@@ -205,7 +205,7 @@ The source generator supports all major HTTP verbs through the `Configure` metho
 
 ## Project Structure
 
-Helps organize your endpoints in a clean folder structure where each endpoint is contained within its own folder:
+Helps organise your endpoints in a clean folder structure where each endpoint is contained within its own folder:
 
 ```
 MyApi/
@@ -283,7 +283,7 @@ public static class EndpointExtensions
 
 - **Compile-Time Safety**: Catch routing errors at build time, not runtime
 - **Clean Architecture**: Separate your endpoint logic into focused classes
-- **Performance**: No reflection overhead - everything is source generated
+- **Performance**: No reflection overhead - everything is source-generated
 - **Maintainable**: Easy to find, test, and modify specific endpoints
 - **Familiar**: If you've used FastEndpoints, you'll feel right at home
 - **Minimal**: Less boilerplate than controller-based approaches
