@@ -61,7 +61,7 @@ internal static class RequestBindingTypeHelpers
         "RequestFromHeader" => RequestBindingTypeEnum.FromHeader,
         "RequestFromForm" => RequestBindingTypeEnum.FromForm,
         "RequestAsParameters" => RequestBindingTypeEnum.AsParameters,
-        _ => throw new NotImplementedException()
+        _ => throw new NotImplementedException($"Unknown request type: {requestType}")
     };
 
     internal static string ConvertFromRequestBindingType(this RequestBindingTypeEnum requestType) => requestType switch
