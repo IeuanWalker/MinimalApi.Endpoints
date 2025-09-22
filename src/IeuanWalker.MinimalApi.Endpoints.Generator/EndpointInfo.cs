@@ -1,4 +1,6 @@
-﻿namespace IeuanWalker.MinimalApi.Endpoints.Generator;
+﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
+
+namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 
 class EndpointInfo
 {
@@ -10,6 +12,7 @@ class EndpointInfo
         string? withName,
         string? withTags,
         string? requestType,
+        (RequestBindingTypeEnum RequestBindingType, string? Name)? requestBindingType,
         string? responseType)
     {
         ClassName = className;
@@ -19,12 +22,14 @@ class EndpointInfo
         WithName = withName;
         WithTags = withTags;
         RequestType = requestType;
+        RequestBindingType = requestBindingType;
         ResponseType = responseType;
     }
 
     public string ClassName { get; set; }
     public EndpointType Type { get; set; }
     public string? RequestType { get; set; }
+    public (RequestBindingTypeEnum RequestBindingType, string? Name)? RequestBindingType { get; set; }
     public string? ResponseType { get; set; }
     public string? WithName { get; set; }
     public string? WithTags { get; set; }

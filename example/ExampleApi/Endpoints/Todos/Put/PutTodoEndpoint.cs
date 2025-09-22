@@ -18,6 +18,7 @@ public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
     {
         builder
             .Put("/api/v{version:apiVersion}/todos/{id:int}")
+            .RequestAsParameters()
             .WithSummary("Update a todo")
             .WithDescription("Updates an existing todo item completely")
             .Version(1.0);
@@ -27,9 +28,9 @@ public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
     {
         Todo todo = new()
         {
-            Title = request.Title,
-            Description = request.Description,
-            IsCompleted = request.IsCompleted
+            Title = request.Body.Title,
+            Description = request.Body.Description,
+            IsCompleted = request.Body.IsCompleted
         };
 
         Todo? updatedTodo = await _todoStore.UpdateAsync(request.Id, todo, ct);

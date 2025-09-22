@@ -3,7 +3,7 @@ using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.WeatherForecast.Get.V1;
 
-public class GetWeatherForecastEndpoint : IEndpoint<RequestModel, ResponseModel[]>
+public class GetWeatherForecastEndpoint : IEndpointWithoutRequest<ResponseModel[]>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
@@ -17,7 +17,7 @@ public class GetWeatherForecastEndpoint : IEndpoint<RequestModel, ResponseModel[
         "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
     ];
 
-    public async Task<ResponseModel[]> HandleAsync(RequestModel request, CancellationToken ct)
+    public async Task<ResponseModel[]> HandleAsync(CancellationToken ct)
     {
         ResponseModel[] forecast = [.. Enumerable.Range(1, 5).Select(index =>
             new ResponseModel
