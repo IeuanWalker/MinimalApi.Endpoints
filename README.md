@@ -124,7 +124,7 @@ public class TriggerJobEndpoint : IEndpoint
 
 ### Custom Endpoint Configuration
 
-You can configure additional options in the `Configure` method:
+The `Configure` method gives you full access to the `RouteHandlerBuilder`, allowing you to configure the endpoint exactly as you would with standard ASP.NET Core minimal APIs. This means you can use any configuration method available on `RouteHandlerBuilder`:
 
 ```csharp
 public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
@@ -135,9 +135,17 @@ public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
             .Post("/users")
             .WithName("CreateUser")
             .WithTags("Users")
-            .WithOpenApi()
-            .Produces<CreateUserResponseModel>(201)
-            .ProducesValidationProblem();
+            .WithSummary("Creates a new user")
+            .WithDescription("Creates a new user in the system")
+            .Produces<ResponseModel>(201)
+            .Produces(400)
+            .Produces(409)
+            .ProducesValidationProblem()
+            .RequireAuthorization()
+            .RequireCors("MyPolicy")
+            .CacheOutput(TimeSpan.FromMinutes(5))
+            .AddEndpointFilter<ValidationFilter>()
+            .WithMetadata(new SwaggerOperationAttribute("Create User", "Creates a new user"));
     }
 
     public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
@@ -147,6 +155,16 @@ public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
     }
 }
 ```
+
+Since you have complete access to the `RouteHandlerBuilder`, you can configure:
+- **OpenAPI/Swagger documentation** with summaries, descriptions, and response types
+- **Authentication and authorization** requirements
+- **CORS policies** and caching strategies
+- **Endpoint filters** for cross-cutting concerns
+- **Rate limiting** and other middleware
+- **Custom metadata** for documentation or tooling
+- **Response compression** and content negotiation
+- Any other configuration available in minimal APIs
 
 ### Multiple Response Types
 
