@@ -13,16 +13,6 @@ internal static class EndpointGeneratorHelper
         builder.AppendLine($".{endpoint.Verb.ToMap()}(\"{endpoint.Pattern}\", async ({(endpoint.HasRequest ? $"[AsParameters] global::{endpoint.RequestType} request, " : string.Empty)}[FromServices] global::{endpoint.ClassName} endpoint, CancellationToken ct) =>");
         using(builder.AppendBlock(false))
         {
-            if(endpoint.Validate && endpoint.HasRequest)
-            {
-                builder.AppendLine($"(({(endpoint.HasResponse ? "IEndpoint" : "IEndpointWithoutResponse")}<global::{endpoint.RequestType}{(endpoint.HasResponse ? $",  global::{endpoint.ResponseType}" : string.Empty)}>)endpoint).OnBeforeValidate(request);");
-                builder.AppendLine($"await (({(endpoint.HasResponse ? "IEndpoint" : "IEndpointWithoutResponse")}<global::{endpoint.RequestType}{(endpoint.HasResponse ? $",  global::{endpoint.ResponseType}" : string.Empty)}>)endpoint).OnBeforeValidateAsync(request, ct);");
-                builder.AppendLine();
-                builder.AppendLine($"(({(endpoint.HasResponse ? "IEndpoint" : "IEndpointWithoutResponse")}<global::{endpoint.RequestType}{(endpoint.HasResponse ? $",  global::{endpoint.ResponseType}" : string.Empty)}>)endpoint).OnAfterValidate(request);");
-                builder.AppendLine($"await (({(endpoint.HasResponse ? "IEndpoint" : "IEndpointWithoutResponse")}<global::{endpoint.RequestType}{(endpoint.HasResponse ? $",  global::{endpoint.ResponseType}" : string.Empty)}>)endpoint).OnAfterValidateAsync(request, ct);");
-                builder.AppendLine();
-            }
-
             builder.AppendLine($"{(endpoint.HasResponse ? "return " : string.Empty)}await endpoint.HandleAsync({(endpoint.HasRequest ? "request, " : string.Empty)}ct);");
         }
         builder.Append(")");

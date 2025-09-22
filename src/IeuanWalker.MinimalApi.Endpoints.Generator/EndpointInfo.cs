@@ -10,8 +10,7 @@ class EndpointInfo
         string? withName,
         string? withTags,
         string? requestType,
-        string? responseType,
-        bool validate)
+        string? responseType)
     {
         ClassName = className;
         Type = type;
@@ -21,7 +20,6 @@ class EndpointInfo
         WithTags = withTags;
         RequestType = requestType;
         ResponseType = responseType;
-        Validate = validate;
     }
 
     public string ClassName { get; set; }
@@ -32,7 +30,6 @@ class EndpointInfo
     public string? WithTags { get; set; }
     public HttpVerb Verb { get; set; }
     public string Pattern { get; set; }
-    public bool Validate { get; set; }
     public bool HasRequest
     {
         get => Type switch
