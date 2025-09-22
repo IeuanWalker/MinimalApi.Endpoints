@@ -317,7 +317,7 @@ public static class EndpointExtensions
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to open an issue or submit a Pull Request (start with an issue if its a significant change).
 
 ## License
 
