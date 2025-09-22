@@ -6,4 +6,7 @@
     <Project Path="src/IeuanWalker.MinimalApi.Endpoints.Generator/IeuanWalker.MinimalApi.Endpoints.Generator.csproj" />
     <Project Path="src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj" />
   </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="README.md" />
+  </Folder>
 </Solution>

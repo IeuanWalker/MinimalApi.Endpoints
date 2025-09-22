@@ -1,1 +1,307 @@
-start
+﻿# MinimalApi.Endpoints
+
+A source generator that provides a structured way to create ASP.NET Core Minimal API endpoints using classes. This library is inspired by FastEndpoints but is source-generated and designed to be as minimal as possible.
+
+## Features
+
+- **Source Generated**: Zero runtime reflection, all endpoint mapping is generated at compile time
+- **Type-Safe**: Strongly typed request/response models with compile-time validation
+- **Minimal Boilerplate**: Clean class-based endpoint definitions
+- **Flexible**: Support for various endpoint patterns (with/without request/response)
+- **FastEndpoints-like**: Similar structure and developer experience to FastEndpoints
+- **Performance**: Optimized generated code with minimal overhead
+
+## Quick Start
+
+### Installation
+
+Add the NuGet package to your project:
+
+```xml
+<PackageReference Include="IeuanWalker.MinimalApi.Endpoints" Version="1.0.0" />
+```
+
+### Basic Setup
+
+1. **Configure your Program.cs**:
+
+```csharp
+using MyApi;
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Register all endpoints from the current assembly - extension method is generated after you create your first endpoint
+builder.AddEndpointsFromMyApi();
+
+var app = builder.Build();
+
+// Map all endpoints from the current assembly - extension method is generated after you create your first endpoint
+app.MapEndpointsFromMyApi();
+
+app.Run();
+```
+
+## Creating Endpoints
+
+### Endpoint with Request and Response
+
+```csharp
+using IeuanWalker.MinimalApi.Endpoints;
+
+public class GetUserEndpoint : IEndpoint<RequestModel, GetUserResponseModel>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder.Get("/users/{id}");
+    }
+
+    public async Task<GetUserResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
+    {
+        // Your endpoint logic here
+        return new GetUserResponseModel { Name = "John Doe", Id = request.Id };
+    }
+}
+
+public record RequestModel(int Id);
+public record GetUserResponseModel(int Id, string Name);
+```
+
+### Endpoint without Request
+
+```csharp
+public class GetAllUsersEndpoint : IEndpointWithoutRequest<List<User>>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder.Get("/users");
+    }
+
+    public async Task<List<User>> HandleAsync(CancellationToken ct)
+    {
+        // Return list of users
+        return await GetUsersAsync();
+    }
+}
+```
+
+### Endpoint without Response
+
+```csharp
+public class DeleteUserEndpoint : IEndpointWithoutResponse<RequestModel>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder.Delete("/users/{id}");
+    }
+
+    public async Task HandleAsync(RequestModel request, CancellationToken ct)
+    {
+        // Delete user logic
+        await DeleteUserAsync(request.Id);
+    }
+}
+
+public record RequestModel(int Id);
+```
+
+### Endpoint without Request or Response
+
+```csharp
+public class TriggerJobEndpoint : IEndpoint
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder.Get("/trigger");
+    }
+
+    public async Task HandleAsync(CancellationToken ct)
+    {
+        await ExecuteJob();
+    }
+}
+```
+
+## Advanced Configuration
+
+### Custom Endpoint Configuration
+
+You can configure additional options in the `Configure` method:
+
+```csharp
+public class CreateUserEndpoint : IEndpoint<RequestModel, CreateUserResponseModel>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder
+            .Post("/users")
+            .WithName("CreateUser")
+            .WithTags("Users")
+            .WithOpenApi()
+            .Produces<CreateUserResponseModel>(201)
+            .ProducesValidationProblem();
+    }
+
+    public async Task<CreateUserResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
+    {
+        // Implementation
+        return new CreateUserResponseModel(newUser.Id);
+    }
+}
+```
+
+### Multiple Response Types
+
+You can return different response types based on the operation result using ASP.NET Core's `Results<T1, T2, ...>` type:
+
+```csharp
+using Microsoft.AspNetCore.Http.HttpResults;
+
+public class CreateTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel>, Conflict>>
+{
+    private readonly ITodoService _todoService;
+
+    public CreateTodoEndpoint(ITodoService todoService)
+    {
+        _todoService = todoService;
+    }
+
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder
+            .Post("/api/todos")
+            .WithSummary("Create a new todo")
+            .WithDescription("Creates a new todo item")
+            .Produces<ResponseModel>(201)
+            .Produces(409); // Conflict
+    }
+
+    public async Task<Results<Ok<ResponseModel>, Conflict>> HandleAsync(RequestModel request, CancellationToken ct)
+    {
+        // Check if todo with same title already exists
+        if (await _todoService.ExistsAsync(request.Title, ct))
+        {
+            return TypedResults.Conflict();
+        }
+
+        var createdTodo = await _todoService.CreateAsync(request, ct);
+        return TypedResults.Ok(ResponseModel.FromTodo(createdTodo));
+    }
+}
+```
+
+This approach provides:
+- **Type Safety**: All possible response types are known at compile time
+- **OpenAPI Documentation**: Automatically generates correct API documentation with all possible responses
+- **Clear Intent**: Makes it explicit what responses the endpoint can return
+
+### HTTP Verbs
+
+The source generator supports all major HTTP verbs through the `Configure` method:
+
+- `builder.Get(pattern)`
+- `builder.Post(pattern)`
+- `builder.Put(pattern)`
+- `builder.Patch(pattern)`
+- `builder.Delete(pattern)`
+
+## Project Structure
+
+Helps organize your endpoints in a clean folder structure where each endpoint is contained within its own folder:
+
+```
+MyApi/
+├── Endpoints/
+│   ├── Users/
+│   │   ├── Get/
+│   │   │   ├── GetUsersEndpoint.cs
+│   │   │   ├── RequestModel.cs
+│   │   │   └── ResponseModel.cs
+│   │   ├── Post/
+│   │   │   ├── PostUserEndpoint.cs
+│   │   │   ├── RequestModel.cs
+│   │   │   └── ResponseModel.cs
+│   │   ├── Put/
+│   │   │   ├── PutUserEndpoint.cs
+│   │   │   ├── RequestModel.cs
+│   │   │   └── ResponseModel.cs
+│   │   └── Delete/
+│   │       ├── DeleteUserEndpoint.cs
+│   │       ├── RequestModel.cs
+│   │       └── ResponseModel.cs
+│   └── Products/
+│       ├── Get/
+│       │   ├── GetProductEndpoint.cs
+│       │   ├── RequestModel.cs
+│       │   └── ResponseModel.cs
+│       └── Post/
+│           ├── PostProductEndpoint.cs
+│           ├── RequestModel.cs
+│           └── ResponseModel.cs
+└── Program.cs
+```
+
+## How It Works
+
+1. **Source Generation**: The source generator scans your assembly for classes implementing `IEndpointBase`
+2. **Code Generation**: It generates extension methods (`AddEndpointsFromYourAssembly` and `MapEndpointsFromYourAssembly`)
+3. **Dependency Injection**: Endpoints are automatically registered as scoped services
+4. **Route Mapping**: HTTP verbs and patterns are extracted from the `Configure` method and mapped to your handlers
+
+### Generated Code Example
+
+For each assembly containing endpoints, the generator creates:
+
+```csharp
+public static class EndpointExtensions
+{
+    public static IHostApplicationBuilder AddEndpointsFromMyApi(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddScoped<GetUserEndpoint>();
+        builder.Services.AddScoped<CreateUserEndpoint>();
+        // ... other endpoints
+        return builder;
+    }
+
+    public static WebApplication MapEndpointsFromMyApi(this WebApplication app)
+    {
+        // GET: /users/{id}
+        RouteHandlerBuilder getUserEndpoint = app
+            .MapGet("/users/{id}", async ([AsParameters] GetUserRequestModel request, [FromServices] GetUserEndpoint endpoint, CancellationToken ct) =>
+            {
+                return await endpoint.HandleAsync(request, ct);
+            })
+            .WithName("GetUserEndpoint");
+        
+        GetUserEndpoint.Configure(getUserEndpoint);
+        
+        // ... other endpoint mappings
+        return app;
+    }
+}
+```
+
+## Why Use This?
+
+- **Compile-Time Safety**: Catch routing errors at build time, not runtime
+- **Clean Architecture**: Separate your endpoint logic into focused classes
+- **Performance**: No reflection overhead - everything is source generated
+- **Maintainable**: Easy to find, test, and modify specific endpoints
+- **Familiar**: If you've used FastEndpoints, you'll feel right at home
+- **Minimal**: Less boilerplate than controller-based approaches
+
+## Interface Reference
+
+| Interface | Use Case | Request | Response |
+|-----------|----------|---------|----------|
+| `IEndpoint<TRequest, TResponse>` | Standard endpoint with both request and response | ✅ | ✅ |
+| `IEndpointWithoutRequest<TResponse>` | Query endpoints that return data without input | ❌ | ✅ |
+| `IEndpointWithoutResponse<TRequest>` | Command endpoints that don't return data | ✅ | ❌ |
+| `IEndpoint` | Simple endpoints with no request or response | ❌ | ❌ |
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License.

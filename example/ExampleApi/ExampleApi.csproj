@@ -19,8 +19,4 @@
 		<ProjectReference Include="..\..\src\IeuanWalker.MinimalApi.Endpoints\IeuanWalker.MinimalApi.Endpoints.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Endpoints\TestV2\" />
-	</ItemGroup>
-
 </Project>
