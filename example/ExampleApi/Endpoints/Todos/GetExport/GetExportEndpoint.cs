@@ -2,6 +2,7 @@ using ExampleApi.Infrastructure;
 using ExampleApi.Models;
 using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Net;
 using System.Text;
@@ -22,8 +23,8 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
         builder
             .Get("/api/v{version:apiVersion}/todos/export")
             .WithSummary("Export todos")
-            .WithDescription("Exports all todos as an HTML file")
-            .Produces(HttpStatusCode.OK)
+            .WithDescription("Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.")
+            .Produces(StatusCodes.Status200OK)
             .Version(1.0);
     }
 
