@@ -32,7 +32,7 @@ indent_size = 2
 [*.{cs,csx,vb,vbx}]
 # Basic formatting
 end_of_line = crlf
-dotnet_style_operator_placement_when_wrapping = beginning_of_line
+dotnet_style_operator_placement_where_wrapping = beginning_of_line
 
 # .NET Code style - Language constructs
 dotnet_style_coalesce_expression = true:suggestion
@@ -63,21 +63,27 @@ dotnet_style_namespace_match_folder = true:suggestion
 # C# SPECIFIC SETTINGS
 # =============================================
 [*.cs]
-# Using organization
+
+# ---------------------------------------------
+# Using and namespace organization
+# ---------------------------------------------
 dotnet_sort_system_directives_first = true
 csharp_using_directive_placement = outside_namespace:silent
-
-# Namespace declarations
+dotnet_style_prefer_global_using_directives = true:suggestion
 csharp_style_namespace_declarations = file_scoped:error
 
+# ---------------------------------------------
 # Code style preferences
+# ---------------------------------------------
 csharp_prefer_braces = true:silent
 csharp_prefer_static_local_function = true:suggestion
 csharp_prefer_simple_using_statement = true:suggestion
 csharp_prefer_simple_default_expression = true:suggestion
 csharp_prefer_system_threading_lock = true:suggestion
 
+# ---------------------------------------------
 # Expression preferences
+# ---------------------------------------------
 csharp_style_throw_expression = true:suggestion
 csharp_style_conditional_delegate_call = true:suggestion
 csharp_style_prefer_method_group_conversion = true:silent
@@ -88,16 +94,26 @@ csharp_style_deconstructed_variable_declaration = true:suggestion
 csharp_style_inlined_variable_declaration = true:suggestion
 csharp_style_prefer_simple_property_accessors = true:suggestion
 
+# ---------------------------------------------
 # Pattern matching preferences
+# ---------------------------------------------
 csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
 csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_prefer_pattern_matching = true:suggestion
+csharp_style_prefer_not_pattern = true:suggestion
+csharp_style_prefer_extended_property_pattern = true:suggestion
 
+# ---------------------------------------------
 # Variable preferences
+# ---------------------------------------------
 csharp_style_var_for_built_in_types = false:suggestion
 csharp_style_var_when_type_is_apparent = false:suggestion
 csharp_style_var_elsewhere = false:suggestion
 
+# ---------------------------------------------
 # Expression-bodied members
+# ---------------------------------------------
 csharp_style_expression_bodied_methods = false:silent
 csharp_style_expression_bodied_constructors = false:silent
 csharp_style_expression_bodied_operators = false:silent
@@ -105,41 +121,55 @@ csharp_style_expression_bodied_properties = true:silent
 csharp_style_expression_bodied_indexers = true:silent
 csharp_style_expression_bodied_accessors = true:silent
 csharp_style_expression_bodied_lambdas = true:silent
-csharp_style_expression_bodied_local_functions = false:silent
+csharp_style_expression_bodied_local_functions = true:silent
 
+# ---------------------------------------------
 # Modern C# features
+# ---------------------------------------------
 csharp_style_prefer_range_operator = true:suggestion
 csharp_style_prefer_index_operator = true:suggestion
 csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
 csharp_style_prefer_tuple_swap = true:suggestion
 csharp_style_prefer_utf8_string_literals = true:suggestion
-csharp_style_prefer_primary_constructors = false:suggestion
-csharp_style_prefer_primary_constructors_on_records = true:suggestion
+csharp_style_prefer_raw_string_literals = true:suggestion
+csharp_style_prefer_primary_constructors = false:suggestion  # For classes/structs
+csharp_style_prefer_primary_constructors_on_records = true:suggestion  # For records
+csharp_style_prefer_required_properties = true:suggestion
 
+# ---------------------------------------------
 # Modifier preferences
+# ---------------------------------------------
 csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:error
 
 # =============================================
 # C# FORMATTING RULES
 # =============================================
 
+# ---------------------------------------------
 # Spacing preferences
+# ---------------------------------------------
 csharp_space_around_binary_operators = before_and_after
 csharp_space_after_cast = false
 csharp_space_after_keywords_in_control_flow_statements = true
 csharp_space_between_method_declaration_parameter_list_parentheses = false
 csharp_space_between_method_call_parameter_list_parentheses = false
 
+# ---------------------------------------------
 # New line preferences
+# ---------------------------------------------
 csharp_new_line_before_open_brace = all
 csharp_new_line_before_else = true
 csharp_new_line_before_catch = true
 csharp_new_line_before_finally = true
 
+# ---------------------------------------------
 # Indentation preferences
+# ---------------------------------------------
 csharp_indent_labels = one_less_than_current
 
+# ---------------------------------------------
 # Miscellaneous preferences
+# ---------------------------------------------
 csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental = true:silent
 
 # =============================================
@@ -154,6 +184,10 @@ dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 dotnet_naming_style.camel_case_style.capitalization = camel_case
 dotnet_naming_style.underscore_prefix_camel_case_style.capitalization = camel_case
 dotnet_naming_style.underscore_prefix_camel_case_style.required_prefix = _
+
+# ---------------------------------------------
+# Field naming rules
+# ---------------------------------------------
 
 # Public fields: PascalCase
 dotnet_naming_symbols.public_fields.applicable_kinds = field
@@ -192,51 +226,78 @@ dotnet_naming_rule.static_fields_should_be_camel_case.severity = error
 # DIAGNOSTIC RULES
 # =============================================
 
+# ---------------------------------------------
 # IDE Rules
+# ---------------------------------------------
 dotnet_diagnostic.IDE0011.severity = error    # Use braces
 dotnet_diagnostic.IDE0046.severity = none     # Convert to conditional expression (disabled)
 dotnet_diagnostic.IDE0220.severity = error    # Add parentheses for clarity
 dotnet_diagnostic.IDE1006.severity = error    # Naming rule violations
 
+# ---------------------------------------------
 # Compiler Warnings
+# ---------------------------------------------
 dotnet_diagnostic.CS1591.severity = suggestion # Missing XML comment for publicly visible type or member
 dotnet_diagnostic.CS4014.severity = error      # Unawaited tasks
 
+# ---------------------------------------------
 # Code Analysis - Security
+# ---------------------------------------------
 dotnet_diagnostic.CA2007.severity = error      # ConfigureAwait
+dotnet_diagnostic.CA2009.severity = error      # Do not call ToImmutableCollection on an ImmutableCollection value
+dotnet_diagnostic.CA2011.severity = error      # Avoid infinite recursion
+dotnet_diagnostic.CA2012.severity = error      # Use ValueTasks correctly
+dotnet_diagnostic.CA2017.severity = error      # Parameter count mismatch
+dotnet_diagnostic.CA2018.severity = error      # Buffer size mismatch
 dotnet_diagnostic.CA2100.severity = error      # SQL injection
 dotnet_diagnostic.CA3001.severity = error      # XSS vulnerabilities
-dotnet_diagnostic.CA2000.severity = warning    # Dispose objects before losing scope
-dotnet_diagnostic.CA2213.severity = error      # Disposable fields should be disposed
 dotnet_diagnostic.CA5350.severity = error      # Do Not Use Weak Cryptographic Algorithms
 dotnet_diagnostic.CA5351.severity = error      # Do Not Use Broken Cryptographic Algorithms
 
+# ---------------------------------------------
 # Code Analysis - Performance
+# ---------------------------------------------
 dotnet_diagnostic.CA1805.severity = warning    # Unnecessary initialization
 dotnet_diagnostic.CA1810.severity = warning    # Static constructor performance
 dotnet_diagnostic.CA1822.severity = error      # Mark members as static
 dotnet_diagnostic.CA1834.severity = error      # Use StringBuilder.Append(char)
 
+# ---------------------------------------------
 # Code Analysis - Design
+# ---------------------------------------------
 dotnet_diagnostic.CA1050.severity = error      # Declare types in namespaces
 dotnet_diagnostic.CA1063.severity = error      # IDisposable implementation
 dotnet_diagnostic.CA2016.severity = error      # Forward CancellationToken
 dotnet_diagnostic.CA2208.severity = error      # Instantiate argument exceptions correctly
 
+# ---------------------------------------------
+# Code Analysis - Resource Management
+# ---------------------------------------------
+dotnet_diagnostic.CA2000.severity = warning    # Dispose objects before losing scope
+dotnet_diagnostic.CA2213.severity = error      # Disposable fields should be disposed
+
+# ---------------------------------------------
 # Code Analysis - Exception Handling
+# ---------------------------------------------
 dotnet_diagnostic.CA1031.severity = warning    # Do not catch general exception types
 dotnet_diagnostic.CA2201.severity = error      # Do not raise reserved exception types
 
-# Code Analysis - Disabled/Silent
+# ---------------------------------------------
+# Code Analysis - Disabled/Silent Rules
+# ---------------------------------------------
 dotnet_diagnostic.CA1711.severity = none       # Identifiers should not have incorrect suffix
 dotnet_diagnostic.CA1826.severity = silent     # Use property instead of Linq Enumerable method
 
+# ---------------------------------------------
 # Third-party Analyzer Rules - Roslynator
+# ---------------------------------------------
 dotnet_diagnostic.RCS1075.severity = none      # Avoid empty catch clause that catches System.Exception
 dotnet_diagnostic.RCS1146.severity = none      # Use conditional access
 dotnet_diagnostic.RCS1161.severity = none      # Enum should declare explicit values
 
+# ---------------------------------------------
 # Third-party Analyzer Rules - SonarAnalyzer
+# ---------------------------------------------
 dotnet_diagnostic.S112.severity = silent       # General exceptions should never be thrown
 dotnet_diagnostic.S1135.severity = suggestion  # Track uses of "TODO" tags
 dotnet_diagnostic.S1643.severity = silent      # Strings should not be concatenated using '+' in a loop
