@@ -1,4 +1,4 @@
-﻿namespace ExampleApi.Endpoints.TestV2;
+﻿namespace ExampleApi.Endpoints.WeatherForecast.Get.V1;
 
 public class RequestModel
 {
