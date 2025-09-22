@@ -1,10 +1,11 @@
-﻿using System.Collections.Immutable;
-using System.Text;
-using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
+﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System.Collections.Immutable;
+using System.Net;
+using System.Text;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator
 {
@@ -162,6 +163,8 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
 
         static string GenerateEndpointExtensions(List<EndpointInfo> endpointClasses)
         {
+            endpointClasses = endpointClasses.OrderBy(x => x.ClassName).ToList();
+
             using IndentedTextBuilder builder = new();
             string sanitisedAssemblyName = assemblyName?.Sanitize(string.Empty) ?? "Assembly";
 

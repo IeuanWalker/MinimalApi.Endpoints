@@ -10,12 +10,19 @@ internal static class EndpointGeneratorHelper
 
         builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = app");
         builder.IncreaseIndent();
-        builder.AppendLine($".{endpoint.Verb.ToMap()}(\"{endpoint.Pattern}\", async ({(endpoint.HasRequest ? $"{endpoint.GetBindingType()}global::{endpoint.RequestType} request, " : string.Empty)}[FromServices] global::{endpoint.ClassName} endpoint, CancellationToken ct) =>");
-        using(builder.AppendBlock(false))
+        builder.AppendLine($".{endpoint.Verb.ToMap()}(\"{endpoint.Pattern}\", async (");
+
+        builder.IncreaseIndent();
+
+        if(endpoint.HasRequest)
         {
-            builder.AppendLine($"{(endpoint.HasResponse ? "return " : string.Empty)}await endpoint.HandleAsync({(endpoint.HasRequest ? "request, " : string.Empty)}ct);");
+            builder.AppendLine($"{endpoint.GetBindingType()}global::{endpoint.RequestType} request,");
         }
-        builder.Append(")");
+        builder.AppendLine($"[FromServices] global::{endpoint.ClassName} endpoint,");
+        builder.Append($"CancellationToken ct) => await endpoint.HandleAsync({(endpoint.HasRequest ? "request, " : string.Empty)}ct))");
+
+        builder.DecreaseIndent();
+
         if(endpoint.WithTags is null)
         {
             builder.GenerateAndAddTags(endpoint.Pattern);
