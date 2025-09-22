@@ -47,7 +47,7 @@ app.Run();
 ```csharp
 using IeuanWalker.MinimalApi.Endpoints;
 
-public class GetUserEndpoint : IEndpoint<RequestModel, GetUserResponseModel>
+public class GetUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
@@ -57,12 +57,12 @@ public class GetUserEndpoint : IEndpoint<RequestModel, GetUserResponseModel>
     public async Task<GetUserResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
     {
         // Your endpoint logic here
-        return new GetUserResponseModel { Name = "John Doe", Id = request.Id };
+        return new ResponseModel { Name = "John Doe", Id = request.Id };
     }
 }
 
 public record RequestModel(int Id);
-public record GetUserResponseModel(int Id, string Name);
+public record ResponseModel(int Id, string Name);
 ```
 
 ### Endpoint without Request
@@ -127,7 +127,7 @@ public class TriggerJobEndpoint : IEndpoint
 You can configure additional options in the `Configure` method:
 
 ```csharp
-public class CreateUserEndpoint : IEndpoint<RequestModel, CreateUserResponseModel>
+public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
@@ -140,10 +140,10 @@ public class CreateUserEndpoint : IEndpoint<RequestModel, CreateUserResponseMode
             .ProducesValidationProblem();
     }
 
-    public async Task<CreateUserResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
+    public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
     {
         // Implementation
-        return new CreateUserResponseModel(newUser.Id);
+        return new ResponseModel(newUser.Id);
     }
 }
 ```
@@ -265,7 +265,7 @@ public static class EndpointExtensions
     {
         // GET: /users/{id}
         RouteHandlerBuilder getUserEndpoint = app
-            .MapGet("/users/{id}", async ([AsParameters] GetUserRequestModel request, [FromServices] GetUserEndpoint endpoint, CancellationToken ct) =>
+            .MapGet("/users/{id}", async ([AsParameters] RequestModel request, [FromServices] GetUserEndpoint endpoint, CancellationToken ct) =>
             {
                 return await endpoint.HandleAsync(request, ct);
             })
