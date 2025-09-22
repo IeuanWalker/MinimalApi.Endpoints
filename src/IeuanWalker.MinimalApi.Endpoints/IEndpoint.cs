@@ -9,20 +9,20 @@ public interface IEndpointBase
 
 public interface IEndpoint : IEndpointBase
 {
-    public Task HandleAsync(CancellationToken ct);
+    Task HandleAsync(CancellationToken ct);
 }
 
 public interface IEndpoint<in TRequest, TResponse> : IEndpointBase
 {
-    public Task<TResponse> HandleAsync(TRequest request, CancellationToken ct);
+    Task<TResponse> HandleAsync(TRequest request, CancellationToken ct);
 }
 
 public interface IEndpointWithoutRequest<TResponse> : IEndpointBase
 {
-    public Task<TResponse> HandleAsync(CancellationToken ct);
+    Task<TResponse> HandleAsync(CancellationToken ct);
 }
 
 public interface IEndpointWithoutResponse<in TRequest> : IEndpointBase
 {
-    public Task HandleAsync(TRequest request, CancellationToken ct);
+    Task HandleAsync(TRequest request, CancellationToken ct);
 }

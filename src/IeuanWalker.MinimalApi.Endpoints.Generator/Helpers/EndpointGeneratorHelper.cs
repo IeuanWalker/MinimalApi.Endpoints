@@ -1,6 +1,6 @@
 ﻿namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
-internal static class EndpointGeneratorHelper
+static class EndpointGeneratorHelper
 {
     internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber)
     {

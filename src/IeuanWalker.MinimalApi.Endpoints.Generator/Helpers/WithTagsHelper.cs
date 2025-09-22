@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
-internal static class WithTagsHelper
+static class WithTagsHelper
 {
     public static string? GetTags(this TypeDeclarationSyntax typeDeclaration)
     {
@@ -49,7 +49,7 @@ internal static class WithTagsHelper
         builder.Append($".WithTags(\"{apiName}\")");
     }
 
-    private static string? ExtractApiNameFromPattern(string pattern)
+    static string? ExtractApiNameFromPattern(string pattern)
     {
         // Remove query string if present
         int queryIndex = pattern.IndexOf('?');
@@ -65,7 +65,7 @@ internal static class WithTagsHelper
         }
 
         // Split the pattern by slashes and remove empty entries
-        string[] segments = pattern.Split('/').Where(s => !string.IsNullOrEmpty(s)).ToArray();
+        string[] segments = [.. pattern.Split('/').Where(s => !string.IsNullOrEmpty(s))];
 
         // Handle different pattern formats:
         // /rootName/api/v1/ApiName -> ApiName
@@ -120,7 +120,7 @@ internal static class WithTagsHelper
         return GetFirstNonParameterSegment(segments);
     }
 
-    private static string? GetFirstNonParameterSegment(string[] segments)
+    static string? GetFirstNonParameterSegment(string[] segments)
     {
         // Find the first segment that isn't a route parameter
         for(int i = segments.Length - 1; i >= 0; i--)
@@ -143,7 +143,7 @@ internal static class WithTagsHelper
         return segments.Length > 0 ? segments[segments.Length - 1] : null;
     }
 
-    private static bool IsRouteParameter(string segment)
+    static bool IsRouteParameter(string segment)
     {
         if(string.IsNullOrEmpty(segment))
         {
@@ -154,7 +154,7 @@ internal static class WithTagsHelper
         return segment.StartsWith("{") && segment.EndsWith("}");
     }
 
-    private static bool IsVersionSegment(string segment)
+    static bool IsVersionSegment(string segment)
     {
         if(string.IsNullOrEmpty(segment))
         {

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
-internal static class HttpVerbRouteHelpers
+static class HttpVerbRouteHelpers
 {
     public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration)
     {

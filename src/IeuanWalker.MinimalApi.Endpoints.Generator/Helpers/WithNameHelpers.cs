@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
-internal static class WithNameHelpers
+static class WithNameHelpers
 {
     public static string? GetWithName(this TypeDeclarationSyntax typeDeclaration)
     {

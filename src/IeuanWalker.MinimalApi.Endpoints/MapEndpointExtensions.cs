@@ -3,6 +3,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace IeuanWalker.MinimalApi.Endpoints;
 
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
+[SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "<Pending>")]
 public static class MapEndpointExtensions
 {
     public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)

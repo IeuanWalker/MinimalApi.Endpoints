@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
-internal static class RequestBindingTypeHelpers
+static class RequestBindingTypeHelpers
 {
     public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration)
     {

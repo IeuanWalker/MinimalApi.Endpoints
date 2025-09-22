@@ -7,7 +7,7 @@ namespace ExampleApi.Endpoints.Todos.Put;
 
 public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 {
-    private readonly ITodoStore _todoStore;
+    readonly ITodoStore _todoStore;
 
     public PutTodoEndpoint(ITodoStore todoStore)
     {
