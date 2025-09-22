@@ -9,6 +9,7 @@ A source generator that provides a structured way to create ASP.NET Core Minimal
 - **Minimal Boilerplate**: Clean class-based endpoint definitions
 - **Flexible**: Support for various endpoint patterns (with/without request/response)
 - **Performance**: Optimised generated code with minimal overhead
+- **Request Binding Control**: Fine-grained control over how request parameters are bound
 
 ## Quick Start
 
@@ -51,7 +52,9 @@ public class GetUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
-        builder.Get("/users/{id}");
+        builder
+            .Get("/users/{id}")
+            .RequestAsParameters();
     }
 
     public async Task<GetUserResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
@@ -60,9 +63,6 @@ public class GetUserEndpoint : IEndpoint<RequestModel, ResponseModel>
         return new ResponseModel { Name = "John Doe", Id = request.Id };
     }
 }
-
-public record RequestModel(int Id);
-public record ResponseModel(int Id, string Name);
 ```
 
 ### Endpoint without Request
@@ -90,7 +90,9 @@ public class DeleteUserEndpoint : IEndpointWithoutResponse<RequestModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
-        builder.Delete("/users/{id}");
+        builder
+            .Delete("/users/{id}")
+            .RequestAsParameters();
     }
 
     public async Task HandleAsync(RequestModel request, CancellationToken ct)
@@ -99,8 +101,6 @@ public class DeleteUserEndpoint : IEndpointWithoutResponse<RequestModel>
         await DeleteUserAsync(request.Id);
     }
 }
-
-public record RequestModel(int Id);
 ```
 
 ### Endpoint without Request or Response
@@ -122,6 +122,49 @@ public class TriggerJobEndpoint : IEndpoint
 
 ## Advanced Configuration
 
+### HTTP Verbs
+
+The source generator supports all major HTTP verbs through the `Configure` method:
+
+- `builder.Get(pattern)`
+- `builder.Post(pattern)`
+- `builder.Put(pattern)`
+- `builder.Patch(pattern)`
+- `builder.Delete(pattern)`
+
+### Request Binding Control
+
+The library provides extension methods to control how request parameters are bound, giving you fine-grained control over the source generator's behavior:
+
+```csharp
+public class UpdateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder
+            .Put("/users/{id}")
+            .RequestAsParameters(); // Treats RequestModel as [AsParameters]
+    }
+
+    public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
+    {
+        // Implementation
+        return new ResponseModel(request.Id);
+    }
+}
+```
+
+#### Available Request Binding Methods
+
+| Method | Description | 
+|--------|-------------|
+| `RequestFromBody()` | Treats the request model as `[FromBody]` |  |
+| `RequestFromRoute(string? name = null)` | Treats the request model as `[FromRoute]` | |
+| `RequestFromQuery(string? name = null)` | Treats the request model as `[FromQuery]` | |
+| `RequestFromHeader(string? name = null)` | Treats the request model as `[FromHeader]` | |
+| `RequestFromForm(string? name = null)` | Treats the request model as `[FromForm]` | |
+| `RequestAsParameters()` | Treats the request model as `[AsParameters]` | For mixed parameter sources (route + query + headers) |
+
 ### Custom Endpoint Configuration
 
 The `Configure` method gives you full access to the `RouteHandlerBuilder`, allowing you to configure the endpoint exactly as you would with standard ASP.NET Core minimal APIs. This means you can use any configuration method available on `RouteHandlerBuilder`:
@@ -133,6 +176,7 @@ public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
     {
         builder
             .Post("/users")
+            .RequestFromBody()
             .WithName("CreateUser")
             .WithTags("Users")
             .WithSummary("Creates a new user")
@@ -211,16 +255,6 @@ This approach provides:
 - **OpenAPI Documentation**: Automatically generates correct API documentation with all possible responses
 - **Clear Intent**: Makes it explicit what responses the endpoint can return
 
-### HTTP Verbs
-
-The source generator supports all major HTTP verbs through the `Configure` method:
-
-- `builder.Get(pattern)`
-- `builder.Post(pattern)`
-- `builder.Put(pattern)`
-- `builder.Patch(pattern)`
-- `builder.Delete(pattern)`
-
 ## Project Structure
 
 Helps organise your endpoints in a clean folder structure where each endpoint is contained within its own folder:
@@ -263,6 +297,7 @@ MyApi/
 2. **Code Generation**: It generates extension methods (`AddEndpointsFromYourAssembly` and `MapEndpointsFromYourAssembly`)
 3. **Dependency Injection**: Endpoints are automatically registered as scoped services
 4. **Route Mapping**: HTTP verbs and patterns are extracted from the `Configure` method and mapped to your handlers
+5. **Request Binding**: Extension methods control how request parameters are bound in the generated code
 
 ### Generated Code Example
 
@@ -281,7 +316,7 @@ public static class EndpointExtensions
 
     public static WebApplication MapEndpointsFromMyApi(this WebApplication app)
     {
-        // GET: /users/{id}
+        // GET: /users/{id} - with RequestAsParameters()
         RouteHandlerBuilder getUserEndpoint = app
             .MapGet("/users/{id}", async ([AsParameters] RequestModel request, [FromServices] GetUserEndpoint endpoint, CancellationToken ct) =>
             {
@@ -290,6 +325,16 @@ public static class EndpointExtensions
             .WithName("GetUserEndpoint");
         
         GetUserEndpoint.Configure(getUserEndpoint);
+        
+        // POST: /users - with RequestFromBody()
+        RouteHandlerBuilder createUserEndpoint = app
+            .MapPost("/users", async ([FromBody] CreateUserRequest request, [FromServices] CreateUserEndpoint endpoint, CancellationToken ct) =>
+            {
+                return await endpoint.HandleAsync(request, ct);
+            })
+            .WithName("CreateUserEndpoint");
+        
+        CreateUserEndpoint.Configure(createUserEndpoint);
         
         // ... other endpoint mappings
         return app;
@@ -305,15 +350,16 @@ public static class EndpointExtensions
 - **Maintainable**: Easy to find, test, and modify specific endpoints
 - **Familiar**: If you've used FastEndpoints, you'll feel right at home
 - **Minimal**: Less boilerplate than controller-based approaches
+- **Flexible Binding**: Fine-grained control over parameter binding behavior
 
 ## Interface Reference
 
 | Interface | Use Case | Request | Response |
 |-----------|----------|---------|----------|
+| `IEndpoint` | Simple endpoints with no request or response | ❌ | ❌ |
 | `IEndpoint<TRequest, TResponse>` | Standard endpoint with both request and response | ✅ | ✅ |
 | `IEndpointWithoutRequest<TResponse>` | Query endpoints that return data without input | ❌ | ✅ |
 | `IEndpointWithoutResponse<TRequest>` | Command endpoints that don't return data | ✅ | ❌ |
-| `IEndpoint` | Simple endpoints with no request or response | ❌ | ❌ |
 
 ## Contributing
 
