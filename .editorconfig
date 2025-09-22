@@ -2,59 +2,66 @@
 # top-most EditorConfig file
 root = true
 
-# ===================================
+# =============================================
 # GLOBAL SETTINGS
-# ===================================
+# =============================================
 [*]
 insert_final_newline = true
 indent_style = tab
 indent_size = 4
 
-# ===================================
-# FILE TYPE SPECIFIC INDENTATION
-# ===================================
+# =============================================
+# FILE TYPE SPECIFIC SETTINGS
+# =============================================
+
+# Project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
 indent_size = 2
 
+# MSBuild and configuration files
 [*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct}]
 indent_size = 2
 
-[*.json]
+# Data format files
+[*.{json,xml}]
 indent_size = 2
 
-[*.xml]
-indent_size = 2
-
-# ===================================
-# COMMON CODE FILES (C#, VB, SCRIPTS)
-# ===================================
+# =============================================
+# .NET COMMON SETTINGS (C#, VB)
+# =============================================
 [*.{cs,csx,vb,vbx}]
 # Basic formatting
-dotnet_style_operator_placement_when_wrapping = beginning_of_line
 end_of_line = crlf
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
 
-# .NET Style preferences
+# .NET Code style - Language constructs
 dotnet_style_coalesce_expression = true:suggestion
 dotnet_style_null_propagation = true:suggestion
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
 dotnet_style_prefer_auto_properties = true:silent
-dotnet_style_collection_initializer = true:suggestion
 dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
 dotnet_style_prefer_conditional_expression_over_assignment = true:warning
 dotnet_style_prefer_conditional_expression_over_return = true:none
+dotnet_style_prefer_compound_assignment = true:suggestion
+dotnet_style_prefer_simplified_interpolation = true:suggestion
+
+# .NET Code style - Collections and initialization
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_prefer_collection_expression = true:suggestion
+
+# .NET Code style - Tuples and anonymous types
 dotnet_style_explicit_tuple_names = true:suggestion
 dotnet_style_prefer_inferred_tuple_names = true:suggestion
 dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
-dotnet_style_prefer_compound_assignment = true:suggestion
-dotnet_style_prefer_simplified_interpolation = true:suggestion
-dotnet_style_namespace_match_folder = true:suggestion
-dotnet_style_prefer_collection_expression = true:suggestion
-dotnet_style_object_initializer = true:suggestion
-dotnet_style_require_accessibility_modifiers = omit_if_default:error
 
-# ===================================
-# C# SPECIFIC RULES
-# ===================================
+# .NET Code style - Accessibility and organization
+dotnet_style_require_accessibility_modifiers = omit_if_default:error
+dotnet_style_namespace_match_folder = true:suggestion
+
+# =============================================
+# C# SPECIFIC SETTINGS
+# =============================================
 [*.cs]
 # Using organization
 dotnet_sort_system_directives_first = true
@@ -107,13 +114,15 @@ csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
 csharp_style_prefer_tuple_swap = true:suggestion
 csharp_style_prefer_utf8_string_literals = true:suggestion
 csharp_style_prefer_primary_constructors = false:suggestion
+csharp_style_prefer_primary_constructors_on_records = true:suggestion
 
 # Modifier preferences
 csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:error
 
-# ===================================
-# FORMATTING RULES
-# ===================================
+# =============================================
+# C# FORMATTING RULES
+# =============================================
+
 # Spacing preferences
 csharp_space_around_binary_operators = before_and_after
 csharp_space_after_cast = false
@@ -133,30 +142,41 @@ csharp_indent_labels = one_less_than_current
 # Miscellaneous preferences
 csharp_style_allow_blank_line_after_token_in_conditional_expression_experimental = true:silent
 
-# ===================================
+# =============================================
 # NAMING CONVENTIONS
-# ===================================
-# Naming rule violations
+# =============================================
+
+# Enable naming rule violations
 dotnet_diagnostic.IDE1006.severity = error
 
+# Define naming styles
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+dotnet_naming_style.underscore_prefix_camel_case_style.capitalization = camel_case
+dotnet_naming_style.underscore_prefix_camel_case_style.required_prefix = _
+
 # Public fields: PascalCase
-dotnet_naming_symbols.public_symbols.applicable_kinds = field
-dotnet_naming_symbols.public_symbols.applicable_accessibilities = public
+dotnet_naming_symbols.public_fields.applicable_kinds = field
+dotnet_naming_symbols.public_fields.applicable_accessibilities = public
 
-dotnet_naming_style.first_word_upper_case_style.capitalization = first_word_upper
+dotnet_naming_rule.public_fields_should_be_pascal_case.symbols = public_fields
+dotnet_naming_rule.public_fields_should_be_pascal_case.style = pascal_case_style
+dotnet_naming_rule.public_fields_should_be_pascal_case.severity = suggestion
 
-dotnet_naming_rule.public_members_must_be_capitalized.symbols = public_symbols
-dotnet_naming_rule.public_members_must_be_capitalized.style = first_word_upper_case_style
-dotnet_naming_rule.public_members_must_be_capitalized.severity = suggestion
+# Private fields: _camelCase
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
 
-# Instance fields: camelCase
+dotnet_naming_rule.private_fields_should_have_underscore_prefix.symbols = private_fields
+dotnet_naming_rule.private_fields_should_have_underscore_prefix.style = underscore_prefix_camel_case_style
+dotnet_naming_rule.private_fields_should_have_underscore_prefix.severity = suggestion
+
+# Instance fields: camelCase (protected, internal, etc.)
 dotnet_naming_symbols.instance_fields.applicable_kinds = field
-
-dotnet_naming_style.instance_field_style.capitalization = camel_case
-dotnet_naming_style.instance_field_style.required_prefix =
+dotnet_naming_symbols.instance_fields.applicable_accessibilities = internal, protected, protected_internal, private_protected
 
 dotnet_naming_rule.instance_fields_should_be_camel_case.symbols = instance_fields
-dotnet_naming_rule.instance_fields_should_be_camel_case.style = instance_field_style
+dotnet_naming_rule.instance_fields_should_be_camel_case.style = camel_case_style
 dotnet_naming_rule.instance_fields_should_be_camel_case.severity = error
 
 # Static fields: camelCase (non-public)
@@ -164,64 +184,61 @@ dotnet_naming_symbols.static_fields.applicable_kinds = field
 dotnet_naming_symbols.static_fields.required_modifiers = static
 dotnet_naming_symbols.static_fields.applicable_accessibilities = internal, private, protected, protected_internal, private_protected
 
-dotnet_naming_style.static_field_style.capitalization = camel_case
-dotnet_naming_style.static_field_style.required_prefix =
-
 dotnet_naming_rule.static_fields_should_be_camel_case.symbols = static_fields
-dotnet_naming_rule.static_fields_should_be_camel_case.style = instance_field_style
+dotnet_naming_rule.static_fields_should_be_camel_case.style = camel_case_style
 dotnet_naming_rule.static_fields_should_be_camel_case.severity = error
 
-# Private fields: underscore prefix (suggestion)
-dotnet_naming_symbols.private_fields.applicable_kinds = field
-dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+# =============================================
+# DIAGNOSTIC RULES
+# =============================================
 
-dotnet_naming_style.prefix_underscore.capitalization = camel_case
-dotnet_naming_style.prefix_underscore.required_prefix = _
+# IDE Rules
+dotnet_diagnostic.IDE0011.severity = error    # Use braces
+dotnet_diagnostic.IDE0046.severity = none     # Convert to conditional expression (disabled)
+dotnet_diagnostic.IDE0220.severity = error    # Add parentheses for clarity
+dotnet_diagnostic.IDE1006.severity = error    # Naming rule violations
 
-dotnet_naming_rule.private_members_with_underscore.symbols = private_fields
-dotnet_naming_rule.private_members_with_underscore.style = prefix_underscore
-dotnet_naming_rule.private_members_with_underscore.severity = suggestion
+# Compiler Warnings
+dotnet_diagnostic.CS1591.severity = suggestion # Missing XML comment for publicly visible type or member
+dotnet_diagnostic.CS4014.severity = error      # Unawaited tasks
 
-# ===================================
-# ANALYZER RULES & DIAGNOSTICS
-# ===================================
-# IDE rules
-dotnet_diagnostic.IDE0046.severity = none  # Convert to conditional expression (disabled)
-dotnet_diagnostic.IDE0011.severity = error # Use braces
-dotnet_diagnostic.IDE0220.severity = error # Add parentheses for clarity
+# Code Analysis - Security
+dotnet_diagnostic.CA2007.severity = error      # ConfigureAwait
+dotnet_diagnostic.CA2100.severity = error      # SQL injection
+dotnet_diagnostic.CA3001.severity = error      # XSS vulnerabilities
+dotnet_diagnostic.CA2000.severity = warning    # Dispose objects before losing scope
+dotnet_diagnostic.CA2213.severity = error      # Disposable fields should be disposed
+dotnet_diagnostic.CA5350.severity = error      # Do Not Use Weak Cryptographic Algorithms
+dotnet_diagnostic.CA5351.severity = error      # Do Not Use Broken Cryptographic Algorithms
 
-# Compiler warnings
-dotnet_diagnostic.CS4014.severity = error  # Unawaited tasks
+# Code Analysis - Performance
+dotnet_diagnostic.CA1805.severity = warning    # Unnecessary initialization
+dotnet_diagnostic.CA1810.severity = warning    # Static constructor performance
+dotnet_diagnostic.CA1822.severity = error      # Mark members as static
+dotnet_diagnostic.CA1834.severity = error      # Use StringBuilder.Append(char)
 
-# Code analysis rules - Security
-dotnet_diagnostic.CA2007.severity = error  # ConfigureAwait
-dotnet_diagnostic.CA2100.severity = error  # SQL injection
-dotnet_diagnostic.CA3001.severity = error  # XSS vulnerabilities
+# Code Analysis - Design
+dotnet_diagnostic.CA1050.severity = error      # Declare types in namespaces
+dotnet_diagnostic.CA1063.severity = error      # IDisposable implementation
+dotnet_diagnostic.CA2016.severity = error      # Forward CancellationToken
+dotnet_diagnostic.CA2208.severity = error      # Instantiate argument exceptions correctly
 
-# Code analysis rules - Performance
-dotnet_diagnostic.CA1805.severity = warning # Unnecessary initialization
-dotnet_diagnostic.CA1810.severity = warning # Static constructor performance
-dotnet_diagnostic.CA1822.severity = error   # Mark members as static
-dotnet_diagnostic.CA1834.severity = error   # Use StringBuilder.Append(char)
+# Code Analysis - Exception Handling
+dotnet_diagnostic.CA1031.severity = warning    # Do not catch general exception types
+dotnet_diagnostic.CA2201.severity = error      # Do not raise reserved exception types
 
-# Code analysis rules - Design
-dotnet_diagnostic.CA1050.severity = error   # Declare types in namespaces
-dotnet_diagnostic.CA1063.severity = error   # IDisposable implementation
-dotnet_diagnostic.CA2016.severity = error   # Forward CancellationToken
-dotnet_diagnostic.CA2208.severity = error   # Instantiate argument exceptions correctly
+# Code Analysis - Disabled/Silent
+dotnet_diagnostic.CA1711.severity = none       # Identifiers should not have incorrect suffix
+dotnet_diagnostic.CA1826.severity = silent     # Use property instead of Linq Enumerable method
 
-# Code analysis rules - Disabled/Silent
-dotnet_diagnostic.CA1711.severity = none    # Identifiers should not have incorrect suffix
-dotnet_diagnostic.CA1826.severity = silent  # Use property instead of Linq Enumerable method
+# Third-party Analyzer Rules - Roslynator
+dotnet_diagnostic.RCS1075.severity = none      # Avoid empty catch clause that catches System.Exception
+dotnet_diagnostic.RCS1146.severity = none      # Use conditional access
+dotnet_diagnostic.RCS1161.severity = none      # Enum should declare explicit values
 
-# Third-party analyzer rules - Roslynator
-dotnet_diagnostic.RCS1075.severity = none   # Avoid empty catch clause that catches System.Exception
-dotnet_diagnostic.RCS1146.severity = none   # Use conditional access
-dotnet_diagnostic.RCS1161.severity = none   # Enum should declare explicit values
-
-# Third-party analyzer rules - SonarAnalyzer
-dotnet_diagnostic.S112.severity = silent    # General exceptions should never be thrown
-dotnet_diagnostic.S1135.severity = suggestion # Track uses of "TODO" tags
-dotnet_diagnostic.S1643.severity = silent   # Strings should not be concatenated using '+' in a loop
-dotnet_diagnostic.S2344.severity = none     # Enumeration type names should not have "Flags" or "Enum" suffixes
-dotnet_diagnostic.S3358.severity = silent   # Ternary operators should not be nested
+# Third-party Analyzer Rules - SonarAnalyzer
+dotnet_diagnostic.S112.severity = silent       # General exceptions should never be thrown
+dotnet_diagnostic.S1135.severity = suggestion  # Track uses of "TODO" tags
+dotnet_diagnostic.S1643.severity = silent      # Strings should not be concatenated using '+' in a loop
+dotnet_diagnostic.S2344.severity = none        # Enumeration type names should not have "Flags" or "Enum" suffixes
+dotnet_diagnostic.S3358.severity = silent      # Ternary operators should not be nested
