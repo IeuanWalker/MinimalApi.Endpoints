@@ -1,6 +1,6 @@
 ﻿# MinimalApi.Endpoints
 
-A source generator that provides a structured way to create ASP.NET Core Minimal API endpoints using classes. This library is inspired by FastEndpoints but is source-generated and designed to be as minimal as possible.
+A source generator that provides a structured way to create ASP.NET Core Minimal API endpoints using classes. FastEndpoints inspired this library, but it is source-generated and designed to be as minimal as possible.
 
 ## Features
 
@@ -8,8 +8,7 @@ A source generator that provides a structured way to create ASP.NET Core Minimal
 - **Type-Safe**: Strongly typed request/response models with compile-time validation
 - **Minimal Boilerplate**: Clean class-based endpoint definitions
 - **Flexible**: Support for various endpoint patterns (with/without request/response)
-- **FastEndpoints-like**: Similar structure and developer experience to FastEndpoints
-- **Performance**: Optimized generated code with minimal overhead
+- **Performance**: Optimised generated code with minimal overhead
 
 ## Quick Start
 
