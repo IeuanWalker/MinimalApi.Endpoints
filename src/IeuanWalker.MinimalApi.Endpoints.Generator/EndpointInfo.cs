@@ -1,0 +1,81 @@
+﻿namespace IeuanWalker.MinimalApi.Endpoints.Generator;
+
+class EndpointInfo
+{
+    public EndpointInfo(
+        string className,
+        EndpointType type,
+        HttpVerb verb,
+        string pattern,
+        string? withName,
+        string? withTags,
+        string? requestType,
+        string? responseType,
+        bool validate)
+    {
+        ClassName = className;
+        Type = type;
+        Verb = verb;
+        Pattern = pattern;
+        WithName = withName;
+        WithTags = withTags;
+        RequestType = requestType;
+        ResponseType = responseType;
+        Validate = validate;
+    }
+
+    public string ClassName { get; set; }
+    public EndpointType Type { get; set; }
+    public string? RequestType { get; set; }
+    public string? ResponseType { get; set; }
+    public string? WithName { get; set; }
+    public string? WithTags { get; set; }
+    public HttpVerb Verb { get; set; }
+    public string Pattern { get; set; }
+    public bool Validate { get; set; }
+    public bool HasRequest
+    {
+        get => Type switch
+        {
+            EndpointType.WithRequestAndResponse => true,
+            EndpointType.WithoutResponse => true,
+            EndpointType.WithoutRequest => false,
+            EndpointType.WithoutRequestOrResponse => false,
+            _ => false
+        };
+    }
+    public bool HasResponse
+    {
+        get => Type switch
+        {
+            EndpointType.WithRequestAndResponse => true,
+            EndpointType.WithoutResponse => false,
+            EndpointType.WithoutRequest => true,
+            EndpointType.WithoutRequestOrResponse => false,
+            _ => false
+        };
+    }
+
+    public string GetSafeClassName()
+    {
+        // Use the full class name to ensure uniqueness, then sanitize it
+        return ClassName.Replace(".", "").Replace("<", "").Replace(">", "").Replace(",", "").Replace("`", "");
+    }
+}
+
+enum EndpointType
+{
+    WithRequestAndResponse,
+    WithoutRequest,
+    WithoutResponse,
+    WithoutRequestOrResponse
+}
+
+enum HttpVerb
+{
+    Get,
+    Post,
+    Put,
+    Patch,
+    Delete
+}
