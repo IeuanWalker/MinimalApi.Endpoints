@@ -17,6 +17,7 @@ public class DeleteTodoEndpoint : IEndpointWithoutResponse<RequestModel>
     {
         builder
             .Delete("/api/v{version:apiVersion}/todos/{id:int}")
+            .RequestAsParameters()
             .WithSummary("Delete a todo")
             .WithDescription("Deletes an existing todo item")
             .Version(1.0);

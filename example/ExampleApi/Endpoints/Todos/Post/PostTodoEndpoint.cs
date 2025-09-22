@@ -19,6 +19,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
     {
         builder
             .Post("/api/v{version:apiVersion}/todos")
+            .RequestFromBody()
             .WithSummary("Create a new todo")
             .WithDescription("Creates a new todo item")
             .Version(1.0);

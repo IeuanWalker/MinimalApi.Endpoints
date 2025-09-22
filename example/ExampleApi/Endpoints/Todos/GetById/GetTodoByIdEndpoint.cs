@@ -18,6 +18,7 @@ public class GetTodoByIdEndpoint : IEndpoint<RequestModel, ResponseModel?>
     {
         builder
             .Get("/api/v{version:apiVersion}/todos/{id:int}")
+            .RequestAsParameters()
             .WithSummary("Get todo by ID")
             .WithDescription("Retrieves a specific todo by its ID")
             .Version(1.0);

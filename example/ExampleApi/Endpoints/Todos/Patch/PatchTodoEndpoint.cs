@@ -18,6 +18,7 @@ public class PatchTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
     {
         builder
             .Patch("/api/v{version:apiVersion}/todos/{id:int}")
+            .RequestAsParameters()
             .WithSummary("Partially update a todo")
             .WithDescription("Updates specific fields of an existing todo item")
             .Version(1.0);
@@ -27,14 +28,14 @@ public class PatchTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
     {
         Todo? updatedTodo = await _todoStore.PatchAsync(request.Id, todo =>
         {
-            if(request.Title is not null)
-                todo.Title = request.Title;
+            if(request.Body.Title is not null)
+                todo.Title = request.Body.Title;
 
-            if(request.Description is not null)
-                todo.Description = request.Description;
+            if(request.Body.Description is not null)
+                todo.Description = request.Body.Description;
 
-            if(request.IsCompleted.HasValue)
-                todo.IsCompleted = request.IsCompleted.Value;
+            if(request.Body.IsCompleted.HasValue)
+                todo.IsCompleted = request.Body.IsCompleted.Value;
         }, ct);
 
         return updatedTodo is null

@@ -103,6 +103,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             withName,
                             withTags,
                             interfaceType.TypeArguments[0].ToDisplayString(),
+                            typeDeclaration.GetRequestTypeAndName(),
                             interfaceType.TypeArguments[1].ToDisplayString()));
                     }
                     // Check for IEndpointWithoutRequest<TResponse>
@@ -115,6 +116,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             verbAndPattern.Value.pattern,
                             withName,
                             withTags,
+                            null,
                             null,
                             interfaceType.TypeArguments[0].ToDisplayString()));
                     }
@@ -129,6 +131,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             withName,
                             withTags,
                             interfaceType.TypeArguments[0].ToDisplayString(),
+                            typeDeclaration.GetRequestTypeAndName(),
                             null));
                     }
                     // Check for IEndpointWithoutRequest (no generics)
@@ -141,6 +144,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             verbAndPattern.Value.pattern,
                             withName,
                             withTags,
+                            null,
                             null,
                             null));
                     }

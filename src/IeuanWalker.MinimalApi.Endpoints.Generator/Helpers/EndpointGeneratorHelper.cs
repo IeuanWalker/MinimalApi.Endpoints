@@ -10,7 +10,7 @@ internal static class EndpointGeneratorHelper
 
         builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = app");
         builder.IncreaseIndent();
-        builder.AppendLine($".{endpoint.Verb.ToMap()}(\"{endpoint.Pattern}\", async ({(endpoint.HasRequest ? $"[AsParameters] global::{endpoint.RequestType} request, " : string.Empty)}[FromServices] global::{endpoint.ClassName} endpoint, CancellationToken ct) =>");
+        builder.AppendLine($".{endpoint.Verb.ToMap()}(\"{endpoint.Pattern}\", async ({(endpoint.HasRequest ? $"{endpoint.GetBindingType()}global::{endpoint.RequestType} request, " : string.Empty)}[FromServices] global::{endpoint.ClassName} endpoint, CancellationToken ct) =>");
         using(builder.AppendBlock(false))
         {
             builder.AppendLine($"{(endpoint.HasResponse ? "return " : string.Empty)}await endpoint.HandleAsync({(endpoint.HasRequest ? "request, " : string.Empty)}ct);");
@@ -32,5 +32,20 @@ internal static class EndpointGeneratorHelper
 
         // Configure the endpoint
         builder.AppendLine($"global::{endpoint.ClassName}.Configure({uniqueRootName});");
+    }
+
+    static string GetBindingType(this EndpointInfo endpoint)
+    {
+        if(!endpoint.HasRequest)
+        {
+            return string.Empty;
+        }
+
+        if(endpoint.RequestBindingType is null)
+        {
+            return string.Empty;
+        }
+
+        return $"[{endpoint.RequestBindingType.Value.RequestBindingType.ConvertFromRequestBindingType()}{(endpoint.RequestBindingType.Value.Name is not null ? $"(Name = \"{endpoint.RequestBindingType.Value.Name}\")" : string.Empty)}] ";
     }
 }

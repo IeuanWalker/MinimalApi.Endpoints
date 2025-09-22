@@ -7,13 +7,19 @@ public class RequestModel
 {
     [FromRoute(Name = "id")]
     public int Id { get; set; }
-    
+
+    [FromBody]
+    public RequestBodyModel Body { get; set; } = null!;
+}
+
+public class RequestBodyModel
+{
     [Required]
     [StringLength(200, MinimumLength = 1)]
     public string Title { get; set; } = string.Empty;
-    
+
     [StringLength(1000)]
     public string Description { get; set; } = string.Empty;
-    
+
     public bool IsCompleted { get; set; }
 }
