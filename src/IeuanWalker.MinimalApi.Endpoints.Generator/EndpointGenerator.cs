@@ -103,8 +103,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             withName,
                             withTags,
                             interfaceType.TypeArguments[0].ToDisplayString(),
-                            interfaceType.TypeArguments[1].ToDisplayString(),
-                            typeDeclaration.Validate()));
+                            interfaceType.TypeArguments[1].ToDisplayString()));
                     }
                     // Check for IEndpointWithoutRequest<TResponse>
                     else if(SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequest) && interfaceType.TypeArguments.Length == 1)
@@ -117,8 +116,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             withName,
                             withTags,
                             null,
-                            interfaceType.TypeArguments[0].ToDisplayString(),
-                            typeDeclaration.Validate()));
+                            interfaceType.TypeArguments[0].ToDisplayString()));
                     }
                     // Check for IEndpointWithRequestWithoutResponse<TRequest>
                     else if(SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponse) && interfaceType.TypeArguments.Length == 1)
@@ -131,8 +129,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             withName,
                             withTags,
                             interfaceType.TypeArguments[0].ToDisplayString(),
-                            null,
-                            typeDeclaration.Validate()));
+                            null));
                     }
                     // Check for IEndpointWithoutRequest (no generics)
                     else if(SymbolEqualityComparer.Default.Equals(interfaceType, endpointWithoutRequestOrResponse))
@@ -145,8 +142,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator
                             withName,
                             withTags,
                             null,
-                            null,
-                            typeDeclaration.Validate()));
+                            null));
                     }
                 }
             }
