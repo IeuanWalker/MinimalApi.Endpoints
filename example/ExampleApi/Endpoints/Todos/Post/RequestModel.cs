@@ -11,5 +11,5 @@ public class RequestModel
 	[StringLength(1000)]
 	public string Description { get; set; } = string.Empty;
 
-	public bool IsCompleted { get; set; } = false;
+	public bool IsCompleted { get; set; }
 }

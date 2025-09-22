@@ -243,7 +243,7 @@ dotnet_diagnostic.CS4014.severity = error      # Unawaited tasks
 # ---------------------------------------------
 # Code Analysis - Security
 # ---------------------------------------------
-dotnet_diagnostic.CA2007.severity = error      # ConfigureAwait
+dotnet_diagnostic.CA2007.severity = silent      # ConfigureAwait
 dotnet_diagnostic.CA2009.severity = error      # Do not call ToImmutableCollection on an ImmutableCollection value
 dotnet_diagnostic.CA2011.severity = error      # Avoid infinite recursion
 dotnet_diagnostic.CA2012.severity = error      # Use ValueTasks correctly
