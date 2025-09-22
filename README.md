@@ -156,15 +156,16 @@ public class UpdateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 
 #### Available Request Binding Methods
 
-| Method | Description | 
+| Method | Description |
 |--------|-------------|
-| `RequestFromBody()` | Treats the request model as `[FromBody]` |  |
-| `RequestFromRoute(string? name = null)` | Treats the request model as `[FromRoute]` | |
-| `RequestFromQuery(string? name = null)` | Treats the request model as `[FromQuery]` | |
-| `RequestFromHeader(string? name = null)` | Treats the request model as `[FromHeader]` | |
-| `RequestFromForm(string? name = null)` | Treats the request model as `[FromForm]` | |
-| `RequestAsParameters()` | Treats the request model as `[AsParameters]` | For mixed parameter sources (route + query + headers) |
+| `RequestFromBody()` | Treats the request model as `[FromBody]` |
+| `RequestFromRoute(string? name = null)` | Treats the request model as `[FromRoute]` |
+| `RequestFromQuery(string? name = null)` | Treats the request model as `[FromQuery]` |
+| `RequestFromHeader(string? name = null)` | Treats the request model as `[FromHeader]` |
+| `RequestFromForm(string? name = null)` | Treats the request model as `[FromForm]` |
+| `RequestAsParameters()` | Treats the request model as `[AsParameters]` |
 
+*Note: `RequestAsParameters()` is for mixed parameter sources (route + query + headers).*
 ### Custom Endpoint Configuration
 
 The `Configure` method gives you full access to the `RouteHandlerBuilder`, allowing you to configure the endpoint exactly as you would with standard ASP.NET Core minimal APIs. This means you can use any configuration method available on `RouteHandlerBuilder`:
