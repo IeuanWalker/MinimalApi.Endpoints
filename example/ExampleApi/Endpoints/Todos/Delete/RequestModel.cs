@@ -4,6 +4,6 @@ namespace ExampleApi.Endpoints.Todos.Delete;
 
 public class RequestModel
 {
-    [FromRoute(Name = "id")]
-    public int Id { get; set; }
+	[FromRoute(Name = "id")]
+	public int Id { get; set; }
 }
