@@ -1,10 +1,10 @@
+using System.Net;
+using System.Text;
 using ExampleApi.Infrastructure;
 using ExampleApi.Models;
 using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
-using System.Net;
-using System.Text;
 
 namespace ExampleApi.Endpoints.Todos.GetExport;
 
@@ -23,7 +23,7 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 			.Get("/api/v{version:apiVersion}/todos/export")
 			.WithSummary("Export todos")
 			.WithDescription("Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.")
-			.Produces(StatusCodes.Status200OK)
+			.WithResponse<string>(StatusCodes.Status200OK, "Downloadable HTML file containing all todos in a formatted table", "text/html")
 			.Version(1.0);
 	}
 
@@ -31,7 +31,7 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 	{
 		IEnumerable<Todo> result = await _todoStore.GetAllAsync(ct);
 
-		if(!result.Any())
+		if (!result.Any())
 		{
 			return TypedResults.NoContent();
 		}

@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.OpenApi;
-using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 namespace ExampleApi.Infrastructure;
@@ -11,7 +10,7 @@ static class ScalarConfiguration
 	internal static IHostApplicationBuilder AddScalar(this IHostApplicationBuilder builder)
 	{
 		builder.Services.AddEndpointsApiExplorer();
-		builder.Services.AddOpenApi();
+		builder.Services.AddOpenApi(config => config.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.'));
 
 		List<ApiVersion> versions =
 		[
@@ -19,12 +18,13 @@ static class ScalarConfiguration
 			new ApiVersion(2)
 		];
 
-		foreach(int majorVersion in versions.Where(x => x.MajorVersion is not null).Select(versions => versions.MinorVersion!.Value))
+		foreach (int majorVersion in versions.Where(x => x.MajorVersion is not null).Select(versions => versions.MajorVersion!.Value))
 		{
 			builder.Services.Configure<ScalarOptions>(options => options.AddDocument($"v{majorVersion}", $"v{majorVersion}"));
 			builder.Services.AddOpenApi($"v{majorVersion}", options =>
 			{
 				options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+				options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
 				options.AddDocumentTransformer((document, context, _) =>
 				{
 					IApiVersionDescriptionProvider provider = context.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
