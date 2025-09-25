@@ -58,7 +58,7 @@ public class GetUserEndpoint : IEndpoint<RequestModel, ResponseModel>
             .RequestAsParameters();
     }
 
-    public async Task<GetUserResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
+    public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
     {
         // Your endpoint logic here
         return new ResponseModel { Name = "John Doe", Id = request.Id };
@@ -134,13 +134,13 @@ Both validation methods return the `400 Bad Request` status code with a `Validat
 
 Both validation methods can be used independently or together. If both are present for the same type, FluentValidation takes precedence.
 
-> Its recommeded to use FluentValidation over DataAnnoations as the requried attribute to enable dataAnnoation is _`is for evaluation purposes only and is subject to change or removal in future updates`_
+> Its recommended to use FluentValidation over DataAnnotations as the required attribute to enable DataAnnotations is _`is for evaluation purposes only and is subject to change or removal in future updates`_
 
 ### DataAnnotations Validation
 
 Use standard DataAnnotations attributes on your request models. You must also add the `[ValidatableType]` attribute to enable validation. This is what .net uses to source generate the validation logic.
 
->_If you were using minimal api's directly you wouldn't need to add this as the source generator automatically runs when it finds minimal api endpoints in your code, the limitation here is source generator cant run on top/ chain other source generators. As this library source generates the minimal api endpoints the automatic generator .net built doesnt see them._
+>_If you were using minimal api's directly you wouldn't need to add this as the source generator automatically runs when it finds minimal api endpoints in your code, the limitation here is source generator can't run on top of/ chain other source generators. As this library source generates the minimal api endpoints the automatic generator .NET built doesnt see them._
 
 >_So this attribute tells the .NET source generator that this type needs the logic generated for it, even if it cant find the endpoint that uses it_
 
@@ -151,21 +151,9 @@ using Microsoft.Extensions.Validation;
 #pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 [ValidatableType]// Required for DataAnnotations validation
 #pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-public class CreateUserRequest
+public class RequestModel
 {
-    [Required]
-    [StringLength(100, MinimumLength = 2)]
-    public string Name { get; set; } = string.Empty;
-
-    [Required]
-    [EmailAddress]
-    public string Email { get; set; } = string.Empty;
-
-    [Range(18, 120)]
-    public int Age { get; set; }
-
-    [Phone]
-    public string? PhoneNumber { get; set; }
+    // ... properties
 }
 ```
 
@@ -176,7 +164,7 @@ Create validators by implementing `AbstractValidator<T>` for your request models
 ```csharp
 using FluentValidation;
 
-public class CreateUserRequest
+public class RequestModel
 {
     public string Name { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -185,9 +173,9 @@ public class CreateUserRequest
 }
 
 // Validator must be in the same assembly as your endpoints
-public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
+public class RequestValidator : AbstractValidator<RequestModel>
 {
-    public CreateUserRequestValidator()
+    public RequestValidator()
     {
         RuleFor(x => x.Name)
             .NotEmpty()
@@ -209,7 +197,7 @@ public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
     }
 }
 
-public class CreateUserEndpoint : IEndpoint<CreateUserRequest, UserResponse>
+public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
@@ -217,10 +205,9 @@ public class CreateUserEndpoint : IEndpoint<CreateUserRequest, UserResponse>
             .Post("/users")
             .RequestFromBody()
             .WithSummary("Create a new user")
-            .ProducesValidationProblem(); // Documents validation responses
     }
 
-    public async Task<UserResponse> HandleAsync(CreateUserRequest request, CancellationToken ct)
+    public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
     {
         // Request is automatically validated using FluentValidation before reaching this method
         // If validation fails, a 400 Bad Request with detailed validation errors is returned
@@ -234,7 +221,7 @@ public class CreateUserEndpoint : IEndpoint<CreateUserRequest, UserResponse>
 You can disable automatic validation for specific endpoints using the `DisableValidation()` extension method:
 
 ```csharp
-public class CreateUserEndpoint : IEndpoint<CreateUserRequest, UserResponse>
+public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
@@ -244,7 +231,7 @@ public class CreateUserEndpoint : IEndpoint<CreateUserRequest, UserResponse>
             .DisableValidation();
     }
 
-    public async Task<UserResponse> HandleAsync(CreateUserRequest request, CancellationToken ct)
+    public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
     {
         // Manual validation can be performed here if needed
         // No automatic validation is applied
