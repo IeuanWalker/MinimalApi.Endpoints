@@ -15,7 +15,7 @@ public class EndpointGenerator : IIncrementalGenerator
 	const string fullIEndpointBase = "IeuanWalker.MinimalApi.Endpoints.IEndpointBase";
 	const string fullIEndpointWithRequestAndResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint`2";
 	const string fullIEndpointWithoutRequest = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutRequest`1";
-	const string fullIEndpointWithoutResponse = "IeuanWalker.MinimalApi.EndEndpoints.IEndpointWithoutResponse`1";
+	const string fullIEndpointWithoutResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutResponse`1";
 	const string fullIEndpointWithoutRequestOrResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint";
 
 	static string? assemblyName;
