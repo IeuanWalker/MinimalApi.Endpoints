@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Builder;
 
 namespace IeuanWalker.MinimalApi.Endpoints;
 
@@ -7,24 +7,24 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 [SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "<Pending>")]
 public static class MapEndpointExtensions
 {
-    public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
-    {
-        return builder;
-    }
-    public static RouteHandlerBuilder Post(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
-    {
-        return builder;
-    }
-    public static RouteHandlerBuilder Put(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
-    {
-        return builder;
-    }
-    public static RouteHandlerBuilder Patch(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
-    {
-        return builder;
-    }
-    public static RouteHandlerBuilder Delete(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
-    {
-        return builder;
-    }
+	public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	{
+		return builder;
+	}
+	public static RouteHandlerBuilder Post(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	{
+		return builder;
+	}
+	public static RouteHandlerBuilder Put(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	{
+		return builder;
+	}
+	public static RouteHandlerBuilder Patch(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	{
+		return builder;
+	}
+	public static RouteHandlerBuilder Delete(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	{
+		return builder;
+	}
 }

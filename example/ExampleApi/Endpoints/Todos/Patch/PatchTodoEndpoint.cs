@@ -28,17 +28,17 @@ public class PatchTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 	{
 		Todo? updatedTodo = await _todoStore.PatchAsync(request.Id, todo =>
 		{
-			if(request.Body.Title is not null)
+			if (request.Body.Title is not null)
 			{
 				todo.Title = request.Body.Title;
 			}
 
-			if(request.Body.Description is not null)
+			if (request.Body.Description is not null)
 			{
 				todo.Description = request.Body.Description;
 			}
 
-			if(request.Body.IsCompleted.HasValue)
+			if (request.Body.IsCompleted.HasValue)
 			{
 				todo.IsCompleted = request.Body.IsCompleted.Value;
 			}

@@ -4,7 +4,7 @@ using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ExampleApi.Endpoints.Todos.Post;
+namespace ExampleApi.Endpoints.Todos.PostFluentValidation;
 
 public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel>, Conflict>>
 {
@@ -18,7 +18,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.Post("/api/v{version:apiVersion}/todos")
+			.Post("/api/v{version:apiVersion}/todos/FluentValidation")
 			.RequestFromBody()
 			.WithSummary("Create a new todo")
 			.WithDescription("Creates a new todo item")
@@ -27,7 +27,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 
 	public async Task<Results<Ok<ResponseModel>, Conflict>> HandleAsync(RequestModel request, CancellationToken ct)
 	{
-		if((await _todoStore.GetAllAsync(ct)).Any(x => x.Title.Equals(request.Title, StringComparison.InvariantCultureIgnoreCase)))
+		if ((await _todoStore.GetAllAsync(ct)).Any(x => x.Title.Equals(request.Title, StringComparison.InvariantCultureIgnoreCase)))
 		{
 			return TypedResults.Conflict();
 		}

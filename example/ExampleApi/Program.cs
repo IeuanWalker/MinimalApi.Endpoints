@@ -3,10 +3,12 @@ using ExampleApi.Infrastructure;
 using ExampleApi.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.Services.AddProblemDetails();
+builder.Services.AddValidation();
 builder.AddApiVersioning();
-builder.AddScalar();
 builder.AddEndpointsFromExampleApi();
 builder.Services.AddSingleton<ITodoStore, InMemoryTodoStore>();
+builder.AddScalar();
 
 WebApplication app = builder.Build();
 app.UseHttpsRedirection();

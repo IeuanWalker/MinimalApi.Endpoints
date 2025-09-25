@@ -28,7 +28,7 @@ public class InMemoryTodoStore : ITodoStore
 			new Todo { Id = _nextId++, Title = "Write tests", Description = "Add unit tests for the API", IsCompleted = false, CreatedAt = DateTime.UtcNow.AddHours(-2) }
 		];
 
-		foreach(Todo? todo in initialTodos)
+		foreach (Todo? todo in initialTodos)
 		{
 			_todos.TryAdd(todo.Id, todo);
 		}
@@ -57,7 +57,7 @@ public class InMemoryTodoStore : ITodoStore
 
 	public Task<Todo?> UpdateAsync(int id, Todo todo, CancellationToken ct)
 	{
-		if(!_todos.TryGetValue(id, out Todo? value))
+		if (!_todos.TryGetValue(id, out Todo? value))
 		{
 			return Task.FromResult<Todo?>(null);
 		}
@@ -71,7 +71,7 @@ public class InMemoryTodoStore : ITodoStore
 
 	public Task<Todo?> PatchAsync(int id, Action<Todo> patchAction, CancellationToken ct)
 	{
-		if(!_todos.TryGetValue(id, out Todo? existingTodo))
+		if (!_todos.TryGetValue(id, out Todo? existingTodo))
 		{
 			return Task.FromResult<Todo?>(null);
 		}
