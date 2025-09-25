@@ -4,7 +4,7 @@ static class EndpointGeneratorHelper
 {
 	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber, (string groupName, string pattern)? group)
 	{
-		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.Verb, $"{group?.pattern ?? string.Empty}{endpoint.Pattern}", routeNumber);
+		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.Verb, $"{group?.pattern ?? string.Empty}{endpoint.Pattern}", routeNumber).ToLowerFirstLetter();
 
 		builder.AppendLine($"// {endpoint.Verb.ToString().ToUpper()}: {group?.pattern ?? string.Empty}{endpoint.Pattern}");
 

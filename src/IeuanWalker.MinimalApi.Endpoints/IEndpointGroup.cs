@@ -10,7 +10,7 @@ public interface IEndpointGroup
 
 public static class EndpointGroupExtensions
 {
-	public static RouteHandlerBuilder MapGroup<TEndpointGroup>(this RouteHandlerBuilder builder) where TEndpointGroup : IEndpointGroup
+	public static RouteHandlerBuilder Group<TEndpointGroup>(this RouteHandlerBuilder builder) where TEndpointGroup : IEndpointGroup
 	{
 		return builder;
 	}

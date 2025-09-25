@@ -22,7 +22,7 @@ static class MapGroupHelper
 		// Look for MapGroup calls in the method body
 		IEnumerable<InvocationExpressionSyntax> mapGroupCalls = configureMethod.DescendantNodes()
 			.OfType<InvocationExpressionSyntax>()
-			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "MapGroup");
+			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
 
 		InvocationExpressionSyntax? firstMapGroupCall = mapGroupCalls.FirstOrDefault();
 
@@ -44,12 +44,18 @@ static class MapGroupHelper
 					return null;
 				}
 
-				if(SymbolEqualityComparer.Default.Equals(namedTypeSymbol, endpointGroupSymbol) ||
+				if (SymbolEqualityComparer.Default.Equals(namedTypeSymbol, endpointGroupSymbol) ||
 					namedTypeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointGroupSymbol)) ||
 					InheritsFrom(namedTypeSymbol, endpointGroupSymbol))
 				{
 					// Now get the pattern from the endpoint group's Configure method
-					string pattern = GetPatternFromEndpointGroup(namedTypeSymbol, compilation);
+					string? pattern = GetPatternFromEndpointGroup(namedTypeSymbol);
+
+					if (pattern is null)
+					{
+						return null;
+					}
+
 					return (namedTypeSymbol, pattern);
 				}
 			}
@@ -58,7 +64,7 @@ static class MapGroupHelper
 		return null;
 	}
 
-	static string GetPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol, Compilation compilation)
+	static string? GetPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol)
 	{
 		// Get all syntax references for the endpoint group type
 		foreach (SyntaxReference syntaxRef in endpointGroupSymbol.DeclaringSyntaxReferences)
@@ -92,7 +98,7 @@ static class MapGroupHelper
 			}
 		}
 
-		return string.Empty;
+		return null;
 	}
 
 	static bool InheritsFrom(INamedTypeSymbol typeSymbol, INamedTypeSymbol baseTypeSymbol)

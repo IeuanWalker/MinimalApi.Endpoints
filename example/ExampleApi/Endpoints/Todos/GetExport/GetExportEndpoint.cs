@@ -20,7 +20,7 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.MapGroup<TodoEndpointGroup>()
+			.Group<TodoEndpointGroup>()
 			.Get("/export")
 			.WithSummary("Export todos")
 			.WithDescription("Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.")

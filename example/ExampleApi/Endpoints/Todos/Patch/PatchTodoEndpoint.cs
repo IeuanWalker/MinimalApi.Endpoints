@@ -17,7 +17,7 @@ public class PatchTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.MapGroup<TodoEndpointGroup>()
+			.Group<TodoEndpointGroup>()
 			.Patch("/{id:int}")
 			.RequestAsParameters()
 			.WithSummary("Partially update a todo")

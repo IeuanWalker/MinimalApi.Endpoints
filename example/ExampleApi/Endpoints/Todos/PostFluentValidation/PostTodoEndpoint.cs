@@ -18,7 +18,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.MapGroup<TodoEndpointGroup>()
+			.Group<TodoEndpointGroup>()
 			.Post("/FluentValidation")
 			.RequestFromBody()
 			.WithSummary("Create a new todo")

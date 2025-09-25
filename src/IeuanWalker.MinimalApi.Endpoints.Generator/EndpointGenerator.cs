@@ -224,7 +224,6 @@ public class EndpointGenerator : IIncrementalGenerator
 			builder.AppendLine($"public static IHostApplicationBuilder AddEndpointsFrom{sanitisedAssemblyName}(this IHostApplicationBuilder builder)");
 			using (builder.AppendBlock())
 			{
-				builder.AppendLine("builder.Services.AddProblemDetails();");
 				foreach (EndpointInfo endpoint in endpointClasses)
 				{
 					if (endpoint.FluentValidationClass is not null)
@@ -256,7 +255,7 @@ public class EndpointGenerator : IIncrementalGenerator
 					if (group.Key.symbol is not null)
 					{
 						// Create a group for endpoints with the same Group
-						string groupName = $"{group.Key.symbol.Sanitize("group")}_{groupIndex}";
+						string groupName = $"group_{group.Key.symbol.Split('.').Last().Sanitize().ToLowerFirstLetter()}_{groupIndex}";
 
 						builder.AppendLine($"// GROUP: {group.Key.symbol}");
 						builder.AppendLine($"RouteGroupBuilder {groupName} = {group.Key.symbol}.Configure(app);");

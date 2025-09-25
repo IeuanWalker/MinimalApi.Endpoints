@@ -146,7 +146,7 @@ public class TodoEndpointGroup : IEndpointGroup
 
 ### Using Endpoint Groups
 
-Reference the group in your endpoints using the `MapGroup<T>()` extension method:
+Reference the group in your endpoints using the `Group<T>()` extension method:
 
 ```csharp
 public class GetAllTodosEndpoint : IEndpointWithoutRequest<ResponseModel[]>
@@ -154,7 +154,7 @@ public class GetAllTodosEndpoint : IEndpointWithoutRequest<ResponseModel[]>
     public static void Configure(RouteHandlerBuilder builder)
     {
         builder
-            .MapGroup<TodoEndpointGroup>()  // Reference the endpoint group
+            .Group<TodoEndpointGroup>()  // Reference the endpoint group
             .Get("/")                       // Relative path within the group
             .WithSummary("Get all todos")
             .WithDescription("Retrieves all todos from the store")
