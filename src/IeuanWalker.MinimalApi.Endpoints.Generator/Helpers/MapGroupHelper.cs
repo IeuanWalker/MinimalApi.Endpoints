@@ -19,16 +19,16 @@ static class MapGroupHelper
 			return null;
 		}
 
-		// Look for MapGroup calls in the method body
-		IEnumerable<InvocationExpressionSyntax> mapGroupCalls = configureMethod.DescendantNodes()
+		// Look for Group calls in the method body
+		IEnumerable<InvocationExpressionSyntax> groupCalls = configureMethod.DescendantNodes()
 			.OfType<InvocationExpressionSyntax>()
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
 
-		InvocationExpressionSyntax? firstMapGroupCall = mapGroupCalls.FirstOrDefault();
+		InvocationExpressionSyntax? firstGroupCall = groupCalls.FirstOrDefault();
 
-		if (firstMapGroupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr)
+		if (firstGroupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr)
 		{
-			// Check if MapGroup has generic type arguments
+			// Check if Group has generic type arguments
 			if (memberAccessExpr.Name is GenericNameSyntax genericName && genericName.TypeArgumentList.Arguments.Count > 0)
 			{
 				// Extract the first generic type argument
