@@ -17,7 +17,8 @@ public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.Put("/api/v{version:apiVersion}/todos/{id:int}")
+			.MapGroup<TodoEndpointGroup>()
+			.Put("/{id:int}")
 			.RequestAsParameters()
 			.WithSummary("Update a todo")
 			.WithDescription("Updates an existing todo item completely")

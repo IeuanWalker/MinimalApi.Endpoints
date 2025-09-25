@@ -1,5 +1,6 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 
@@ -8,6 +9,7 @@ class EndpointInfo
 	public EndpointInfo(
 		string className,
 		EndpointType type,
+		(INamedTypeSymbol symbol, string pattern)? group,
 		HttpVerb verb,
 		string pattern,
 		string? withName,
@@ -19,6 +21,7 @@ class EndpointInfo
 	{
 		ClassName = className;
 		Type = type;
+		Group = group;
 		Verb = verb;
 		Pattern = pattern;
 		WithName = withName;
@@ -31,6 +34,7 @@ class EndpointInfo
 
 	public string ClassName { get; set; }
 	public EndpointType Type { get; set; }
+	public (INamedTypeSymbol symbol, string pattern)? Group { get; set; }
 	public ITypeSymbol? RequestType { get; set; }
 	public (RequestBindingTypeEnum RequestBindingType, string? Name)? RequestBindingType { get; set; }
 	public INamedTypeSymbol? FluentValidationClass { get; set; }

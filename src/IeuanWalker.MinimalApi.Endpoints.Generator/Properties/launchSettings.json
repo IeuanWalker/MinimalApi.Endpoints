@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "IeuanWalker.MinimalApi.Endpoints.Generator": {
+      "commandName": "Project"
+    },
+    "Profile 1": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\..\\example\\ExampleApi\\ExampleApi.csproj"
+    }
+  }
+}

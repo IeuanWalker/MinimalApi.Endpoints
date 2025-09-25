@@ -17,7 +17,8 @@ public class GetAllTodosEndpoint : IEndpointWithoutRequest<ResponseModel[]>
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.Get("/api/v{version:apiVersion}/todos")
+			.MapGroup<TodoEndpointGroup>()
+			.Get("/")
 			.WithSummary("Get all todos")
 			.WithDescription("Retrieves all todos from the store")
 			.Version(1.0);

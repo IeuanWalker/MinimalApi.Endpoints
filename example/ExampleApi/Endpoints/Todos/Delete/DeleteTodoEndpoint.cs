@@ -16,7 +16,8 @@ public class DeleteTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.Delete("/api/v{version:apiVersion}/todos/{id:int}")
+			.MapGroup<TodoEndpointGroup>()
+			.Delete("/{id:int}")
 			.RequestAsParameters()
 			.WithSummary("Delete a todo")
 			.WithDescription("Deletes an existing todo item")

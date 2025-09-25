@@ -17,7 +17,8 @@ public class GetTodoByIdEndpoint : IEndpoint<RequestModel, ResponseModel?>
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.Get("/api/v{version:apiVersion}/todos/{id:int}")
+			.MapGroup<TodoEndpointGroup>()
+			.Get("/{id:int}")
 			.RequestAsParameters()
 			.WithSummary("Get todo by ID")
 			.WithDescription("Retrieves a specific todo by its ID")

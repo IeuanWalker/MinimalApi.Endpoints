@@ -11,10 +11,11 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 [Generator]
 public class EndpointGenerator : IIncrementalGenerator
 {
+	const string fullIEndpointGroup = "IeuanWalker.MinimalApi.Endpoints.IEndpointGroup";
 	const string fullIEndpointBase = "IeuanWalker.MinimalApi.Endpoints.IEndpointBase";
 	const string fullIEndpointWithRequestAndResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint`2";
 	const string fullIEndpointWithoutRequest = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutRequest`1";
-	const string fullIEndpointWithoutResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutResponse`1";
+	const string fullIEndpointWithoutResponse = "IeuanWalker.MinimalApi.EndEndpoints.IEndpointWithoutResponse`1";
 	const string fullIEndpointWithoutRequestOrResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint";
 
 	static string? assemblyName;
@@ -45,13 +46,14 @@ public class EndpointGenerator : IIncrementalGenerator
 		List<EndpointInfo> endpointClasses = [];
 
 		// Get the endpoint interface symbols to check against
-		INamedTypeSymbol endpointBase = compilation.GetTypeByMetadataName(fullIEndpointBase)!;
-		INamedTypeSymbol endpointWithRequestAndResponse = compilation.GetTypeByMetadataName(fullIEndpointWithRequestAndResponse)!;
-		INamedTypeSymbol endpointWithoutRequest = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequest)!;
-		INamedTypeSymbol endpointWithoutResponse = compilation.GetTypeByMetadataName(fullIEndpointWithoutResponse)!;
-		INamedTypeSymbol endpointWithoutRequestOrResponse = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequestOrResponse)!;
+		INamedTypeSymbol endpointGroupSymbol = compilation.GetTypeByMetadataName(fullIEndpointGroup)!;
+		INamedTypeSymbol endpointBaseSymbol = compilation.GetTypeByMetadataName(fullIEndpointBase)!;
+		INamedTypeSymbol endpointWithRequestAndResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithRequestAndResponse)!;
+		INamedTypeSymbol endpointWithoutRequestSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequest)!;
+		INamedTypeSymbol endpointWithoutResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutResponse)!;
+		INamedTypeSymbol endpointWithoutRequestOrResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequestOrResponse)!;
 
-		if (endpointBase is null)
+		if (endpointBaseSymbol is null)
 		{
 			return;
 		}
@@ -72,7 +74,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			}
 
 			// Check if the type implements IEndpointBase
-			bool implementsEndpointBase = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointBase));
+			bool implementsEndpointBase = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointBaseSymbol));
 
 			if (!implementsEndpointBase)
 			{
@@ -88,16 +90,38 @@ public class EndpointGenerator : IIncrementalGenerator
 
 			string? withName = typeDeclaration.GetWithName();
 			string? withTags = typeDeclaration.GetTags();
+			(INamedTypeSymbol symbol, string pattern)? mapGroup = typeDeclaration.GetGroup(endpointGroupSymbol, compilation);
+
+			// If withName is null and there's a mapGroup, try to inherit from the group
+			if (withName is null && mapGroup is not null)
+			{
+				TypeDeclarationSyntax? groupTypeDeclaration = mapGroup.Value.symbol.ToTypeDeclarationSyntax(types, compilation);
+				if (groupTypeDeclaration is not null)
+				{
+					withName = groupTypeDeclaration.GetWithName();
+				}
+			}
+
+			// If withTags is null and there's a mapGroup, try to inherit from the group
+			if (withTags is null && mapGroup is not null)
+			{
+				TypeDeclarationSyntax? groupTypeDeclaration = mapGroup.Value.symbol.ToTypeDeclarationSyntax(types, compilation);
+				if (groupTypeDeclaration is not null)
+				{
+					withTags = groupTypeDeclaration.GetTags();
+				}
+			}
 
 			// Determine which specific endpoint interface it implements
 			foreach (INamedTypeSymbol interfaceType in typeSymbol.AllInterfaces)
 			{
 				// Check for IEndpoint<TRequest, TResponse>
-				if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithRequestAndResponse) && interfaceType.TypeArguments.Length == 2)
+				if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithRequestAndResponseSymbol) && interfaceType.TypeArguments.Length == 2)
 				{
 					endpointClasses.Add(new EndpointInfo(
 						typeSymbol.ToDisplayString(),
 						EndpointType.WithRequestAndResponse,
+						mapGroup,
 						verbAndPattern.Value.verb,
 						verbAndPattern.Value.pattern,
 						withName,
@@ -108,11 +132,12 @@ public class EndpointGenerator : IIncrementalGenerator
 						interfaceType.TypeArguments[1]));
 				}
 				// Check for IEndpointWithoutRequest<TResponse>
-				else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequest) && interfaceType.TypeArguments.Length == 1)
+				else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequestSymbol) && interfaceType.TypeArguments.Length == 1)
 				{
 					endpointClasses.Add(new EndpointInfo(
 						typeSymbol.ToDisplayString(),
 						EndpointType.WithoutRequest,
+						mapGroup,
 						verbAndPattern.Value.verb,
 						verbAndPattern.Value.pattern,
 						withName,
@@ -123,11 +148,12 @@ public class EndpointGenerator : IIncrementalGenerator
 						interfaceType.TypeArguments[0]));
 				}
 				// Check for IEndpointWithRequestWithoutResponse<TRequest>
-				else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponse) && interfaceType.TypeArguments.Length == 1)
+				else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponseSymbol) && interfaceType.TypeArguments.Length == 1)
 				{
 					endpointClasses.Add(new EndpointInfo(
 						typeSymbol.ToDisplayString(),
 						EndpointType.WithoutResponse,
+						mapGroup,
 						verbAndPattern.Value.verb,
 						verbAndPattern.Value.pattern,
 						withName,
@@ -138,11 +164,12 @@ public class EndpointGenerator : IIncrementalGenerator
 						null));
 				}
 				// Check for IEndpointWithoutRequest (no generics)
-				else if (SymbolEqualityComparer.Default.Equals(interfaceType, endpointWithoutRequestOrResponse))
+				else if (SymbolEqualityComparer.Default.Equals(interfaceType, endpointWithoutRequestOrResponseSymbol))
 				{
 					endpointClasses.Add(new EndpointInfo(
 						typeSymbol.ToDisplayString(),
 						EndpointType.WithoutRequestOrResponse,
+						mapGroup,
 						verbAndPattern.Value.verb,
 						verbAndPattern.Value.pattern,
 						withName,
@@ -212,17 +239,50 @@ public class EndpointGenerator : IIncrementalGenerator
 
 			builder.AppendLine();
 
-			// Generate MapEndpoints method
+			// Generate MapEndpoints method with grouping
 			builder.AppendLine($"public static WebApplication MapEndpointsFrom{sanitisedAssemblyName}(this WebApplication app)");
 			using (builder.AppendBlock())
 			{
-				for (int i = 0; i < endpointClasses.Count; i++)
+				// Group endpoints by their Group property (both symbol and pattern)
+				IOrderedEnumerable<IGrouping<(string? symbol, string? pattern), EndpointInfo>> groupedEndpoints = endpointClasses
+					.GroupBy(x => (x.Group?.symbol?.ToDisplayString(), x.Group?.pattern))
+					.OrderBy(g => g.Key.Item1).ThenBy(g => g.Key.pattern);
+
+				int groupIndex = 0;
+				int endpointIndex = 0;
+
+				foreach (IGrouping<(string? symbol, string? pattern), EndpointInfo> group in groupedEndpoints)
 				{
-					EndpointInfo? endpoint = endpointClasses[i];
+					if (group.Key.symbol is not null)
+					{
+						// Create a group for endpoints with the same Group
+						string groupName = $"{group.Key.symbol.Sanitize("group")}_{groupIndex}";
 
-					builder.ToEndpoint(endpoint, i);
+						builder.AppendLine($"// GROUP: {group.Key.symbol}");
+						builder.AppendLine($"RouteGroupBuilder {groupName} = {group.Key.symbol}.Configure(app);");
+						builder.AppendLine();
 
-					builder.AppendLine();
+						foreach (EndpointInfo endpoint in group.OrderBy(x => x.Verb).ThenBy(x => x.Pattern))
+						{
+							builder.ToEndpoint(endpoint, endpointIndex, (groupName, group.Key.pattern ?? string.Empty));
+							builder.AppendLine();
+
+							endpointIndex++;
+						}
+					}
+					else
+					{
+						// Endpoints without a group
+						foreach (EndpointInfo endpoint in group.OrderBy(x => x.Verb).ThenBy(x => x.Pattern))
+						{
+							builder.ToEndpoint(endpoint, endpointIndex, null);
+							builder.AppendLine();
+
+							endpointIndex++;
+						}
+					}
+
+					groupIndex++;
 				}
 
 				builder.AppendLine("return app;");
