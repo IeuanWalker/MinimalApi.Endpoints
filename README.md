@@ -284,7 +284,6 @@ public class UpdateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 | `RequestFromHeader(string? name = null)` | Treats the request model as `[FromHeader]` |
 | `RequestFromForm(string? name = null)` | Treats the request model as `[FromForm]` |
 | `RequestAsParameters()` | Treats the request model as `[AsParameters]` |
-| `DisableValidation()` | Disables automatic validation for this endpoint |
 
 *Note: `RequestAsParameters()` is for mixed parameter sources (route + query + headers).*
 ### Custom Endpoint Configuration
