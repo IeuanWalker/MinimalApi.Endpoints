@@ -254,8 +254,9 @@ public class EndpointGenerator : IIncrementalGenerator
 				{
 					if (group.Key.symbol is not null)
 					{
-						// Create a group for endpoints with the same Group
-						string groupName = $"group_{group.Key.symbol.Split('.').Last().Sanitize().ToLowerFirstLetter()}_{groupIndex}";
+						int lastDotIndex = group.Key.symbol.LastIndexOf('.');
+						string lastSegment = lastDotIndex >= 0 ? group.Key.symbol.Substring(lastDotIndex + 1) : group.Key.symbol;
+						string groupName = $"group_{lastSegment.Sanitize().ToLowerFirstLetter()}_{groupIndex}";
 
 						builder.AppendLine($"// GROUP: {group.Key.symbol}");
 						builder.AppendLine($"RouteGroupBuilder {groupName} = {group.Key.symbol}.Configure(app);");

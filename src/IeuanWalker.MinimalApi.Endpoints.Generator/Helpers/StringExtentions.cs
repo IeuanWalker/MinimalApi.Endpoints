@@ -20,11 +20,7 @@ static class Extensions
 			return input.ToLower();
 		}
 
-		return string.Create(input.Length, input, (span, str) =>
-		{
-			span[0] = char.ToLower(str[0]);
-			str.AsSpan(1).CopyTo(span.Slice(1));
-		});
+		return char.ToLower(input[0]) + input.Substring(1);
 	}
 
 	internal static string ToUpperFirstLetter(this string input)
