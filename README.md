@@ -10,6 +10,7 @@ A source generator that provides a structured way to create ASP.NET Core Minimal
 - **Flexible**: Support for various endpoint patterns (with/without request/response)
 - **Performance**: Optimised generated code with minimal overhead
 - **Request Binding Control**: Fine-grained control over how request parameters are bound
+- **Automatic Validation**: Built-in support for DataAnnotations and FluentValidation
 
 ## Quick Start
 
@@ -120,6 +121,138 @@ public class TriggerJobEndpoint : IEndpoint
 }
 ```
 
+## Request Validation
+
+MinimalApi.Endpoints provides automatic validation support for both **DataAnnotations** and **FluentValidation**. Validation is applied automatically based on the attributes or validators you define.
+
+In your startup, ensure you registered the AddProblemDetails service - 
+```csharp
+builder.Services.AddProblemDetails();
+```
+
+Both validation methods return the `400 Bad Request` status code with a `ValidationProblem` response containing detailed error information if validation fails.
+
+Both validation methods can be used independently or together. If both are present for the same type, FluentValidation takes precedence.
+
+> Its recommeded to use FluentValidation over DataAnnoations as the requried attribute to enable dataAnnoation is _`is for evaluation purposes only and is subject to change or removal in future updates`_
+
+### DataAnnotations Validation
+
+Use standard DataAnnotations attributes on your request models. You must also add the `[ValidatableType]` attribute to enable validation. This is what .net uses to source generate the validation logic.
+
+>_If you were using minimal api's directly you wouldn't need to add this as the source generator automatically runs when it finds minimal api endpoints in your code, the limitation here is source generator cant run on top/ chain other source generators. As this library source generates the minimal api endpoints the automatic generator .net built doesnt see them._
+
+>_So this attribute tells the .NET source generator that this type needs the logic generated for it, even if it cant find the endpoint that uses it_
+
+```csharp
+using System.ComponentModel.DataAnnotations;
+using Microsoft.Extensions.Validation;
+
+#pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+[ValidatableType]// Required for DataAnnotations validation
+#pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+public class CreateUserRequest
+{
+    [Required]
+    [StringLength(100, MinimumLength = 2)]
+    public string Name { get; set; } = string.Empty;
+
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+
+    [Range(18, 120)]
+    public int Age { get; set; }
+
+    [Phone]
+    public string? PhoneNumber { get; set; }
+}
+```
+
+### FluentValidation Support
+
+Create validators by implementing `AbstractValidator<T>` for your request models. The source generator will automatically detect and wire up the validators.
+
+```csharp
+using FluentValidation;
+
+public class CreateUserRequest
+{
+    public string Name { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public int Age { get; set; }
+    public string? PhoneNumber { get; set; }
+}
+
+// Validator must be in the same assembly as your endpoints
+public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
+{
+    public CreateUserRequestValidator()
+    {
+        RuleFor(x => x.Name)
+            .NotEmpty()
+            .MinimumLength(2)
+            .MaximumLength(100);
+
+        RuleFor(x => x.Email)
+            .NotEmpty()
+            .EmailAddress();
+
+        RuleFor(x => x.Age)
+            .InclusiveBetween(18, 120)
+            .WithMessage("Age must be between 18 and 120");
+
+        RuleFor(x => x.PhoneNumber)
+            .Matches(@"^\+?[1-9]\d{1,14}$")
+            .When(x => !string.IsNullOrEmpty(x.PhoneNumber))
+            .WithMessage("Please provide a valid phone number");
+    }
+}
+
+public class CreateUserEndpoint : IEndpoint<CreateUserRequest, UserResponse>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder
+            .Post("/users")
+            .RequestFromBody()
+            .WithSummary("Create a new user")
+            .ProducesValidationProblem(); // Documents validation responses
+    }
+
+    public async Task<UserResponse> HandleAsync(CreateUserRequest request, CancellationToken ct)
+    {
+        // Request is automatically validated using FluentValidation before reaching this method
+        // If validation fails, a 400 Bad Request with detailed validation errors is returned
+        return await CreateUserAsync(request, ct);
+    }
+}
+```
+
+### Disabling Validation
+
+You can disable automatic validation for specific endpoints using the `DisableValidation()` extension method:
+
+```csharp
+public class CreateUserEndpoint : IEndpoint<CreateUserRequest, UserResponse>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder
+            .Post("/users/unsafe")
+            .RequestFromBody()
+            .DisableValidation();
+    }
+
+    public async Task<UserResponse> HandleAsync(CreateUserRequest request, CancellationToken ct)
+    {
+        // Manual validation can be performed here if needed
+        // No automatic validation is applied
+        return await CreateUserAsync(request, ct);
+    }
+}
+```
+
 ## Advanced Configuration
 
 ### HTTP Verbs
@@ -164,6 +297,7 @@ public class UpdateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 | `RequestFromHeader(string? name = null)` | Treats the request model as `[FromHeader]` |
 | `RequestFromForm(string? name = null)` | Treats the request model as `[FromForm]` |
 | `RequestAsParameters()` | Treats the request model as `[AsParameters]` |
+| `DisableValidation()` | Disables automatic validation for this endpoint |
 
 *Note: `RequestAsParameters()` is for mixed parameter sources (route + query + headers).*
 ### Custom Endpoint Configuration
@@ -299,6 +433,7 @@ MyApi/
 3. **Dependency Injection**: Endpoints are automatically registered as scoped services
 4. **Route Mapping**: HTTP verbs and patterns are extracted from the `Configure` method and mapped to your handlers
 5. **Request Binding**: Extension methods control how request parameters are bound in the generated code
+6. **Validation Integration**: Automatically detects and integrates DataAnnotations and FluentValidation
 
 ### Generated Code Example
 
@@ -327,13 +462,14 @@ public static class EndpointExtensions
         
         GetUserEndpoint.Configure(getUserEndpoint);
         
-        // POST: /users - with RequestFromBody()
+        // POST: /users - with RequestFromBody() and FluentValidation
         RouteHandlerBuilder createUserEndpoint = app
             .MapPost("/users", async ([FromBody] CreateUserRequest request, [FromServices] CreateUserEndpoint endpoint, CancellationToken ct) =>
             {
                 return await endpoint.HandleAsync(request, ct);
             })
-            .WithName("CreateUserEndpoint");
+            .WithName("CreateUserEndpoint")
+            .AddEndpointFilter<FluentValidationFilter<CreateUserRequest>>();
         
         CreateUserEndpoint.Configure(createUserEndpoint);
         
@@ -352,6 +488,8 @@ public static class EndpointExtensions
 - **Familiar**: If you've used FastEndpoints, you'll feel right at home
 - **Minimal**: Less boilerplate than controller-based approaches
 - **Flexible Binding**: Fine-grained control over parameter binding behavior
+- **Automatic Validation**: Built-in support for popular validation libraries
+- **Type-Safe Validation**: Compile-time validation integration with zero runtime overhead
 
 ## Interface Reference
 

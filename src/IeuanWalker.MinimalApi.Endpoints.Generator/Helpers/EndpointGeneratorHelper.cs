@@ -38,7 +38,9 @@ static class EndpointGeneratorHelper
 		{
 			builder.AppendLine();
 			builder.AppendLine(".DisableValidation()");
-			builder.Append($".AddEndpointFilter<FluentValidationFilter<global::{endpoint.RequestType}>>()");
+			builder.AppendLine($".AddEndpointFilter<FluentValidationFilter<global::{endpoint.RequestType}>>()");
+			builder.Append(".ProducesValidationProblem()");
+
 		}
 
 		builder.AppendLine(";");
