@@ -2,13 +2,13 @@
 
 static class EndpointGeneratorHelper
 {
-	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber)
+	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber, (string groupName, string pattern)? group)
 	{
-		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.Verb, endpoint.Pattern, routeNumber);
+		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.Verb, $"{group?.pattern ?? string.Empty}{endpoint.Pattern}", routeNumber).ToLowerFirstLetter();
 
-		builder.AppendLine($"// {endpoint.Verb.ToString().ToUpper()}: {endpoint.Pattern}");
+		builder.AppendLine($"// {endpoint.Verb.ToString().ToUpper()}: {group?.pattern ?? string.Empty}{endpoint.Pattern}");
 
-		builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = app");
+		builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = {group?.groupName ?? "app"}");
 		builder.IncreaseIndent();
 		builder.AppendLine($".{endpoint.Verb.ToMap()}(\"{endpoint.Pattern}\", async (");
 
@@ -25,7 +25,7 @@ static class EndpointGeneratorHelper
 
 		if (endpoint.WithTags is null)
 		{
-			builder.GenerateAndAddTags(endpoint.Pattern);
+			builder.GenerateAndAddTags($"{group?.pattern ?? string.Empty}{endpoint.Pattern}");
 		}
 
 		if (endpoint.WithName is null)

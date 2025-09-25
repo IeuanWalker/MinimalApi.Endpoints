@@ -11,6 +11,7 @@ A source generator that provides a structured way to create ASP.NET Core Minimal
 - **Performance**: Optimised generated code with minimal overhead
 - **Request Binding Control**: Fine-grained control over how request parameters are bound
 - **Automatic Validation**: Built-in support for DataAnnotations and FluentValidation
+- **Endpoint Grouping**: Organize related endpoints under common route prefixes with shared configuration
 
 ## Quick Start
 
@@ -117,6 +118,53 @@ public class TriggerJobEndpoint : IEndpoint
     public async Task HandleAsync(CancellationToken ct)
     {
         await ExecuteJob();
+    }
+}
+```
+
+## Endpoint Grouping
+
+Endpoint grouping allows you to organize related endpoints under common route prefixes and apply shared configuration. This is particularly useful for versioning, common middleware, or organizing endpoints by feature area.
+
+### Creating an Endpoint Group
+
+Create a class that implements `IEndpointGroup`:
+
+```csharp
+using IeuanWalker.MinimalApi.Endpoints;
+
+public class TodoEndpointGroup : IEndpointGroup
+{
+    public static RouteGroupBuilder Configure(WebApplication app)
+    {
+        return app.MapGroup("api/v{version:apiVersion}/todos")
+            .WithTags("Todos")
+            .RequireAuthorization(); // Apply authorization to all endpoints in this group
+    }
+}
+```
+
+### Using Endpoint Groups
+
+Reference the group in your endpoints using the `Group<T>()` extension method:
+
+```csharp
+public class GetAllTodosEndpoint : IEndpointWithoutRequest<ResponseModel[]>
+{
+    public static void Configure(RouteHandlerBuilder builder)
+    {
+        builder
+            .Group<TodoEndpointGroup>()  // Reference the endpoint group
+            .Get("/")                       // Relative path within the group
+            .WithSummary("Get all todos")
+            .WithDescription("Retrieves all todos from the store")
+            .Version(1.0);
+    }
+
+    public async Task<ResponseModel[]> HandleAsync(CancellationToken ct)
+    {
+        // Implementation
+        return await GetTodosAsync();
     }
 }
 ```
@@ -384,6 +432,7 @@ Helps organise your endpoints in a clean folder structure where each endpoint is
 MyApi/
 ├── Endpoints/
 │   ├── Users/
+│   │   ├── UserEndpointGroup.cs
 │   │   ├── Get/
 │   │   │   ├── GetUsersEndpoint.cs
 │   │   │   ├── RequestModel.cs
@@ -401,6 +450,7 @@ MyApi/
 │   │       ├── RequestModel.cs
 │   │       └── ResponseModel.cs
 │   └── Products/
+│       ├── ProductEndpointGroup.cs
 │       ├── Get/
 │       │   ├── GetProductEndpoint.cs
 │       │   ├── RequestModel.cs
@@ -414,12 +464,13 @@ MyApi/
 
 ## How It Works
 
-1. **Source Generation**: The source generator scans your assembly for classes implementing `IEndpointBase`
+1. **Source Generation**: The source generator scans your assembly for classes implementing `IEndpointBase` and `IEndpointGroup`
 2. **Code Generation**: It generates extension methods (`AddEndpointsFromYourAssembly` and `MapEndpointsFromYourAssembly`)
 3. **Dependency Injection**: Endpoints are automatically registered as scoped services
 4. **Route Mapping**: HTTP verbs and patterns are extracted from the `Configure` method and mapped to your handlers
-5. **Request Binding**: Extension methods control how request parameters are bound in the generated code
-6. **Validation Integration**: Automatically detects and integrates DataAnnotations and FluentValidation
+5. **Group Processing**: Endpoints using `MapGroup<T>()` are organized under their respective group configurations
+6. **Request Binding**: Extension methods control how request parameters are bound in the generated code
+7. **Validation Integration**: Automatically detects and integrates DataAnnotations and FluentValidation
 
 ### Generated Code Example
 
@@ -438,28 +489,40 @@ public static class EndpointExtensions
 
     public static WebApplication MapEndpointsFromMyApi(this WebApplication app)
     {
-        // GET: /users/{id} - with RequestAsParameters()
-        RouteHandlerBuilder getUserEndpoint = app
-            .MapGet("/users/{id}", async ([AsParameters] RequestModel request, [FromServices] GetUserEndpoint endpoint, CancellationToken ct) =>
+        // GROUP: TodoEndpointGroup
+        RouteGroupBuilder TodoEndpointGroup_0 = TodoEndpointGroup.Configure(app);
+        
+        // GET: / (within group: api/v{version:apiVersion}/todos)
+        RouteHandlerBuilder getAllTodosEndpoint = TodoEndpointGroup_0
+            .MapGet("/", async ([FromServices] GetAllTodosEndpoint endpoint, CancellationToken ct) =>
+            {
+                return await endpoint.HandleAsync(ct);
+            })
+            .WithName("GetAllTodosEndpoint");
+        
+        GetAllTodosEndpoint.Configure(getAllTodosEndpoint);
+        
+        // POST: / (within group: api/v{version:apiVersion}/todos)
+        RouteHandlerBuilder createTodoEndpoint = TodoEndpointGroup_0
+            .MapPost("/", async ([FromBody] CreateTodoRequest request, [FromServices] CreateTodoEndpoint endpoint, CancellationToken ct) =>
             {
                 return await endpoint.HandleAsync(request, ct);
             })
-            .WithName("GetUserEndpoint");
+            .WithName("CreateTodoEndpoint")
+            .AddEndpointFilter<FluentValidationFilter<CreateTodoRequest>>();
         
-        GetUserEndpoint.Configure(getUserEndpoint);
+        CreateTodoEndpoint.Configure(createTodoEndpoint);
         
-        // POST: /users - with RequestFromBody() and FluentValidation
-        RouteHandlerBuilder createUserEndpoint = app
-            .MapPost("/users", async ([FromBody] CreateUserRequest request, [FromServices] CreateUserEndpoint endpoint, CancellationToken ct) =>
+        // Standalone endpoints without groups
+        RouteHandlerBuilder standaloneEndpoint = app
+            .MapGet("/health", async ([FromServices] HealthCheckEndpoint endpoint, CancellationToken ct) =>
             {
-                return await endpoint.HandleAsync(request, ct);
+                return await endpoint.HandleAsync(ct);
             })
-            .WithName("CreateUserEndpoint")
-            .AddEndpointFilter<FluentValidationFilter<CreateUserRequest>>();
+            .WithName("HealthCheckEndpoint");
         
-        CreateUserEndpoint.Configure(createUserEndpoint);
+        HealthCheckEndpoint.Configure(standaloneEndpoint);
         
-        // ... other endpoint mappings
         return app;
     }
 }
@@ -476,6 +539,7 @@ public static class EndpointExtensions
 - **Flexible Binding**: Fine-grained control over parameter binding behavior
 - **Automatic Validation**: Built-in support for popular validation libraries
 - **Type-Safe Validation**: Compile-time validation integration with zero runtime overhead
+- **Organized Grouping**: Clean organization of related endpoints with shared configuration
 
 ## Interface Reference
 

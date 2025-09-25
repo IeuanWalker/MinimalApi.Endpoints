@@ -20,7 +20,8 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
-			.Get("/api/v{version:apiVersion}/todos/export")
+			.Group<TodoEndpointGroup>()
+			.Get("/export")
 			.WithSummary("Export todos")
 			.WithDescription("Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.")
 			.WithResponse<string>(StatusCodes.Status200OK, "Downloadable HTML file containing all todos in a formatted table", "text/html")

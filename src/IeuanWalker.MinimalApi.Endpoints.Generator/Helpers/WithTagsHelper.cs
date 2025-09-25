@@ -46,7 +46,7 @@ static class WithTagsHelper
 		}
 
 		builder.AppendLine();
-		builder.Append($".WithTags(\"{apiName}\")");
+		builder.Append($".WithTags(\"{apiName!.ToUpperFirstLetter()}\")");
 	}
 
 	static string? ExtractApiNameFromPattern(string pattern)
