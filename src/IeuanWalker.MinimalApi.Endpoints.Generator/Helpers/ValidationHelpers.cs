@@ -106,7 +106,6 @@ static class ValidationHelpers
 				INamedTypeSymbol? typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration) as INamedTypeSymbol;
 				if (typeSymbol is not null && ImplementsValidatorInterface(typeSymbol, iValidatorOfRequest))
 				{
-
 					return typeSymbol;
 				}
 			}
