@@ -26,7 +26,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 			.Version(1.0);
 	}
 
-	public async Task<Results<Ok<ResponseModel>, Conflict>> HandleAsync(RequestModel request, CancellationToken ct)
+	public async Task<Results<Ok<ResponseModel>, Conflict>> Handle(RequestModel request, CancellationToken ct)
 	{
 		if ((await _todoStore.GetAllAsync(ct)).Any(x => x.Title.Equals(request.Title, StringComparison.InvariantCultureIgnoreCase)))
 		{

@@ -19,7 +19,7 @@ static class EndpointGeneratorHelper
 			builder.AppendLine($"{endpoint.GetBindingType()}global::{endpoint.RequestType} request,");
 		}
 		builder.AppendLine($"[FromServices] global::{endpoint.ClassName} endpoint,");
-		builder.Append($"CancellationToken ct) => await endpoint.HandleAsync({(endpoint.HasRequest ? "request, " : string.Empty)}ct))");
+		builder.Append($"CancellationToken ct) => await endpoint.Handle({(endpoint.HasRequest ? "request, " : string.Empty)}ct))");
 
 		builder.DecreaseIndent();
 

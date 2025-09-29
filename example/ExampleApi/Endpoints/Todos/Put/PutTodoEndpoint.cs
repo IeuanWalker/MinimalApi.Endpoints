@@ -25,7 +25,7 @@ public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 			.Version(1.0);
 	}
 
-	public async Task<ResponseModel?> HandleAsync(RequestModel request, CancellationToken ct)
+	public async Task<ResponseModel?> Handle(RequestModel request, CancellationToken ct)
 	{
 		Todo todo = new()
 		{

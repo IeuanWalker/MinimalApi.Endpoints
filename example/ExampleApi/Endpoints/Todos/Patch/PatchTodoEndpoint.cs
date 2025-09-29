@@ -25,7 +25,7 @@ public class PatchTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 			.Version(1.0);
 	}
 
-	public async Task<ResponseModel?> HandleAsync(RequestModel request, CancellationToken ct)
+	public async Task<ResponseModel?> Handle(RequestModel request, CancellationToken ct)
 	{
 		Todo? updatedTodo = await _todoStore.PatchAsync(request.Id, todo =>
 		{

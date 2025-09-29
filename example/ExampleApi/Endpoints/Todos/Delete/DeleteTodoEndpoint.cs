@@ -24,7 +24,7 @@ public class DeleteTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 			.Version(1.0);
 	}
 
-	public async Task HandleAsync(RequestModel request, CancellationToken ct)
+	public async Task Handle(RequestModel request, CancellationToken ct)
 	{
 		await _todoStore.DeleteAsync(request.Id, ct);
 	}
