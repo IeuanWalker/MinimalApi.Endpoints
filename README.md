@@ -62,3 +62,10 @@ That's it! Your endpoints are now mapped with zero runtime reflection.
 ---
 
 📖 **[Full Documentation & Examples →](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki)**
+
+
+## Contributing
+Contributions are welcome! Please feel free to open an issue or submit a Pull Request _(start with an issue if its a significant change)_.
+
+## License
+This project is licensed under the MIT License.
