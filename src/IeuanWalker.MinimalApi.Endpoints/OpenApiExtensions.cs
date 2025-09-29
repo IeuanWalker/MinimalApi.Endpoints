@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints;
 
@@ -32,7 +33,11 @@ public static class OpenApiExtensions
 
 		builder.AddOpenApiOperationTransformer((operation, _, _) =>
 		{
-			operation.Responses?[statusCode.ToString()].Description = description;
+			if (operation.Responses is not null)
+			{
+				IOpenApiResponse? response = operation.Responses[statusCode.ToString()];
+				response?.Description = description;
+			}
 
 			return Task.CompletedTask;
 		});

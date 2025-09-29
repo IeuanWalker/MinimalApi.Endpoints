@@ -43,7 +43,7 @@ static class HttpVerbRouteHelpers
 			.OfType<InvocationExpressionSyntax>()
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && httpVerbMethods.Contains(memberAccess.Name.Identifier.ValueText));
 
-		List<InvocationExpressionSyntax> httpVerbCallsList = httpVerbCalls.ToList();
+		List<InvocationExpressionSyntax> httpVerbCallsList = [.. httpVerbCalls];
 
 		// Validate HTTP verb usage
 		if (httpVerbCallsList.Count == 0)
@@ -66,7 +66,7 @@ static class HttpVerbRouteHelpers
 			return null;
 		}
 
-		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList.First();
+		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList[0];
 		if (firstHttpVerbCall.Expression is MemberAccessExpressionSyntax verbMemberAccess)
 		{
 			verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);

@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -48,7 +47,7 @@ static class MapGroupHelper
 			.OfType<InvocationExpressionSyntax>()
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
 
-		List<InvocationExpressionSyntax> groupCallsList = groupCalls.ToList();
+		List<InvocationExpressionSyntax> groupCallsList = [.. groupCalls];
 
 		// Validate that there's only one Group call
 		if (groupCallsList.Count > 1)
@@ -63,38 +62,37 @@ static class MapGroupHelper
 
 		InvocationExpressionSyntax? firstGroupCall = groupCallsList.FirstOrDefault();
 
-		if (firstGroupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr)
+		if (
+			firstGroupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr &&
+			memberAccessExpr.Name is GenericNameSyntax genericName &&
+			genericName.TypeArgumentList.Arguments.Count > 0)
 		{
-			// Check if Group has generic type arguments
-			if (memberAccessExpr.Name is GenericNameSyntax genericName && genericName.TypeArgumentList.Arguments.Count > 0)
+			// Extract the first generic type argument
+			TypeSyntax endpointGroup = genericName.TypeArgumentList.Arguments[0];
+
+			SemanticModel semanticModel = compilation.GetSemanticModel(endpointGroup.SyntaxTree);
+
+			// Get the type information for the syntax node
+			TypeInfo typeInfo = semanticModel.GetTypeInfo(endpointGroup);
+
+			if (typeInfo.Type is not INamedTypeSymbol namedTypeSymbol)
 			{
-				// Extract the first generic type argument
-				TypeSyntax endpointGroup = genericName.TypeArgumentList.Arguments[0];
+				return null;
+			}
 
-				SemanticModel semanticModel = compilation.GetSemanticModel(endpointGroup.SyntaxTree);
+			if (SymbolEqualityComparer.Default.Equals(namedTypeSymbol, endpointGroupSymbol) ||
+				namedTypeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointGroupSymbol)) ||
+				InheritsFrom(namedTypeSymbol, endpointGroupSymbol))
+			{
+				// Now get the pattern from the endpoint group's Configure method
+				string? pattern = GetPatternFromEndpointGroup(namedTypeSymbol, context);
 
-				// Get the type information for the syntax node
-				TypeInfo typeInfo = semanticModel.GetTypeInfo(endpointGroup);
-
-				if (typeInfo.Type is not INamedTypeSymbol namedTypeSymbol)
+				if (pattern is null)
 				{
 					return null;
 				}
 
-				if (SymbolEqualityComparer.Default.Equals(namedTypeSymbol, endpointGroupSymbol) ||
-					namedTypeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointGroupSymbol)) ||
-					InheritsFrom(namedTypeSymbol, endpointGroupSymbol))
-				{
-					// Now get the pattern from the endpoint group's Configure method
-					string? pattern = GetPatternFromEndpointGroup(namedTypeSymbol, context);
-
-					if (pattern is null)
-					{
-						return null;
-					}
-
-					return (namedTypeSymbol, pattern);
-				}
+				return (namedTypeSymbol, pattern);
 			}
 		}
 
@@ -121,7 +119,7 @@ static class MapGroupHelper
 						.OfType<InvocationExpressionSyntax>()
 						.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "MapGroup");
 
-					List<InvocationExpressionSyntax> mapGroupCallsList = mapGroupCalls.ToList();
+					List<InvocationExpressionSyntax> mapGroupCallsList = [.. mapGroupCalls];
 
 					// Validate endpoint group Configure method
 					if (mapGroupCallsList.Count == 0)
@@ -145,7 +143,7 @@ static class MapGroupHelper
 					}
 
 					// Extract pattern from the single MapGroup call
-					InvocationExpressionSyntax firstMapGroupCall = mapGroupCallsList.First();
+					InvocationExpressionSyntax firstMapGroupCall = mapGroupCallsList[0];
 					if (firstMapGroupCall.ArgumentList.Arguments.Count > 0)
 					{
 						ArgumentSyntax firstArgument = firstMapGroupCall.ArgumentList.Arguments[0];

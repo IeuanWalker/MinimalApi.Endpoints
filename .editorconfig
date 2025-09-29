@@ -16,7 +16,7 @@ indent_size = 4
 
 # Project files
 [*.{csproj,vbproj,vcxproj,vcxproj.filters,proj,projitems,shproj}]
-indent_size = 2
+indent_size = 4
 
 # MSBuild and configuration files
 [*.{props,targets,ruleset,config,nuspec,resx,vsixmanifest,vsct}]
@@ -58,6 +58,8 @@ dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
 # .NET Code style - Accessibility and organization
 dotnet_style_require_accessibility_modifiers = omit_if_default:error
 dotnet_style_namespace_match_folder = true:suggestion
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
+tab_width = 4
 
 # =============================================
 # C# SPECIFIC SETTINGS
@@ -303,3 +305,4 @@ dotnet_diagnostic.S1135.severity = suggestion  # Track uses of "TODO" tags
 dotnet_diagnostic.S1643.severity = silent      # Strings should not be concatenated using '+' in a loop
 dotnet_diagnostic.S2344.severity = none        # Enumeration type names should not have "Flags" or "Enum" suffixes
 dotnet_diagnostic.S3358.severity = silent      # Ternary operators should not be nested
+dotnet_diagnostic.S1121.severity = none        # Assignments should not be made from within sub-expressions
