@@ -7,7 +7,31 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
 static class MapGroupHelper
 {
-	public static (INamedTypeSymbol symbol, string pattern)? GetGroup(this TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol endpointGroupSymbol, Compilation compilation)
+	static readonly DiagnosticDescriptor noMapGroupDescriptor = new(
+		id: "MINAPI003",
+		title: "No MapGroup configured",
+		messageFormat: "Endpoint group '{0}' has no MapGroup configured in the Configure method. Exactly one MapGroup call must be specified.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor multipleMapGroupsDescriptor = new(
+		id: "MINAPI004",
+		title: "Multiple MapGroup calls configured",
+		messageFormat: "Endpoint group '{0}' has multiple MapGroup calls configured in the Configure method. Only one MapGroup call should be specified per endpoint group.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor multipleGroupCallsDescriptor = new(
+		id: "MINAPI005",
+		title: "Multiple Group calls configured",
+		messageFormat: "Type '{0}' has multiple Group calls configured in the Configure method. Only one Group call should be specified per endpoint.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	public static (INamedTypeSymbol symbol, string pattern)? GetGroup(this TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol endpointGroupSymbol, Compilation compilation, SourceProductionContext context)
 	{
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
@@ -24,7 +48,20 @@ static class MapGroupHelper
 			.OfType<InvocationExpressionSyntax>()
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
 
-		InvocationExpressionSyntax? firstGroupCall = groupCalls.FirstOrDefault();
+		List<InvocationExpressionSyntax> groupCallsList = groupCalls.ToList();
+
+		// Validate that there's only one Group call
+		if (groupCallsList.Count > 1)
+		{
+			// Multiple Group calls found
+			context.ReportDiagnostic(Diagnostic.Create(
+				multipleGroupCallsDescriptor,
+				configureMethod.Identifier.GetLocation(),
+				typeDeclaration.Identifier.ValueText));
+			return null;
+		}
+
+		InvocationExpressionSyntax? firstGroupCall = groupCallsList.FirstOrDefault();
 
 		if (firstGroupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr)
 		{
@@ -49,7 +86,7 @@ static class MapGroupHelper
 					InheritsFrom(namedTypeSymbol, endpointGroupSymbol))
 				{
 					// Now get the pattern from the endpoint group's Configure method
-					string? pattern = GetPatternFromEndpointGroup(namedTypeSymbol);
+					string? pattern = GetPatternFromEndpointGroup(namedTypeSymbol, context);
 
 					if (pattern is null)
 					{
@@ -64,7 +101,7 @@ static class MapGroupHelper
 		return null;
 	}
 
-	static string? GetPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol)
+	static string? GetPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol, SourceProductionContext context)
 	{
 		// Get all syntax references for the endpoint group type
 		foreach (SyntaxReference syntaxRef in endpointGroupSymbol.DeclaringSyntaxReferences)
@@ -84,9 +121,32 @@ static class MapGroupHelper
 						.OfType<InvocationExpressionSyntax>()
 						.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "MapGroup");
 
-					InvocationExpressionSyntax? firstMapGroupCall = mapGroupCalls.FirstOrDefault();
+					List<InvocationExpressionSyntax> mapGroupCallsList = mapGroupCalls.ToList();
 
-					if (firstMapGroupCall is not null && firstMapGroupCall.ArgumentList.Arguments.Count > 0)
+					// Validate endpoint group Configure method
+					if (mapGroupCallsList.Count == 0)
+					{
+						// No MapGroup found
+						context.ReportDiagnostic(Diagnostic.Create(
+							noMapGroupDescriptor,
+							configureMethod.Identifier.GetLocation(),
+							endpointGroupSymbol.Name));
+						return null;
+					}
+
+					if (mapGroupCallsList.Count > 1)
+					{
+						// Multiple MapGroup calls found
+						context.ReportDiagnostic(Diagnostic.Create(
+							multipleMapGroupsDescriptor,
+							configureMethod.Identifier.GetLocation(),
+							endpointGroupSymbol.Name));
+						return null;
+					}
+
+					// Extract pattern from the single MapGroup call
+					InvocationExpressionSyntax firstMapGroupCall = mapGroupCallsList.First();
+					if (firstMapGroupCall.ArgumentList.Arguments.Count > 0)
 					{
 						ArgumentSyntax firstArgument = firstMapGroupCall.ArgumentList.Arguments[0];
 						if (firstArgument.Expression is LiteralExpressionSyntax literalExpr && literalExpr.Token.IsKind(SyntaxKind.StringLiteralToken))

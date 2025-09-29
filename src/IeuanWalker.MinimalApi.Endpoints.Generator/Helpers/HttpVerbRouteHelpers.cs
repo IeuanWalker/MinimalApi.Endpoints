@@ -6,7 +6,23 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
 static class HttpVerbRouteHelpers
 {
-	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration)
+	static readonly DiagnosticDescriptor noHttpVerbDescriptor = new(
+		id: "MINAPI001",
+		title: "No HTTP verb configured",
+		messageFormat: "Type '{0}' has no HTTP verb configured in the Configure method. At least one HTTP verb (Get, Post, Put, Patch, Delete) must be specified.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor multipleHttpVerbsDescriptor = new(
+		id: "MINAPI002",
+		title: "Multiple HTTP verbs configured",
+		messageFormat: "Type '{0}' has multiple HTTP verbs configured in the Configure method. Only one HTTP verb should be specified per endpoint.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration, SourceProductionContext context)
 	{
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
@@ -27,8 +43,31 @@ static class HttpVerbRouteHelpers
 			.OfType<InvocationExpressionSyntax>()
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && httpVerbMethods.Contains(memberAccess.Name.Identifier.ValueText));
 
-		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCalls.FirstOrDefault();
-		if (firstHttpVerbCall?.Expression is MemberAccessExpressionSyntax verbMemberAccess)
+		List<InvocationExpressionSyntax> httpVerbCallsList = httpVerbCalls.ToList();
+
+		// Validate HTTP verb usage
+		if (httpVerbCallsList.Count == 0)
+		{
+			// No HTTP verb found - report on Configure method
+			context.ReportDiagnostic(Diagnostic.Create(
+				noHttpVerbDescriptor,
+				configureMethod.Identifier.GetLocation(),
+				typeDeclaration.Identifier.ValueText));
+			return null;
+		}
+
+		if (httpVerbCallsList.Count > 1)
+		{
+			// Multiple HTTP verbs found - report on Configure method
+			context.ReportDiagnostic(Diagnostic.Create(
+				multipleHttpVerbsDescriptor,
+				configureMethod.Identifier.GetLocation(),
+				typeDeclaration.Identifier.ValueText));
+			return null;
+		}
+
+		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList.First();
+		if (firstHttpVerbCall.Expression is MemberAccessExpressionSyntax verbMemberAccess)
 		{
 			verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
 

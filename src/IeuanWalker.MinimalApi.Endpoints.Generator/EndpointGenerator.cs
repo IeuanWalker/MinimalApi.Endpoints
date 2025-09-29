@@ -82,7 +82,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			}
 
 			// Analyze the Configure method for WithName usage, HTTP verb, and route pattern
-			(HttpVerb verb, string pattern)? verbAndPattern = typeDeclaration.GetVerbAndPattern();
+			(HttpVerb verb, string pattern)? verbAndPattern = typeDeclaration.GetVerbAndPattern(context);
 			if (verbAndPattern is null)
 			{
 				continue;
@@ -90,7 +90,7 @@ public class EndpointGenerator : IIncrementalGenerator
 
 			string? withName = typeDeclaration.GetWithName();
 			string? withTags = typeDeclaration.GetTags();
-			(INamedTypeSymbol symbol, string pattern)? mapGroup = typeDeclaration.GetGroup(endpointGroupSymbol, compilation);
+			(INamedTypeSymbol symbol, string pattern)? mapGroup = typeDeclaration.GetGroup(endpointGroupSymbol, compilation, context);
 
 			// If withName is null and there's a mapGroup, try to inherit from the group
 			if (withName is null && mapGroup is not null)
