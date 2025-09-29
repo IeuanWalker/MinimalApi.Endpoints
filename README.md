@@ -19,17 +19,17 @@ A source generator that brings **clean, class-based endpoints** to ASP.NET Core 
 You have complete access to the `RouteHandlerBuilder`, so you can configure endpoints exactly like standard Minimal APIs:
 
 ```csharp
-public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
+public class HelloWorldEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
 		builder
-            .Post("/users")
+            .Post("/HelloWorld")
             .RequestFromBody()
-            .WithName("CreateUser")
-            .WithTags("Users")
-            .WithSummary("Creates a new user")
-            .WithDescription("Creates a new user in the system")
+            .WithName("CreateHelloWorld")
+            .WithTags("HelloWorld")
+            .WithSummary("Creates a hello world")
+            .WithDescription("Creates a new world in the system")
             .Produces<ResponseModel>(201)
             .Produces(400)
             .Produces(409)
@@ -42,7 +42,7 @@ public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
     public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
     {
         // Your implementation
-        return new ResponseModel(newUser.Id);
+        return new ResponseModel();
     }
 }
 ```
