@@ -4,7 +4,7 @@
 [![Build](https://github.com/IeuanWalker/Hangfire.RecurringJob/actions/workflows/build.yml/badge.svg)](https://github.com/IeuanWalker/Hangfire.RecurringJob/actions/workflows/build.yml)
 [![Read the docs](https://img.shields.io/badge/wiki-read%20the%20docs-blue)](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki)
 
-A source generator that brings **clean, class-based endpoints** to ASP.NET Core Minimal APIs. Inspired by FastEndpoints, but **source-generated** and designed to be as minimal as possible.
+A source generator that brings **clean, class-based endpoints** to ASP.NET Core Minimal APIs. Inspired by [FastEndpoints](https://github.com/FastEndpoints/FastEndpoints), but **source-generated** and designed to be as minimal as possible.
 
 ## Why Use This?
 
