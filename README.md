@@ -7,15 +7,29 @@
 A source generator that brings **clean, class-based endpoints** to ASP.NET Core Minimal APIs. Inspired by [FastEndpoints](https://github.com/FastEndpoints/FastEndpoints), but **source-generated** and designed to be as minimal as possible.
 
 ## Why Use This?
-
 - **🚀 Zero Runtime Overhead**: Source-generated code with no reflection
 - **🏗️ Clean Architecture**: Organized, testable endpoint classes  
 - **🔧 Full Control**: Complete access to `RouteHandlerBuilder` - it's just Minimal APIs underneath
 - **📁 Better Organization**: Clear project structure with endpoint grouping _(check out the example project)_
 - **🔓 No Lock-In**: Copy the generated code and remove the library anytime - you own the output
 
-## Custom Endpoint Configuration
+## How It Works _(see [wiki](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/How-does-it-work%3F) for more detailed explanation)_
+1. **Create endpoint classes** implementing one of the [endpoint interfaces](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Endpoints)
+2. **Source generator scans** your assembly at compile time
+3. **Generates extension methods** for dependency injection and route mapping
+4. **Call the extensions** in your `Program.cs`:
 
+```csharp
+var builder = WebApplication.CreateBuilder();
+builder.AddEndpointsFromYourAssembly(); // Registers endpoints as services
+
+var app = builder.Build();
+app.MapEndpointsFromYourAssembly();     // Maps all routes
+```
+
+That's it! Your endpoints are now mapped with zero runtime reflection.
+
+## Full access to configure your endpoints
 You have complete access to the `RouteHandlerBuilder`, so you can configure endpoints exactly like standard Minimal APIs:
 
 ```csharp
@@ -47,24 +61,7 @@ public class HelloWorldEndpoint : IEndpoint<RequestModel, ResponseModel>
 }
 ```
 
-## How It Works
 
-1. **Create endpoint classes** implementing one of the [endpoint interfaces](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Endpoints)
-2. **Source generator scans** your assembly at compile time
-3. **Generates extension methods** for dependency injection and route mapping
-4. **Call the extensions** in your `Program.cs`:
-
-```csharp
-var builder = WebApplication.CreateBuilder();
-builder.AddEndpointsFromYourAssembly(); // Registers endpoints as services
-
-var app = builder.Build();
-app.MapEndpointsFromYourAssembly();     // Maps all routes
-```
-
-That's it! Your endpoints are now mapped with zero runtime reflection.
-
----
 
 📖 **[Full Documentation & Examples →](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki)**
 
