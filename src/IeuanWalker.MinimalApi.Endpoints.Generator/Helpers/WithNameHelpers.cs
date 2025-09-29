@@ -47,7 +47,14 @@ static class WithNameHelpers
 		pattern = Regex.Replace(pattern, @"\s+", " ").Trim();
 		pattern = Regex.Replace(pattern, @"\bapi\b", "", RegexOptions.IgnoreCase).Trim();
 		pattern = Regex.Replace(pattern, @"\bv\b", "", RegexOptions.IgnoreCase).Trim();
-		pattern = string.Concat(pattern.Split(' ').Select(word => char.ToUpperInvariant(word[0]) + word.Substring(1)));
+		try
+		{
+			pattern = string.Concat(pattern.Split(' ').Select(word => char.ToUpperInvariant(word[0]) + word.Substring(1)));
+		}
+		catch (Exception)
+		{
+			// Intentionally ignored - fallback to using just verb and route number
+		}
 
 		return $"{verb}_{pattern}_{routeNumber}";
 	}
