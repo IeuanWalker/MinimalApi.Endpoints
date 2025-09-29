@@ -44,17 +44,17 @@ public class CreateUserEndpoint : IEndpoint<RequestModel, ResponseModel>
 
 ## How It Works
 
-1. **Create endpoint classes** implementing `IEndpointBase`
+1. **Create endpoint classes** implementing one of the [endpoint interfaces](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Endpoints)
 2. **Source generator scans** your assembly at compile time
 3. **Generates extension methods** for dependency injection and route mapping
 4. **Call the extensions** in your `Program.cs`:
 
 ```csharp
 var builder = WebApplication.CreateBuilder();
-builder.AddEndpointsFromMyApi(); // Registers endpoints as services
+builder.AddEndpointsFromYourAssembly(); // Registers endpoints as services
 
 var app = builder.Build();
-app.MapEndpointsFromMyApi();     // Maps all routes
+app.MapEndpointsFromYourAssembly();     // Maps all routes
 ```
 
 That's it! Your endpoints are now mapped with zero runtime reflection.
