@@ -1,4 +1,7 @@
-﻿# MinimalApi.Endpoints
+﻿# MinimalApi.Endpoints [![Nuget](https://img.shields.io/nuget/v/IeuanWalker.MinimalApi.Endpoints)](https://www.nuget.org/packages/IeuanWalker.MinimalApi.Endpoints) [![Nuget](https://img.shields.io/nuget/dt/IeuanWalker.MinimalApi.Endpoints)](https://www.nuget.org/packages/IeuanWalker.MinimalApi.Endpoints) 
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![Build](https://github.com/IeuanWalker/Hangfire.RecurringJob/actions/workflows/build.yml/badge.svg)](https://github.com/IeuanWalker/Hangfire.RecurringJob/actions/workflows/build.yml)
 
 A source generator that brings **clean, class-based endpoints** to ASP.NET Core Minimal APIs. Inspired by FastEndpoints, but **source-generated** and designed to be as minimal as possible.
 
