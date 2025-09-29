@@ -1,6 +1,6 @@
 ﻿# MinimalApi.Endpoints
 
-A source generator that brings **clean, class-based endpoints** to ASP.NET Core Minimal APIs. FastEndpoints inspired, but **source-generated** and designed to be as minimal as possible.
+A source generator that brings **clean, class-based endpoints** to ASP.NET Core Minimal APIs. Inspired by FastEndpoints, but **source-generated** and designed to be as minimal as possible.
 
 ## Why Use This?
 
