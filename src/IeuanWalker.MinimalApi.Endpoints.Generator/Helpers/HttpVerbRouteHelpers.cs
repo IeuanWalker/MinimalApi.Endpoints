@@ -67,7 +67,7 @@ static class HttpVerbRouteHelpers
 		}
 
 		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList.First();
-		if (firstHttpVerbCall?.Expression is MemberAccessExpressionSyntax verbMemberAccess)
+		if (firstHttpVerbCall.Expression is MemberAccessExpressionSyntax verbMemberAccess)
 		{
 			verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
 
