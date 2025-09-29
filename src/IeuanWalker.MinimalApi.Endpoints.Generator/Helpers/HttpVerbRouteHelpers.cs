@@ -7,7 +7,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 static class HttpVerbRouteHelpers
 {
 	static readonly DiagnosticDescriptor noHttpVerbDescriptor = new(
-		id: "IWMINAPI001",
+		id: "MINAPI001",
 		title: "No HTTP verb configured",
 		messageFormat: "Type '{0}' has no HTTP verb configured in the Configure method. At least one HTTP verb (Get, Post, Put, Patch, Delete) must be specified.",
 		category: "MinimalApiEndpoints",
@@ -15,7 +15,7 @@ static class HttpVerbRouteHelpers
 		isEnabledByDefault: true);
 
 	static readonly DiagnosticDescriptor multipleHttpVerbsDescriptor = new(
-		id: "IWMINAPI002",
+		id: "MINAPI002",
 		title: "Multiple HTTP verbs configured",
 		messageFormat: "Type '{0}' has multiple HTTP verbs configured in the Configure method. Only one HTTP verb should be specified per endpoint.",
 		category: "MinimalApiEndpoints",

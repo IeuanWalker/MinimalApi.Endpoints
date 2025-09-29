@@ -24,7 +24,7 @@ static class MapGroupHelper
 		isEnabledByDefault: true);
 
 	static readonly DiagnosticDescriptor multipleGroupCallsDescriptor = new(
-		id: "MINAPI006",
+		id: "MINAPI005",
 		title: "Multiple Group calls configured",
 		messageFormat: "Type '{0}' has multiple Group calls configured in the Configure method. Only one Group call should be specified per endpoint.",
 		category: "MinimalApiEndpoints",
