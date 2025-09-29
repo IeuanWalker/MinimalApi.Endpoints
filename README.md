@@ -39,7 +39,7 @@ public class HelloWorldEndpoint : IEndpoint<RequestModel, ResponseModel>
             .CacheOutput(TimeSpan.FromMinutes(5));
     }
 
-    public async Task<ResponseModel> HandleAsync(RequestModel request, CancellationToken ct)
+    public async Task<ResponseModel> Handle(RequestModel request, CancellationToken ct)
     {
         // Your implementation
         return new ResponseModel();
@@ -70,7 +70,7 @@ That's it! Your endpoints are now mapped with zero runtime reflection.
 
 
 ## Contributing
-Contributions are welcome! Please feel free to open an issue or submit a Pull Request _(start with an issue if its a significant change)_.
+Contributions are welcome! Please feel free to open an issue or submit a Pull Request _(start with an issue if it's a significant change)_.
 
 ## License
 This project is licensed under the MIT License.
