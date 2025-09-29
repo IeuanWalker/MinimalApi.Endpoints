@@ -24,7 +24,7 @@ public class GetAllTodosEndpoint : IEndpointWithoutRequest<ResponseModel[]>
 			.Version(1.0);
 	}
 
-	public async Task<ResponseModel[]> HandleAsync(CancellationToken ct)
+	public async Task<ResponseModel[]> Handle(CancellationToken ct)
 	{
 		IEnumerable<Todo> result = await _todoStore.GetAllAsync(ct);
 

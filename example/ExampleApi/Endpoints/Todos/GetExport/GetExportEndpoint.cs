@@ -28,7 +28,7 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 			.Version(1.0);
 	}
 
-	public async Task<Results<FileContentHttpResult, NoContent>> HandleAsync(CancellationToken ct)
+	public async Task<Results<FileContentHttpResult, NoContent>> Handle(CancellationToken ct)
 	{
 		IEnumerable<Todo> result = await _todoStore.GetAllAsync(ct);
 
