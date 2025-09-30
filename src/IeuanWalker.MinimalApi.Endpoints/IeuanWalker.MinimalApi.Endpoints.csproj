@@ -6,12 +6,30 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<Version>1.0.0</Version>
+		<PackageId>IeuanWalker.MinimalApi.Endpoints</PackageId>
+		<Description>A source generator that brings clean, class-based endpoints to ASP.NET Core Minimal APIs. Inspired by FastEndpoints, but source-generated and designed to be as minimal as possible.</Description>
+		<PackageTags>http;rest;rest-api;web-api;webapi;aspnet;aspnetcore;minimal-api;vertical-slice-architecture;repr-pattern</PackageTags>
+		<Authors>Ieuan Walker</Authors>
+		<PackageProjectUrl>https://github.com/IeuanWalker/MinimalApi.Endpoints</PackageProjectUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/IeuanWalker/MinimalApi.Endpoints</RepositoryUrl>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageIcon>icon.png</PackageIcon>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	</PropertyGroup>
+
 	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<None Include="../../LICENSE" Pack="true" PackagePath="\" />
+		<None Include="../../README.md" Pack="true" PackagePath="\" />
+		<None Include="../../icon.png" Pack="true" PackagePath="\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\MinimalApi.Generator\IeuanWalker.MinimalApi.Endpoints.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -20,4 +38,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="[10.0.0-rc.1.25451.107,)" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<None Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\bin\$(Configuration)\netstandard2.0\IeuanWalker.MinimalApi.Endpoints.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+	</ItemGroup>
 </Project>

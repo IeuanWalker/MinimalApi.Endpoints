@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+env:
+  NET_VERSION: 8.0.100
+  PROJECT_GENERATOR: 'src/IeuanWalker.MinimalApi.Endpoints.Generator/IeuanWalker.MinimalApi.Endpoints.Generator.csproj'
+  PROJECT_LIBRARY: 'src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj'
+  NUGET_PATH: 'D:/a/MinimalApi.Endpoints/MinimalApi.Endpoints/src/IeuanWalker.MinimalApi.Endpoints/bin/Release/IeuanWalker.MinimalApi.Endpoints.${{ github.event.release.tag_name }}.nupkg'
+  
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+  
+    - name: Setup .NET ${{ env.NET_VERSION }}
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: ${{ env.NET_VERSION }}
+
+    - name: Restore dependencies
+      run: |
+        dotnet restore ${{ env.PROJECT_GENERATOR }}
+        dotnet restore ${{ env.PROJECT_LIBRARY }}
+
+    - name: Build
+      run: dotnet build ${{ env.PROJECT_GENERATOR }} -c Release --no-restore
+
+    - name: Build
+      run: dotnet build ${{ env.PROJECT_LIBRARY }} -c Release /p:Version=${{ github.event.release.tag_name }} --no-restore
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: NuGet
+        path: ${{ env.NUGET_PATH }}
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.1.1
+
+    - name: Publish
+      run: nuget push ${{ env.NUGET_PATH }} -Source 'https://api.nuget.org/v3/index.json' -ApiKey ${{secrets.NUGET_API_KEY}}
