@@ -6,7 +6,7 @@ on:
 
 env:
   NET_VERSION: 8.0.100
-  PROJECT_GENTERATOR: 'src/IeuanWalker.MinimalApi.Endpoints.Generator/IeuanWalker.MinimalApi.Endpoints.Generator.csproj'
+  PROJECT_GENERATOR: 'src/IeuanWalker.MinimalApi.Endpoints.Generator/IeuanWalker.MinimalApi.Endpoints.Generator.csproj'
   PROJECT_LIBRARY: 'src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj'
   NUGET_PATH: 'D:/a/MinimalApi.Endpoints/MinimalApi.Endpoints/src/IeuanWalker.MinimalApi.Endpoints/bin/Release/IeuanWalker.MinimalApi.Endpoints.${{ github.event.release.tag_name }}.nupkg'
   
@@ -23,11 +23,11 @@ jobs:
 
     - name: Restore dependencies
       run: |
-        dotnet restore ${{ env.PROJECT_GENTERATOR }}
+        dotnet restore ${{ env.PROJECT_GENERATOR }}
         dotnet restore ${{ env.PROJECT_LIBRARY }}
 
     - name: Build
-      run: dotnet build ${{ env.PROJECT_GENTERATOR }} -c Release --no-restore
+      run: dotnet build ${{ env.PROJECT_GENERATOR }} -c Release --no-restore
 
     - name: Build
       run: dotnet build ${{ env.PROJECT_LIBRARY }} -c Release /p:Version=${{ github.event.release.tag_name }} --no-restore
