@@ -1,6 +1,7 @@
 using ExampleApi.Infrastructure;
 using ExampleApi.Services;
 using ExampleApi;
+using IeuanWalker.MinimalApi.Endpoints;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();
@@ -15,5 +16,6 @@ app.UseHttpsRedirection();
 app.UseApiVersioning();
 app.MapEndpointsFromExampleApi();
 app.UseScalar();
+app.UseDefaultExceptionHandler();
 
 await app.RunAsync();
