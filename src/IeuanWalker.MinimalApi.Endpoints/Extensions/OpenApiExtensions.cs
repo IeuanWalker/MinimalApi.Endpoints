@@ -8,29 +8,41 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 
 public static class OpenApiExtensions
 {
-	public static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null)
+	public static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{
-		builder.WithResponse(null, statusCode, description, contentType);
+		builder.WithResponse(null, statusCode, description, contentType, additionalContentTypes);
 
 		return builder;
 	}
 
-	public static RouteHandlerBuilder WithResponse<T>(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null)
+	public static RouteHandlerBuilder WithResponse<T>(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{
-		builder.WithResponse(typeof(T), statusCode, description, contentType);
+		builder.WithResponse(typeof(T), statusCode, description, contentType, additionalContentTypes);
+
+		builder.Produces(200);
 
 		return builder;
 	}
 
-	static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, Type? type, int statusCode, string description, string? contentType = null)
+	static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, Type? responseType, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{
+		if (responseType is not null && string.IsNullOrEmpty(contentType))
+		{
+			contentType = "application/json";
+		}
+
+
 		if (contentType is null)
 		{
-			builder.WithMetadata(new ProducesResponseTypeMetadata(statusCode, type ?? typeof(void)));
+			builder.WithMetadata(new ProducesResponseTypeMetadata(statusCode, responseType ?? typeof(void)));
 		}
 		else
 		{
-			builder.WithMetadata(new ProducesResponseTypeMetadata(statusCode, type ?? typeof(void), [contentType]));
+			string[] contentTypes = new string[additionalContentTypes.Length + 1];
+			contentTypes[0] = contentType;
+			additionalContentTypes.CopyTo(contentTypes, 1);
+
+			builder.WithMetadata(new ProducesResponseTypeMetadata(statusCode, responseType ?? typeof(void), contentTypes));
 		}
 
 		builder.AddOpenApiOperationTransformer((operation, _, _) =>
