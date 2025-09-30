@@ -1,7 +1,6 @@
 name: Build
 
 on:
-  workflow_dispatch:
   push:
     branches: [ "master" ]
   pull_request:
@@ -25,7 +24,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.NET_VERSION }}
-        include-prerelease: true
 
     - name: Restore dependencies
       run: dotnet restore
