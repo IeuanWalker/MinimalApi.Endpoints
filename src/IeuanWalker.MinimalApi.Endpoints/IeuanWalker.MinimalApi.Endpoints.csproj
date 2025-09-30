@@ -34,11 +34,23 @@
 
 	<ItemGroup>
 		<PackageReference Include="FluentValidation" Version="[12.0.0,)" />
-		<PackageReference Include="MiniValidation" Version="[0.9.2,)" />
 		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="[10.0.0-rc.1.25451.107,)" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\bin\$(Configuration)\netstandard2.0\IeuanWalker.MinimalApi.Endpoints.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+		<ProjectReference Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\IeuanWalker.MinimalApi.Endpoints.Generator.csproj"
+						  PrivateAssets="all"
+						  IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Analyzer Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\bin\$(Configuration)\netstandard2.0\IeuanWalker.MinimalApi.Endpoints.Generator.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\bin\$(Configuration)\netstandard2.0\IeuanWalker.MinimalApi.Endpoints.Generator.dll"
+			  Pack="true"
+			  PackagePath="analyzers/dotnet/cs"
+			  Visible="false" />
 	</ItemGroup>
 </Project>
