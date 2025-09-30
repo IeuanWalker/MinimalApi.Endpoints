@@ -4,9 +4,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 
-namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
+namespace IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 
-static class SourceGeneratorHelpers
+static class SourceGeneratorExtensions
 {
 	internal static TypeDeclarationSyntax? ToTypeDeclarationSyntax(this INamedTypeSymbol symbol, ImmutableArray<TypeDeclarationSyntax?> allTypeDeclarations, Compilation compilation)
 	{

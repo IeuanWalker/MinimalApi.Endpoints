@@ -1,6 +1,6 @@
 using System.CodeDom.Compiler;
 
-namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
+namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 
 sealed class IndentedTextBuilder : IDisposable
 {

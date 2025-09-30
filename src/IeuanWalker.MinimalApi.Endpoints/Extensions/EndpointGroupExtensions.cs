@@ -1,13 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
-
-public interface IEndpointGroup
-{
-	static abstract RouteGroupBuilder Configure(WebApplication app);
-}
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 public static class EndpointGroupExtensions
 {

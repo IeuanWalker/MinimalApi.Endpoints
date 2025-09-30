@@ -8,8 +8,6 @@
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
-    <File Path=".github/workflows/build.yml" />
-    <File Path=".github/workflows/release.yml" />
     <File Path="README.md" />
   </Folder>
 </Solution>
