@@ -22,7 +22,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: ${{ env.NET_VERSION }}
-        include-prerelease: true
 
     - name: Restore dependencies
       run: |
