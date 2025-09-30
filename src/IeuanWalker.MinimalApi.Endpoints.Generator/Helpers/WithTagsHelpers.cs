@@ -1,10 +1,11 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
-static class WithTagsHelper
+static class WithTagsHelpers
 {
 	public static string? GetTags(this TypeDeclarationSyntax typeDeclaration)
 	{

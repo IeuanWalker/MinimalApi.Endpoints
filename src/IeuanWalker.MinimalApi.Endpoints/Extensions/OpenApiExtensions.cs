@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 public static class OpenApiExtensions
 {

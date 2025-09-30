@@ -38,9 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\IeuanWalker.MinimalApi.Endpoints.Generator.csproj"
-						  PrivateAssets="all"
-						  IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+		<ProjectReference Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\IeuanWalker.MinimalApi.Endpoints.Generator.csproj" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -48,9 +46,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\bin\$(Configuration)\netstandard2.0\IeuanWalker.MinimalApi.Endpoints.Generator.dll"
-			  Pack="true"
-			  PackagePath="analyzers/dotnet/cs"
-			  Visible="false" />
+		<None Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\bin\$(Configuration)\netstandard2.0\IeuanWalker.MinimalApi.Endpoints.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
 </Project>

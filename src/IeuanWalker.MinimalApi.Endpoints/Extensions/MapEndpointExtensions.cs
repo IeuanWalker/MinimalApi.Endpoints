@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Builder;
 
+#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 [SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "<Pending>")]

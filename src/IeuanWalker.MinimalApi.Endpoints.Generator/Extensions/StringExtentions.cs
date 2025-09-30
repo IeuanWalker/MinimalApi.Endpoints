@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
+namespace IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 
 static class Extensions
 {

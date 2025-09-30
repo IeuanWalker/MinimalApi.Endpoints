@@ -2,7 +2,7 @@
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Http;
 
-namespace IeuanWalker.MinimalApi.Endpoints;
+namespace IeuanWalker.MinimalApi.Endpoints.Filters;
 
 public class FluentValidationFilter<T> : IEndpointFilter where T : class
 {

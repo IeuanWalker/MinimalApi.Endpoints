@@ -1,5 +1,6 @@
 ﻿using System.Collections.Immutable;
 using System.Text;
+using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -209,7 +210,7 @@ public class EndpointGenerator : IIncrementalGenerator
 
 		if (endpointClasses.Any(x => x.FluentValidationClass is not null))
 		{
-			builder.AppendLine("using IeuanWalker.MinimalApi.Endpoints;");
+			builder.AppendLine("using IeuanWalker.MinimalApi.Endpoints.Filters;");
 			builder.AppendLine("using FluentValidation;");
 		}
 

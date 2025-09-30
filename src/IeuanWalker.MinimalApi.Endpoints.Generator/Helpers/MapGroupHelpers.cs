@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
-static class MapGroupHelper
+static class MapGroupHelpers
 {
 	static readonly DiagnosticDescriptor noMapGroupDescriptor = new(
 		id: "MINAPI003",
