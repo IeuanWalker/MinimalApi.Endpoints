@@ -7,7 +7,7 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 /// <summary>
 /// inherit from this base class to define your dto validators
 /// <para>
-/// HINT: validators are registered as singletons. i.e. the same validator instance is used to validate each request for best performance. hence,
+/// HINT: Validators are registered as singletons. I.e. the same validator instance is used to validate each request for best performance. Hence,
 /// do not maintain state in your validators.
 /// </para>
 /// </summary>
