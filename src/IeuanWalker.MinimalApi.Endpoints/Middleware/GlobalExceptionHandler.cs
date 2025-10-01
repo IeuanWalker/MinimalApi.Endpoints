@@ -11,7 +11,7 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 
 public static class GlobalExceptionHandlerExtensions
 {
-	public static IApplicationBuilder UseDefaultExceptionHandler(this IApplicationBuilder app)
+	public static IApplicationBuilder UseDefaultGlobalExceptionHandler(this IApplicationBuilder app)
 	{
 		app.UseExceptionHandler(exceptionHandlerApp =>
 		{

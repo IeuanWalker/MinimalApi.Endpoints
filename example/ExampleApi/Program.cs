@@ -16,6 +16,6 @@ app.UseHttpsRedirection();
 app.UseApiVersioning();
 app.MapEndpointsFromExampleApi();
 app.UseScalar();
-app.UseDefaultExceptionHandler();
+app.UseDefaultGlobalExceptionHandler();
 
 await app.RunAsync();
