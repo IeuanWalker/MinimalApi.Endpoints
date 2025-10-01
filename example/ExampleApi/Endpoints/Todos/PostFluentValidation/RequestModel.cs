@@ -50,6 +50,7 @@ sealed class ConfirmationEmailSettingsValidator : Validator<RequestModel>
 
 	}
 }
+
 sealed class NestedObjectModelValidator : Validator<NestedObjectModel>
 {
 	public NestedObjectModelValidator()
