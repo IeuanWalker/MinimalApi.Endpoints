@@ -163,7 +163,7 @@ public class EndpointGenerator : IIncrementalGenerator
 						withName,
 						withTags,
 						interfaceType.TypeArguments[0],
-						typeDeclaration.GetRequestTypeAndName(),
+						typeDeclaration.GetRequestTypeAndName(context),
 						typeDeclaration.Validate(compilation, interfaceType.TypeArguments[0]),
 						interfaceType.TypeArguments[1]));
 				}
@@ -195,7 +195,7 @@ public class EndpointGenerator : IIncrementalGenerator
 						withName,
 						withTags,
 						interfaceType.TypeArguments[0],
-						typeDeclaration.GetRequestTypeAndName(),
+						typeDeclaration.GetRequestTypeAndName(context),
 						typeDeclaration.Validate(compilation, interfaceType.TypeArguments[0]),
 						null));
 				}

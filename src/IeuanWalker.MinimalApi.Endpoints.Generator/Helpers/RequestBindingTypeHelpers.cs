@@ -6,7 +6,15 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
 static class RequestBindingTypeHelpers
 {
-	public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration)
+	static readonly DiagnosticDescriptor multipleRequestTypeMethodsDescriptor = new(
+		id: "MINAPI007",
+		title: "Multiple request type methods configured",
+		messageFormat: "Type '{0}' has multiple request type methods configured in the Configure method. Only one request type method should be specified per endpoint.",
+		category: "Request type",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration, SourceProductionContext context)
 	{
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
@@ -24,7 +32,20 @@ static class RequestBindingTypeHelpers
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
 				   requestTypeMethods.Contains(memberAccess.Name.Identifier.ValueText));
 
-		InvocationExpressionSyntax? firstRequestTypeCall = requestTypeCalls.FirstOrDefault();
+		List<InvocationExpressionSyntax> requestTypeCallsList = [.. requestTypeCalls];
+
+		// Validate that there's only one request type method call
+		if (requestTypeCallsList.Count > 1)
+		{
+			// Multiple request type methods found
+			context.ReportDiagnostic(Diagnostic.Create(
+				multipleRequestTypeMethodsDescriptor,
+				configureMethod.Identifier.GetLocation(),
+				typeDeclaration.Identifier.ValueText));
+			return null;
+		}
+
+		InvocationExpressionSyntax? firstRequestTypeCall = requestTypeCallsList.FirstOrDefault();
 		if (firstRequestTypeCall?.Expression is MemberAccessExpressionSyntax requestTypeMemberAccess)
 		{
 			RequestBindingTypeEnum? requestType = ConvertToRequestBindingType(requestTypeMemberAccess.Name.Identifier.ValueText);
