@@ -274,7 +274,7 @@ public class EndpointGenerator : IIncrementalGenerator
 
 				if (validators.Any())
 				{
-					builder.AppendLine("// Validators not directly releted to an endpoints request model");
+					builder.AppendLine("// Validators not directly related to an endpoints request model");
 					foreach ((INamedTypeSymbol validator, ITypeSymbol model) in validators)
 					{
 						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{model}>, global::{validator}>();");
