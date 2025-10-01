@@ -104,7 +104,7 @@ static class ValidationHelpers
 			foreach (TypeDeclarationSyntax typeDeclaration in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
 			{
 				INamedTypeSymbol? typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration) as INamedTypeSymbol;
-				if (typeSymbol is not null && InheritsFromValidatorBase(typeSymbol, validatorOfRequest))
+				if (typeSymbol is not null && typeSymbol.InheritsFromValidatorBase(validatorOfRequest))
 				{
 					return typeSymbol;
 				}
@@ -120,12 +120,18 @@ static class ValidationHelpers
 	/// <param name="typeSymbol">The type symbol to check</param>
 	/// <param name="validatorBaseClass">The validator base class to check for</param>
 	/// <returns>True if the type inherits from the base class, false otherwise</returns>
-	static bool InheritsFromValidatorBase(INamedTypeSymbol typeSymbol, INamedTypeSymbol validatorBaseClass)
+	public static bool InheritsFromValidatorBase(this INamedTypeSymbol typeSymbol, INamedTypeSymbol validatorBaseClass)
 	{
 		// Check the inheritance chain
 		INamedTypeSymbol? current = typeSymbol.BaseType;
 		while (current is not null)
 		{
+			// Check if the current type is a generic type and its original definition matches the validator base class
+			if (current.IsGenericType && SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseClass))
+			{
+				return true;
+			}
+			// Also check for exact match (non-generic case)
 			if (SymbolEqualityComparer.Default.Equals(current, validatorBaseClass))
 			{
 				return true;
@@ -134,5 +140,24 @@ static class ValidationHelpers
 		}
 
 		return false;
+	}
+
+	public static ITypeSymbol? GetValidatedTypeFromValidator(this INamedTypeSymbol validatorTypeSymbol, INamedTypeSymbol validatorBaseSymbol)
+	{
+		// Walk up the inheritance chain to find the Validator<T> base class
+		INamedTypeSymbol? current = validatorTypeSymbol.BaseType;
+		while (current != null)
+		{
+			// Check if this is the Validator<T> base class
+			if (current.IsGenericType &&
+				SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseSymbol))
+			{
+				// Return the first type argument (the T in Validator<T>)
+				return current.TypeArguments.Length > 0 ? current.TypeArguments[0] : null;
+			}
+			current = current.BaseType;
+		}
+
+		return null;
 	}
 }
