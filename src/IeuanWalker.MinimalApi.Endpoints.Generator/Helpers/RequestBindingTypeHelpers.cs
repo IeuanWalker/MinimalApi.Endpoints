@@ -32,13 +32,11 @@ static class RequestBindingTypeHelpers
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
 				   requestTypeMethods.Contains(memberAccess.Name.Identifier.ValueText));
 
-		List<InvocationExpressionSyntax> requestTypeCallsList = [.. requestTypeCalls];
-
 		// Validate that there's only one request type method call
-		if (requestTypeCallsList.Count > 1)
+		if (requestTypeCalls.Count() > 1)
 		{
 			// Report error on each request type method call
-			foreach (InvocationExpressionSyntax requestTypeCall in requestTypeCallsList)
+			foreach (InvocationExpressionSyntax requestTypeCall in requestTypeCalls)
 			{
 				if (requestTypeCall.Expression is MemberAccessExpressionSyntax memberAccess)
 				{
@@ -51,7 +49,7 @@ static class RequestBindingTypeHelpers
 			return null;
 		}
 
-		InvocationExpressionSyntax? firstRequestTypeCall = requestTypeCallsList.FirstOrDefault();
+		InvocationExpressionSyntax? firstRequestTypeCall = requestTypeCalls.FirstOrDefault();
 		if (firstRequestTypeCall?.Expression is MemberAccessExpressionSyntax requestTypeMemberAccess)
 		{
 			RequestBindingTypeEnum? requestType = ConvertToRequestBindingType(requestTypeMemberAccess.Name.Identifier.ValueText);
