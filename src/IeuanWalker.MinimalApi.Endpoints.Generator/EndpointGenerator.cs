@@ -217,7 +217,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			if (group.Count() > 1)
 			{
 				// Report error on each duplicate validator
-				foreach ((INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration) in group)
+				foreach ((INamedTypeSymbol _, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration) in group)
 				{
 					context.ReportDiagnostic(Diagnostic.Create(
 						duplicateValidatorsDescriptor,
@@ -228,7 +228,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			else
 			{
 				// Only one validator for this model type, add it to the valid validators list
-				(INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration) = group.First();
+				(INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax _) = group.First();
 				validators.Add((validator, model));
 			}
 		}
