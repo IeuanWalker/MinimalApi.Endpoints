@@ -12,6 +12,7 @@ builder.AddScalar();
 
 WebApplication app = builder.Build();
 app.UseHttpsRedirection();
+app.UseExceptionHandler();
 app.UseApiVersioning();
 app.MapEndpointsFromExampleApi();
 app.UseScalar();
