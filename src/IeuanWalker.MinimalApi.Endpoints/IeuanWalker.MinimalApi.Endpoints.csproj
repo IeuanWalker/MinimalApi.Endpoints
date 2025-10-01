@@ -48,8 +48,4 @@
 	<ItemGroup>
 		<None Include="..\IeuanWalker.MinimalApi.Endpoints.Generator\bin\$(Configuration)\netstandard2.0\IeuanWalker.MinimalApi.Endpoints.Generator.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="GlobalExceptionHandler\" />
-	</ItemGroup>
 </Project>
