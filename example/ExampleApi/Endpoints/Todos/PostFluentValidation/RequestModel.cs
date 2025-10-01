@@ -1,4 +1,5 @@
 using FluentValidation;
+using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Todos.PostFluentValidation;
 
@@ -12,7 +13,7 @@ public class RequestModel
 	public bool IsTest { get; set; }
 }
 
-sealed class ConfirmationEmailSettingsValidator : AbstractValidator<RequestModel>
+sealed class ConfirmationEmailSettingsValidator : Validator<RequestModel>
 {
 	public ConfirmationEmailSettingsValidator()
 	{

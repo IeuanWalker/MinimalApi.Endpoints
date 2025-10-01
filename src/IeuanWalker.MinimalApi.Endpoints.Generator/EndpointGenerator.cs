@@ -229,7 +229,7 @@ public class EndpointGenerator : IIncrementalGenerator
 				{
 					if (endpoint.FluentValidationClass is not null)
 					{
-						builder.AppendLine($"builder.Services.AddScoped<IValidator<global::{endpoint.RequestType}>, global::{endpoint.FluentValidationClass}>();");
+						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{endpoint.RequestType}>, global::{endpoint.FluentValidationClass}>();");
 					}
 					builder.AppendLine($"builder.Services.AddScoped<global::{endpoint.ClassName}>();");
 				}
