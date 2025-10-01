@@ -12,6 +12,15 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 [Generator]
 public class EndpointGenerator : IIncrementalGenerator
 {
+	static readonly DiagnosticDescriptor duplicateValidatorsDescriptor = new(
+		id: "MINAPI006",
+		title: "Duplicate Validator",
+		messageFormat: "Multiple validators found for the model type '{0}'. Only one validator per model type is allowed.",
+		category: "Validation",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	const string validator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
 	const string fullIEndpointGroup = "IeuanWalker.MinimalApi.Endpoints.IEndpointGroup";
 	const string fullIEndpointBase = "IeuanWalker.MinimalApi.Endpoints.IEndpointBase";
 	const string fullIEndpointWithRequestAndResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint`2";
@@ -45,8 +54,10 @@ public class EndpointGenerator : IIncrementalGenerator
 		assemblyName = compilation.Assembly.Name.Trim();
 
 		List<EndpointInfo> endpointClasses = [];
+		List<(INamedTypeSymbol validator, ITypeSymbol model)> validators = [];
 
 		// Get the endpoint interface symbols to check against
+		INamedTypeSymbol validatorSymbol = compilation.GetTypeByMetadataName(validator)!;
 		INamedTypeSymbol endpointGroupSymbol = compilation.GetTypeByMetadataName(fullIEndpointGroup)!;
 		INamedTypeSymbol endpointBaseSymbol = compilation.GetTypeByMetadataName(fullIEndpointBase)!;
 		INamedTypeSymbol endpointWithRequestAndResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithRequestAndResponse)!;
@@ -71,6 +82,30 @@ public class EndpointGenerator : IIncrementalGenerator
 
 			if (typeSymbol is null || typeSymbol.IsAbstract)
 			{
+				continue;
+			}
+
+			bool implementsValidator = typeSymbol.InheritsFromValidatorBase(validatorSymbol);
+
+			if (implementsValidator)
+			{
+				ITypeSymbol? validatedType = typeSymbol.GetValidatedTypeFromValidator(validatorSymbol);
+				if (validatedType is not null)
+				{
+					if (validators.Any(x => x.model.ToDisplayString().Equals(validatedType.ToDisplayString())))
+					{
+						// Duplicate validator for the same model type found - skip to avoid ambiguity
+						context.ReportDiagnostic(Diagnostic.Create(
+							duplicateValidatorsDescriptor,
+							typeDeclaration.GetLocation(),
+							validatedType.ToDisplayString()));
+
+						continue;
+					}
+
+					validators.Add((typeSymbol, validatedType));
+				}
+
 				continue;
 			}
 
@@ -188,11 +223,11 @@ public class EndpointGenerator : IIncrementalGenerator
 			return;
 		}
 
-		string source = GenerateEndpointExtensions(endpointClasses);
+		string source = GenerateEndpointExtensions(endpointClasses, validators);
 		context.AddSource("EndpointExtensions.g.cs", SourceText.From(source, Encoding.UTF8));
 	}
 
-	static string GenerateEndpointExtensions(List<EndpointInfo> endpointClasses)
+	static string GenerateEndpointExtensions(List<EndpointInfo> endpointClasses, List<(INamedTypeSymbol validator, ITypeSymbol model)> validators)
 	{
 		endpointClasses = [.. endpointClasses.OrderBy(x => x.ClassName)];
 
@@ -229,11 +264,24 @@ public class EndpointGenerator : IIncrementalGenerator
 				{
 					if (endpoint.FluentValidationClass is not null)
 					{
-						builder.AppendLine($"builder.Services.AddScoped<IValidator<global::{endpoint.RequestType}>, global::{endpoint.FluentValidationClass}>();");
+						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{endpoint.RequestType}>, global::{endpoint.FluentValidationClass}>();");
+
+						validators.RemoveAll(x => x.model.ToDisplayString().Equals(endpoint.RequestType!.ToDisplayString()));
 					}
 					builder.AppendLine($"builder.Services.AddScoped<global::{endpoint.ClassName}>();");
 				}
 				builder.AppendLine();
+
+				if (validators.Any())
+				{
+					builder.AppendLine("// Validators not directly related to an endpoints request model");
+					foreach ((INamedTypeSymbol validator, ITypeSymbol model) in validators)
+					{
+						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{model}>, global::{validator}>();");
+					}
+					builder.AppendLine();
+				}
+
 				builder.AppendLine("return builder;");
 			}
 

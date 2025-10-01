@@ -6,7 +6,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
 static class ValidationHelpers
 {
-	const string fluentValidationInterface = "FluentValidation.IValidator`1";
+	const string validator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
 
 	/// <summary>
 	/// Validates whether the specified type declaration requires validation.
@@ -67,10 +67,10 @@ static class ValidationHelpers
 			return null;
 		}
 
-		// Get the IValidator`1 interface symbol to check against
-		INamedTypeSymbol? iValidatorBase = compilation.GetTypeByMetadataName(fluentValidationInterface);
+		// Get the Validator`1 base class symbol to check against
+		INamedTypeSymbol? validatorBase = compilation.GetTypeByMetadataName(validator);
 
-		if (iValidatorBase is null)
+		if (validatorBase is null)
 		{
 			return null;
 		}
@@ -81,19 +81,19 @@ static class ValidationHelpers
 			return null;
 		}
 
-		// Construct the specific IValidator<TRequest> type
-		INamedTypeSymbol iValidatorOfRequest = iValidatorBase.Construct(requestTypeSymbol);
+		// Construct the specific Validator<TRequest> type
+		INamedTypeSymbol validatorOfRequest = validatorBase.Construct(requestTypeSymbol);
 
-		return FindValidatorInSourceTrees(compilation, iValidatorOfRequest);
+		return FindValidatorInSourceTrees(compilation, validatorOfRequest);
 	}
 
 	/// <summary>
 	/// Searches for validator implementations in the source trees.
 	/// </summary>
 	/// <param name="compilation">The compilation context</param>
-	/// <param name="iValidatorOfRequest">The specific validator interface to search for</param>
+	/// <param name="validatorOfRequest">The specific validator base class to search for</param>
 	/// <returns>The validator class name if found, null otherwise</returns>
-	static INamedTypeSymbol? FindValidatorInSourceTrees(Compilation compilation, INamedTypeSymbol iValidatorOfRequest)
+	static INamedTypeSymbol? FindValidatorInSourceTrees(Compilation compilation, INamedTypeSymbol validatorOfRequest)
 	{
 		// Only search in source trees (user's code), not all referenced assemblies
 		foreach (SyntaxTree syntaxTree in compilation.SyntaxTrees)
@@ -104,7 +104,7 @@ static class ValidationHelpers
 			foreach (TypeDeclarationSyntax typeDeclaration in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
 			{
 				INamedTypeSymbol? typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration) as INamedTypeSymbol;
-				if (typeSymbol is not null && ImplementsValidatorInterface(typeSymbol, iValidatorOfRequest))
+				if (typeSymbol is not null && typeSymbol.InheritsFromValidatorBase(validatorOfRequest))
 				{
 					return typeSymbol;
 				}
@@ -115,13 +115,49 @@ static class ValidationHelpers
 	}
 
 	/// <summary>
-	/// Checks if the type symbol implements the specified validator interface.
+	/// Checks if the type symbol inherits from the specified validator base class.
 	/// </summary>
 	/// <param name="typeSymbol">The type symbol to check</param>
-	/// <param name="validatorInterface">The validator interface to check for</param>
-	/// <returns>True if the type implements the interface, false otherwise</returns>
-	static bool ImplementsValidatorInterface(INamedTypeSymbol typeSymbol, INamedTypeSymbol validatorInterface)
+	/// <param name="validatorBaseClass">The validator base class to check for</param>
+	/// <returns>True if the type inherits from the base class, false otherwise</returns>
+	public static bool InheritsFromValidatorBase(this INamedTypeSymbol typeSymbol, INamedTypeSymbol validatorBaseClass)
 	{
-		return typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, validatorInterface));
+		// Check the inheritance chain
+		INamedTypeSymbol? current = typeSymbol.BaseType;
+		while (current is not null)
+		{
+			// Check if the current type is a generic type and its original definition matches the validator base class
+			if (current.IsGenericType && SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseClass))
+			{
+				return true;
+			}
+			// Also check for exact match (non-generic case)
+			if (SymbolEqualityComparer.Default.Equals(current, validatorBaseClass))
+			{
+				return true;
+			}
+			current = current.BaseType;
+		}
+
+		return false;
+	}
+
+	public static ITypeSymbol? GetValidatedTypeFromValidator(this INamedTypeSymbol validatorTypeSymbol, INamedTypeSymbol validatorBaseSymbol)
+	{
+		// Walk up the inheritance chain to find the Validator<T> base class
+		INamedTypeSymbol? current = validatorTypeSymbol.BaseType;
+		while (current != null)
+		{
+			// Check if this is the Validator<T> base class
+			if (current.IsGenericType &&
+				SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseSymbol))
+			{
+				// Return the first type argument (the T in Validator<T>)
+				return current.TypeArguments.Length > 0 ? current.TypeArguments[0] : null;
+			}
+			current = current.BaseType;
+		}
+
+		return null;
 	}
 }
