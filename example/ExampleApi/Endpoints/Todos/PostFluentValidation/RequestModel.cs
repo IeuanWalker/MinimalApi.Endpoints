@@ -50,17 +50,6 @@ sealed class ConfirmationEmailSettingsValidator : Validator<RequestModel>
 
 	}
 }
-sealed class NestedObject2Model1Validator : Validator<NestedObject2Model>
-{
-	public NestedObject2Model1Validator()
-	{
-		RuleFor(x => x.Note)
-			.NotEmpty()
-			.MinimumLength(1)
-			.MaximumLength(200);
-	}
-}
-
 
 sealed class NestedObjectModelValidator : Validator<NestedObjectModel>
 {

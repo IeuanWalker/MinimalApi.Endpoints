@@ -70,7 +70,6 @@ public class EndpointGenerator : IIncrementalGenerator
 			return;
 		}
 
-		// First pass: collect all validators and endpoints
 		foreach (TypeDeclarationSyntax? typeDeclaration in types)
 		{
 			if (typeDeclaration is null)
@@ -208,7 +207,6 @@ public class EndpointGenerator : IIncrementalGenerator
 			}
 		}
 
-		// Second pass: identify and report duplicate validators
 		IEnumerable<IGrouping<string, (INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration)>> validatorGroups = allValidators
 			.GroupBy(v => v.model.ToDisplayString());
 
