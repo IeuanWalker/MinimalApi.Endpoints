@@ -9,7 +9,7 @@ static class RequestBindingTypeHelpers
 	static readonly DiagnosticDescriptor multipleRequestTypeMethodsDescriptor = new(
 		id: "MINAPI007",
 		title: "Multiple request type methods configured",
-		messageFormat: "Type '{0}' has multiple request type methods configured in the Configure method. Only one request type method should be specified per endpoint.",
+		messageFormat: "Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.",
 		category: "Request type",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
@@ -37,11 +37,17 @@ static class RequestBindingTypeHelpers
 		// Validate that there's only one request type method call
 		if (requestTypeCallsList.Count > 1)
 		{
-			// Multiple request type methods found
-			context.ReportDiagnostic(Diagnostic.Create(
-				multipleRequestTypeMethodsDescriptor,
-				configureMethod.Identifier.GetLocation(),
-				typeDeclaration.Identifier.ValueText));
+			// Report error on each request type method call
+			foreach (InvocationExpressionSyntax requestTypeCall in requestTypeCallsList)
+			{
+				if (requestTypeCall.Expression is MemberAccessExpressionSyntax memberAccess)
+				{
+					context.ReportDiagnostic(Diagnostic.Create(
+						multipleRequestTypeMethodsDescriptor,
+						requestTypeCall.GetLocation(),
+						memberAccess.Name.Identifier.ValueText));
+				}
+			}
 			return null;
 		}
 
