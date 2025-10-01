@@ -14,6 +14,7 @@ public class GetTestEndpoint : IEndpoint
 
 	public async Task Handle(CancellationToken ct)
 	{
+		await Task.Delay(1, ct);
 		throw new NotImplementedException();
 	}
 }
