@@ -10,13 +10,12 @@ builder.AddApiVersioning();
 builder.AddEndpointsFromExampleApi();
 builder.Services.AddSingleton<ITodoStore, InMemoryTodoStore>();
 builder.AddScalar();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 WebApplication app = builder.Build();
 app.UseHttpsRedirection();
 app.UseApiVersioning();
 app.MapEndpointsFromExampleApi();
 app.UseScalar();
-app.UseExceptionHandler();
+app.UseDefaultExceptionHandler();
 
 await app.RunAsync();

@@ -1,41 +1,46 @@
-﻿using Microsoft.AspNetCore.Diagnostics;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
-public class GlobalExceptionHandler : IExceptionHandler
+public static class GlobalExceptionHandlerExtensions
 {
-	readonly IProblemDetailsService _problemDetailsService;
-	readonly IHostEnvironment _hostEnvironment;
-
-	public GlobalExceptionHandler(IProblemDetailsService problemDetailsService, IHostEnvironment hostEnvironment)
+	public static IApplicationBuilder UseDefaultExceptionHandler(this IApplicationBuilder app)
 	{
-		_problemDetailsService = problemDetailsService;
-		_hostEnvironment = hostEnvironment;
-	}
-
-	public async ValueTask<bool> TryHandleAsync(
-		HttpContext httpContext,
-		Exception exception,
-		CancellationToken cancellationToken)
-	{
-		ProblemDetails problemDetails = new()
+		app.UseExceptionHandler(exceptionHandlerApp =>
 		{
-			Status = StatusCodes.Status500InternalServerError,
-			Title = "Internal Server Error!",
-			Type = _hostEnvironment.IsProduction() ? string.Empty : exception.GetType().Name,
-			Detail = _hostEnvironment.IsProduction() ? "An unexpected error has occurred." : exception.Message
-		};
+			exceptionHandlerApp.Run(async httpContext =>
+			{
+				IExceptionHandlerFeature? exHandlerFeature = httpContext.Features.Get<IExceptionHandlerFeature>();
+				IProblemDetailsService? problemDetailsService = httpContext.RequestServices.GetService<IProblemDetailsService>();
+				IHostEnvironment? hostEnvironment = httpContext.RequestServices.GetService<IHostEnvironment>();
 
-		return await _problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-		{
-			Exception = exception,
-			HttpContext = httpContext,
-			ProblemDetails = problemDetails
+				if (exHandlerFeature is not null && problemDetailsService is not null)
+				{
+					ProblemDetails problemDetails = new()
+					{
+						Status = StatusCodes.Status500InternalServerError,
+						Title = "Internal Server Error!",
+						Type = hostEnvironment?.IsProduction() ?? true ? string.Empty : exHandlerFeature.Error.GetType().Name,
+						Detail = hostEnvironment?.IsProduction() ?? true ? "An unexpected error has occurred." : exHandlerFeature.Error.Message
+					};
+
+					await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
+					{
+						Exception = exHandlerFeature.Error,
+						HttpContext = httpContext,
+						ProblemDetails = problemDetails
+					});
+				}
+			});
 		});
+
+		return app;
 	}
 }
