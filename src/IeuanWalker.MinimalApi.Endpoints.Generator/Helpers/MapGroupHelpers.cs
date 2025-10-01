@@ -17,7 +17,7 @@ static class MapGroupHelpers
 	static readonly DiagnosticDescriptor multipleMapGroupsDescriptor = new(
 		id: "MINAPI004",
 		title: "Multiple MapGroup calls configured",
-		messageFormat: "Endpoint group '{0}' has multiple MapGroup calls configured in the Configure method. Only one MapGroup call should be specified per endpoint group.",
+		messageFormat: "Multiple MapGroup calls are configured in the Configure method. Only one MapGroup call should be specified per endpoint group. Remove this 'MapGroup' call or the other conflicting MapGroup calls.",
 		category: "MinimalApiEndpoints",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
@@ -25,7 +25,7 @@ static class MapGroupHelpers
 	static readonly DiagnosticDescriptor multipleGroupCallsDescriptor = new(
 		id: "MINAPI005",
 		title: "Multiple Group calls configured",
-		messageFormat: "Type '{0}' has multiple Group calls configured in the Configure method. Only one Group call should be specified per endpoint.",
+		messageFormat: "Multiple Group calls are configured in the Configure method. Only one Group call should be specified per endpoint. Remove this 'Group' call or the other conflicting Group calls.",
 		category: "MinimalApiEndpoints",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
@@ -52,11 +52,13 @@ static class MapGroupHelpers
 		// Validate that there's only one Group call
 		if (groupCallsList.Count > 1)
 		{
-			// Multiple Group calls found
-			context.ReportDiagnostic(Diagnostic.Create(
-				multipleGroupCallsDescriptor,
-				configureMethod.Identifier.GetLocation(),
-				typeDeclaration.Identifier.ValueText));
+			// Report error on each Group method call
+			foreach (InvocationExpressionSyntax groupCall in groupCallsList)
+			{
+				context.ReportDiagnostic(Diagnostic.Create(
+					multipleGroupCallsDescriptor,
+					groupCall.GetLocation()));
+			}
 			return null;
 		}
 
@@ -134,11 +136,13 @@ static class MapGroupHelpers
 
 					if (mapGroupCallsList.Count > 1)
 					{
-						// Multiple MapGroup calls found
-						context.ReportDiagnostic(Diagnostic.Create(
-							multipleMapGroupsDescriptor,
-							configureMethod.Identifier.GetLocation(),
-							endpointGroupSymbol.Name));
+						// Report error on each MapGroup method call
+						foreach (InvocationExpressionSyntax mapGroupCall in mapGroupCallsList)
+						{
+							context.ReportDiagnostic(Diagnostic.Create(
+								multipleMapGroupsDescriptor,
+								mapGroupCall.GetLocation()));
+						}
 						return null;
 					}
 

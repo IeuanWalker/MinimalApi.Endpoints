@@ -17,7 +17,7 @@ static class HttpVerbRouteHelpers
 	static readonly DiagnosticDescriptor multipleHttpVerbsDescriptor = new(
 		id: "MINAPI002",
 		title: "Multiple HTTP verbs configured",
-		messageFormat: "Type '{0}' has multiple HTTP verbs configured in the Configure method. Only one HTTP verb should be specified per endpoint.",
+		messageFormat: "Multiple HTTP verbs are configured in the Configure method. Only one HTTP verb should be specified per endpoint. Remove this '{0}' call or the other conflicting HTTP verb calls.",
 		category: "MinimalApiEndpoints",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
@@ -58,11 +58,17 @@ static class HttpVerbRouteHelpers
 
 		if (httpVerbCallsList.Count > 1)
 		{
-			// Multiple HTTP verbs found - report on Configure method
-			context.ReportDiagnostic(Diagnostic.Create(
-				multipleHttpVerbsDescriptor,
-				configureMethod.Identifier.GetLocation(),
-				typeDeclaration.Identifier.ValueText));
+			// Report error on each HTTP verb method call
+			foreach (InvocationExpressionSyntax httpVerbCall in httpVerbCallsList)
+			{
+				if (httpVerbCall.Expression is MemberAccessExpressionSyntax memberAccess)
+				{
+					context.ReportDiagnostic(Diagnostic.Create(
+						multipleHttpVerbsDescriptor,
+						httpVerbCall.GetLocation(),
+						memberAccess.Name.Identifier.ValueText));
+				}
+			}
 			return null;
 		}
 

@@ -19,7 +19,6 @@ public class DeleteTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 			.Group<TodoEndpointGroup>()
 			.Delete("/{id:int}")
 			.RequestAsParameters()
-			.RequestFromBody()
 			.WithSummary("Delete a todo")
 			.WithDescription("Deletes an existing todo item")
 			.Version(1.0);

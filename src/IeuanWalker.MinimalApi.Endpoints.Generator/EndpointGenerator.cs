@@ -15,12 +15,12 @@ public class EndpointGenerator : IIncrementalGenerator
 	static readonly DiagnosticDescriptor duplicateValidatorsDescriptor = new(
 		id: "MINAPI006",
 		title: "Duplicate Validator",
-		messageFormat: "Multiple validators found for the model type '{0}'. Only one validator per model type is allowed.",
+		messageFormat: "Multiple validators found for the model type '{0}'. Only one validator per model type is allowed. Remove this validator or the other conflicting validators for the same model type.",
 		category: "Validation",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	const string validator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
+	const string fullValidator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
 	const string fullIEndpointGroup = "IeuanWalker.MinimalApi.Endpoints.IEndpointGroup";
 	const string fullIEndpointBase = "IeuanWalker.MinimalApi.Endpoints.IEndpointBase";
 	const string fullIEndpointWithRequestAndResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint`2";
@@ -54,10 +54,10 @@ public class EndpointGenerator : IIncrementalGenerator
 		assemblyName = compilation.Assembly.Name.Trim();
 
 		List<EndpointInfo> endpointClasses = [];
-		List<(INamedTypeSymbol validator, ITypeSymbol model)> validators = [];
+		List<(INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration)> allValidators = [];
 
 		// Get the endpoint interface symbols to check against
-		INamedTypeSymbol validatorSymbol = compilation.GetTypeByMetadataName(validator)!;
+		INamedTypeSymbol validatorSymbol = compilation.GetTypeByMetadataName(fullValidator)!;
 		INamedTypeSymbol endpointGroupSymbol = compilation.GetTypeByMetadataName(fullIEndpointGroup)!;
 		INamedTypeSymbol endpointBaseSymbol = compilation.GetTypeByMetadataName(fullIEndpointBase)!;
 		INamedTypeSymbol endpointWithRequestAndResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithRequestAndResponse)!;
@@ -70,6 +70,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			return;
 		}
 
+		// First pass: collect all validators and endpoints
 		foreach (TypeDeclarationSyntax? typeDeclaration in types)
 		{
 			if (typeDeclaration is null)
@@ -92,18 +93,7 @@ public class EndpointGenerator : IIncrementalGenerator
 				ITypeSymbol? validatedType = typeSymbol.GetValidatedTypeFromValidator(validatorSymbol);
 				if (validatedType is not null)
 				{
-					if (validators.Any(x => x.model.ToDisplayString().Equals(validatedType.ToDisplayString())))
-					{
-						// Duplicate validator for the same model type found - skip to avoid ambiguity
-						context.ReportDiagnostic(Diagnostic.Create(
-							duplicateValidatorsDescriptor,
-							typeDeclaration.GetLocation(),
-							validatedType.ToDisplayString()));
-
-						continue;
-					}
-
-					validators.Add((typeSymbol, validatedType));
+					allValidators.Add((typeSymbol, validatedType, typeDeclaration));
 				}
 
 				continue;
@@ -215,6 +205,33 @@ public class EndpointGenerator : IIncrementalGenerator
 						null,
 						null));
 				}
+			}
+		}
+
+		// Second pass: identify and report duplicate validators
+		IEnumerable<IGrouping<string, (INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration)>> validatorGroups = allValidators
+			.GroupBy(v => v.model.ToDisplayString());
+
+		List<(INamedTypeSymbol validator, ITypeSymbol model)> validators = [];
+
+		foreach (IGrouping<string, (INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration)> group in validatorGroups)
+		{
+			if (group.Count() > 1)
+			{
+				// Report error on each duplicate validator
+				foreach ((INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration) in group)
+				{
+					context.ReportDiagnostic(Diagnostic.Create(
+						duplicateValidatorsDescriptor,
+						typeDeclaration.GetLocation(),
+						model.ToDisplayString()));
+				}
+			}
+			else
+			{
+				// Only one validator for this model type, add it to the valid validators list
+				(INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration) = group.First();
+				validators.Add((validator, model));
 			}
 		}
 
