@@ -20,6 +20,54 @@ public class EndpointGenerator : IIncrementalGenerator
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
+	static readonly DiagnosticDescriptor noHttpVerbDescriptor = new(
+		id: "MINAPI001",
+		title: "No HTTP verb configured",
+		messageFormat: "Type '{0}' has no HTTP verb configured in the Configure method. At least one HTTP verb (Get, Post, Put, Patch, Delete) must be specified.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor multipleHttpVerbsDescriptor = new(
+		id: "MINAPI002",
+		title: "Multiple HTTP verbs configured",
+		messageFormat: "Multiple HTTP verbs are configured in the Configure method. Only one HTTP verb should be specified per endpoint. Remove this '{0}' call or the other conflicting HTTP verb calls.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor noMapGroupDescriptor = new(
+		id: "MINAPI003",
+		title: "No MapGroup configured",
+		messageFormat: "Endpoint group '{0}' has no MapGroup configured in the Configure method. Exactly one MapGroup call must be specified.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor multipleMapGroupsDescriptor = new(
+		id: "MINAPI004",
+		title: "Multiple MapGroup calls configured",
+		messageFormat: "Multiple MapGroup calls are configured in the Configure method. Only one MapGroup call should be specified per endpoint group. Remove this 'MapGroup' call or the other conflicting MapGroup calls.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor multipleGroupCallsDescriptor = new(
+		id: "MINAPI005",
+		title: "Multiple Group calls configured",
+		messageFormat: "Multiple Group calls are configured in the Configure method. Only one Group call should be specified per endpoint. Remove this 'Group' call or the other conflicting Group calls.",
+		category: "MinimalApiEndpoints",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor multipleRequestTypeMethodsDescriptor = new(
+		id: "MINAPI007",
+		title: "Multiple request type methods configured",
+		messageFormat: "Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.",
+		category: "Request type",
+		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
 	const string fullValidator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
 	const string fullIEndpointGroup = "IeuanWalker.MinimalApi.Endpoints.IEndpointGroup";
 	const string fullIEndpointBase = "IeuanWalker.MinimalApi.Endpoints.IEndpointBase";
@@ -87,11 +135,12 @@ public class EndpointGenerator : IIncrementalGenerator
 		string? requestBindingName = null;
 		bool disableValidation = false;
 		string? responseTypeName = null;
+		List<DiagnosticInfo> diagnostics = new();
 
 		if (isEndpoint)
 		{
-			// Extract HTTP verb and route pattern
-			(HttpVerb verb, string pattern)? verbAndPattern = ExtractVerbAndPattern(typeDeclaration);
+			// Extract HTTP verb and route pattern with diagnostics
+			(HttpVerb verb, string pattern)? verbAndPattern = ExtractVerbAndPattern(typeDeclaration, typeSymbol.Name, diagnostics);
 			if (verbAndPattern.HasValue)
 			{
 				httpVerb = verbAndPattern.Value.verb.ToString();
@@ -104,16 +153,16 @@ public class EndpointGenerator : IIncrementalGenerator
 			// Extract WithTags
 			withTags = ExtractTags(typeDeclaration);
 
-			// Extract Group information
-			(string? groupType, string? pattern)? groupInfo = ExtractGroup(typeDeclaration, endpointGroupSymbol, semanticModel);
+			// Extract Group information with diagnostics
+			(string? groupType, string? pattern)? groupInfo = ExtractGroup(typeDeclaration, endpointGroupSymbol, semanticModel, diagnostics);
 			if (groupInfo.HasValue)
 			{
 				groupTypeName = groupInfo.Value.groupType;
 				groupPattern = groupInfo.Value.pattern;
 			}
 
-			// Extract request binding type
-			(RequestBindingTypeEnum requestType, string? name)? requestBindingInfo = ExtractRequestBindingType(typeDeclaration);
+			// Extract request binding type with diagnostics
+			(RequestBindingTypeEnum requestType, string? name)? requestBindingInfo = ExtractRequestBindingType(typeDeclaration, diagnostics);
 			if (requestBindingInfo.HasValue)
 			{
 				requestBindingType = requestBindingInfo.Value.requestType.ToString();
@@ -160,11 +209,12 @@ public class EndpointGenerator : IIncrementalGenerator
 			disableValidation: disableValidation,
 			responseTypeName: responseTypeName,
 			interfaceNames: interfaceNames,
-			location: typeDeclaration.GetLocation()
+			location: typeDeclaration.GetLocation(),
+			diagnostics: diagnostics.ToArray()
 		);
 	}
 
-	static (HttpVerb verb, string pattern)? ExtractVerbAndPattern(TypeDeclarationSyntax typeDeclaration)
+	static (HttpVerb verb, string pattern)? ExtractVerbAndPattern(TypeDeclarationSyntax typeDeclaration, string typeName, List<DiagnosticInfo> diagnostics)
 	{
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
 			.OfType<MethodDeclarationSyntax>()
@@ -176,17 +226,55 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		string[] httpVerbMethods = ["Get", "Post", "Put", "Patch", "Delete"];
-		InvocationExpressionSyntax? httpVerbCall = configureMethod.DescendantNodes()
+		IEnumerable<InvocationExpressionSyntax> httpVerbCalls = configureMethod.DescendantNodes()
 			.OfType<InvocationExpressionSyntax>()
-			.FirstOrDefault(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && httpVerbMethods.Contains(memberAccess.Name.Identifier.ValueText));
+			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && httpVerbMethods.Contains(memberAccess.Name.Identifier.ValueText));
 
-		if (httpVerbCall?.Expression is MemberAccessExpressionSyntax verbMemberAccess)
+		List<InvocationExpressionSyntax> httpVerbCallsList = httpVerbCalls.ToList();
+
+		// Validate HTTP verb usage
+		if (httpVerbCallsList.Count == 0)
+		{
+			// No HTTP verb found - report on Configure method
+			diagnostics.Add(new DiagnosticInfo(
+				noHttpVerbDescriptor.Id,
+				noHttpVerbDescriptor.Title.ToString(),
+				noHttpVerbDescriptor.MessageFormat.ToString(),
+				noHttpVerbDescriptor.Category,
+				noHttpVerbDescriptor.DefaultSeverity,
+				configureMethod.Identifier.GetLocation(),
+				typeName));
+			return null;
+		}
+
+		if (httpVerbCallsList.Count > 1)
+		{
+			// Report error on each HTTP verb method call
+			foreach (InvocationExpressionSyntax httpVerbCall in httpVerbCallsList)
+			{
+				if (httpVerbCall.Expression is MemberAccessExpressionSyntax memberAccess)
+				{
+					diagnostics.Add(new DiagnosticInfo(
+						multipleHttpVerbsDescriptor.Id,
+						multipleHttpVerbsDescriptor.Title.ToString(),
+						multipleHttpVerbsDescriptor.MessageFormat.ToString(),
+						multipleHttpVerbsDescriptor.Category,
+						multipleHttpVerbsDescriptor.DefaultSeverity,
+						httpVerbCall.GetLocation(),
+						memberAccess.Name.Identifier.ValueText));
+				}
+			}
+			return null;
+		}
+
+		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList[0];
+		if (firstHttpVerbCall.Expression is MemberAccessExpressionSyntax verbMemberAccess)
 		{
 			HttpVerb? verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
 
-			if (verb.HasValue && httpVerbCall.ArgumentList.Arguments.Count > 0)
+			if (verb.HasValue && firstHttpVerbCall.ArgumentList.Arguments.Count > 0)
 			{
-				ArgumentSyntax argument = httpVerbCall.ArgumentList.Arguments[0];
+				ArgumentSyntax argument = firstHttpVerbCall.ArgumentList.Arguments[0];
 				if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
 				{
 					return (verb.Value, literal.Token.ValueText);
@@ -261,7 +349,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		return null;
 	}
 
-	static (string? groupTypeName, string? pattern)? ExtractGroup(TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol? endpointGroupSymbol, SemanticModel semanticModel)
+	static (string? groupTypeName, string? pattern)? ExtractGroup(TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol? endpointGroupSymbol, SemanticModel semanticModel, List<DiagnosticInfo> diagnostics)
 	{
 		if (endpointGroupSymbol is null)
 		{
@@ -277,11 +365,32 @@ public class EndpointGenerator : IIncrementalGenerator
 			return null;
 		}
 
-		InvocationExpressionSyntax? groupCall = configureMethod.DescendantNodes()
+		IEnumerable<InvocationExpressionSyntax> groupCalls = configureMethod.DescendantNodes()
 			.OfType<InvocationExpressionSyntax>()
-			.FirstOrDefault(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
+			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
 
-		if (groupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr &&
+		List<InvocationExpressionSyntax> groupCallsList = groupCalls.ToList();
+
+		// Validate that there's only one Group call
+		if (groupCallsList.Count > 1)
+		{
+			// Report error on each Group method call
+			foreach (InvocationExpressionSyntax groupCall in groupCallsList)
+			{
+				diagnostics.Add(new DiagnosticInfo(
+					multipleGroupCallsDescriptor.Id,
+					multipleGroupCallsDescriptor.Title.ToString(),
+					multipleGroupCallsDescriptor.MessageFormat.ToString(),
+					multipleGroupCallsDescriptor.Category,
+					multipleGroupCallsDescriptor.DefaultSeverity,
+					groupCall.GetLocation()));
+			}
+			return null;
+		}
+
+		InvocationExpressionSyntax? firstGroupCall = groupCallsList.FirstOrDefault();
+
+		if (firstGroupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr &&
 			memberAccessExpr.Name is GenericNameSyntax genericName &&
 			genericName.TypeArgumentList.Arguments.Count > 0)
 		{
@@ -294,7 +403,7 @@ public class EndpointGenerator : IIncrementalGenerator
 					namedTypeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointGroupSymbol)) ||
 					InheritsFrom(namedTypeSymbol, endpointGroupSymbol))
 				{
-					string? pattern = ExtractPatternFromEndpointGroup(namedTypeSymbol);
+					string? pattern = ExtractPatternFromEndpointGroup(namedTypeSymbol, diagnostics);
 					if (pattern is not null)
 					{
 						return (namedTypeSymbol.ToDisplayString(), pattern);
@@ -320,7 +429,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		return false;
 	}
 
-	static string? ExtractPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol)
+	static string? ExtractPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol, List<DiagnosticInfo> diagnostics)
 	{
 		foreach (SyntaxReference syntaxRef in endpointGroupSymbol.DeclaringSyntaxReferences)
 		{
@@ -333,13 +442,48 @@ public class EndpointGenerator : IIncrementalGenerator
 
 				if (configureMethod is not null)
 				{
-					InvocationExpressionSyntax? mapGroupCall = configureMethod.DescendantNodes()
+					IEnumerable<InvocationExpressionSyntax> mapGroupCalls = configureMethod.DescendantNodes()
 						.OfType<InvocationExpressionSyntax>()
-						.FirstOrDefault(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "MapGroup");
+						.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "MapGroup");
 
-					if (mapGroupCall?.ArgumentList.Arguments.Count > 0)
+					List<InvocationExpressionSyntax> mapGroupCallsList = mapGroupCalls.ToList();
+
+					// Validate endpoint group Configure method
+					if (mapGroupCallsList.Count == 0)
 					{
-						ArgumentSyntax firstArgument = mapGroupCall.ArgumentList.Arguments[0];
+						// No MapGroup found
+						diagnostics.Add(new DiagnosticInfo(
+							noMapGroupDescriptor.Id,
+							noMapGroupDescriptor.Title.ToString(),
+							noMapGroupDescriptor.MessageFormat.ToString(),
+							noMapGroupDescriptor.Category,
+							noMapGroupDescriptor.DefaultSeverity,
+							configureMethod.Identifier.GetLocation(),
+							endpointGroupSymbol.Name));
+						return null;
+					}
+
+					if (mapGroupCallsList.Count > 1)
+					{
+						// Report error on each MapGroup method call
+						foreach (InvocationExpressionSyntax mapGroupCall in mapGroupCallsList)
+						{
+							diagnostics.Add(new DiagnosticInfo(
+								multipleMapGroupsDescriptor.Id,
+								multipleMapGroupsDescriptor.Title.ToString(),
+								multipleMapGroupsDescriptor.MessageFormat.ToString(),
+								multipleMapGroupsDescriptor.Category,
+								multipleMapGroupsDescriptor.DefaultSeverity,
+								mapGroupCall.GetLocation()));
+						}
+						return null;
+					}
+
+					// Extract pattern from the single MapGroup call
+					InvocationExpressionSyntax firstMapGroupCall = mapGroupCallsList[0];
+					if (firstMapGroupCall.ArgumentList.Arguments.Count > 0)
+					{
+						ArgumentSyntax firstArgument = firstMapGroupCall.ArgumentList.Arguments[0];
 						if (firstArgument.Expression is LiteralExpressionSyntax literalExpr && literalExpr.Token.IsKind(SyntaxKind.StringLiteralToken))
 						{
 							return literalExpr.Token.ValueText;
@@ -351,7 +495,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		return null;
 	}
 
-	static (RequestBindingTypeEnum requestType, string? name)? ExtractRequestBindingType(TypeDeclarationSyntax typeDeclaration)
+	static (RequestBindingTypeEnum requestType, string? name)? ExtractRequestBindingType(TypeDeclarationSyntax typeDeclaration, List<DiagnosticInfo> diagnostics)
 	{
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
 			.OfType<MethodDeclarationSyntax>()
@@ -363,19 +507,41 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		string[] requestTypeMethods = ["RequestFromBody", "RequestFromQuery", "RequestFromRoute", "RequestFromHeader", "RequestFromForm", "RequestAsParameters"];
-		InvocationExpressionSyntax? requestTypeCall = configureMethod.DescendantNodes()
+		IEnumerable<InvocationExpressionSyntax> requestTypeCalls = configureMethod.DescendantNodes()
 			.OfType<InvocationExpressionSyntax>()
-			.FirstOrDefault(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && requestTypeMethods.Contains(memberAccess.Name.Identifier.ValueText));
+			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && requestTypeMethods.Contains(memberAccess.Name.Identifier.ValueText));
 
-		if (requestTypeCall?.Expression is MemberAccessExpressionSyntax requestTypeMemberAccess)
+		// Validate that there's only one request type method call
+		if (requestTypeCalls.Count() > 1)
+		{
+			// Report error on each request type method call
+			foreach (InvocationExpressionSyntax requestTypeCall in requestTypeCalls)
+			{
+				if (requestTypeCall.Expression is MemberAccessExpressionSyntax memberAccess)
+				{
+					diagnostics.Add(new DiagnosticInfo(
+						multipleRequestTypeMethodsDescriptor.Id,
+						multipleRequestTypeMethodsDescriptor.Title.ToString(),
+						multipleRequestTypeMethodsDescriptor.MessageFormat.ToString(),
+						multipleRequestTypeMethodsDescriptor.Category,
+						multipleRequestTypeMethodsDescriptor.DefaultSeverity,
+						requestTypeCall.GetLocation(),
+						memberAccess.Name.Identifier.ValueText));
+				}
+			}
+			return null;
+		}
+
+		InvocationExpressionSyntax? firstRequestTypeCall = requestTypeCalls.FirstOrDefault();
+		if (firstRequestTypeCall?.Expression is MemberAccessExpressionSyntax requestTypeMemberAccess)
 		{
 			RequestBindingTypeEnum? requestType = ConvertToRequestBindingType(requestTypeMemberAccess.Name.Identifier.ValueText);
 			if (requestType.HasValue)
 			{
 				string? name = null;
-				if (requestTypeCall.ArgumentList.Arguments.Count > 0)
+				if (firstRequestTypeCall.ArgumentList.Arguments.Count > 0)
 				{
-					ArgumentSyntax argument = requestTypeCall.ArgumentList.Arguments[0];
+					ArgumentSyntax argument = firstRequestTypeCall.ArgumentList.Arguments[0];
 					if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
 					{
 						name = literal.Token.ValueText;
@@ -451,6 +617,19 @@ public class EndpointGenerator : IIncrementalGenerator
 			if (typeInfo is null)
 			{
 				continue;
+			}
+
+			// Report diagnostics for this type
+			foreach (DiagnosticInfo diagInfo in typeInfo.Diagnostics)
+			{
+				DiagnosticDescriptor descriptor = new(
+					diagInfo.Id,
+					diagInfo.Title,
+					diagInfo.MessageFormat,
+					diagInfo.Category,
+					diagInfo.Severity,
+					isEnabledByDefault: true);
+				context.ReportDiagnostic(Diagnostic.Create(descriptor, diagInfo.Location, diagInfo.MessageArgs));
 			}
 
 			// Build a map for group lookups

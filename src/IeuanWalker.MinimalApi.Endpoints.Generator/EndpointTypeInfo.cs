@@ -27,7 +27,8 @@ internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 		bool disableValidation,
 		string? responseTypeName,
 		string[] interfaceNames,
-		Location location)
+		Location location,
+		DiagnosticInfo[] diagnostics)
 	{
 		TypeName = typeName;
 		IsAbstract = isAbstract;
@@ -47,6 +48,7 @@ internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 		ResponseTypeName = responseTypeName;
 		InterfaceNames = interfaceNames;
 		Location = location;
+		Diagnostics = diagnostics;
 	}
 
 	public string TypeName { get; }
@@ -67,6 +69,7 @@ internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 	public string? ResponseTypeName { get; }
 	public string[] InterfaceNames { get; }
 	public Location Location { get; }
+	public DiagnosticInfo[] Diagnostics { get; }
 
 	public bool Equals(EndpointTypeInfo? other)
 	{
@@ -88,7 +91,8 @@ internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 			   RequestBindingName == other.RequestBindingName &&
 			   DisableValidation == other.DisableValidation &&
 			   ResponseTypeName == other.ResponseTypeName &&
-			   InterfaceNamesEquals(other.InterfaceNames);
+			   InterfaceNamesEquals(other.InterfaceNames) &&
+			   DiagnosticsEquals(other.Diagnostics);
 	}
 
 	private bool InterfaceNamesEquals(string[] other)
@@ -97,6 +101,16 @@ internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 		for (int i = 0; i < InterfaceNames.Length; i++)
 		{
 			if (InterfaceNames[i] != other[i]) return false;
+		}
+		return true;
+	}
+
+	private bool DiagnosticsEquals(DiagnosticInfo[] other)
+	{
+		if (Diagnostics.Length != other.Length) return false;
+		for (int i = 0; i < Diagnostics.Length; i++)
+		{
+			if (!Diagnostics[i].Equals(other[i])) return false;
 		}
 		return true;
 	}
