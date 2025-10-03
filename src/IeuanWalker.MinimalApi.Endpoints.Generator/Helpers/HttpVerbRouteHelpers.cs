@@ -22,7 +22,7 @@ static class HttpVerbRouteHelpers
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration, SourceProductionContext context)
+	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration, string typeName, List<DiagnosticInfo> diagnostics)
 	{
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
@@ -33,9 +33,6 @@ static class HttpVerbRouteHelpers
 		{
 			return null;
 		}
-
-		HttpVerb? verb = null;
-		string? pattern = null;
 
 		// Look for HTTP verb extension method calls (Get, Post, Put, Patch, Delete)
 		string[] httpVerbMethods = ["Get", "Post", "Put", "Patch", "Delete"];
@@ -49,10 +46,14 @@ static class HttpVerbRouteHelpers
 		if (httpVerbCallsList.Count == 0)
 		{
 			// No HTTP verb found - report on Configure method
-			context.ReportDiagnostic(Diagnostic.Create(
-				noHttpVerbDescriptor,
+			diagnostics.Add(new DiagnosticInfo(
+				noHttpVerbDescriptor.Id,
+				noHttpVerbDescriptor.Title.ToString(),
+				noHttpVerbDescriptor.MessageFormat.ToString(),
+				noHttpVerbDescriptor.Category,
+				noHttpVerbDescriptor.DefaultSeverity,
 				configureMethod.Identifier.GetLocation(),
-				typeDeclaration.Identifier.ValueText));
+				typeName));
 			return null;
 		}
 
@@ -63,8 +64,12 @@ static class HttpVerbRouteHelpers
 			{
 				if (httpVerbCall.Expression is MemberAccessExpressionSyntax memberAccess)
 				{
-					context.ReportDiagnostic(Diagnostic.Create(
-						multipleHttpVerbsDescriptor,
+					diagnostics.Add(new DiagnosticInfo(
+						multipleHttpVerbsDescriptor.Id,
+						multipleHttpVerbsDescriptor.Title.ToString(),
+						multipleHttpVerbsDescriptor.MessageFormat.ToString(),
+						multipleHttpVerbsDescriptor.Category,
+						multipleHttpVerbsDescriptor.DefaultSeverity,
 						httpVerbCall.GetLocation(),
 						memberAccess.Name.Identifier.ValueText));
 				}
@@ -75,7 +80,7 @@ static class HttpVerbRouteHelpers
 		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList[0];
 		if (firstHttpVerbCall.Expression is MemberAccessExpressionSyntax verbMemberAccess)
 		{
-			verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
+			HttpVerb? verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
 
 			// Try to extract the route pattern argument
 			if (verb is not null && firstHttpVerbCall.ArgumentList.Arguments.Count > 0)
@@ -84,12 +89,12 @@ static class HttpVerbRouteHelpers
 
 				if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
 				{
-					pattern = literal.Token.ValueText;
+					return (verb.Value, literal.Token.ValueText);
 				}
 			}
 		}
 
-		return verb is null || pattern is null ? null : (verb.Value, pattern);
+		return null;
 	}
 
 	public static string ToMap(this HttpVerb verb)
@@ -114,4 +119,13 @@ static class HttpVerbRouteHelpers
 		"delete" => HttpVerb.Delete,
 		_ => null
 	};
+}
+
+public enum HttpVerb
+{
+	Get,
+	Post,
+	Put,
+	Patch,
+	Delete
 }

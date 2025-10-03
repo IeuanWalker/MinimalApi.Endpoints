@@ -7,14 +7,14 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 static class RequestBindingTypeHelpers
 {
 	static readonly DiagnosticDescriptor multipleRequestTypeMethodsDescriptor = new(
-		id: "MINAPI007",
+		id: "MINAPI008",
 		title: "Multiple request type methods configured",
 		messageFormat: "Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.",
 		category: "Request type",
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration, SourceProductionContext context)
+	public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration, List<DiagnosticInfo> diagnostics)
 	{
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
@@ -40,8 +40,12 @@ static class RequestBindingTypeHelpers
 			{
 				if (requestTypeCall.Expression is MemberAccessExpressionSyntax memberAccess)
 				{
-					context.ReportDiagnostic(Diagnostic.Create(
-						multipleRequestTypeMethodsDescriptor,
+					diagnostics.Add(new DiagnosticInfo(
+						multipleRequestTypeMethodsDescriptor.Id,
+						multipleRequestTypeMethodsDescriptor.Title.ToString(),
+						multipleRequestTypeMethodsDescriptor.MessageFormat.ToString(),
+						multipleRequestTypeMethodsDescriptor.Category,
+						multipleRequestTypeMethodsDescriptor.DefaultSeverity,
 						requestTypeCall.GetLocation(),
 						memberAccess.Name.Identifier.ValueText));
 				}

@@ -13,11 +13,19 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 public class EndpointGenerator : IIncrementalGenerator
 {
 	static readonly DiagnosticDescriptor duplicateValidatorsDescriptor = new(
-		id: "MINAPI006",
+		id: "MINAPI007",
 		title: "Duplicate Validator",
 		messageFormat: "Multiple validators found for the model type '{0}'. Only one validator per model type is allowed. Remove this validator or the other conflicting validators for the same model type.",
 		category: "Validation",
 		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor unusedGroupDescriptor = new(
+		id: "MINAPI006",
+		title: "Unused Endpoint Group",
+		messageFormat: "The endpoint group '{0}' is defined but not used by any endpoints. Remove this group or assign it to an endpoint.",
+		category: "Map group",
+		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true);
 
 	const string fullValidator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
@@ -26,228 +34,205 @@ public class EndpointGenerator : IIncrementalGenerator
 	const string fullIEndpointWithRequestAndResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint`2";
 	const string fullIEndpointWithoutRequest = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutRequest`1";
 	const string fullIEndpointWithoutResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutResponse`1";
-	const string fullIEndpointWithoutRequestOrResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint";
-
-	static string? assemblyName;
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
-		// Find any type declarations with base lists (potential interface implementers)
-		IncrementalValuesProvider<TypeDeclarationSyntax?> typeDeclarations = context.SyntaxProvider
+		// Extract type information during syntax analysis
+		IncrementalValuesProvider<TypeInfo?> typeInfos = context.SyntaxProvider
 			.CreateSyntaxProvider(
 				predicate: static (s, _) => s is TypeDeclarationSyntax tds && tds.BaseList != null,
-				transform: static (ctx, _) => ctx.Node as TypeDeclarationSyntax)
-			.Where(type => type != null);
+				transform: static (ctx, ct) => ExtractTypeInfo(ctx, ct))
+			.Where(static typeInfo => typeInfo != null);
 
-		// Combine with compilation for semantic analysis
-		IncrementalValueProvider<(Compilation, ImmutableArray<TypeDeclarationSyntax?>)> compilationAndTypes
-			= context.CompilationProvider.Combine(typeDeclarations.Collect());
+		// Collect all type information
+		IncrementalValueProvider<ImmutableArray<TypeInfo?>> collectedTypeInfos = typeInfos.Collect();
+
+		// Get assembly name from compilation
+		IncrementalValueProvider<string> assemblyNameProvider = context.CompilationProvider
+			.Select(static (compilation, _) => compilation.Assembly.Name.Trim());
+
+		// Combine collected type infos with assembly name
+		IncrementalValueProvider<(ImmutableArray<TypeInfo?>, string)> combined =
+			collectedTypeInfos.Combine(assemblyNameProvider);
 
 		// Generate source output
-		context.RegisterSourceOutput(compilationAndTypes,
-			(spc, source) => Execute(source.Item1, source.Item2, spc));
+		context.RegisterSourceOutput(combined,
+			static (spc, source) => Execute(source.Item1, source.Item2, spc));
 	}
 
-	static void Execute(Compilation compilation, ImmutableArray<TypeDeclarationSyntax?> types, SourceProductionContext context)
+	static TypeInfo? ExtractTypeInfo(GeneratorSyntaxContext context, CancellationToken cancellationToken)
 	{
-		// Get the assembly name from the compilation
-		assemblyName = compilation.Assembly.Name.Trim();
+		if (context.Node is not TypeDeclarationSyntax typeDeclaration)
+		{
+			return null;
+		}
 
-		List<EndpointInfo> endpointClasses = [];
-		List<(INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration)> allValidators = [];
+		SemanticModel semanticModel = context.SemanticModel;
+		INamedTypeSymbol? typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration, cancellationToken);
 
-		// Get the endpoint interface symbols to check against
+		if (typeSymbol is null || typeSymbol.IsAbstract)
+		{
+			return null;
+		}
+
+		Compilation compilation = semanticModel.Compilation;
+
+		List<DiagnosticInfo> diagnostics = [];
+		Location location = typeDeclaration.GetLocation();
+		string typeName = typeSymbol.ToDisplayString();
+
+		// Check if this is a validator
 		INamedTypeSymbol validatorSymbol = compilation.GetTypeByMetadataName(fullValidator)!;
+		bool isValidator = typeSymbol.InheritsFromValidatorBase(validatorSymbol);
+		if (isValidator)
+		{
+			ITypeSymbol? validatedType = typeSymbol.GetValidatedTypeFromValidator(validatorSymbol);
+			string? validatedTypeName = validatedType?.ToDisplayString();
+			if (validatedTypeName != null)
+			{
+				return new ValidatorInfo(typeName, validatedTypeName, location, [.. diagnostics]);
+			}
+		}
+
+		// Check if this is an endpoint group
 		INamedTypeSymbol endpointGroupSymbol = compilation.GetTypeByMetadataName(fullIEndpointGroup)!;
+		bool isEndpointGroup = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointGroupSymbol));
+		if (isEndpointGroup)
+		{
+			string? pattern = semanticModel.GetDeclaredSymbol(typeDeclaration)?.GetPatternFromEndpointGroup(diagnostics);
+
+			if (pattern is null)
+			{
+				return null;
+			}
+
+			return new EndpointGroupInfo(typeName, pattern, typeDeclaration.GetWithName(), typeDeclaration.GetTags(), location, [.. diagnostics]);
+		}
+
+		// Check if this is an endpoint
 		INamedTypeSymbol endpointBaseSymbol = compilation.GetTypeByMetadataName(fullIEndpointBase)!;
+		bool isEndpoint = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointBaseSymbol));
+
+		if (!isEndpoint)
+		{
+			return null;
+		}
+
+		(HttpVerb verb, string pattern)? verbAndPattern = typeDeclaration.GetVerbAndPattern(typeSymbol.Name, diagnostics);
+
+		if (verbAndPattern is null)
+		{
+			if (diagnostics.Any())
+			{
+				return new TypeInfo(typeName, location, diagnostics);
+			}
+
+			return null;
+		}
+
 		INamedTypeSymbol endpointWithRequestAndResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithRequestAndResponse)!;
 		INamedTypeSymbol endpointWithoutRequestSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequest)!;
 		INamedTypeSymbol endpointWithoutResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutResponse)!;
-		INamedTypeSymbol endpointWithoutRequestOrResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequestOrResponse)!;
 
-		if (endpointBaseSymbol is null)
+		string? requestTypeName = null;
+		string? responseTypeName = null;
+		foreach (INamedTypeSymbol interfaceType in typeSymbol.AllInterfaces)
+		{
+			if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithRequestAndResponseSymbol) && interfaceType.TypeArguments.Length == 2)
+			{
+				requestTypeName = interfaceType.TypeArguments[0].ToDisplayString();
+				responseTypeName = interfaceType.TypeArguments[1].ToDisplayString();
+			}
+			else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequestSymbol) && interfaceType.TypeArguments.Length == 1)
+			{
+				responseTypeName = interfaceType.TypeArguments[0].ToDisplayString();
+			}
+			else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponseSymbol) && interfaceType.TypeArguments.Length == 1)
+			{
+				requestTypeName = interfaceType.TypeArguments[0].ToDisplayString();
+			}
+		}
+
+		return new EndpointInfo(
+			typeName,
+			verbAndPattern.Value.verb,
+			verbAndPattern.Value.pattern,
+			typeDeclaration.GetWithName(),
+			typeDeclaration.GetTags(),
+			typeDeclaration.GetGroup(endpointGroupSymbol, semanticModel, diagnostics),
+			requestTypeName,
+			typeDeclaration.GetRequestTypeAndName(diagnostics),
+			typeDeclaration.DontValidate(),
+			responseTypeName,
+			location,
+			diagnostics);
+	}
+
+	static void Execute(ImmutableArray<TypeInfo?> typeInfos, string assemblyName, SourceProductionContext context)
+	{
+		List<EndpointInfo> allEndpoints = [.. typeInfos.OfType<EndpointInfo>()];
+		List<EndpointGroupInfo> allEndpointGroups = [.. typeInfos.OfType<EndpointGroupInfo>()];
+		List<ValidatorInfo> allValidators = [.. typeInfos.OfType<ValidatorInfo>()];
+
+		if (allEndpoints.Count == 0)
 		{
 			return;
 		}
 
-		foreach (TypeDeclarationSyntax? typeDeclaration in types)
+		// Report diagnostics
+		foreach (DiagnosticInfo diagnosticInfo in typeInfos.Where(x => x is not null).SelectMany(x => x?.Diagnostics))
 		{
-			if (typeDeclaration is null)
+			DiagnosticDescriptor descriptor = new(
+				diagnosticInfo.Id,
+				diagnosticInfo.Title,
+				diagnosticInfo.MessageFormat,
+				diagnosticInfo.Category,
+				diagnosticInfo.Severity,
+				isEnabledByDefault: true);
+			context.ReportDiagnostic(Diagnostic.Create(descriptor, diagnosticInfo.Location, diagnosticInfo.MessageArgs));
+		}
+
+		// Check for unused groups
+		IEnumerable<string?> usedGroups = allEndpoints
+			.Select(e => e.Group)
+			.Where(g => g is not null)
+			.Distinct();
+
+		foreach (EndpointGroupInfo group in allEndpointGroups.Where(g => !usedGroups.Contains(g.TypeName)))
+		{
+			context.ReportDiagnostic(Diagnostic.Create(
+					unusedGroupDescriptor,
+					group.Location,
+					group.TypeName));
+		}
+
+
+		// Handle duplicate validators
+		IEnumerable<IGrouping<string, ValidatorInfo>> validatorGroups = allValidators.GroupBy(v => v.ValidatedTypeName);
+
+		foreach (IGrouping<string, ValidatorInfo> group in validatorGroups.Where(x => x.Count() > 1))
+		{
+			// Report error on each duplicate validator
+			foreach (ValidatorInfo validator in group)
 			{
-				continue;
-			}
-
-			SemanticModel semanticModel = compilation.GetSemanticModel(typeDeclaration.SyntaxTree);
-			INamedTypeSymbol? typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration);
-
-			if (typeSymbol is null || typeSymbol.IsAbstract)
-			{
-				continue;
-			}
-
-			bool implementsValidator = typeSymbol.InheritsFromValidatorBase(validatorSymbol);
-
-			if (implementsValidator)
-			{
-				ITypeSymbol? validatedType = typeSymbol.GetValidatedTypeFromValidator(validatorSymbol);
-				if (validatedType is not null)
-				{
-					allValidators.Add((typeSymbol, validatedType, typeDeclaration));
-				}
-
-				continue;
-			}
-
-			// Check if the type implements IEndpointBase
-			bool implementsEndpointBase = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointBaseSymbol));
-
-			if (!implementsEndpointBase)
-			{
-				continue;
-			}
-
-			// Analyze the Configure method for WithName usage, HTTP verb, and route pattern
-			(HttpVerb verb, string pattern)? verbAndPattern = typeDeclaration.GetVerbAndPattern(context);
-			if (verbAndPattern is null)
-			{
-				continue;
-			}
-
-			string? withName = typeDeclaration.GetWithName();
-			string? withTags = typeDeclaration.GetTags();
-			(INamedTypeSymbol symbol, string pattern)? mapGroup = typeDeclaration.GetGroup(endpointGroupSymbol, compilation, context);
-
-			// If withName is null and there's a mapGroup, try to inherit from the group
-			if (withName is null && mapGroup is not null)
-			{
-				TypeDeclarationSyntax? groupTypeDeclaration = mapGroup.Value.symbol.ToTypeDeclarationSyntax(types, compilation);
-				if (groupTypeDeclaration is not null)
-				{
-					withName = groupTypeDeclaration.GetWithName();
-				}
-			}
-
-			// If withTags is null and there's a mapGroup, try to inherit from the group
-			if (withTags is null && mapGroup is not null)
-			{
-				TypeDeclarationSyntax? groupTypeDeclaration = mapGroup.Value.symbol.ToTypeDeclarationSyntax(types, compilation);
-				if (groupTypeDeclaration is not null)
-				{
-					withTags = groupTypeDeclaration.GetTags();
-				}
-			}
-
-			// Determine which specific endpoint interface it implements
-			foreach (INamedTypeSymbol interfaceType in typeSymbol.AllInterfaces)
-			{
-				// Check for IEndpoint<TRequest, TResponse>
-				if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithRequestAndResponseSymbol) && interfaceType.TypeArguments.Length == 2)
-				{
-					endpointClasses.Add(new EndpointInfo(
-						typeSymbol.ToDisplayString(),
-						EndpointType.WithRequestAndResponse,
-						mapGroup,
-						verbAndPattern.Value.verb,
-						verbAndPattern.Value.pattern,
-						withName,
-						withTags,
-						interfaceType.TypeArguments[0],
-						typeDeclaration.GetRequestTypeAndName(context),
-						typeDeclaration.Validate(compilation, interfaceType.TypeArguments[0]),
-						interfaceType.TypeArguments[1]));
-				}
-				// Check for IEndpointWithoutRequest<TResponse>
-				else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequestSymbol) && interfaceType.TypeArguments.Length == 1)
-				{
-					endpointClasses.Add(new EndpointInfo(
-						typeSymbol.ToDisplayString(),
-						EndpointType.WithoutRequest,
-						mapGroup,
-						verbAndPattern.Value.verb,
-						verbAndPattern.Value.pattern,
-						withName,
-						withTags,
-						null,
-						null,
-						null,
-						interfaceType.TypeArguments[0]));
-				}
-				// Check for IEndpointWithRequestWithoutResponse<TRequest>
-				else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponseSymbol) && interfaceType.TypeArguments.Length == 1)
-				{
-					endpointClasses.Add(new EndpointInfo(
-						typeSymbol.ToDisplayString(),
-						EndpointType.WithoutResponse,
-						mapGroup,
-						verbAndPattern.Value.verb,
-						verbAndPattern.Value.pattern,
-						withName,
-						withTags,
-						interfaceType.TypeArguments[0],
-						typeDeclaration.GetRequestTypeAndName(context),
-						typeDeclaration.Validate(compilation, interfaceType.TypeArguments[0]),
-						null));
-				}
-				// Check for IEndpointWithoutRequest (no generics)
-				else if (SymbolEqualityComparer.Default.Equals(interfaceType, endpointWithoutRequestOrResponseSymbol))
-				{
-					endpointClasses.Add(new EndpointInfo(
-						typeSymbol.ToDisplayString(),
-						EndpointType.WithoutRequestOrResponse,
-						mapGroup,
-						verbAndPattern.Value.verb,
-						verbAndPattern.Value.pattern,
-						withName,
-						withTags,
-						null,
-						null,
-						null,
-						null));
-				}
+				context.ReportDiagnostic(Diagnostic.Create(
+					duplicateValidatorsDescriptor,
+					validator.Location,
+					validator.ValidatedTypeName));
 			}
 		}
 
-		IEnumerable<IGrouping<string, (INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration)>> validatorGroups = allValidators
-			.GroupBy(v => v.model.ToDisplayString());
+		string source = GenerateEndpointExtensions(allEndpoints, allEndpointGroups, allValidators, assemblyName);
 
-		List<(INamedTypeSymbol validator, ITypeSymbol model)> validators = [];
-
-		foreach (IGrouping<string, (INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration)> group in validatorGroups)
-		{
-			if (group.Count() > 1)
-			{
-				// Report error on each duplicate validator
-				foreach ((INamedTypeSymbol _, ITypeSymbol model, TypeDeclarationSyntax typeDeclaration) in group)
-				{
-					context.ReportDiagnostic(Diagnostic.Create(
-						duplicateValidatorsDescriptor,
-						typeDeclaration.GetLocation(),
-						model.ToDisplayString()));
-				}
-			}
-			else
-			{
-				// Only one validator for this model type, add it to the valid validators list
-				(INamedTypeSymbol validator, ITypeSymbol model, TypeDeclarationSyntax _) = group.First();
-				validators.Add((validator, model));
-			}
-		}
-
-		if (endpointClasses.Count == 0)
-		{
-			return;
-		}
-
-		string source = GenerateEndpointExtensions(endpointClasses, validators);
 		context.AddSource("EndpointExtensions.g.cs", SourceText.From(source, Encoding.UTF8));
 	}
 
-	static string GenerateEndpointExtensions(List<EndpointInfo> endpointClasses, List<(INamedTypeSymbol validator, ITypeSymbol model)> validators)
+	static string GenerateEndpointExtensions(List<EndpointInfo> endpointClasses, List<EndpointGroupInfo> endpointGroups, List<ValidatorInfo> validators, string assemblyName)
 	{
-		endpointClasses = [.. endpointClasses.OrderBy(x => x.ClassName)];
-
 		using IndentedTextBuilder builder = new();
 		string sanitisedAssemblyName = assemblyName?.Sanitize(string.Empty) ?? "Assembly";
+
+		IEnumerable<IGrouping<string?, EndpointInfo>> groupedEndpoints = endpointClasses.GroupBy(x => x.Group);
 
 		builder.AppendLine("""
 			  // <auto-generated>
@@ -258,7 +243,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			  using Microsoft.AspNetCore.Mvc;
 			  """);
 
-		if (endpointClasses.Any(x => x.FluentValidationClass is not null))
+		if (validators.Any())
 		{
 			builder.AppendLine("using IeuanWalker.MinimalApi.Endpoints.Filters;");
 			builder.AppendLine("using FluentValidation;");
@@ -275,24 +260,33 @@ public class EndpointGenerator : IIncrementalGenerator
 			builder.AppendLine($"public static IHostApplicationBuilder AddEndpointsFrom{sanitisedAssemblyName}(this IHostApplicationBuilder builder)");
 			using (builder.AppendBlock())
 			{
-				foreach (EndpointInfo endpoint in endpointClasses)
+				foreach (IGrouping<string?, EndpointInfo> group in groupedEndpoints)
 				{
-					if (endpoint.FluentValidationClass is not null)
+					foreach (EndpointInfo? endpoint in group.OrderBy(x => x.HttpVerb).ThenBy(x => x.RoutePattern))
 					{
-						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{endpoint.RequestType}>, global::{endpoint.FluentValidationClass}>();");
+						if (endpoint.RequestType is not null)
+						{
+							ValidatorInfo? requestValidator = validators.FirstOrDefault(x => x.ValidatedTypeName.Equals(endpoint.RequestType));
 
-						validators.RemoveAll(x => x.model.ToDisplayString().Equals(endpoint.RequestType!.ToDisplayString()));
+							if (requestValidator is not null)
+							{
+								builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{endpoint.RequestType}>, global::{requestValidator.TypeName}>();");
+							}
+						}
+
+						builder.AppendLine($"builder.Services.AddScoped<global::{endpoint.TypeName}>();");
 					}
-					builder.AppendLine($"builder.Services.AddScoped<global::{endpoint.ClassName}>();");
 				}
+
 				builder.AppendLine();
 
-				if (validators.Any())
+				List<ValidatorInfo> nonRequestModelValidators = [.. validators.Where(v => !endpointClasses.Any(e => e.RequestType == v.ValidatedTypeName))];
+				if (nonRequestModelValidators.Any())
 				{
 					builder.AppendLine("// Validators not directly related to an endpoints request model");
-					foreach ((INamedTypeSymbol validator, ITypeSymbol model) in validators)
+					foreach (ValidatorInfo validator in nonRequestModelValidators)
 					{
-						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{model}>, global::{validator}>();");
+						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{validator.ValidatedTypeName}>, global::{validator.TypeName}>();");
 					}
 					builder.AppendLine();
 				}
@@ -306,29 +300,26 @@ public class EndpointGenerator : IIncrementalGenerator
 			builder.AppendLine($"public static WebApplication MapEndpointsFrom{sanitisedAssemblyName}(this WebApplication app)");
 			using (builder.AppendBlock())
 			{
-				// Group endpoints by their Group property (both symbol and pattern)
-				IOrderedEnumerable<IGrouping<(string? symbol, string? pattern), EndpointInfo>> groupedEndpoints = endpointClasses
-					.GroupBy(x => (x.Group?.symbol?.ToDisplayString(), x.Group?.pattern))
-					.OrderBy(g => g.Key.Item1).ThenBy(g => g.Key.pattern);
-
 				int groupIndex = 0;
 				int endpointIndex = 0;
 
-				foreach (IGrouping<(string? symbol, string? pattern), EndpointInfo> group in groupedEndpoints)
+				foreach (IGrouping<string?, EndpointInfo> endpointGroup in groupedEndpoints)
 				{
-					if (group.Key.symbol is not null)
+					if (endpointGroup.Key is not null)
 					{
-						int lastDotIndex = group.Key.symbol.LastIndexOf('.');
-						string lastSegment = lastDotIndex >= 0 ? group.Key.symbol.Substring(lastDotIndex + 1) : group.Key.symbol;
+						EndpointGroupInfo group = endpointGroups.First(x => x.TypeName == endpointGroup.Key);
+
+						int lastDotIndex = group.TypeName.LastIndexOf('.');
+						string lastSegment = lastDotIndex >= 0 ? group.TypeName.Substring(lastDotIndex + 1) : group.TypeName;
 						string groupName = $"group_{lastSegment.Sanitize().ToLowerFirstLetter()}_{groupIndex}";
 
-						builder.AppendLine($"// GROUP: {group.Key.symbol}");
-						builder.AppendLine($"RouteGroupBuilder {groupName} = {group.Key.symbol}.Configure(app);");
+						builder.AppendLine($"// GROUP: {group.TypeName}");
+						builder.AppendLine($"RouteGroupBuilder {groupName} = {group.TypeName}.Configure(app);");
 						builder.AppendLine();
 
-						foreach (EndpointInfo endpoint in group.OrderBy(x => x.Verb).ThenBy(x => x.Pattern))
+						foreach (EndpointInfo endpoint in endpointGroup.OrderBy(x => x.HttpVerb).ThenBy(x => x.RoutePattern))
 						{
-							builder.ToEndpoint(endpoint, endpointIndex, (groupName, group.Key.pattern ?? string.Empty));
+							builder.ToEndpoint(endpoint, endpointIndex, validators, (group, groupName));
 							builder.AppendLine();
 
 							endpointIndex++;
@@ -337,9 +328,9 @@ public class EndpointGenerator : IIncrementalGenerator
 					else
 					{
 						// Endpoints without a group
-						foreach (EndpointInfo endpoint in group.OrderBy(x => x.Verb).ThenBy(x => x.Pattern))
+						foreach (EndpointInfo endpoint in endpointGroup.OrderBy(x => x.HttpVerb).ThenBy(x => x.RoutePattern))
 						{
-							builder.ToEndpoint(endpoint, endpointIndex, null);
+							builder.ToEndpoint(endpoint, endpointIndex, validators, null);
 							builder.AppendLine();
 
 							endpointIndex++;

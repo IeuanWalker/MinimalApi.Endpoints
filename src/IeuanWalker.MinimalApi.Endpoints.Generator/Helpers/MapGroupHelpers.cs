@@ -30,8 +30,13 @@ static class MapGroupHelpers
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	public static (INamedTypeSymbol symbol, string pattern)? GetGroup(this TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol endpointGroupSymbol, Compilation compilation, SourceProductionContext context)
+	public static string? GetGroup(this TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol? endpointGroupSymbol, SemanticModel semanticModel, List<DiagnosticInfo> diagnostics)
 	{
+		if (endpointGroupSymbol is null)
+		{
+			return null;
+		}
+
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
 			.OfType<MethodDeclarationSyntax>()
@@ -55,8 +60,12 @@ static class MapGroupHelpers
 			// Report error on each Group method call
 			foreach (InvocationExpressionSyntax groupCall in groupCallsList)
 			{
-				context.ReportDiagnostic(Diagnostic.Create(
-					multipleGroupCallsDescriptor,
+				diagnostics.Add(new DiagnosticInfo(
+					multipleGroupCallsDescriptor.Id,
+					multipleGroupCallsDescriptor.Title.ToString(),
+					multipleGroupCallsDescriptor.MessageFormat.ToString(),
+					multipleGroupCallsDescriptor.Category,
+					multipleGroupCallsDescriptor.DefaultSeverity,
 					groupCall.GetLocation()));
 			}
 			return null;
@@ -72,10 +81,8 @@ static class MapGroupHelpers
 			// Extract the first generic type argument
 			TypeSyntax endpointGroup = genericName.TypeArgumentList.Arguments[0];
 
-			SemanticModel semanticModel = compilation.GetSemanticModel(endpointGroup.SyntaxTree);
-
 			// Get the type information for the syntax node
-			TypeInfo typeInfo = semanticModel.GetTypeInfo(endpointGroup);
+			Microsoft.CodeAnalysis.TypeInfo typeInfo = semanticModel.GetTypeInfo(endpointGroup);
 
 			if (typeInfo.Type is not INamedTypeSymbol namedTypeSymbol)
 			{
@@ -87,21 +94,21 @@ static class MapGroupHelpers
 				InheritsFrom(namedTypeSymbol, endpointGroupSymbol))
 			{
 				// Now get the pattern from the endpoint group's Configure method
-				string? pattern = GetPatternFromEndpointGroup(namedTypeSymbol, context);
+				string? pattern = GetPatternFromEndpointGroup(namedTypeSymbol, diagnostics);
 
 				if (pattern is null)
 				{
 					return null;
 				}
 
-				return (namedTypeSymbol, pattern);
+				return namedTypeSymbol.ToDisplayString();
 			}
 		}
 
 		return null;
 	}
 
-	static string? GetPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol, SourceProductionContext context)
+	public static string? GetPatternFromEndpointGroup(this INamedTypeSymbol endpointGroupSymbol, List<DiagnosticInfo> diagnostics)
 	{
 		// Get all syntax references for the endpoint group type
 		foreach (SyntaxReference syntaxRef in endpointGroupSymbol.DeclaringSyntaxReferences)
@@ -127,8 +134,12 @@ static class MapGroupHelpers
 					if (mapGroupCallsList.Count == 0)
 					{
 						// No MapGroup found
-						context.ReportDiagnostic(Diagnostic.Create(
-							noMapGroupDescriptor,
+						diagnostics.Add(new DiagnosticInfo(
+							noMapGroupDescriptor.Id,
+							noMapGroupDescriptor.Title.ToString(),
+							noMapGroupDescriptor.MessageFormat.ToString(),
+							noMapGroupDescriptor.Category,
+							noMapGroupDescriptor.DefaultSeverity,
 							configureMethod.Identifier.GetLocation(),
 							endpointGroupSymbol.Name));
 						return null;
@@ -139,8 +150,12 @@ static class MapGroupHelpers
 						// Report error on each MapGroup method call
 						foreach (InvocationExpressionSyntax mapGroupCall in mapGroupCallsList)
 						{
-							context.ReportDiagnostic(Diagnostic.Create(
-								multipleMapGroupsDescriptor,
+							diagnostics.Add(new DiagnosticInfo(
+								multipleMapGroupsDescriptor.Id,
+								multipleMapGroupsDescriptor.Title.ToString(),
+								multipleMapGroupsDescriptor.MessageFormat.ToString(),
+								multipleMapGroupsDescriptor.Category,
+								multipleMapGroupsDescriptor.DefaultSeverity,
 								mapGroupCall.GetLocation()));
 						}
 						return null;
