@@ -313,7 +313,10 @@ public class EndpointGenerator : IIncrementalGenerator
 						string lastSegment = lastDotIndex >= 0 ? group.TypeName.Substring(lastDotIndex + 1) : group.TypeName;
 						string groupName = $"group_{lastSegment.Sanitize().ToLowerFirstLetter()}_{groupIndex}";
 
+						builder.AppendLine($"// {new string('*', group.TypeName.Length + 7)}");
 						builder.AppendLine($"// GROUP: {group.TypeName}");
+						builder.AppendLine($"// {endpointGroup.Count()} endpoints");
+						builder.AppendLine($"// {new string('*', group.TypeName.Length + 7)}");
 						builder.AppendLine($"RouteGroupBuilder {groupName} = {group.TypeName}.Configure(app);");
 						builder.AppendLine();
 
@@ -327,6 +330,15 @@ public class EndpointGenerator : IIncrementalGenerator
 					}
 					else
 					{
+						if (endpointClasses.Any(x => x.Group is not null))
+						{
+							builder.AppendLine("// *********************");
+							builder.AppendLine("// Not grouped endpoints");
+							builder.AppendLine($"// {endpointGroup.Count()} endpoints");
+							builder.AppendLine("// *********************");
+							builder.AppendLine();
+						}
+
 						// Endpoints without a group
 						foreach (EndpointInfo endpoint in endpointGroup.OrderBy(x => x.HttpVerb).ThenBy(x => x.RoutePattern))
 						{
