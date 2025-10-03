@@ -22,7 +22,7 @@ static class HttpVerbRouteHelpers
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration, SourceProductionContext context)
+	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration, string typeName, List<DiagnosticInfo> diagnostics)
 	{
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
@@ -49,10 +49,14 @@ static class HttpVerbRouteHelpers
 		if (httpVerbCallsList.Count == 0)
 		{
 			// No HTTP verb found - report on Configure method
-			context.ReportDiagnostic(Diagnostic.Create(
-				noHttpVerbDescriptor,
+			diagnostics.Add(new DiagnosticInfo(
+				noHttpVerbDescriptor.Id,
+				noHttpVerbDescriptor.Title.ToString(),
+				noHttpVerbDescriptor.MessageFormat.ToString(),
+				noHttpVerbDescriptor.Category,
+				noHttpVerbDescriptor.DefaultSeverity,
 				configureMethod.Identifier.GetLocation(),
-				typeDeclaration.Identifier.ValueText));
+				typeName));
 			return null;
 		}
 
@@ -63,8 +67,12 @@ static class HttpVerbRouteHelpers
 			{
 				if (httpVerbCall.Expression is MemberAccessExpressionSyntax memberAccess)
 				{
-					context.ReportDiagnostic(Diagnostic.Create(
-						multipleHttpVerbsDescriptor,
+					diagnostics.Add(new DiagnosticInfo(
+						multipleHttpVerbsDescriptor.Id,
+						multipleHttpVerbsDescriptor.Title.ToString(),
+						multipleHttpVerbsDescriptor.MessageFormat.ToString(),
+						multipleHttpVerbsDescriptor.Category,
+						multipleHttpVerbsDescriptor.DefaultSeverity,
 						httpVerbCall.GetLocation(),
 						memberAccess.Name.Identifier.ValueText));
 				}

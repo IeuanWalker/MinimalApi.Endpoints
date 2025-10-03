@@ -14,7 +14,7 @@ static class RequestBindingTypeHelpers
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration, SourceProductionContext context)
+	public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration, List<DiagnosticInfo> diagnostics)
 	{
 		// Find the Configure method
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
@@ -40,8 +40,12 @@ static class RequestBindingTypeHelpers
 			{
 				if (requestTypeCall.Expression is MemberAccessExpressionSyntax memberAccess)
 				{
-					context.ReportDiagnostic(Diagnostic.Create(
-						multipleRequestTypeMethodsDescriptor,
+					diagnostics.Add(new DiagnosticInfo(
+						multipleRequestTypeMethodsDescriptor.Id,
+						multipleRequestTypeMethodsDescriptor.Title.ToString(),
+						multipleRequestTypeMethodsDescriptor.MessageFormat.ToString(),
+						multipleRequestTypeMethodsDescriptor.Category,
+						multipleRequestTypeMethodsDescriptor.DefaultSeverity,
 						requestTypeCall.GetLocation(),
 						memberAccess.Name.Identifier.ValueText));
 				}

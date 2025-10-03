@@ -1,87 +1,94 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 
-class EndpointInfo
+public abstract class TypeInfo
 {
-	public EndpointInfo(
-		string className,
-		EndpointType type,
-		(INamedTypeSymbol symbol, string pattern)? group,
-		HttpVerb verb,
-		string pattern,
-		string? withName,
-		string? withTags,
-		ITypeSymbol? requestType,
-		(RequestBindingTypeEnum RequestBindingType, string? Name)? requestBindingType,
-		INamedTypeSymbol? fluentValidationClass,
-		ITypeSymbol? responseType)
+	protected TypeInfo(string typeName, Location location, DiagnosticInfo[] diagnostics)
 	{
-		ClassName = className;
-		Type = type;
-		Group = group;
-		Verb = verb;
+		TypeName = typeName;
+		Location = location;
+		Diagnostics = diagnostics;
+	}
+
+	public string TypeName { get; }
+	public Location Location { get; }
+	public DiagnosticInfo[] Diagnostics { get; }
+}
+
+public sealed class ValidatorInfo : TypeInfo
+{
+	public ValidatorInfo(string typeName, string validatedTypeName, Location location, DiagnosticInfo[] diagnostics)
+		: base(typeName, location, diagnostics)
+	{
+		ValidatedTypeName = validatedTypeName;
+	}
+
+	public string ValidatedTypeName { get; }
+}
+
+public sealed class EndpointGroupInfo : TypeInfo
+{
+	public EndpointGroupInfo(string typeName, string pattern, string? withName, string? withTags, Location location, DiagnosticInfo[] diagnostics)
+		: base(typeName, location, diagnostics)
+	{
 		Pattern = pattern;
 		WithName = withName;
 		WithTags = withTags;
+	}
+
+	public string Pattern { get; set; }
+	public string? WithName { get; }
+	public string? WithTags { get; }
+}
+
+public sealed class EndpointInfo : TypeInfo
+{
+	public EndpointInfo(
+		string typeName,
+		HttpVerb httpVerb,
+		string routePattern,
+		string? withName,
+		string? withTags,
+		string? group,
+		string? requestType,
+		RequestBindingTypeEnum? requestBindingType,
+		bool disableValidation,
+		string? responseType,
+		Location location,
+		DiagnosticInfo[] diagnostics)
+		: base(typeName, location, diagnostics)
+	{
+		HttpVerb = httpVerb;
+		RoutePattern = routePattern;
+		WithName = withName;
+		WithTags = withTags;
+		Group = group;
 		RequestType = requestType;
 		RequestBindingType = requestBindingType;
-		FluentValidationClass = fluentValidationClass;
+		DisableValidation = disableValidation;
 		ResponseType = responseType;
 	}
 
-	public string ClassName { get; set; }
-	public EndpointType Type { get; set; }
-	public (INamedTypeSymbol symbol, string pattern)? Group { get; set; }
-	public ITypeSymbol? RequestType { get; set; }
-	public (RequestBindingTypeEnum RequestBindingType, string? Name)? RequestBindingType { get; set; }
-	public INamedTypeSymbol? FluentValidationClass { get; set; }
-	public ITypeSymbol? ResponseType { get; set; }
-	public string? WithName { get; set; }
-	public string? WithTags { get; set; }
-	public HttpVerb Verb { get; set; }
-	public string Pattern { get; set; }
-	public bool HasRequest
-	{
-		get => Type switch
-		{
-			EndpointType.WithRequestAndResponse => true,
-			EndpointType.WithoutResponse => true,
-			EndpointType.WithoutRequest => false,
-			EndpointType.WithoutRequestOrResponse => false,
-			_ => false
-		};
-	}
-	public bool HasResponse
-	{
-		get => Type switch
-		{
-			EndpointType.WithRequestAndResponse => true,
-			EndpointType.WithoutResponse => false,
-			EndpointType.WithoutRequest => true,
-			EndpointType.WithoutRequestOrResponse => false,
-			_ => false
-		};
-	}
+	public HttpVerb? HttpVerb { get; }
+	public string? RoutePattern { get; }
+	public string? WithName { get; }
+	public string? WithTags { get; }
+	public string? Group { get; }
+	public string? RequestType { get; }
+	public RequestBindingTypeEnum? RequestBindingType { get; }
+	public string? ResponseType { get; }
+	public bool DisableValidation { get; }
 
 	public string GetSafeClassName()
 	{
 		// Use the full class name to ensure uniqueness, then sanitize it
-		return ClassName.Replace(".", "").Replace("<", "").Replace(">", "").Replace(",", "").Replace("`", "");
+		return TypeName.Replace(".", "").Replace("<", "").Replace(">", "").Replace(",", "").Replace("`", "");
 	}
 }
 
-enum EndpointType
-{
-	WithRequestAndResponse,
-	WithoutRequest,
-	WithoutResponse,
-	WithoutRequestOrResponse
-}
-
-enum HttpVerb
+public enum HttpVerb
 {
 	Get,
 	Post,

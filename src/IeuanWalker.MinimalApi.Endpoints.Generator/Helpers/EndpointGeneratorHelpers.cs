@@ -1,47 +1,53 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
+using Microsoft.CodeAnalysis;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
 static class EndpointGeneratorHelpers
 {
-	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber, (string groupName, string pattern)? group)
+	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber, List<ValidatorInfo> validators, (EndpointGroupInfo groupInfo, string groupName)? group)
 	{
-		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.Verb, $"{group?.pattern ?? string.Empty}{endpoint.Pattern}", routeNumber).ToLowerFirstLetter();
+		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.HttpVerb ?? HttpVerb.Get, $"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}", routeNumber).ToLowerFirstLetter();
 
-		builder.AppendLine($"// {endpoint.Verb.ToString().ToUpper()}: {group?.pattern ?? string.Empty}{endpoint.Pattern}");
+		builder.AppendLine($"// {endpoint.HttpVerb?.ToString().ToUpper()}: {group?.groupInfo?.Pattern ?? string.Empty}{endpoint.RoutePattern}");
 
 		builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = {group?.groupName ?? "app"}");
 		builder.IncreaseIndent();
-		builder.AppendLine($".{endpoint.Verb.ToMap()}(\"{endpoint.Pattern}\", async (");
+		builder.AppendLine($".{endpoint.HttpVerb?.ToMap() ?? "MapGet"}(\"{endpoint.RoutePattern}\", async (");
 
 		builder.IncreaseIndent();
 
-		if (endpoint.HasRequest)
+		if (endpoint.RequestType is not null)
 		{
 			builder.AppendLine($"{endpoint.GetBindingType()}global::{endpoint.RequestType} request,");
 		}
-		builder.AppendLine($"[FromServices] global::{endpoint.ClassName} endpoint,");
-		builder.Append($"CancellationToken ct) => await endpoint.Handle({(endpoint.HasRequest ? "request, " : string.Empty)}ct))");
+		builder.AppendLine($"[FromServices] global::{endpoint.TypeName} endpoint,");
+		builder.Append($"CancellationToken ct) => await endpoint.Handle({(endpoint.RequestType is not null ? "request, " : string.Empty)}ct))");
 
 		builder.DecreaseIndent();
 
-		if (endpoint.WithTags is null)
+		if (endpoint.WithTags is null && group?.groupInfo.WithTags is null)
 		{
-			builder.GenerateAndAddTags($"{group?.pattern ?? string.Empty}{endpoint.Pattern}");
+			builder.GenerateAndAddTags($"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}");
 		}
 
-		if (endpoint.WithName is null)
+		if (endpoint.WithName is null && group?.groupInfo.WithName is null)
 		{
 			builder.AppendLine();
 			builder.Append($".WithName(\"{uniqueRootName}\")");
 		}
 
-		if (endpoint.FluentValidationClass is not null)
+		if (endpoint.RequestType is not null)
 		{
-			builder.AppendLine();
-			builder.AppendLine(".DisableValidation()");
-			builder.AppendLine($".AddEndpointFilter<FluentValidationFilter<global::{endpoint.RequestType}>>()");
-			builder.Append(".ProducesValidationProblem()");
+			ValidatorInfo? requestValidator = validators.FirstOrDefault(x => x.ValidatedTypeName.Equals(endpoint.RequestType));
+
+			if (requestValidator is not null)
+			{
+				builder.AppendLine();
+				builder.AppendLine(".DisableValidation()");
+				builder.AppendLine($".AddEndpointFilter<FluentValidationFilter<global::{endpoint.RequestType}>>()");
+				builder.Append(".ProducesValidationProblem()");
+			}
 		}
 
 		builder.AppendLine(";");
@@ -49,12 +55,12 @@ static class EndpointGeneratorHelpers
 		builder.AppendLine();
 
 		// Configure the endpoint
-		builder.AppendLine($"global::{endpoint.ClassName}.Configure({uniqueRootName});");
+		builder.AppendLine($"global::{endpoint.TypeName}.Configure({uniqueRootName});");
 	}
 
 	static string GetBindingType(this EndpointInfo endpoint)
 	{
-		if (!endpoint.HasRequest)
+		if (endpoint.RequestType is null)
 		{
 			return string.Empty;
 		}
@@ -64,6 +70,7 @@ static class EndpointGeneratorHelpers
 			return string.Empty;
 		}
 
-		return $"[{endpoint.RequestBindingType.Value.RequestBindingType.ConvertFromRequestBindingType()}{(endpoint.RequestBindingType.Value.Name is not null ? $"(Name = \"{endpoint.RequestBindingType.Value.Name}\")" : string.Empty)}] ";
+
+		return $"[{endpoint.RequestBindingType.Value.ConvertFromRequestBindingType()}] ";
 	}
 }
