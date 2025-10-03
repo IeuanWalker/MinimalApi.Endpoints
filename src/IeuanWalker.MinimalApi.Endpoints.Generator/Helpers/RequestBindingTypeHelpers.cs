@@ -99,6 +99,69 @@ static class RequestBindingTypeHelpers
 		RequestBindingTypeEnum.AsParameters => "AsParameters",
 		_ => throw new NotImplementedException()
 	};
+
+	/// <summary>
+	/// Extracts request binding type from a type declaration for use in incremental generator transform step.
+	/// Collects diagnostics instead of reporting them immediately.
+	/// </summary>
+	public static (RequestBindingTypeEnum requestType, string? name)? ExtractRequestBindingType(TypeDeclarationSyntax typeDeclaration, List<DiagnosticInfo> diagnostics)
+	{
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
+			.OfType<MethodDeclarationSyntax>()
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+
+		if (configureMethod is null)
+		{
+			return null;
+		}
+
+		string[] requestTypeMethods = ["RequestFromBody", "RequestFromQuery", "RequestFromRoute", "RequestFromHeader", "RequestFromForm", "RequestAsParameters"];
+		IEnumerable<InvocationExpressionSyntax> requestTypeCalls = configureMethod.DescendantNodes()
+			.OfType<InvocationExpressionSyntax>()
+			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && requestTypeMethods.Contains(memberAccess.Name.Identifier.ValueText));
+
+		// Validate that there's only one request type method call
+		if (requestTypeCalls.Count() > 1)
+		{
+			// Report error on each request type method call
+			foreach (InvocationExpressionSyntax requestTypeCall in requestTypeCalls)
+			{
+				if (requestTypeCall.Expression is MemberAccessExpressionSyntax memberAccess)
+				{
+					diagnostics.Add(new DiagnosticInfo(
+						multipleRequestTypeMethodsDescriptor.Id,
+						multipleRequestTypeMethodsDescriptor.Title.ToString(),
+						multipleRequestTypeMethodsDescriptor.MessageFormat.ToString(),
+						multipleRequestTypeMethodsDescriptor.Category,
+						multipleRequestTypeMethodsDescriptor.DefaultSeverity,
+						requestTypeCall.GetLocation(),
+						memberAccess.Name.Identifier.ValueText));
+				}
+			}
+			return null;
+		}
+
+		InvocationExpressionSyntax? firstRequestTypeCall = requestTypeCalls.FirstOrDefault();
+		if (firstRequestTypeCall?.Expression is MemberAccessExpressionSyntax requestTypeMemberAccess)
+		{
+			RequestBindingTypeEnum? requestType = ConvertToRequestBindingType(requestTypeMemberAccess.Name.Identifier.ValueText);
+			if (requestType.HasValue)
+			{
+				string? name = null;
+				if (firstRequestTypeCall.ArgumentList.Arguments.Count > 0)
+				{
+					ArgumentSyntax argument = firstRequestTypeCall.ArgumentList.Arguments[0];
+					if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
+					{
+						name = literal.Token.ValueText;
+					}
+				}
+				return (requestType.Value, name);
+			}
+		}
+
+		return null;
+	}
 }
 
 public enum RequestBindingTypeEnum

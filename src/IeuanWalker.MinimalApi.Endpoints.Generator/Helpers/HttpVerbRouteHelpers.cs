@@ -114,4 +114,79 @@ static class HttpVerbRouteHelpers
 		"delete" => HttpVerb.Delete,
 		_ => null
 	};
+
+	/// <summary>
+	/// Extracts HTTP verb and pattern from a type declaration for use in incremental generator transform step.
+	/// Collects diagnostics instead of reporting them immediately.
+	/// </summary>
+	public static (HttpVerb verb, string pattern)? ExtractVerbAndPattern(TypeDeclarationSyntax typeDeclaration, string typeName, List<DiagnosticInfo> diagnostics)
+	{
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
+			.OfType<MethodDeclarationSyntax>()
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+
+		if (configureMethod is null)
+		{
+			return null;
+		}
+
+		string[] httpVerbMethods = ["Get", "Post", "Put", "Patch", "Delete"];
+		IEnumerable<InvocationExpressionSyntax> httpVerbCalls = configureMethod.DescendantNodes()
+			.OfType<InvocationExpressionSyntax>()
+			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && httpVerbMethods.Contains(memberAccess.Name.Identifier.ValueText));
+
+		List<InvocationExpressionSyntax> httpVerbCallsList = httpVerbCalls.ToList();
+
+		// Validate HTTP verb usage
+		if (httpVerbCallsList.Count == 0)
+		{
+			// No HTTP verb found - report on Configure method
+			diagnostics.Add(new DiagnosticInfo(
+				noHttpVerbDescriptor.Id,
+				noHttpVerbDescriptor.Title.ToString(),
+				noHttpVerbDescriptor.MessageFormat.ToString(),
+				noHttpVerbDescriptor.Category,
+				noHttpVerbDescriptor.DefaultSeverity,
+				configureMethod.Identifier.GetLocation(),
+				typeName));
+			return null;
+		}
+
+		if (httpVerbCallsList.Count > 1)
+		{
+			// Report error on each HTTP verb method call
+			foreach (InvocationExpressionSyntax httpVerbCall in httpVerbCallsList)
+			{
+				if (httpVerbCall.Expression is MemberAccessExpressionSyntax memberAccess)
+				{
+					diagnostics.Add(new DiagnosticInfo(
+						multipleHttpVerbsDescriptor.Id,
+						multipleHttpVerbsDescriptor.Title.ToString(),
+						multipleHttpVerbsDescriptor.MessageFormat.ToString(),
+						multipleHttpVerbsDescriptor.Category,
+						multipleHttpVerbsDescriptor.DefaultSeverity,
+						httpVerbCall.GetLocation(),
+						memberAccess.Name.Identifier.ValueText));
+				}
+			}
+			return null;
+		}
+
+		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList[0];
+		if (firstHttpVerbCall.Expression is MemberAccessExpressionSyntax verbMemberAccess)
+		{
+			HttpVerb? verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
+
+			if (verb.HasValue && firstHttpVerbCall.ArgumentList.Arguments.Count > 0)
+			{
+				ArgumentSyntax argument = firstHttpVerbCall.ArgumentList.Arguments[0];
+				if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
+				{
+					return (verb.Value, literal.Token.ValueText);
+				}
+			}
+		}
+
+		return null;
+	}
 }

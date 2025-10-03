@@ -59,4 +59,33 @@ static class WithNameHelpers
 		return $"{verb}_{pattern}_{routeNumber}";
 	}
 
+	/// <summary>
+	/// Extracts WithName value from a type declaration for use in incremental generator transform step.
+	/// </summary>
+	public static string? ExtractWithName(TypeDeclarationSyntax typeDeclaration)
+	{
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
+			.OfType<MethodDeclarationSyntax>()
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+
+		if (configureMethod is null)
+		{
+			return null;
+		}
+
+		InvocationExpressionSyntax? withNameCall = configureMethod.DescendantNodes()
+			.OfType<InvocationExpressionSyntax>()
+			.FirstOrDefault(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "WithName");
+
+		if (withNameCall?.ArgumentList.Arguments.Count > 0)
+		{
+			ArgumentSyntax argument = withNameCall.ArgumentList.Arguments[0];
+			if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
+			{
+				return literal.Token.ValueText;
+			}
+		}
+
+		return null;
+	}
 }

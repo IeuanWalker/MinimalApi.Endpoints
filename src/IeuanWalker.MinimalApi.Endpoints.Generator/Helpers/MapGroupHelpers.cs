@@ -178,4 +178,144 @@ static class MapGroupHelpers
 
 		return false;
 	}
+
+	/// <summary>
+	/// Extracts group information from a type declaration for use in incremental generator transform step.
+	/// Collects diagnostics instead of reporting them immediately.
+	/// </summary>
+	public static (string? groupTypeName, string? pattern)? ExtractGroup(TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol? endpointGroupSymbol, SemanticModel semanticModel, List<DiagnosticInfo> diagnostics)
+	{
+		if (endpointGroupSymbol is null)
+		{
+			return null;
+		}
+
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
+			.OfType<MethodDeclarationSyntax>()
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+
+		if (configureMethod is null)
+		{
+			return null;
+		}
+
+		IEnumerable<InvocationExpressionSyntax> groupCalls = configureMethod.DescendantNodes()
+			.OfType<InvocationExpressionSyntax>()
+			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
+
+		List<InvocationExpressionSyntax> groupCallsList = groupCalls.ToList();
+
+		// Validate that there's only one Group call
+		if (groupCallsList.Count > 1)
+		{
+			// Report error on each Group method call
+			foreach (InvocationExpressionSyntax groupCall in groupCallsList)
+			{
+				diagnostics.Add(new DiagnosticInfo(
+					multipleGroupCallsDescriptor.Id,
+					multipleGroupCallsDescriptor.Title.ToString(),
+					multipleGroupCallsDescriptor.MessageFormat.ToString(),
+					multipleGroupCallsDescriptor.Category,
+					multipleGroupCallsDescriptor.DefaultSeverity,
+					groupCall.GetLocation()));
+			}
+			return null;
+		}
+
+		InvocationExpressionSyntax? firstGroupCall = groupCallsList.FirstOrDefault();
+
+		if (firstGroupCall?.Expression is MemberAccessExpressionSyntax memberAccessExpr &&
+			memberAccessExpr.Name is GenericNameSyntax genericName &&
+			genericName.TypeArgumentList.Arguments.Count > 0)
+		{
+			TypeSyntax endpointGroup = genericName.TypeArgumentList.Arguments[0];
+			Microsoft.CodeAnalysis.TypeInfo symbolTypeInfo = semanticModel.GetTypeInfo(endpointGroup);
+
+			if (symbolTypeInfo.Type is INamedTypeSymbol namedTypeSymbol)
+			{
+				if (SymbolEqualityComparer.Default.Equals(namedTypeSymbol, endpointGroupSymbol) ||
+					namedTypeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointGroupSymbol)) ||
+					InheritsFrom(namedTypeSymbol, endpointGroupSymbol))
+				{
+					string? pattern = ExtractPatternFromEndpointGroup(namedTypeSymbol, diagnostics);
+					if (pattern is not null)
+					{
+						return (namedTypeSymbol.ToDisplayString(), pattern);
+					}
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/// <summary>
+	/// Extracts pattern from an endpoint group for use in incremental generator transform step.
+	/// Collects diagnostics instead of reporting them immediately.
+	/// </summary>
+	public static string? ExtractPatternFromEndpointGroup(INamedTypeSymbol endpointGroupSymbol, List<DiagnosticInfo> diagnostics)
+	{
+		foreach (SyntaxReference syntaxRef in endpointGroupSymbol.DeclaringSyntaxReferences)
+		{
+			SyntaxNode syntaxNode = syntaxRef.GetSyntax();
+			if (syntaxNode is TypeDeclarationSyntax typeDeclaration)
+			{
+				MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
+					.OfType<MethodDeclarationSyntax>()
+					.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+
+				if (configureMethod is not null)
+				{
+					IEnumerable<InvocationExpressionSyntax> mapGroupCalls = configureMethod.DescendantNodes()
+						.OfType<InvocationExpressionSyntax>()
+						.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "MapGroup");
+
+					List<InvocationExpressionSyntax> mapGroupCallsList = mapGroupCalls.ToList();
+
+					// Validate endpoint group Configure method
+					if (mapGroupCallsList.Count == 0)
+					{
+						// No MapGroup found
+						diagnostics.Add(new DiagnosticInfo(
+							noMapGroupDescriptor.Id,
+							noMapGroupDescriptor.Title.ToString(),
+							noMapGroupDescriptor.MessageFormat.ToString(),
+							noMapGroupDescriptor.Category,
+							noMapGroupDescriptor.DefaultSeverity,
+							configureMethod.Identifier.GetLocation(),
+							endpointGroupSymbol.Name));
+						return null;
+					}
+
+					if (mapGroupCallsList.Count > 1)
+					{
+						// Report error on each MapGroup method call
+						foreach (InvocationExpressionSyntax mapGroupCall in mapGroupCallsList)
+						{
+							diagnostics.Add(new DiagnosticInfo(
+								multipleMapGroupsDescriptor.Id,
+								multipleMapGroupsDescriptor.Title.ToString(),
+								multipleMapGroupsDescriptor.MessageFormat.ToString(),
+								multipleMapGroupsDescriptor.Category,
+								multipleMapGroupsDescriptor.DefaultSeverity,
+								mapGroupCall.GetLocation()));
+						}
+						return null;
+					}
+
+					// Extract pattern from the single MapGroup call
+					InvocationExpressionSyntax firstMapGroupCall = mapGroupCallsList[0];
+					if (firstMapGroupCall.ArgumentList.Arguments.Count > 0)
+					{
+						ArgumentSyntax firstArgument = firstMapGroupCall.ArgumentList.Arguments[0];
+						if (firstArgument.Expression is LiteralExpressionSyntax literalExpr && literalExpr.Token.IsKind(SyntaxKind.StringLiteralToken))
+						{
+							return literalExpr.Token.ValueText;
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 }

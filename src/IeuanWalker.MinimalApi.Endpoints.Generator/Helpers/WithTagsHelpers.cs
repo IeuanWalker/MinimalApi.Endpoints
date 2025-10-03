@@ -178,4 +178,34 @@ static class WithTagsHelpers
 
 		return false;
 	}
+
+	/// <summary>
+	/// Extracts WithTags value from a type declaration for use in incremental generator transform step.
+	/// </summary>
+	public static string? ExtractTags(TypeDeclarationSyntax typeDeclaration)
+	{
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
+			.OfType<MethodDeclarationSyntax>()
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+
+		if (configureMethod is null)
+		{
+			return null;
+		}
+
+		InvocationExpressionSyntax? withTagsCall = configureMethod.DescendantNodes()
+			.OfType<InvocationExpressionSyntax>()
+			.FirstOrDefault(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "WithTags");
+
+		if (withTagsCall?.ArgumentList.Arguments.Count > 0)
+		{
+			ArgumentSyntax argument = withTagsCall.ArgumentList.Arguments[0];
+			if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
+			{
+				return literal.Token.ValueText;
+			}
+		}
+
+		return null;
+	}
 }

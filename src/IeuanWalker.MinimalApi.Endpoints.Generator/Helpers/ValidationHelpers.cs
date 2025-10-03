@@ -160,4 +160,23 @@ static class ValidationHelpers
 
 		return null;
 	}
+
+	/// <summary>
+	/// Checks if validation is disabled for a type declaration for use in incremental generator transform step.
+	/// </summary>
+	public static bool CheckDisableValidation(TypeDeclarationSyntax typeDeclaration)
+	{
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
+			.OfType<MethodDeclarationSyntax>()
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+
+		if (configureMethod is null)
+		{
+			return false;
+		}
+
+		return configureMethod.DescendantNodes()
+			.OfType<InvocationExpressionSyntax>()
+			.Any(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "DisableValidation");
+	}
 }
