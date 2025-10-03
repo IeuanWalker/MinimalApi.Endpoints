@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 
-public abstract class TypeInfo
+public class TypeInfo
 {
-	protected TypeInfo(string typeName, Location location, DiagnosticInfo[] diagnostics)
+	public TypeInfo(string typeName, Location location, List<DiagnosticInfo> diagnostics)
 	{
 		TypeName = typeName;
 		Location = location;
@@ -14,12 +14,12 @@ public abstract class TypeInfo
 
 	public string TypeName { get; }
 	public Location Location { get; }
-	public DiagnosticInfo[] Diagnostics { get; }
+	public List<DiagnosticInfo> Diagnostics { get; }
 }
 
 public sealed class ValidatorInfo : TypeInfo
 {
-	public ValidatorInfo(string typeName, string validatedTypeName, Location location, DiagnosticInfo[] diagnostics)
+	public ValidatorInfo(string typeName, string validatedTypeName, Location location, List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
 	{
 		ValidatedTypeName = validatedTypeName;
@@ -30,7 +30,7 @@ public sealed class ValidatorInfo : TypeInfo
 
 public sealed class EndpointGroupInfo : TypeInfo
 {
-	public EndpointGroupInfo(string typeName, string pattern, string? withName, string? withTags, Location location, DiagnosticInfo[] diagnostics)
+	public EndpointGroupInfo(string typeName, string pattern, string? withName, string? withTags, Location location, List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
 	{
 		Pattern = pattern;
@@ -57,7 +57,7 @@ public sealed class EndpointInfo : TypeInfo
 		bool disableValidation,
 		string? responseType,
 		Location location,
-		DiagnosticInfo[] diagnostics)
+		List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
 	{
 		HttpVerb = httpVerb;

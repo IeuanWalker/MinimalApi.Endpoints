@@ -114,6 +114,11 @@ public class EndpointGenerator : IIncrementalGenerator
 
 		if (verbAndPattern is null)
 		{
+			if (diagnostics.Any())
+			{
+				return new TypeInfo(typeName, location, diagnostics);
+			}
+
 			return null;
 		}
 
@@ -152,7 +157,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			typeDeclaration.DontValidate(),
 			responseTypeName,
 			location,
-			[.. diagnostics]);
+			diagnostics);
 	}
 
 	static void Execute(ImmutableArray<TypeInfo?> typeInfos, string assemblyName, SourceProductionContext context)
@@ -167,7 +172,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		// Report diagnostics
-		foreach (DiagnosticInfo diagnosticInfo in typeInfos.SelectMany(x => x?.Diagnostics))
+		foreach (DiagnosticInfo diagnosticInfo in  typeInfos.SelectMany(x => x?.Diagnostics))
 		{
 			DiagnosticDescriptor descriptor = new(
 				diagnosticInfo.Id,
