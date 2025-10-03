@@ -20,7 +20,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	static readonly DiagnosticDescriptor unsedGroupDescriptor = new(
+	static readonly DiagnosticDescriptor unusedGroupDescriptor = new(
 		id: "MINAPI006",
 		title: "Unused Endpoint Group",
 		messageFormat: "The endpoint group '{0}' is defined but not used by any endpoints. Remove this group or assign it to an endpoint.",
