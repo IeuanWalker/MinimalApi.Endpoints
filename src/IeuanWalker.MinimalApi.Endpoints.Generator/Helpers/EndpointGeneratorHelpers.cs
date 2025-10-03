@@ -71,6 +71,6 @@ static class EndpointGeneratorHelpers
 		}
 
 
-		return $"[{endpoint.RequestBindingType.Value.ConvertFromRequestBindingType()}] ";
+		return $"[{endpoint.RequestBindingType.Value.requestType.ConvertFromRequestBindingType()}{(endpoint.RequestBindingType.Value.name is not null ? $"(Name = \"{endpoint.RequestBindingType.Value.name}\")" : string.Empty)}] ";
 	}
 }

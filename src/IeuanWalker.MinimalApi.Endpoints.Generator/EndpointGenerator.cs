@@ -68,23 +68,13 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		Compilation compilation = semanticModel.Compilation;
-		INamedTypeSymbol? validatorSymbol = compilation.GetTypeByMetadataName(fullValidator);
-		INamedTypeSymbol? endpointGroupSymbol = compilation.GetTypeByMetadataName(fullIEndpointGroup);
-		INamedTypeSymbol? endpointBaseSymbol = compilation.GetTypeByMetadataName(fullIEndpointBase);
-		INamedTypeSymbol? endpointWithRequestAndResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithRequestAndResponse);
-		INamedTypeSymbol? endpointWithoutRequestSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequest);
-		INamedTypeSymbol? endpointWithoutResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutResponse);
-
-		if (validatorSymbol is null || endpointBaseSymbol is null)
-		{
-			return null;
-		}
 
 		List<DiagnosticInfo> diagnostics = [];
 		Location location = typeDeclaration.GetLocation();
 		string typeName = typeSymbol.ToDisplayString();
 
 		// Check if this is a validator
+		INamedTypeSymbol validatorSymbol = compilation.GetTypeByMetadataName(fullValidator)!;
 		bool isValidator = typeSymbol.InheritsFromValidatorBase(validatorSymbol);
 		if (isValidator)
 		{
@@ -97,6 +87,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		// Check if this is an endpoint group
+		INamedTypeSymbol endpointGroupSymbol = compilation.GetTypeByMetadataName(fullIEndpointGroup)!;
 		bool isEndpointGroup = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointGroupSymbol));
 		if (isEndpointGroup)
 		{
@@ -107,79 +98,61 @@ public class EndpointGenerator : IIncrementalGenerator
 				return null;
 			}
 
-			string? withName = typeDeclaration.GetWithName();
-			string? withTags = typeDeclaration.GetTags();
-			return new EndpointGroupInfo(typeName, pattern, withName, withTags, location, [.. diagnostics]);
+			return new EndpointGroupInfo(typeName, pattern, typeDeclaration.GetWithName(), typeDeclaration.GetTags(), location, [.. diagnostics]);
 		}
 
 		// Check if this is an endpoint
+		INamedTypeSymbol endpointBaseSymbol = compilation.GetTypeByMetadataName(fullIEndpointBase)!;
 		bool isEndpoint = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointBaseSymbol));
-		if (isEndpoint)
+
+		if (!isEndpoint)
 		{
-			// Extract HTTP verb and route pattern with diagnostics
-			(HttpVerb verb, string pattern)? verbAndPattern = typeDeclaration.GetVerbAndPattern(typeSymbol.Name, diagnostics);
-			if (verbAndPattern.HasValue)
+			return null;
+		}
+
+		(HttpVerb verb, string pattern)? verbAndPattern = typeDeclaration.GetVerbAndPattern(typeSymbol.Name, diagnostics);
+
+		if (verbAndPattern is null)
+		{
+			return null;
+		}
+
+		INamedTypeSymbol endpointWithRequestAndResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithRequestAndResponse)!;
+		INamedTypeSymbol endpointWithoutRequestSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutRequest)!;
+		INamedTypeSymbol endpointWithoutResponseSymbol = compilation.GetTypeByMetadataName(fullIEndpointWithoutResponse)!;
+
+		string? requestTypeName = null;
+		string? responseTypeName = null;
+		foreach (INamedTypeSymbol interfaceType in typeSymbol.AllInterfaces)
+		{
+			if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithRequestAndResponseSymbol) && interfaceType.TypeArguments.Length == 2)
 			{
-				// Extract WithName
-				string? withName = typeDeclaration.GetWithName();
-
-				// Extract WithTags
-				string? withTags = typeDeclaration.GetTags();
-
-				// Extract Group information with diagnostics
-				string? groupTypeName = null;
-				(INamedTypeSymbol symbol, string pattern)? groupInfo = typeDeclaration.GetGroup(endpointGroupSymbol, semanticModel, diagnostics);
-				if (groupInfo.HasValue)
-				{
-					groupTypeName = groupInfo.Value.symbol.ToDisplayString();
-				}
-
-				// Extract request binding type with diagnostics
-				RequestBindingTypeEnum? requestBindingType = null;
-				(RequestBindingTypeEnum requestType, string? name)? requestBindingInfo = typeDeclaration.GetRequestTypeAndName(diagnostics);
-				requestBindingType = requestBindingInfo?.requestType;
-
-				// Check if validation is disabled
-				bool disableValidation = typeDeclaration.DontValidate();
-
-				// Extract request and response types from interfaces
-				string? requestTypeName = null;
-				string? responseTypeName = null;
-				foreach (INamedTypeSymbol interfaceType in typeSymbol.AllInterfaces)
-				{
-					if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithRequestAndResponseSymbol) && interfaceType.TypeArguments.Length == 2)
-					{
-						requestTypeName = interfaceType.TypeArguments[0].ToDisplayString();
-						responseTypeName = interfaceType.TypeArguments[1].ToDisplayString();
-					}
-					else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequestSymbol) && interfaceType.TypeArguments.Length == 1)
-					{
-						responseTypeName = interfaceType.TypeArguments[0].ToDisplayString();
-					}
-					else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponseSymbol) && interfaceType.TypeArguments.Length == 1)
-					{
-						requestTypeName = interfaceType.TypeArguments[0].ToDisplayString();
-					}
-				}
-
-
-				return new EndpointInfo(
-					typeName,
-					verbAndPattern.Value.verb,
-					verbAndPattern.Value.pattern,
-					withName,
-					withTags,
-					groupTypeName,
-					requestTypeName,
-					requestBindingType,
-					disableValidation,
-					responseTypeName,
-					location,
-					[.. diagnostics]);
+				requestTypeName = interfaceType.TypeArguments[0].ToDisplayString();
+				responseTypeName = interfaceType.TypeArguments[1].ToDisplayString();
+			}
+			else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequestSymbol) && interfaceType.TypeArguments.Length == 1)
+			{
+				responseTypeName = interfaceType.TypeArguments[0].ToDisplayString();
+			}
+			else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponseSymbol) && interfaceType.TypeArguments.Length == 1)
+			{
+				requestTypeName = interfaceType.TypeArguments[0].ToDisplayString();
 			}
 		}
 
-		return null;
+		return new EndpointInfo(
+			typeName,
+			verbAndPattern.Value.verb,
+			verbAndPattern.Value.pattern,
+			typeDeclaration.GetWithName(),
+			typeDeclaration.GetTags(),
+			typeDeclaration.GetGroup(endpointGroupSymbol, semanticModel, diagnostics),
+			requestTypeName,
+			typeDeclaration.GetRequestTypeAndName(diagnostics),
+			typeDeclaration.DontValidate(),
+			responseTypeName,
+			location,
+			[.. diagnostics]);
 	}
 
 	static void Execute(ImmutableArray<TypeInfo?> typeInfos, string assemblyName, SourceProductionContext context)

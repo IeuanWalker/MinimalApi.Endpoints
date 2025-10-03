@@ -30,7 +30,7 @@ static class MapGroupHelpers
 		defaultSeverity: DiagnosticSeverity.Error,
 		isEnabledByDefault: true);
 
-	public static (INamedTypeSymbol symbol, string pattern)? GetGroup(this TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol? endpointGroupSymbol, SemanticModel semanticModel, List<DiagnosticInfo> diagnostics)
+	public static string? GetGroup(this TypeDeclarationSyntax typeDeclaration, INamedTypeSymbol? endpointGroupSymbol, SemanticModel semanticModel, List<DiagnosticInfo> diagnostics)
 	{
 		if (endpointGroupSymbol is null)
 		{
@@ -101,7 +101,7 @@ static class MapGroupHelpers
 					return null;
 				}
 
-				return (namedTypeSymbol, pattern);
+				return namedTypeSymbol.ToDisplayString();
 			}
 		}
 

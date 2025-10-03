@@ -53,7 +53,7 @@ public sealed class EndpointInfo : TypeInfo
 		string? withTags,
 		string? group,
 		string? requestType,
-		RequestBindingTypeEnum? requestBindingType,
+		(RequestBindingTypeEnum requestType, string? name)? requestBindingType,
 		bool disableValidation,
 		string? responseType,
 		Location location,
@@ -77,7 +77,7 @@ public sealed class EndpointInfo : TypeInfo
 	public string? WithTags { get; }
 	public string? Group { get; }
 	public string? RequestType { get; }
-	public RequestBindingTypeEnum? RequestBindingType { get; }
+	public (RequestBindingTypeEnum requestType, string? name)? RequestBindingType { get; }
 	public string? ResponseType { get; }
 	public bool DisableValidation { get; }
 
