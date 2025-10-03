@@ -170,9 +170,9 @@ public class EndpointGenerator : IIncrementalGenerator
 
 	static void Execute(ImmutableArray<TypeInfo?> typeInfos, string assemblyName, SourceProductionContext context)
 	{
-		List<EndpointInfo> allEndpoints = typeInfos.OfType<EndpointInfo>().ToList();
-		List<EndpointGroupInfo> allEndpointGroups = typeInfos.OfType<EndpointGroupInfo>().ToList();
-		List<ValidatorInfo> allValidators = typeInfos.OfType<ValidatorInfo>().ToList();
+		List<EndpointInfo> allEndpoints = [.. typeInfos.OfType<EndpointInfo>()];
+		List<EndpointGroupInfo> allEndpointGroups = [.. typeInfos.OfType<EndpointGroupInfo>()];
+		List<ValidatorInfo> allValidators = [.. typeInfos.OfType<ValidatorInfo>()];
 
 		if (allEndpoints.Count == 0)
 		{
@@ -280,7 +280,7 @@ public class EndpointGenerator : IIncrementalGenerator
 
 				builder.AppendLine();
 
-				List<ValidatorInfo> nonRequestModelValidators = validators.Where(v => !endpointClasses.Any(e => e.RequestType == v.ValidatedTypeName)).ToList();
+				List<ValidatorInfo> nonRequestModelValidators = [.. validators.Where(v => !endpointClasses.Any(e => e.RequestType == v.ValidatedTypeName))];
 				if (nonRequestModelValidators.Any())
 				{
 					builder.AppendLine("// Validators not directly related to an endpoints request model");
