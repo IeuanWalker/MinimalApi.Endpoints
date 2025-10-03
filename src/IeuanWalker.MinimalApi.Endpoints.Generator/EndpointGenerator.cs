@@ -119,9 +119,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		bool isEndpoint = typeSymbol.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, endpointBaseSymbol));
 
 		// Extract interface names for endpoint type determination
-		string[] interfaceNames = typeSymbol.AllInterfaces
-			.Select(i => i.OriginalDefinition.ToDisplayString())
-			.ToArray();
+		string[] interfaceNames = [.. typeSymbol.AllInterfaces.Select(i => i.OriginalDefinition.ToDisplayString())];
 
 		// Extract syntax-based information
 		string? httpVerb = null;
@@ -135,7 +133,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		string? requestBindingName = null;
 		bool disableValidation = false;
 		string? responseTypeName = null;
-		List<DiagnosticInfo> diagnostics = new();
+		List<DiagnosticInfo> diagnostics = [];
 
 		if (isEndpoint)
 		{
@@ -210,7 +208,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			responseTypeName: responseTypeName,
 			interfaceNames: interfaceNames,
 			location: typeDeclaration.GetLocation(),
-			diagnostics: diagnostics.ToArray()
+			diagnostics: [.. diagnostics]
 		);
 	}
 
@@ -231,7 +229,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			.Select(static (compilation, _) => compilation.Assembly.Name.Trim());
 
 		// Combine collected type infos with assembly name
-		IncrementalValueProvider<(ImmutableArray<EndpointTypeInfo?>, string)> combined = 
+		IncrementalValueProvider<(ImmutableArray<EndpointTypeInfo?>, string)> combined =
 			collectedTypeInfos.Combine(assemblyNameProvider);
 
 		// Generate source output
@@ -243,7 +241,7 @@ public class EndpointGenerator : IIncrementalGenerator
 	{
 		List<EndpointInfo> endpointClasses = [];
 		List<(string validator, string model, Location location)> allValidators = [];
-		Dictionary<string, EndpointTypeInfo> typeInfoMap = new();
+		Dictionary<string, EndpointTypeInfo> typeInfoMap = [];
 
 		foreach (EndpointTypeInfo? typeInfo in typeInfos)
 		{
@@ -290,7 +288,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			// Handle group inheritance for WithName and WithTags
 			string? withName = typeInfo.WithName;
 			string? withTags = typeInfo.WithTags;
-			
+
 			if (typeInfo.GroupTypeName is not null && typeInfoMap.TryGetValue(typeInfo.GroupTypeName, out EndpointTypeInfo? groupTypeInfo))
 			{
 				withName ??= groupTypeInfo.WithName;
@@ -460,7 +458,7 @@ public class EndpointGenerator : IIncrementalGenerator
 				// Group endpoints by their Group property (both symbol and pattern)
 				IOrderedEnumerable<IGrouping<(string? symbol, string? pattern), EndpointInfo>> groupedEndpoints = endpointClasses
 					.GroupBy(x => (x.Group?.symbol, x.Group?.pattern))
-					.OrderBy(g => g.Key.Item1).ThenBy(g => g.Key.pattern);
+					.OrderBy(g => g.Key.symbol).ThenBy(g => g.Key.pattern);
 
 				int groupIndex = 0;
 				int endpointIndex = 0;

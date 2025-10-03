@@ -203,7 +203,7 @@ static class MapGroupHelpers
 			.OfType<InvocationExpressionSyntax>()
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "Group");
 
-		List<InvocationExpressionSyntax> groupCallsList = groupCalls.ToList();
+		List<InvocationExpressionSyntax> groupCallsList = [.. groupCalls];
 
 		// Validate that there's only one Group call
 		if (groupCallsList.Count > 1)
@@ -270,7 +270,7 @@ static class MapGroupHelpers
 						.OfType<InvocationExpressionSyntax>()
 						.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.ValueText == "MapGroup");
 
-					List<InvocationExpressionSyntax> mapGroupCallsList = mapGroupCalls.ToList();
+					List<InvocationExpressionSyntax> mapGroupCallsList = [.. mapGroupCalls];
 
 					// Validate endpoint group Configure method
 					if (mapGroupCallsList.Count == 0)

@@ -135,7 +135,7 @@ static class HttpVerbRouteHelpers
 			.OfType<InvocationExpressionSyntax>()
 			.Where(invocation => invocation.Expression is MemberAccessExpressionSyntax memberAccess && httpVerbMethods.Contains(memberAccess.Name.Identifier.ValueText));
 
-		List<InvocationExpressionSyntax> httpVerbCallsList = httpVerbCalls.ToList();
+		List<InvocationExpressionSyntax> httpVerbCallsList = [.. httpVerbCalls];
 
 		// Validate HTTP verb usage
 		if (httpVerbCallsList.Count == 0)

@@ -7,7 +7,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 /// Represents diagnostic information to be reported during source generation.
 /// This is an immutable value type that can be cached by the incremental generator.
 /// </summary>
-internal sealed class DiagnosticInfo : IEquatable<DiagnosticInfo>
+sealed class DiagnosticInfo : IEquatable<DiagnosticInfo>
 {
 	public DiagnosticInfo(
 		string id,
@@ -37,8 +37,16 @@ internal sealed class DiagnosticInfo : IEquatable<DiagnosticInfo>
 
 	public bool Equals(DiagnosticInfo? other)
 	{
-		if (ReferenceEquals(null, other)) return false;
-		if (ReferenceEquals(this, other)) return true;
+		if (other is null)
+		{
+			return false;
+		}
+
+		if (ReferenceEquals(this, other))
+		{
+			return true;
+		}
+
 		return Id == other.Id &&
 			   Title == other.Title &&
 			   MessageFormat == other.MessageFormat &&
@@ -47,12 +55,19 @@ internal sealed class DiagnosticInfo : IEquatable<DiagnosticInfo>
 			   MessageArgsEquals(other.MessageArgs);
 	}
 
-	private bool MessageArgsEquals(object[] other)
+	bool MessageArgsEquals(object[] other)
 	{
-		if (MessageArgs.Length != other.Length) return false;
+		if (MessageArgs.Length != other.Length)
+		{
+			return false;
+		}
+
 		for (int i = 0; i < MessageArgs.Length; i++)
 		{
-			if (!Equals(MessageArgs[i], other[i])) return false;
+			if (!Equals(MessageArgs[i], other[i]))
+			{
+				return false;
+			}
 		}
 		return true;
 	}

@@ -7,7 +7,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 /// Represents extracted type information from syntax analysis.
 /// This is an immutable value type that can be cached by the incremental generator.
 /// </summary>
-internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
+sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 {
 	public EndpointTypeInfo(
 		string typeName,
@@ -73,8 +73,16 @@ internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 
 	public bool Equals(EndpointTypeInfo? other)
 	{
-		if (ReferenceEquals(null, other)) return false;
-		if (ReferenceEquals(this, other)) return true;
+		if (other is null)
+		{
+			return false;
+		}
+
+		if (ReferenceEquals(this, other))
+		{
+			return true;
+		}
+
 		return TypeName == other.TypeName &&
 			   IsAbstract == other.IsAbstract &&
 			   IsValidator == other.IsValidator &&
@@ -95,22 +103,36 @@ internal sealed class EndpointTypeInfo : IEquatable<EndpointTypeInfo>
 			   DiagnosticsEquals(other.Diagnostics);
 	}
 
-	private bool InterfaceNamesEquals(string[] other)
+	bool InterfaceNamesEquals(string[] other)
 	{
-		if (InterfaceNames.Length != other.Length) return false;
+		if (InterfaceNames.Length != other.Length)
+		{
+			return false;
+		}
+
 		for (int i = 0; i < InterfaceNames.Length; i++)
 		{
-			if (InterfaceNames[i] != other[i]) return false;
+			if (InterfaceNames[i] != other[i])
+			{
+				return false;
+			}
 		}
 		return true;
 	}
 
-	private bool DiagnosticsEquals(DiagnosticInfo[] other)
+	bool DiagnosticsEquals(DiagnosticInfo[] other)
 	{
-		if (Diagnostics.Length != other.Length) return false;
+		if (Diagnostics.Length != other.Length)
+		{
+			return false;
+		}
+
 		for (int i = 0; i < Diagnostics.Length; i++)
 		{
-			if (!Diagnostics[i].Equals(other[i])) return false;
+			if (!Diagnostics[i].Equals(other[i]))
+			{
+				return false;
+			}
 		}
 		return true;
 	}
