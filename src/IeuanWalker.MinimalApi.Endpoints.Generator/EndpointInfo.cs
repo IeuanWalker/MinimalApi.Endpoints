@@ -80,19 +80,4 @@ public sealed class EndpointInfo : TypeInfo
 	public (RequestBindingTypeEnum requestType, string? name)? RequestBindingType { get; }
 	public string? ResponseType { get; }
 	public bool DisableValidation { get; }
-
-	public string GetSafeClassName()
-	{
-		// Use the full class name to ensure uniqueness, then sanitize it
-		return TypeName.Replace(".", "").Replace("<", "").Replace(">", "").Replace(",", "").Replace("`", "");
-	}
-}
-
-public enum HttpVerb
-{
-	Get,
-	Post,
-	Put,
-	Patch,
-	Delete
 }

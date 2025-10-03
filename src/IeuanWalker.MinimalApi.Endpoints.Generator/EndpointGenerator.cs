@@ -208,8 +208,7 @@ public class EndpointGenerator : IIncrementalGenerator
 
 
 		// Handle duplicate validators
-		IEnumerable<IGrouping<string, ValidatorInfo>> validatorGroups = allValidators
-		.GroupBy(v => v.ValidatedTypeName);
+		IEnumerable<IGrouping<string, ValidatorInfo>> validatorGroups = allValidators.GroupBy(v => v.ValidatedTypeName);
 
 		foreach (IGrouping<string, ValidatorInfo> group in validatorGroups.Where(x => x.Count() > 1))
 		{

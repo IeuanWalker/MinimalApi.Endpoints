@@ -34,9 +34,6 @@ static class HttpVerbRouteHelpers
 			return null;
 		}
 
-		HttpVerb? verb = null;
-		string? pattern = null;
-
 		// Look for HTTP verb extension method calls (Get, Post, Put, Patch, Delete)
 		string[] httpVerbMethods = ["Get", "Post", "Put", "Patch", "Delete"];
 		IEnumerable<InvocationExpressionSyntax> httpVerbCalls = configureMethod.DescendantNodes()
@@ -83,7 +80,7 @@ static class HttpVerbRouteHelpers
 		InvocationExpressionSyntax firstHttpVerbCall = httpVerbCallsList[0];
 		if (firstHttpVerbCall.Expression is MemberAccessExpressionSyntax verbMemberAccess)
 		{
-			verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
+			HttpVerb? verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
 
 			// Try to extract the route pattern argument
 			if (verb is not null && firstHttpVerbCall.ArgumentList.Arguments.Count > 0)
@@ -92,12 +89,12 @@ static class HttpVerbRouteHelpers
 
 				if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
 				{
-					pattern = literal.Token.ValueText;
+					return (verb.Value, literal.Token.ValueText);
 				}
 			}
 		}
 
-		return verb is null || pattern is null ? null : (verb.Value, pattern);
+		return null;
 	}
 
 	public static string ToMap(this HttpVerb verb)
@@ -122,4 +119,13 @@ static class HttpVerbRouteHelpers
 		"delete" => HttpVerb.Delete,
 		_ => null
 	};
+}
+
+public enum HttpVerb
+{
+	Get,
+	Post,
+	Put,
+	Patch,
+	Delete
 }
