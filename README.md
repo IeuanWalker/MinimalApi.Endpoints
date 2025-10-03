@@ -9,7 +9,7 @@ A source generator that brings **clean, class-based endpoints** to ASP.NET Core 
 ## Why Use This?
 - **🚀 Zero Runtime Overhead**: Source-generated code with no reflection
 - **🏗️ Clean Architecture**: Organized, testable endpoint classes  
-- **🔧 Full Control**: Complete access to `RouteHandlerBuilder` - it's just Minimal APIs underneath
+- **🔧 Full Control**: Complete access to `RouteHandlerBuilder` and `RouteGroupBuilder` - it's just Minimal APIs underneath
 - **📁 Better Organization**: Clear project structure with endpoint grouping _(check out the example project)_
 - **🔓 No Lock-In**: Copy the generated code and remove the library anytime - you own the output
 
@@ -37,7 +37,7 @@ public class HelloWorldEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
     public static void Configure(RouteHandlerBuilder builder)
     {
-		builder
+        builder
             .Post("/HelloWorld")
             .RequestFromBody()
             .WithName("CreateHelloWorld")
