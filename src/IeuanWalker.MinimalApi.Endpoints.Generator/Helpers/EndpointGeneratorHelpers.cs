@@ -13,7 +13,7 @@ static class EndpointGeneratorHelpers
 
 		builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = {group?.groupName ?? "app"}");
 		builder.IncreaseIndent();
-		builder.AppendLine($".{endpoint.HttpVerb.ToMap() ?? "MapGet"}(\"{endpoint.RoutePattern}\", async (");
+		builder.AppendLine($".{endpoint.HttpVerb.ToMap()}(\"{endpoint.RoutePattern}\", async (");
 
 		builder.IncreaseIndent();
 
