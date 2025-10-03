@@ -201,7 +201,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		foreach (EndpointGroupInfo group in allEndpointGroups.Where(g => !usedGroups.Contains(g.TypeName)))
 		{
 			context.ReportDiagnostic(Diagnostic.Create(
-					unsedGroupDescriptor,
+					unusedGroupDescriptor,
 					group.Location,
 					group.TypeName));
 		}
