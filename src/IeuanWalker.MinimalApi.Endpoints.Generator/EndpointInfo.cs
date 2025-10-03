@@ -71,8 +71,8 @@ public sealed class EndpointInfo : TypeInfo
 		ResponseType = responseType;
 	}
 
-	public HttpVerb? HttpVerb { get; }
-	public string? RoutePattern { get; }
+	public HttpVerb HttpVerb { get; }
+	public string RoutePattern { get; }
 	public string? WithName { get; }
 	public string? WithTags { get; }
 	public string? Group { get; }

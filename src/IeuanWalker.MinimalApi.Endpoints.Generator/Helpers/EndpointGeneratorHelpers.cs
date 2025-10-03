@@ -7,13 +7,13 @@ static class EndpointGeneratorHelpers
 {
 	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber, List<ValidatorInfo> validators, (EndpointGroupInfo groupInfo, string groupName)? group)
 	{
-		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.HttpVerb ?? HttpVerb.Get, $"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}", routeNumber).ToLowerFirstLetter();
+		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.HttpVerb, $"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}", routeNumber).ToLowerFirstLetter();
 
-		builder.AppendLine($"// {endpoint.HttpVerb?.ToString().ToUpper()}: {group?.groupInfo?.Pattern ?? string.Empty}{endpoint.RoutePattern}");
+		builder.AppendLine($"// {endpoint.HttpVerb.ToString().ToUpper()}: {group?.groupInfo?.Pattern ?? string.Empty}{endpoint.RoutePattern}");
 
 		builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = {group?.groupName ?? "app"}");
 		builder.IncreaseIndent();
-		builder.AppendLine($".{endpoint.HttpVerb?.ToMap() ?? "MapGet"}(\"{endpoint.RoutePattern}\", async (");
+		builder.AppendLine($".{endpoint.HttpVerb.ToMap() ?? "MapGet"}(\"{endpoint.RoutePattern}\", async (");
 
 		builder.IncreaseIndent();
 
