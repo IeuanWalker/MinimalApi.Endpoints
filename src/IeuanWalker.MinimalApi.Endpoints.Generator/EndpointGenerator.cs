@@ -180,7 +180,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		// Report diagnostics
-		foreach (DiagnosticInfo diagnosticInfo in typeInfos.SelectMany(x => x?.Diagnostics))
+		foreach (DiagnosticInfo diagnosticInfo in typeInfos.Where(x => x is not null).SelectMany(x => x?.Diagnostics))
 		{
 			DiagnosticDescriptor descriptor = new(
 				diagnosticInfo.Id,
