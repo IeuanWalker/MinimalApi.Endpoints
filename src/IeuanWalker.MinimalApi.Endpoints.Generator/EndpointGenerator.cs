@@ -13,11 +13,19 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 public class EndpointGenerator : IIncrementalGenerator
 {
 	static readonly DiagnosticDescriptor duplicateValidatorsDescriptor = new(
-		id: "MINAPI006",
+		id: "MINAPI007",
 		title: "Duplicate Validator",
 		messageFormat: "Multiple validators found for the model type '{0}'. Only one validator per model type is allowed. Remove this validator or the other conflicting validators for the same model type.",
 		category: "Validation",
 		defaultSeverity: DiagnosticSeverity.Error,
+		isEnabledByDefault: true);
+
+	static readonly DiagnosticDescriptor unsedGroupDescriptor = new(
+		id: "MINAPI006",
+		title: "Unused Endpoint Group",
+		messageFormat: "The endpoint group '{0}' is defined but not used by any endpoints. Remove this group or assign it to an endpoint.",
+		category: "Map group",
+		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true);
 
 	const string fullValidator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
@@ -172,7 +180,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		// Report diagnostics
-		foreach (DiagnosticInfo diagnosticInfo in  typeInfos.SelectMany(x => x?.Diagnostics))
+		foreach (DiagnosticInfo diagnosticInfo in typeInfos.SelectMany(x => x?.Diagnostics))
 		{
 			DiagnosticDescriptor descriptor = new(
 				diagnosticInfo.Id,
@@ -184,10 +192,24 @@ public class EndpointGenerator : IIncrementalGenerator
 			context.ReportDiagnostic(Diagnostic.Create(descriptor, diagnosticInfo.Location, diagnosticInfo.MessageArgs));
 		}
 
+		// Check for unused groupd
+		IEnumerable<string?> usedGroups = allEndpoints
+			.Select(e => e.Group)
+			.Where(g => g is not null)
+			.Distinct();
+
+		foreach (EndpointGroupInfo group in allEndpointGroups.Where(g => !usedGroups.Contains(g.TypeName)))
+		{
+			context.ReportDiagnostic(Diagnostic.Create(
+					unsedGroupDescriptor,
+					group.Location,
+					group.TypeName));
+		}
+
 
 		// Handle duplicate validators
 		IEnumerable<IGrouping<string, ValidatorInfo>> validatorGroups = allValidators
-			.GroupBy(v => v.ValidatedTypeName);
+		.GroupBy(v => v.ValidatedTypeName);
 
 		foreach (IGrouping<string, ValidatorInfo> group in validatorGroups.Where(x => x.Count() > 1))
 		{
