@@ -192,7 +192,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			context.ReportDiagnostic(Diagnostic.Create(descriptor, diagnosticInfo.Location, diagnosticInfo.MessageArgs));
 		}
 
-		// Check for unused groupd
+		// Check for unused groups
 		IEnumerable<string?> usedGroups = allEndpoints
 			.Select(e => e.Group)
 			.Where(g => g is not null)
