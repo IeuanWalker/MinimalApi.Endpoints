@@ -6,7 +6,9 @@ This is a **C# source generator library** for ASP.NET Core that brings clean, cl
 
 ### Project Structure
 
-The repository consists of three main projects:
+The repository consists of three main projects and four test projects:
+
+**Main Projects:**
 
 1. **`src/IeuanWalker.MinimalApi.Endpoints/`** - The main library project containing:
    - Interface definitions (`IEndpoint`, `IEndpointGroup`, `Validator`)
@@ -24,6 +26,18 @@ The repository consists of three main projects:
    - Shows various endpoint patterns and configurations
    - Includes versioning, Scalar API documentation, and validators
    - Organized by feature with `/Endpoints` folder structure
+
+**Test Projects:**
+
+4. **`tests/IeuanWalker.MinimalApi.Endpoints.Tests/`** - Unit tests for the main library (4 tests)
+
+5. **`tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/`** - Unit tests for the source generator (19 tests)
+
+6. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi (15 tests)
+
+7. **`tests/ExampleApi.IntegrationTests/`** - Integration tests for ExampleApi (5 tests)
+
+All test projects use **xUnit** as the test framework, **Shouldly** for assertions, and **NSubstitute** for mocking.
 
 ## Architecture & Design Principles
 
@@ -102,12 +116,91 @@ dotnet restore
 dotnet build
 ```
 
+### Running Tests
+```bash
+# Run all tests
+dotnet test
+
+# Run tests with code coverage
+dotnet test --collect:"XPlat Code Coverage"
+
+# Run specific test project
+dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Tests
+```
+
+### Test Projects
+
+The solution includes **4 comprehensive test projects** with 40+ tests:
+
+1. **`tests/IeuanWalker.MinimalApi.Endpoints.Tests/`** - Unit tests for the main library
+   - Tests for `FluentValidationFilter` covering all scenarios
+   - Uses xUnit, Shouldly, and NSubstitute
+   - 4 tests covering constructor validation, pass/fail scenarios
+
+2. **`tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/`** - Unit tests for the source generator
+   - Comprehensive tests for code generation across all endpoint types
+   - Diagnostic tests for MINAPI001-006 error conditions
+   - String utility extension tests
+   - Uses compilation-based testing with Microsoft.CodeAnalysis
+   - 19 tests total (8 generation tests, 4 diagnostic tests, 7 utility tests)
+
+3. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi
+   - Tests for endpoint handlers with mocked dependencies
+   - Complete test coverage for `InMemoryTodoStore` (all CRUD operations)
+   - 15 tests covering endpoints and services
+
+4. **`tests/ExampleApi.IntegrationTests/`** - Integration tests for ExampleApi
+   - End-to-end HTTP endpoint testing using `WebApplicationFactory`
+   - Tests for validation, error handling, and serialization
+   - 5 integration tests covering success and failure scenarios
+
+### Test Documentation
+
+Comprehensive testing documentation is available in the `tests/` directory:
+- **`tests/README.md`** - Overview of test projects and how to run tests
+- **`tests/CONTRIBUTING.md`** - Guide for adding new tests with patterns and examples
+- **`tests/TEST_SUMMARY.md`** - Detailed coverage statistics and recommendations
+
+### Testing Best Practices
+
+When writing tests for this project:
+- Use **Shouldly** for assertions (e.g., `result.ShouldBe(expected)`, `result.ShouldNotBeNull()`)
+- Follow **Arrange-Act-Assert** pattern
+- Use descriptive test names: `MethodName_Scenario_ExpectedBehavior`
+- Use **NSubstitute** for mocking dependencies
+- Keep tests independent and isolated
+- Test edge cases (null values, empty collections, not found scenarios)
+
+### CI/CD Integration
+
+Tests run automatically via GitHub Actions on:
+- Every push to master branch
+- Every pull request to master
+- Scheduled runs (every 3 months)
+
+The workflow includes:
+- **Test Execution**: All test projects run with `dotnet test`
+- **Code Coverage**: Collected using XPlat Code Coverage
+- **Coverage Enforcement**: Build fails if coverage drops below 80% (configurable via `MINIMUM_COVERAGE` env var)
+- **PR Comments**: Automatic coverage reports posted to pull requests
+
+### Code Coverage Thresholds
+
+- **Minimum Required**: 80% (enforced - build fails below this)
+- **Target**: 95% (warning level)
+- **Tracked Metrics**: Both line and branch coverage
+
+To adjust the minimum coverage threshold, update `MINIMUM_COVERAGE` in `.github/workflows/build.yml`.
+
 ### Testing Source Generator Changes
-Since there's no dedicated test project, test changes by:
-1. Build the solution to trigger source generation
-2. Inspect generated code in `example/ExampleApi/obj/.../EndpointExtensions.g.cs`
-3. Run the ExampleApi project to verify runtime behavior
-4. Check for any diagnostic warnings/errors in build output
+
+When modifying the source generator:
+1. Update or add tests in `IeuanWalker.MinimalApi.Endpoints.Generator.Tests`
+2. Run generator tests: `dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests`
+3. Verify generated code in `example/ExampleApi/obj/.../EndpointExtensions.g.cs`
+4. Run the ExampleApi project to verify runtime behavior
+5. Check for any diagnostic warnings/errors in build output
+6. Ensure code coverage remains above threshold
 
 ### Diagnostic IDs
 Current diagnostic rules (from `AnalyzerReleases.Shipped.md`):
