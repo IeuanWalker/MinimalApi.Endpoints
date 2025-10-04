@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -39,13 +39,13 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.GeneratedTrees.Should().HaveCount(1);
-			result.Diagnostics.Should().BeEmpty();
+			result.GeneratedTrees.Length.ShouldBe(1);
+			result.Diagnostics.ShouldBeEmpty();
 			
 			string generatedCode = result.GeneratedTrees[0].ToString();
-			generatedCode.Should().Contain("AddEndpointsFromTestApp");
-			generatedCode.Should().Contain("MapEndpointsFromTestApp");
-			generatedCode.Should().Contain("GetUserEndpoint");
+			generatedCode.ShouldContain("AddEndpointsFromTestApp");
+			generatedCode.ShouldContain("MapEndpointsFromTestApp");
+			generatedCode.ShouldContain("GetUserEndpoint");
 		});
 	}
 
@@ -77,12 +77,12 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.GeneratedTrees.Should().HaveCount(1);
-			result.Diagnostics.Should().BeEmpty();
+			result.GeneratedTrees.Length.ShouldBe(1);
+			result.Diagnostics.ShouldBeEmpty();
 			
 			string generatedCode = result.GeneratedTrees[0].ToString();
-			generatedCode.Should().Contain("GetHealthEndpoint");
-			generatedCode.Should().Contain(".Get(\"/health\"");
+			generatedCode.ShouldContain("GetHealthEndpoint");
+			generatedCode.ShouldContain(".Get(\"/health\"");
 		});
 	}
 
@@ -119,12 +119,12 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.GeneratedTrees.Should().HaveCount(1);
-			result.Diagnostics.Should().BeEmpty();
+			result.GeneratedTrees.Length.ShouldBe(1);
+			result.Diagnostics.ShouldBeEmpty();
 			
 			string generatedCode = result.GeneratedTrees[0].ToString();
-			generatedCode.Should().Contain("DeleteUserEndpoint");
-			generatedCode.Should().Contain(".Delete(\"/users/{id}\"");
+			generatedCode.ShouldContain("DeleteUserEndpoint");
+			generatedCode.ShouldContain(".Delete(\"/users/{id}\"");
 		});
 	}
 
@@ -156,12 +156,12 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.GeneratedTrees.Should().HaveCount(1);
-			result.Diagnostics.Should().BeEmpty();
+			result.GeneratedTrees.Length.ShouldBe(1);
+			result.Diagnostics.ShouldBeEmpty();
 			
 			string generatedCode = result.GeneratedTrees[0].ToString();
-			generatedCode.Should().Contain("PingEndpoint");
-			generatedCode.Should().Contain(".Get(\"/ping\"");
+			generatedCode.ShouldContain("PingEndpoint");
+			generatedCode.ShouldContain(".Get(\"/ping\"");
 		});
 	}
 
@@ -206,12 +206,12 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.GeneratedTrees.Should().HaveCount(1);
-			result.Diagnostics.Should().BeEmpty();
+			result.GeneratedTrees.Length.ShouldBe(1);
+			result.Diagnostics.ShouldBeEmpty();
 			
 			string generatedCode = result.GeneratedTrees[0].ToString();
-			generatedCode.Should().Contain("UserEndpointGroup");
-			generatedCode.Should().Contain("GetUserEndpoint");
+			generatedCode.ShouldContain("UserEndpointGroup");
+			generatedCode.ShouldContain("GetUserEndpoint");
 		});
 	}
 
@@ -257,13 +257,13 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.GeneratedTrees.Should().HaveCount(1);
-			result.Diagnostics.Should().BeEmpty();
+			result.GeneratedTrees.Length.ShouldBe(1);
+			result.Diagnostics.ShouldBeEmpty();
 			
 			string generatedCode = result.GeneratedTrees[0].ToString();
-			generatedCode.Should().Contain("CreateUserEndpoint");
-			generatedCode.Should().Contain("FluentValidationFilter");
-			generatedCode.Should().Contain("RequestModelValidator");
+			generatedCode.ShouldContain("CreateUserEndpoint");
+			generatedCode.ShouldContain("FluentValidationFilter");
+			generatedCode.ShouldContain("RequestModelValidator");
 		});
 	}
 
@@ -313,12 +313,12 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.GeneratedTrees.Should().HaveCount(1);
-			result.Diagnostics.Should().BeEmpty();
+			result.GeneratedTrees.Length.ShouldBe(1);
+			result.Diagnostics.ShouldBeEmpty();
 			
 			string generatedCode = result.GeneratedTrees[0].ToString();
-			generatedCode.Should().Contain("GetUsersEndpoint");
-			generatedCode.Should().Contain("CreateUserEndpoint");
+			generatedCode.ShouldContain("GetUsersEndpoint");
+			generatedCode.ShouldContain("CreateUserEndpoint");
 		});
 	}
 
@@ -355,8 +355,8 @@ public class EndpointGeneratorTests
 		// Act & Assert
 		VerifySourceGenerator(source, result =>
 		{
-			result.Diagnostics.Should().NotBeEmpty();
-			result.Diagnostics.Should().Contain(d => d.Id == "MINAPI001");
+			result.Diagnostics.ShouldNotBeEmpty();
+			result.Diagnostics.ShouldContain(d => d.Id == "MINAPI001");
 		});
 	}
 

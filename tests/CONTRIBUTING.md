@@ -47,11 +47,11 @@ public void GeneratesCode_ForScenario()
 
     VerifySourceGenerator(source, result =>
     {
-        result.GeneratedTrees.Should().HaveCount(1);
-        result.Diagnostics.Should().BeEmpty();
+        result.GeneratedTrees.Length.ShouldBe(1);
+        result.Diagnostics.ShouldBeEmpty();
         
         string generatedCode = result.GeneratedTrees[0].ToString();
-        generatedCode.Should().Contain("ExpectedContent");
+        generatedCode.ShouldContain("ExpectedContent");
     });
 }
 
@@ -64,7 +64,7 @@ public void ReportsDiagnostic_WhenCondition()
         """;
 
     GeneratorDriverRunResult result = RunGenerator(source);
-    result.Diagnostics.Should().Contain(d => d.Id == "MINAPI001");
+    result.Diagnostics.ShouldContain(d => d.Id == "MINAPI001");
 }
 ```
 
@@ -99,8 +99,8 @@ public async Task Handle_Scenario_ExpectedBehavior()
     var result = await endpoint.Handle(request, CancellationToken.None);
 
     // Assert
-    result.Should().NotBeNull();
-    result.Property.Should().Be(expectedValue);
+    result.ShouldNotBeNull();
+    result.Property.ShouldBe(expectedValue);
 }
 ```
 
@@ -141,7 +141,7 @@ public class MyFeatureIntegrationTests : IClassFixture<WebApplicationFactory<Pro
         var response = await client.PostAsJsonAsync("/api/endpoint", requestData);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 }
 ```
@@ -167,13 +167,13 @@ public void TestName()
 }
 ```
 
-### 3. Use FluentAssertions
-Prefer FluentAssertions for more readable assertions:
+### 3. Use Shouldly
+Prefer Shouldly for more readable assertions:
 ```csharp
 // Good
-result.Should().NotBeNull();
-result.Count.Should().Be(5);
-result.Should().Contain(x => x.Id == 1);
+result.ShouldNotBeNull();
+result.Count.ShouldBe(5);
+result.ShouldContain(x => x.Id == 1);
 
 // Avoid
 Assert.NotNull(result);
@@ -232,7 +232,7 @@ public async Task AsyncMethod_Test()
 {
     // Use async/await
     var result = await methodAsync();
-    result.Should().NotBeNull();
+    result.ShouldNotBeNull();
 }
 ```
 
@@ -242,7 +242,7 @@ public async Task AsyncMethod_Test()
 public void Method_ThrowsException()
 {
     Action act = () => method();
-    act.Should().Throw<ArgumentNullException>()
+    Should.Throw<ArgumentNullException>(act)
         .WithParameterName("parameterName");
 }
 ```
@@ -257,7 +257,7 @@ public void Validator_ValidInput_Passes()
     
     var result = validator.Validate(model);
     
-    result.IsValid.Should().BeTrue();
+    result.IsValid.ShouldBeTrue();
 }
 ```
 
@@ -269,7 +269,7 @@ public void Validator_ValidInput_Passes()
 public void Method_WithDifferentInputs(string input, string expected)
 {
     var result = method(input);
-    result.Should().Be(expected);
+    result.ShouldBe(expected);
 }
 ```
 
@@ -286,6 +286,6 @@ dotnet test
 ## Additional Resources
 
 - [xUnit Documentation](https://xunit.net/)
-- [FluentAssertions Documentation](https://fluentassertions.com/)
+- [Shouldly Documentation](https://docs.shouldly.org/)
 - [NSubstitute Documentation](https://nsubstitute.github.io/)
 - [ASP.NET Core Testing](https://learn.microsoft.com/en-us/aspnet/core/test/)

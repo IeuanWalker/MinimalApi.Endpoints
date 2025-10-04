@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
@@ -17,7 +17,7 @@ public class StringExtensionsTests
 		string result = input.Sanitize();
 
 		// Assert
-		result.Should().Be(expected);
+		result.ShouldBe(expected);
 	}
 
 	[Fact]
@@ -30,7 +30,7 @@ public class StringExtensionsTests
 		string result = input.Sanitize("-");
 
 		// Assert
-		result.Should().Be("Hello-World");
+		result.ShouldBe("Hello-World");
 	}
 
 	[Fact]
@@ -43,7 +43,7 @@ public class StringExtensionsTests
 		string result = input.Sanitize(string.Empty);
 
 		// Assert
-		result.Should().Be("HelloWorld");
+		result.ShouldBe("HelloWorld");
 	}
 
 	[Theory]
@@ -57,7 +57,7 @@ public class StringExtensionsTests
 		string result = input.ToLowerFirstLetter();
 
 		// Assert
-		result.Should().Be(expected);
+		result.ShouldBe(expected);
 	}
 
 	[Theory]
@@ -71,6 +71,6 @@ public class StringExtensionsTests
 		string result = input.ToUpperFirstLetter();
 
 		// Assert
-		result.Should().Be(expected);
+		result.ShouldBe(expected);
 	}
 }

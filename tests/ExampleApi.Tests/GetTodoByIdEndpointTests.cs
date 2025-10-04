@@ -1,8 +1,8 @@
 using ExampleApi.Endpoints.Todos.GetById;
 using ExampleApi.Models;
 using ExampleApi.Services;
-using FluentAssertions;
 using NSubstitute;
+using Shouldly;
 
 namespace ExampleApi.Tests;
 
@@ -32,11 +32,11 @@ public class GetTodoByIdEndpointTests
 		ResponseModel? result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.Should().NotBeNull();
-		result!.Id.Should().Be(1);
-		result.Title.Should().Be("Test Todo");
-		result.Description.Should().Be("Test Description");
-		result.IsCompleted.Should().BeFalse();
+		result.ShouldNotBeNull();
+		result.Id.ShouldBe(1);
+		result.Title.ShouldBe("Test Todo");
+		result.Description.ShouldBe("Test Description");
+		result.IsCompleted.ShouldBeFalse();
 	}
 
 	[Fact]
@@ -54,6 +54,6 @@ public class GetTodoByIdEndpointTests
 		ResponseModel? result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.Should().BeNull();
+		result.ShouldBeNull();
 	}
 }

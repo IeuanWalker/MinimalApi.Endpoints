@@ -7,7 +7,7 @@ This document provides an overview of the test coverage for the MinimalApi.Endpo
 - **Test Projects**: 4
 - **Test Files**: 9
 - **Total Tests**: 41+ (Fact and Theory tests)
-- **Testing Frameworks**: xUnit, FluentAssertions, NSubstitute, Microsoft.AspNetCore.Mvc.Testing
+- **Testing Frameworks**: xUnit, Shouldly, NSubstitute, Microsoft.AspNetCore.Mvc.Testing
 
 ## Test Projects Overview
 
@@ -123,7 +123,7 @@ This document provides an overview of the test coverage for the MinimalApi.Endpo
 ### Test Patterns Used
 - ✅ Arrange-Act-Assert pattern
 - ✅ Descriptive test names
-- ✅ FluentAssertions for readability
+- ✅ Shouldly for readability
 - ✅ NSubstitute for mocking
 - ✅ Theory tests for multiple test cases
 - ✅ Async/await patterns
@@ -232,7 +232,7 @@ Generator tests use assertion-based verification instead of snapshot testing due
 - [ ] Tests use Arrange-Act-Assert pattern
 - [ ] Tests are independent and isolated
 - [ ] Tests cover both success and failure scenarios
-- [ ] Tests use appropriate assertions (FluentAssertions)
+- [ ] Tests use appropriate assertions (Shouldly)
 - [ ] Tests mock external dependencies
 - [ ] Tests are documented with clear names
 

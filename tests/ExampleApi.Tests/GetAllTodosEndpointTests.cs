@@ -1,8 +1,8 @@
 using ExampleApi.Endpoints.Todos.GetAll;
 using ExampleApi.Models;
 using ExampleApi.Services;
-using FluentAssertions;
 using NSubstitute;
+using Shouldly;
 
 namespace ExampleApi.Tests;
 
@@ -28,11 +28,11 @@ public class GetAllTodosEndpointTests
 		ResponseModel[] result = await endpoint.Handle(CancellationToken.None);
 
 		// Assert
-		result.Should().HaveCount(2);
-		result[0].Id.Should().Be(1);
-		result[0].Title.Should().Be("Todo 1");
-		result[1].Id.Should().Be(2);
-		result[1].Title.Should().Be("Todo 2");
+		result.Length.ShouldBe(2);
+		result[0].Id.ShouldBe(1);
+		result[0].Title.ShouldBe("Todo 1");
+		result[1].Id.ShouldBe(2);
+		result[1].Title.ShouldBe("Todo 2");
 	}
 
 	[Fact]
@@ -49,6 +49,6 @@ public class GetAllTodosEndpointTests
 		ResponseModel[] result = await endpoint.Handle(CancellationToken.None);
 
 		// Assert
-		result.Should().BeEmpty();
+		result.ShouldBeEmpty();
 	}
 }

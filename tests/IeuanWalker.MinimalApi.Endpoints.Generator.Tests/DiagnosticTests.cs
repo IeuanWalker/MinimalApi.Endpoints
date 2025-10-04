@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -34,7 +34,7 @@ public class DiagnosticTests
 		GeneratorDriverRunResult result = RunGenerator(source);
 
 		// Assert
-		result.Diagnostics.Should().Contain(d => d.Id == "MINAPI001");
+		result.Diagnostics.ShouldContain(d => d.Id == "MINAPI001");
 	}
 
 	[Fact]
@@ -65,7 +65,7 @@ public class DiagnosticTests
 		GeneratorDriverRunResult result = RunGenerator(source);
 
 		// Assert
-		result.Diagnostics.Should().Contain(d => d.Id == "MINAPI002");
+		result.Diagnostics.ShouldContain(d => d.Id == "MINAPI002");
 	}
 
 	[Fact]
@@ -112,7 +112,7 @@ public class DiagnosticTests
 		GeneratorDriverRunResult result = RunGenerator(source);
 
 		// Assert
-		result.Diagnostics.Should().Contain(d => d.Id == "MINAPI005");
+		result.Diagnostics.ShouldContain(d => d.Id == "MINAPI005");
 	}
 
 	[Fact]
@@ -151,7 +151,7 @@ public class DiagnosticTests
 		GeneratorDriverRunResult result = RunGenerator(source);
 
 		// Assert
-		result.Diagnostics.Should().Contain(d => d.Id == "MINAPI006" && d.Severity == DiagnosticSeverity.Warning);
+		result.Diagnostics.ShouldContain(d => d.Id == "MINAPI006" && d.Severity == DiagnosticSeverity.Warning);
 	}
 
 	private static GeneratorDriverRunResult RunGenerator(string source)

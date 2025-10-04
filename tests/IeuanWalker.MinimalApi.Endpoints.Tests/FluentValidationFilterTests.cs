@@ -1,9 +1,9 @@
-using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
 using IeuanWalker.MinimalApi.Endpoints.Filters;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
+using Shouldly;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests;
 
@@ -21,8 +21,8 @@ public class FluentValidationFilterTests
 		Action act = () => new FluentValidationFilter<TestModel>(null!);
 
 		// Assert
-		act.Should().Throw<ArgumentNullException>()
-			.WithParameterName("validator");
+		Should.Throw<ArgumentNullException>(act)
+			.ParamName.ShouldBe("validator");
 	}
 
 	[Fact]
@@ -46,7 +46,7 @@ public class FluentValidationFilterTests
 		object? result = await filter.InvokeAsync(context, next);
 
 		// Assert
-		result.Should().Be(expectedResult);
+		result.ShouldBe(expectedResult);
 		await next.Received(1).Invoke(context);
 	}
 
@@ -76,7 +76,7 @@ public class FluentValidationFilterTests
 		object? result = await filter.InvokeAsync(context, next);
 
 		// Assert
-		result.Should().Be(expectedResult);
+		result.ShouldBe(expectedResult);
 		await next.Received(1).Invoke(context);
 	}
 
@@ -107,7 +107,7 @@ public class FluentValidationFilterTests
 		object? result = await filter.InvokeAsync(context, next);
 
 		// Assert
-		result.Should().NotBeNull();
+		result.ShouldNotBeNull();
 		await next.DidNotReceive().Invoke(context);
 	}
 }

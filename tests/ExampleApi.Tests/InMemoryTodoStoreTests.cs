@@ -1,6 +1,6 @@
 using ExampleApi.Models;
 using ExampleApi.Services;
-using FluentAssertions;
+using Shouldly;
 
 namespace ExampleApi.Tests;
 
@@ -16,7 +16,7 @@ public class InMemoryTodoStoreTests
 		IEnumerable<Todo> todos = await store.GetAllAsync(CancellationToken.None);
 
 		// Assert
-		todos.Should().HaveCount(3);
+		todos.Count().ShouldBe(3);
 	}
 
 	[Fact]
@@ -29,8 +29,8 @@ public class InMemoryTodoStoreTests
 		Todo? todo = await store.GetByIdAsync(1, CancellationToken.None);
 
 		// Assert
-		todo.Should().NotBeNull();
-		todo!.Id.Should().Be(1);
+		todo.ShouldNotBeNull();
+		todo.Id.ShouldBe(1);
 	}
 
 	[Fact]
@@ -43,7 +43,7 @@ public class InMemoryTodoStoreTests
 		Todo? todo = await store.GetByIdAsync(999, CancellationToken.None);
 
 		// Assert
-		todo.Should().BeNull();
+		todo.ShouldBeNull();
 	}
 
 	[Fact]
@@ -62,9 +62,9 @@ public class InMemoryTodoStoreTests
 		Todo created = await store.CreateAsync(newTodo, CancellationToken.None);
 
 		// Assert
-		created.Id.Should().BeGreaterThan(0);
-		created.Title.Should().Be("New Todo");
-		created.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+		created.Id.ShouldBeGreaterThan(0);
+		created.Title.ShouldBe("New Todo");
+		created.CreatedAt.ShouldBe(DateTime.UtcNow, TimeSpan.FromSeconds(1));
 	}
 
 	[Fact]
@@ -83,10 +83,10 @@ public class InMemoryTodoStoreTests
 		Todo? result = await store.UpdateAsync(1, updatedTodo, CancellationToken.None);
 
 		// Assert
-		result.Should().NotBeNull();
-		result!.Id.Should().Be(1);
-		result.Title.Should().Be("Updated Title");
-		result.UpdatedAt.Should().NotBeNull();
+		result.ShouldNotBeNull();
+		result.Id.ShouldBe(1);
+		result.Title.ShouldBe("Updated Title");
+		result.UpdatedAt.ShouldNotBeNull();
 	}
 
 	[Fact]
@@ -105,7 +105,7 @@ public class InMemoryTodoStoreTests
 		Todo? result = await store.UpdateAsync(999, updatedTodo, CancellationToken.None);
 
 		// Assert
-		result.Should().BeNull();
+		result.ShouldBeNull();
 	}
 
 	[Fact]
@@ -118,11 +118,11 @@ public class InMemoryTodoStoreTests
 		bool result = await store.DeleteAsync(1, CancellationToken.None);
 
 		// Assert
-		result.Should().BeTrue();
+		result.ShouldBeTrue();
 		
 		// Verify deletion
 		Todo? deletedTodo = await store.GetByIdAsync(1, CancellationToken.None);
-		deletedTodo.Should().BeNull();
+		deletedTodo.ShouldBeNull();
 	}
 
 	[Fact]
@@ -135,7 +135,7 @@ public class InMemoryTodoStoreTests
 		bool result = await store.DeleteAsync(999, CancellationToken.None);
 
 		// Assert
-		result.Should().BeFalse();
+		result.ShouldBeFalse();
 	}
 
 	[Fact]
@@ -151,10 +151,10 @@ public class InMemoryTodoStoreTests
 		}, CancellationToken.None);
 
 		// Assert
-		result.Should().NotBeNull();
-		result!.Id.Should().Be(1);
-		result.IsCompleted.Should().BeTrue();
-		result.UpdatedAt.Should().NotBeNull();
+		result.ShouldNotBeNull();
+		result.Id.ShouldBe(1);
+		result.IsCompleted.ShouldBeTrue();
+		result.UpdatedAt.ShouldNotBeNull();
 	}
 
 	[Fact]
@@ -170,6 +170,6 @@ public class InMemoryTodoStoreTests
 		}, CancellationToken.None);
 
 		// Assert
-		result.Should().BeNull();
+		result.ShouldBeNull();
 	}
 }

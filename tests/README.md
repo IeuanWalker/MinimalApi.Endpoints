@@ -83,7 +83,7 @@ dotnet test --collect:"XPlat Code Coverage"
 ## Test Frameworks and Libraries
 
 - **xUnit** - Test framework
-- **FluentAssertions** - Assertion library for more readable tests
+- **Shouldly** - Assertion library for more readable tests
 - **NSubstitute** - Mocking library for unit tests
 - **Microsoft.AspNetCore.Mvc.Testing** - For integration tests
 

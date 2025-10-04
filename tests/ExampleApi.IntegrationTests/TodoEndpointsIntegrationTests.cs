@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Endpoints.Todos.GetAll;
-using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Shouldly;
 
 namespace ExampleApi.IntegrationTests;
 
@@ -25,11 +25,11 @@ public class TodoEndpointsIntegrationTests : IClassFixture<WebApplicationFactory
 		HttpResponseMessage response = await client.GetAsync("/api/v1/todos");
 
 		// Assert
-		response.StatusCode.Should().Be(HttpStatusCode.OK);
+		response.StatusCode.ShouldBe(HttpStatusCode.OK);
 		
 		ResponseModel[]? todos = await response.Content.ReadFromJsonAsync<ResponseModel[]>();
-		todos.Should().NotBeNull();
-		todos.Should().NotBeEmpty();
+		todos.ShouldNotBeNull();
+		todos.ShouldNotBeEmpty();
 	}
 
 	[Fact]
@@ -42,7 +42,7 @@ public class TodoEndpointsIntegrationTests : IClassFixture<WebApplicationFactory
 		HttpResponseMessage response = await client.GetAsync("/api/v1/todos/1");
 
 		// Assert
-		response.StatusCode.Should().Be(HttpStatusCode.OK);
+		response.StatusCode.ShouldBe(HttpStatusCode.OK);
 	}
 
 	[Fact]
@@ -55,7 +55,7 @@ public class TodoEndpointsIntegrationTests : IClassFixture<WebApplicationFactory
 		HttpResponseMessage response = await client.GetAsync("/api/v1/todos/999");
 
 		// Assert
-		response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+		response.StatusCode.ShouldBe(HttpStatusCode.NotFound);
 	}
 
 	[Fact]
@@ -74,7 +74,7 @@ public class TodoEndpointsIntegrationTests : IClassFixture<WebApplicationFactory
 		HttpResponseMessage response = await client.PostAsJsonAsync("/api/v1/todos/fluent-validation", newTodo);
 
 		// Assert
-		response.StatusCode.Should().Be(HttpStatusCode.OK);
+		response.StatusCode.ShouldBe(HttpStatusCode.OK);
 	}
 
 	[Fact]
@@ -93,6 +93,6 @@ public class TodoEndpointsIntegrationTests : IClassFixture<WebApplicationFactory
 		HttpResponseMessage response = await client.PostAsJsonAsync("/api/v1/todos/fluent-validation", newTodo);
 
 		// Assert
-		response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 	}
 }
