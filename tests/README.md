@@ -39,18 +39,6 @@ Tests individual endpoint classes and business logic in isolation:
 **Test Files:**
 - `GetAllTodosEndpointTests.cs` - Tests for the GetAllTodos endpoint
 
-### 4. ExampleApi.IntegrationTests
-**Integration tests for the ExampleApi project**
-
-End-to-end tests that verify the complete application flow:
-- HTTP endpoint behavior
-- Request validation
-- Response serialization
-- Error handling
-
-**Test Files:**
-- `TodoEndpointsIntegrationTests.cs` - Integration tests for Todo endpoints
-
 ## Building and Running Tests
 
 ### Prerequisites
@@ -71,7 +59,6 @@ dotnet test
 dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Tests
 dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests  
 dotnet test tests/ExampleApi.Tests
-dotnet test tests/ExampleApi.IntegrationTests
 ```
 
 ### Run Tests with Coverage

@@ -4,10 +4,10 @@ This document provides an overview of the test coverage for the MinimalApi.Endpo
 
 ## Test Statistics
 
-- **Test Projects**: 4
-- **Test Files**: 6
-- **Total Tests**: 31 (Fact and Theory tests)
-- **Testing Frameworks**: xUnit, Shouldly, NSubstitute, Microsoft.AspNetCore.Mvc.Testing
+- **Test Projects**: 3
+- **Test Files**: 5
+- **Total Tests**: 26 (Fact and Theory tests)
+- **Testing Frameworks**: xUnit, Shouldly, NSubstitute
 
 ## Test Projects Overview
 
@@ -64,19 +64,6 @@ This document provides an overview of the test coverage for the MinimalApi.Endpo
   - DeleteAsync with invalid ID
   - PatchAsync with valid ID
   - PatchAsync with invalid ID
-
-### 4. ExampleApi.IntegrationTests
-**Purpose**: Integration tests for ExampleApi  
-**Files**: 1  
-**Tests**: 5
-
-#### Coverage:
-- ✅ `TodoEndpointsIntegrationTests` (5 tests)
-  - GetAllTodos returns success
-  - GetTodoById with valid ID returns success
-  - GetTodoById with invalid ID returns not found
-  - CreateTodo with valid data returns success
-  - CreateTodo with invalid data returns bad request
 
 ## Coverage by Component
 
@@ -221,6 +208,6 @@ Generator tests use assertion-based verification instead of snapshot testing due
 
 ## Conclusion
 
-The test infrastructure is comprehensive and production-ready. With 31 tests across 4 projects, the solution has solid coverage of core functionality. The tests follow industry best practices and are well-organized for maintainability.
+The test infrastructure is comprehensive and production-ready. With 26 tests across 3 projects, the solution has solid coverage of core functionality. The tests follow industry best practices and are well-organized for maintainability.
 
 **Status**: ✅ Ready for use (pending .NET 10.0 SDK)

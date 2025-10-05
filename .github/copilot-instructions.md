@@ -35,8 +35,6 @@ The repository consists of three main projects and four test projects:
 
 6. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi (15 tests)
 
-7. **`tests/ExampleApi.IntegrationTests/`** - Integration tests for ExampleApi (5 tests)
-
 All test projects use **xUnit** as the test framework, **Shouldly** for assertions, and **NSubstitute** for mocking.
 
 ## Architecture & Design Principles
@@ -130,7 +128,7 @@ dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Tests
 
 ### Test Projects
 
-The solution includes **4 comprehensive test projects** with 30+ tests:
+The solution includes **3 comprehensive test projects** with 26 tests:
 
 1. **`tests/IeuanWalker.MinimalApi.Endpoints.Tests/`** - Unit tests for the main library
    - Tests for `FluentValidationFilter` covering all scenarios
@@ -146,11 +144,6 @@ The solution includes **4 comprehensive test projects** with 30+ tests:
    - Tests for endpoint handlers with mocked dependencies
    - Complete test coverage for `InMemoryTodoStore` (all CRUD operations)
    - 15 tests covering endpoints and services
-
-4. **`tests/ExampleApi.IntegrationTests/`** - Integration tests for ExampleApi
-   - End-to-end HTTP endpoint testing using `WebApplicationFactory`
-   - Tests for validation, error handling, and serialization
-   - 5 integration tests covering success and failure scenarios
 
 ### Test Documentation
 

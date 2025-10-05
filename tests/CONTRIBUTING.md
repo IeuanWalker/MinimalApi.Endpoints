@@ -104,48 +104,6 @@ public async Task Handle_Scenario_ExpectedBehavior()
 }
 ```
 
-### ExampleApi.IntegrationTests
-Integration tests for ExampleApi:
-- Full HTTP request/response flow
-- Validation behavior
-- Error handling
-- Serialization/deserialization
-
-**When to add tests here:**
-- When adding new API endpoints
-- When testing end-to-end scenarios
-- When testing middleware behavior
-
-**Naming Convention:**
-- `{Feature}IntegrationTests.cs` for feature tests
-
-**Test Patterns:**
-```csharp
-public class MyFeatureIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
-{
-    readonly WebApplicationFactory<Program> _factory;
-
-    public MyFeatureIntegrationTests(WebApplicationFactory<Program> factory)
-    {
-        _factory = factory;
-    }
-
-    [Fact]
-    public async Task Endpoint_WithValidRequest_ReturnsSuccess()
-    {
-        // Arrange
-        HttpClient client = _factory.CreateClient();
-        var requestData = new { /* data */ };
-
-        // Act
-        var response = await client.PostAsJsonAsync("/api/endpoint", requestData);
-
-        // Assert
-        response.StatusCode.ShouldBe(HttpStatusCode.OK);
-    }
-}
-```
-
 ## Testing Best Practices
 
 ### 1. Test Naming
