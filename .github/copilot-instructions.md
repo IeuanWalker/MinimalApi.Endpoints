@@ -31,7 +31,7 @@ The repository consists of three main projects and four test projects:
 
 4. **`tests/IeuanWalker.MinimalApi.Endpoints.Tests/`** - Unit tests for the main library (4 tests)
 
-5. **`tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/`** - Unit tests for the source generator (19 tests)
+5. **`tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/`** - Unit tests for the source generator (7 tests)
 
 6. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi (15 tests)
 
@@ -130,7 +130,7 @@ dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Tests
 
 ### Test Projects
 
-The solution includes **4 comprehensive test projects** with 40+ tests:
+The solution includes **4 comprehensive test projects** with 30+ tests:
 
 1. **`tests/IeuanWalker.MinimalApi.Endpoints.Tests/`** - Unit tests for the main library
    - Tests for `FluentValidationFilter` covering all scenarios
@@ -138,11 +138,9 @@ The solution includes **4 comprehensive test projects** with 40+ tests:
    - 4 tests covering constructor validation, pass/fail scenarios
 
 2. **`tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/`** - Unit tests for the source generator
-   - Comprehensive tests for code generation across all endpoint types
-   - Diagnostic tests for MINAPI001-006 error conditions
-   - String utility extension tests
-   - Uses compilation-based testing with Microsoft.CodeAnalysis
-   - 19 tests total (8 generation tests, 4 diagnostic tests, 7 utility tests)
+   - String utility extension tests (Sanitize, ToLowerFirstLetter, ToUpperFirstLetter)
+   - Uses xUnit and Shouldly
+   - 7 tests total
 
 3. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi
    - Tests for endpoint handlers with mocked dependencies

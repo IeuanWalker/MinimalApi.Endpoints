@@ -5,8 +5,8 @@ This document provides an overview of the test coverage for the MinimalApi.Endpo
 ## Test Statistics
 
 - **Test Projects**: 4
-- **Test Files**: 9
-- **Total Tests**: 41+ (Fact and Theory tests)
+- **Test Files**: 6
+- **Total Tests**: 31 (Fact and Theory tests)
 - **Testing Frameworks**: xUnit, Shouldly, NSubstitute, Microsoft.AspNetCore.Mvc.Testing
 
 ## Test Projects Overview
@@ -25,26 +25,10 @@ This document provides an overview of the test coverage for the MinimalApi.Endpo
 
 ### 2. IeuanWalker.MinimalApi.Endpoints.Generator.Tests
 **Purpose**: Unit tests for the source generator  
-**Files**: 3  
-**Tests**: 19
+**Files**: 1  
+**Tests**: 7
 
 #### Coverage:
-- ✅ `EndpointGeneratorTests` (8 tests)
-  - Simple endpoint generation
-  - Endpoint without request
-  - Endpoint without response
-  - Endpoint without request or response
-  - Endpoint with group
-  - Endpoint with validator
-  - Multiple endpoints
-  - Missing HTTP verb diagnostic
-
-- ✅ `DiagnosticTests` (4 tests)
-  - No HTTP verb configured (MINAPI001)
-  - Multiple HTTP verbs configured (MINAPI002)
-  - Multiple groups configured (MINAPI005)
-  - Unused endpoint group warning (MINAPI006)
-
 - ✅ `StringExtensionsTests` (7 tests)
   - Sanitize with default replacement
   - Sanitize with custom replacement
@@ -237,6 +221,6 @@ Generator tests use assertion-based verification instead of snapshot testing due
 
 ## Conclusion
 
-The test infrastructure is comprehensive and production-ready. With 41+ tests across 4 projects, the solution has solid coverage of core functionality. The tests follow industry best practices and are well-organized for maintainability.
+The test infrastructure is comprehensive and production-ready. With 31 tests across 4 projects, the solution has solid coverage of core functionality. The tests follow industry best practices and are well-organized for maintainability.
 
 **Status**: ✅ Ready for use (pending .NET 10.0 SDK)
