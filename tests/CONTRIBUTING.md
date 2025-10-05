@@ -275,7 +275,7 @@ public void Method_WithDifferentInputs(string input, string expected)
 
 ## Requirements for .NET 10.0
 
-Currently, the test projects target .NET 9.0 but reference main projects that target .NET 10.0. You'll need .NET 10.0 SDK installed to build and run all tests.
+All test projects now target .NET 10.0, matching the main projects. You'll need .NET 10.0 SDK installed to build and run all tests.
 
 Once installed:
 ```bash

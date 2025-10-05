@@ -54,8 +54,7 @@ End-to-end tests that verify the complete application flow:
 ## Building and Running Tests
 
 ### Prerequisites
-- .NET 10.0 SDK or later (for projects targeting net10.0)
-- .NET 9.0 SDK (for test projects targeting net9.0)
+- .NET 10.0 SDK or later (required for all projects)
 
 ### Build Tests
 ```bash
@@ -89,6 +88,6 @@ dotnet test --collect:"XPlat Code Coverage"
 
 ## Note on .NET SDK Version
 
-The test projects target .NET 9.0 to ensure they can be built with the current SDK, while the main projects target .NET 10.0. The tests reference the main projects, so .NET 10.0 SDK is required to build and run the complete test suite.
+All test projects now target .NET 10.0, matching the main projects. .NET 10.0 SDK is required to build and run the complete test suite.
 
 Once .NET 10.0 is officially released, all tests can be built and executed normally.

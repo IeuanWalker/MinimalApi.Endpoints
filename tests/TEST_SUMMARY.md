@@ -200,8 +200,7 @@ dotnet test --filter "FullyQualifiedName~FluentValidation"
 
 ### .NET 10.0 SDK Required
 The tests cannot currently be built because:
-- Main projects target .NET 10.0
-- Test projects target .NET 9.0 but reference main projects
+- All projects (main and test) target .NET 10.0
 - Available SDK is .NET 9.0
 
 **Resolution**: Install .NET 10.0 SDK when available
