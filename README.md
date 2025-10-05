@@ -1,3 +1,5 @@
+> In beta until .NET 10 releases. Looking for feedback before it's officially released.
+
 ﻿# MinimalApi.Endpoints [![Nuget](https://img.shields.io/nuget/v/IeuanWalker.MinimalApi.Endpoints)](https://www.nuget.org/packages/IeuanWalker.MinimalApi.Endpoints) [![Nuget](https://img.shields.io/nuget/dt/IeuanWalker.MinimalApi.Endpoints)](https://www.nuget.org/packages/IeuanWalker.MinimalApi.Endpoints) 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -40,8 +42,8 @@ public class HelloWorldEndpoint : IEndpoint<RequestModel, ResponseModel>
         builder
             .Post("/HelloWorld")
             .RequestFromBody()
-            .WithName("CreateHelloWorld")
-            .WithTags("HelloWorld")
+            .WithName("CreateHelloWorld") // not necessary - automaticly set for you if not set
+            .WithTags("HelloWorld") // not necessary - automaticly set for you if not set
             .WithSummary("Creates a hello world")
             .WithDescription("Creates a new world in the system")
             .Produces<ResponseModel>(201)
