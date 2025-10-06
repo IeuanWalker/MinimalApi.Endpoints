@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,10 +10,7 @@ static class WithNameHelpers
 {
 	public static string? GetWithName(this TypeDeclarationSyntax typeDeclaration)
 	{
-		// Find the Configure method
-		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
-			.OfType<MethodDeclarationSyntax>()
-			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members.GetConfigureMethod();
 
 		if (configureMethod is null)
 		{
