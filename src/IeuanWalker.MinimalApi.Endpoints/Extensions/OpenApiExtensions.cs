@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi;
 
@@ -8,6 +9,7 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 
 public static class OpenApiExtensions
 {
+	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{
 		builder.WithResponse(null, statusCode, description, contentType, additionalContentTypes);
@@ -15,6 +17,7 @@ public static class OpenApiExtensions
 		return builder;
 	}
 
+	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder WithResponse<T>(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{
 		builder.WithResponse(typeof(T), statusCode, description, contentType, additionalContentTypes);
@@ -22,6 +25,7 @@ public static class OpenApiExtensions
 		return builder;
 	}
 
+	[ExcludeFromCodeCoverage]
 	static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, Type? responseType, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{
 		if (responseType is not null && string.IsNullOrEmpty(contentType))
