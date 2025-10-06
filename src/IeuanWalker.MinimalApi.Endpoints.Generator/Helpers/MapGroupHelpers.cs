@@ -114,10 +114,7 @@ static class MapGroupHelpers
 			SyntaxNode syntaxNode = syntaxRef.GetSyntax();
 			if (syntaxNode is TypeDeclarationSyntax typeDeclaration)
 			{
-				// Find the Configure method in the endpoint group
-				MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
-					.OfType<MethodDeclarationSyntax>()
-					.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+				MethodDeclarationSyntax? configureMethod = typeDeclaration.Members.GetConfigureMethod();
 
 				if (configureMethod is not null)
 				{

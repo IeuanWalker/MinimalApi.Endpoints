@@ -50,8 +50,8 @@ static class SourceGeneratorExtensions
 			// Check if parameter type is RouteHandlerBuilder (handle both simple and qualified names)
 			return parameter.Type switch
 			{
-				IdentifierNameSyntax identifierName => identifierName.Identifier.ValueText == "RouteHandlerBuilder",
-				QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.ValueText == "RouteHandlerBuilder",
+				IdentifierNameSyntax identifierName => (identifierName.Identifier.ValueText == "RouteHandlerBuilder" || identifierName.Identifier.ValueText == "WebApplication"),
+				QualifiedNameSyntax qualifiedName => (qualifiedName.Right.Identifier.ValueText == "RouteHandlerBuilder" || qualifiedName.Right.Identifier.ValueText == "WebApplication"),
 				_ => false
 			};
 		}
