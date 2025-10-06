@@ -466,7 +466,7 @@ public class HttpVerbRouteHelpersTests
 			{
 				public static void Configure()
 				{
-					// No parameters - this is still a valid Configure method but with no HTTP verbs
+					// No parameters - this is not a valid Configure method for endpoints
 				}
 			}
 			""";
@@ -479,11 +479,60 @@ public class HttpVerbRouteHelpersTests
 
 		// Assert
 		result.ShouldBeNull();
-		diagnostics.ShouldHaveSingleItem();
-		diagnostics[0].Id.ShouldBe("MINAPI001");
-		diagnostics[0].Title.ShouldBe("No HTTP verb configured");
-		diagnostics[0].MessageArgs.ShouldHaveSingleItem();
-		diagnostics[0].MessageArgs[0].ShouldBe("TestEndpoint");
+		// No diagnostics should be reported since this is treated as if no valid Configure method exists
+		diagnostics.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void GetVerbAndPattern_WithConfigureMethodWithWrongParameterType_ReturnsNull()
+	{
+		// Arrange
+		const string sourceCode = """
+			public class TestEndpoint
+			{
+				public static void Configure(string wrongParam)
+				{
+					// Wrong parameter type - should be RouteHandlerBuilder
+				}
+			}
+			""";
+
+		TypeDeclarationSyntax typeDeclaration = ParseTypeDeclaration(sourceCode);
+		List<DiagnosticInfo> diagnostics = [];
+
+		// Act
+		(HttpVerb verb, string pattern)? result = typeDeclaration.GetVerbAndPattern("TestEndpoint", diagnostics);
+
+		// Assert
+		result.ShouldBeNull();
+		// No diagnostics should be reported since this is treated as if no valid Configure method exists
+		diagnostics.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void GetVerbAndPattern_WithConfigureMethodWithTooManyParameters_ReturnsNull()
+	{
+		// Arrange
+		const string sourceCode = """
+			public class TestEndpoint
+			{
+				public static void Configure(RouteHandlerBuilder builder, string extraParam)
+				{
+					// Too many parameters - should only have RouteHandlerBuilder parameter
+				}
+			}
+			""";
+
+		TypeDeclarationSyntax typeDeclaration = ParseTypeDeclaration(sourceCode);
+		List<DiagnosticInfo> diagnostics = [];
+
+		// Act
+		(HttpVerb verb, string pattern)? result = typeDeclaration.GetVerbAndPattern("TestEndpoint", diagnostics);
+
+		// Assert
+		result.ShouldBeNull();
+		// No diagnostics should be reported since this is treated as if no valid Configure method exists
+		diagnostics.ShouldBeEmpty();
 	}
 
 	#endregion

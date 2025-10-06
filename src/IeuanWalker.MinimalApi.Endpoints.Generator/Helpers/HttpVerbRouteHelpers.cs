@@ -24,10 +24,12 @@ static class HttpVerbRouteHelpers
 
 	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration, string typeName, List<DiagnosticInfo> diagnostics)
 	{
-		// Find the Configure method
+		// Find the Configure method with correct signature (static void Configure(RouteHandlerBuilder builder))
 		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
 			.OfType<MethodDeclarationSyntax>()
-			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" 
+				&& m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword))
+				&& HasRouteHandlerBuilderParameter(m));
 
 		if (configureMethod is null)
 		{
@@ -119,6 +121,25 @@ static class HttpVerbRouteHelpers
 		"delete" => HttpVerb.Delete,
 		_ => null
 	};
+
+	static bool HasRouteHandlerBuilderParameter(MethodDeclarationSyntax method)
+	{
+		// Check if method has exactly one parameter of type RouteHandlerBuilder
+		if (method.ParameterList.Parameters.Count != 1)
+		{
+			return false;
+		}
+
+		ParameterSyntax parameter = method.ParameterList.Parameters[0];
+		
+		// Check if parameter type is RouteHandlerBuilder (handle both simple and qualified names)
+		return parameter.Type switch
+		{
+			IdentifierNameSyntax identifierName => identifierName.Identifier.ValueText == "RouteHandlerBuilder",
+			QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.ValueText == "RouteHandlerBuilder",
+			_ => false
+		};
+	}
 }
 
 public enum HttpVerb
