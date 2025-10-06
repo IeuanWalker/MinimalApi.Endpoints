@@ -261,14 +261,14 @@ public class EndpointGeneratorHelpersTests
 
 		const string expected = """
 			// GET: /api/v1/users
-			RouteHandlerBuilder get_V1Users_7 = userGroup
+			RouteHandlerBuilder get_Users_7 = userGroup
 			    .MapGet("/users", async (
 			        [FromServices] global::GetUsersEndpoint endpoint,
 			        CancellationToken ct) => await endpoint.Handle(ct))
 			    .WithTags("Users")
-			    .WithName("get_V1Users_7");
+			    .WithName("get_Users_7");
 
-			global::GetUsersEndpoint.Configure(get_V1Users_7);
+			global::GetUsersEndpoint.Configure(get_Users_7);
 			
 			""";
 
@@ -326,13 +326,13 @@ public class EndpointGeneratorHelpersTests
 
 		const string expected = """
 			// GET: /api/v1/users
-			RouteHandlerBuilder get_V1Users_9 = userGroup
+			RouteHandlerBuilder get_Users_9 = userGroup
 			    .MapGet("/users", async (
 			        [FromServices] global::GetUsersEndpoint endpoint,
 			        CancellationToken ct) => await endpoint.Handle(ct))
 			    .WithTags("Users");
 
-			global::GetUsersEndpoint.Configure(get_V1Users_9);
+			global::GetUsersEndpoint.Configure(get_Users_9);
 			
 			""";
 
@@ -390,13 +390,13 @@ public class EndpointGeneratorHelpersTests
 
 		const string expected = """
 			// GET: /api/v1/users
-			RouteHandlerBuilder get_V1Users_11 = userGroup
+			RouteHandlerBuilder get_Users_11 = userGroup
 			    .MapGet("/users", async (
 			        [FromServices] global::GetUsersEndpoint endpoint,
 			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithName("get_V1Users_11");
+			    .WithName("get_Users_11");
 
-			global::GetUsersEndpoint.Configure(get_V1Users_11);
+			global::GetUsersEndpoint.Configure(get_Users_11);
 			
 			""";
 
@@ -572,14 +572,14 @@ public class EndpointGeneratorHelpersTests
 
 		const string expected = """
 			// GET: /api/v1/users/{id}/posts/{postId}
-			RouteHandlerBuilder get_V1UsersPosts_16 = userGroup
+			RouteHandlerBuilder get_UsersPosts_16 = userGroup
 			    .MapGet("/users/{id}/posts/{postId}", async (
 			        [FromServices] global::GetUserPostEndpoint endpoint,
 			        CancellationToken ct) => await endpoint.Handle(ct))
 			    .WithTags("Users")
-			    .WithName("get_V1UsersPosts_16");
+			    .WithName("get_UsersPosts_16");
 
-			global::GetUserPostEndpoint.Configure(get_V1UsersPosts_16);
+			global::GetUserPostEndpoint.Configure(get_UsersPosts_16);
 			
 			""";
 
