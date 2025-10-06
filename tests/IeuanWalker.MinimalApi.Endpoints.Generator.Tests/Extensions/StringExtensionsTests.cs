@@ -1,7 +1,7 @@
 using Shouldly;
 using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 
-namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests.Helpers;
+namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests.Extensions;
 
 public class StringExtensionsTests
 {
