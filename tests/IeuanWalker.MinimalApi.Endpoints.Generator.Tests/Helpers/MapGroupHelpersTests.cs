@@ -633,7 +633,7 @@ public class MapGroupHelpersTests
 		TypeDeclarationSyntax typeDeclaration = root.DescendantNodes().OfType<TypeDeclarationSyntax>().First();
 
 		// Create a compilation to get semantic model
-		var compilation = CSharpCompilation.Create(
+		CSharpCompilation compilation = CSharpCompilation.Create(
 			"TestAssembly",
 			[syntaxTree],
 			[MetadataReference.CreateFromFile(typeof(object).Assembly.Location)]);
@@ -649,7 +649,7 @@ public class MapGroupHelpersTests
 		string sourceCode = $"public class {typeName} {{ }}";
 		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
-		var compilation = CSharpCompilation.Create(
+		CSharpCompilation compilation = CSharpCompilation.Create(
 			"TestAssembly",
 			[syntaxTree],
 			[MetadataReference.CreateFromFile(typeof(object).Assembly.Location)]);
@@ -666,7 +666,7 @@ public class MapGroupHelpersTests
 	{
 		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
-		var compilation = CSharpCompilation.Create(
+		CSharpCompilation compilation = CSharpCompilation.Create(
 			"TestAssembly",
 			[syntaxTree],
 			[MetadataReference.CreateFromFile(typeof(object).Assembly.Location)]);
