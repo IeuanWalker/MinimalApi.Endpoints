@@ -50,6 +50,12 @@ static class WithTagsHelpers
 
 	static string? ExtractApiNameFromPattern(string pattern)
 	{
+		// Handle null or empty pattern
+		if (string.IsNullOrEmpty(pattern))
+		{
+			return null;
+		}
+
 		// Remove query string if present
 		int queryIndex = pattern.IndexOf('?');
 		if (queryIndex >= 0)
@@ -66,63 +72,27 @@ static class WithTagsHelpers
 		// Split the pattern by slashes and remove empty entries
 		string[] segments = [.. pattern.Split('/').Where(s => !string.IsNullOrEmpty(s))];
 
-		// Handle different pattern formats:
-		// /rootName/api/v1/ApiName -> ApiName
-		// /rootName/api/ApiName -> ApiName  
-		// /api/v1/ApiName -> ApiName
-		// /api/v{version:apiVersion}/ApiName -> ApiName
-		// /api/ApiName -> ApiName
-		// /root/ApiName/{Id} -> ApiName
-		// /api/v1/Users/{userId}/Posts/{postId} -> Users
-
 		if (segments.Length == 0)
 		{
 			return null;
 		}
 
-		// Find the "api" segment
-		int apiIndex = -1;
-		for (int i = 0; i < segments.Length; i++)
+		// Determine starting index based on API segment presence
+		int startIndex = 0;
+		int apiIndex = Array.FindIndex(segments, s => s.Equals("api", StringComparison.OrdinalIgnoreCase));
+		
+		if (apiIndex != -1)
 		{
-			if (segments[i].Equals("api", StringComparison.OrdinalIgnoreCase))
+			// API segment found - start after it and skip version segments
+			startIndex = apiIndex + 1;
+			while (startIndex < segments.Length && IsVersionSegment(segments[startIndex]))
 			{
-				apiIndex = i;
-				break;
+				startIndex++;
 			}
 		}
 
-		if (apiIndex == -1)
-		{
-			// No "api" segment found, find the first non-route-parameter segment
-			return GetFirstNonParameterSegment(segments);
-		}
-
-		// Look for the API name after the "api" segment
-		int apiNameIndex = apiIndex + 1;
-
-		// Skip version segments (v1, v2, etc.)
-		while (apiNameIndex < segments.Length && IsVersionSegment(segments[apiNameIndex]))
-		{
-			apiNameIndex++;
-		}
-
-		// Find the first non-route-parameter segment after api/version
-		for (int i = apiNameIndex; i < segments.Length; i++)
-		{
-			if (!IsRouteParameter(segments[i]))
-			{
-				return segments[i];
-			}
-		}
-
-		// Fallback: find any non-parameter segment
-		return GetFirstNonParameterSegment(segments);
-	}
-
-	static string? GetFirstNonParameterSegment(string[] segments)
-	{
-		// Find the first segment that isn't a route parameter
-		for (int i = segments.Length - 1; i >= 0; i--)
+		// Find the first valid segment starting from determined index
+		for (int i = startIndex; i < segments.Length; i++)
 		{
 			if (!IsRouteParameter(segments[i]) && !IsVersionSegment(segments[i]))
 			{
@@ -130,16 +100,8 @@ static class WithTagsHelpers
 			}
 		}
 
-		// If all segments are parameters or versions, return the last non-parameter one
-		for (int i = segments.Length - 1; i >= 0; i--)
-		{
-			if (!IsRouteParameter(segments[i]))
-			{
-				return segments[i];
-			}
-		}
-
-		return segments.Length > 0 ? segments[segments.Length - 1] : null;
+		// If no good segments found, return null
+		return null;
 	}
 
 	static bool IsRouteParameter(string segment)
@@ -160,16 +122,35 @@ static class WithTagsHelpers
 			return false;
 		}
 
-		// Check for patterns like v1, v2, v10, etc.
+		// Check for patterns like v1, v2, v10, V1, V2, etc. (case insensitive)
 		if (segment.Length >= 2 &&
-		   segment[0] == 'v' &&
+		   char.ToLowerInvariant(segment[0]) == 'v' &&
 		   segment.Substring(1).All(char.IsDigit))
 		{
 			return true;
 		}
 
-		// Check for versioning parameter patterns like v{version:apiVersion}
-		if (segment.StartsWith("v{") && segment.EndsWith("}"))
+		// Check for decimal versions like v1.5, V2.0, v3.14, V1.2.3, etc. (case insensitive)
+		if (segment.Length >= 4 && char.ToLowerInvariant(segment[0]) == 'v')
+		{
+			string versionPart = segment.Substring(1);
+			// Check if it's a valid decimal version (digits and dots only)
+			if (versionPart.All(c => char.IsDigit(c) || c == '.'))
+			{
+				// Ensure it doesn't start or end with a dot and doesn't have consecutive dots
+				if (!versionPart.StartsWith(".") && !versionPart.EndsWith(".") && !versionPart.Contains(".."))
+				{
+					// Must contain at least one digit
+					if (versionPart.Any(char.IsDigit))
+					{
+						return true;
+					}
+				}
+			}
+		}
+
+		// Check for versioning parameter patterns like v{version:apiVersion} or V{version:apiVersion}
+		if (segment.StartsWith("v{", StringComparison.OrdinalIgnoreCase) && segment.EndsWith("}"))
 		{
 			return true;
 		}
