@@ -24,7 +24,7 @@ public class StringExtensionsTests
 	public void Sanitize_WithCustomReplacement_UsesCustomCharacter()
 	{
 		// Arrange
-		string input = "Hello-World";
+		const string input = "Hello-World";
 
 		// Act
 		string result = input.Sanitize("-");
@@ -37,7 +37,7 @@ public class StringExtensionsTests
 	public void Sanitize_WithEmptyReplacement_RemovesNonAlphanumeric()
 	{
 		// Arrange
-		string input = "Hello-World";
+		const string input = "Hello-World";
 
 		// Act
 		string result = input.Sanitize(string.Empty);

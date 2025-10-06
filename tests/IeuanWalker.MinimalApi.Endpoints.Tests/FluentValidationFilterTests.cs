@@ -34,7 +34,7 @@ public class FluentValidationFilterTests
 
 		EndpointFilterInvocationContext context = Substitute.For<EndpointFilterInvocationContext>();
 		context.Arguments.Returns([]);
-		
+
 		DefaultHttpContext httpContext = new();
 		context.HttpContext.Returns(httpContext);
 
@@ -56,7 +56,7 @@ public class FluentValidationFilterTests
 		// Arrange
 		IValidator<TestModel> validator = Substitute.For<IValidator<TestModel>>();
 		TestModel testModel = new() { Name = "Test" };
-		
+
 		validator.ValidateAsync(testModel, Arg.Any<CancellationToken>())
 			.Returns(new ValidationResult());
 
@@ -64,7 +64,7 @@ public class FluentValidationFilterTests
 
 		EndpointFilterInvocationContext context = Substitute.For<EndpointFilterInvocationContext>();
 		context.Arguments.Returns([testModel]);
-		
+
 		DefaultHttpContext httpContext = new();
 		context.HttpContext.Returns(httpContext);
 
@@ -86,10 +86,10 @@ public class FluentValidationFilterTests
 		// Arrange
 		IValidator<TestModel> validator = Substitute.For<IValidator<TestModel>>();
 		TestModel testModel = new() { Name = "" };
-		
+
 		ValidationFailure failure = new("Name", "Name is required");
 		ValidationResult validationResult = new([failure]);
-		
+
 		validator.ValidateAsync(testModel, Arg.Any<CancellationToken>())
 			.Returns(validationResult);
 
@@ -97,7 +97,7 @@ public class FluentValidationFilterTests
 
 		EndpointFilterInvocationContext context = Substitute.For<EndpointFilterInvocationContext>();
 		context.Arguments.Returns([testModel]);
-		
+
 		DefaultHttpContext httpContext = new();
 		context.HttpContext.Returns(httpContext);
 

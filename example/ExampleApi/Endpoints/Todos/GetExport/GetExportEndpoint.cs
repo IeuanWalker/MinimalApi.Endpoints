@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
 using ExampleApi.Infrastructure;
@@ -17,6 +18,7 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 		_todoStore = todoStore;
 	}
 
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder

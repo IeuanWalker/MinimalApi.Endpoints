@@ -119,7 +119,7 @@ public class InMemoryTodoStoreTests
 
 		// Assert
 		result.ShouldBeTrue();
-		
+
 		// Verify deletion
 		Todo? deletedTodo = await store.GetByIdAsync(1, CancellationToken.None);
 		deletedTodo.ShouldBeNull();
@@ -145,10 +145,7 @@ public class InMemoryTodoStoreTests
 		InMemoryTodoStore store = new();
 
 		// Act
-		Todo? result = await store.PatchAsync(1, todo =>
-		{
-			todo.IsCompleted = true;
-		}, CancellationToken.None);
+		Todo? result = await store.PatchAsync(1, todo => todo.IsCompleted = true, CancellationToken.None);
 
 		// Assert
 		result.ShouldNotBeNull();
@@ -164,10 +161,7 @@ public class InMemoryTodoStoreTests
 		InMemoryTodoStore store = new();
 
 		// Act
-		Todo? result = await store.PatchAsync(999, todo =>
-		{
-			todo.IsCompleted = true;
-		}, CancellationToken.None);
+		Todo? result = await store.PatchAsync(999, todo => todo.IsCompleted = true, CancellationToken.None);
 
 		// Assert
 		result.ShouldBeNull();

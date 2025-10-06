@@ -1,10 +1,12 @@
-﻿using ExampleApi.Infrastructure;
+﻿using System.Diagnostics.CodeAnalysis;
+using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.WeatherForecast.Get.V2;
 
 public class GetWeatherForecastEndpoint : IEndpointWithoutRequest<ResponseModel[]>
 {
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder

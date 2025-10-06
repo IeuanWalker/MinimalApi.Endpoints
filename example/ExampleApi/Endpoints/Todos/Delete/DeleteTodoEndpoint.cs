@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ExampleApi.Infrastructure;
 using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
@@ -13,6 +14,7 @@ public class DeleteTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 		_todoStore = todoStore;
 	}
 
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder

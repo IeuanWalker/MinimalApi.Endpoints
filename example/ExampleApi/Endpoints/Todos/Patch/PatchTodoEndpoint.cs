@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using ExampleApi.Infrastructure;
 using ExampleApi.Models;
 using ExampleApi.Services;
@@ -14,6 +15,7 @@ public class PatchTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 		_todoStore = todoStore;
 	}
 
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
