@@ -253,7 +253,7 @@ public class ValidationHelpersTests
 	public void InheritsFromValidatorBase_WithRealCompilation_DirectInheritance_ReturnsTrue()
 	{
 		// Arrange
-		(CSharpCompilation compilation, INamedTypeSymbol requestType) = CreateCompilationWithValidator("TestRequest", hasValidator: true);
+		(CSharpCompilation compilation, INamedTypeSymbol _) = CreateCompilationWithValidator("TestRequest", hasValidator: true);
 		INamedTypeSymbol? validatorBase = compilation.GetTypeByMetadataName("IeuanWalker.MinimalApi.Endpoints.Validator`1");
 		INamedTypeSymbol? validator = compilation.GetTypeByMetadataName("TestApp.TestRequestValidator");
 
@@ -437,7 +437,7 @@ public class ValidationHelpersTests
 			}
 			");
 
-		List<SyntaxTree> syntaxTrees = sources.Select(source => CSharpSyntaxTree.ParseText(source)).ToList();
+		List<SyntaxTree> syntaxTrees = [.. sources.Select(source => CSharpSyntaxTree.ParseText(source))];
 
 		CSharpCompilation compilation = CSharpCompilation.Create(
 			assemblyName: "TestAssembly",

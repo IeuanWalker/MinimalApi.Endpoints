@@ -227,7 +227,7 @@ public class RequestBindingTypeHelpersTests
 		diagnostics.All(d => d.Title == "Multiple request type methods configured").ShouldBeTrue();
 
 		string[] expectedMethods = ["RequestFromBody", "RequestFromQuery", "RequestFromRoute", "RequestFromHeader", "RequestFromForm", "RequestAsParameters"];
-		string[] actualMethods = diagnostics.Select(d => (string)d.MessageArgs[0]).ToArray();
+		string[] actualMethods = [.. diagnostics.Select(d => (string)d.MessageArgs[0])];
 		actualMethods.ShouldBe(expectedMethods);
 	}
 

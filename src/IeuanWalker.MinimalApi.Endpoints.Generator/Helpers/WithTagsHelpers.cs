@@ -80,7 +80,7 @@ static class WithTagsHelpers
 		// Determine starting index based on API segment presence
 		int startIndex = 0;
 		int apiIndex = Array.FindIndex(segments, s => s.Equals("api", StringComparison.OrdinalIgnoreCase));
-		
+
 		if (apiIndex != -1)
 		{
 			// API segment found - start after it and skip version segments
@@ -134,27 +134,17 @@ static class WithTagsHelpers
 		if (segment.Length >= 4 && char.ToLowerInvariant(segment[0]) == 'v')
 		{
 			string versionPart = segment.Substring(1);
-			// Check if it's a valid decimal version (digits and dots only)
-			if (versionPart.All(c => char.IsDigit(c) || c == '.'))
+
+			if (versionPart.All(c => char.IsDigit(c) || c == '.') &&
+				!versionPart.StartsWith(".") &&
+				!versionPart.EndsWith(".") &&
+				versionPart.Any(char.IsDigit))
 			{
-				// Ensure it doesn't start or end with a dot and doesn't have consecutive dots
-				if (!versionPart.StartsWith(".") && !versionPart.EndsWith(".") && !versionPart.Contains(".."))
-				{
-					// Must contain at least one digit
-					if (versionPart.Any(char.IsDigit))
-					{
-						return true;
-					}
-				}
+				return true;
 			}
 		}
 
 		// Check for versioning parameter patterns like v{version:apiVersion} or V{version:apiVersion}
-		if (segment.StartsWith("v{", StringComparison.OrdinalIgnoreCase) && segment.EndsWith("}"))
-		{
-			return true;
-		}
-
-		return false;
+		return segment.StartsWith("v{", StringComparison.OrdinalIgnoreCase) && segment.EndsWith("}");
 	}
 }

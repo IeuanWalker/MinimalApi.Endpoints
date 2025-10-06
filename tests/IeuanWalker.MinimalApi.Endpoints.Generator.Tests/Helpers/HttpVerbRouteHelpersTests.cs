@@ -456,7 +456,6 @@ public class HttpVerbRouteHelpersTests
 
 	#region Edge Cases
 
-	// TODO: Fix - Should only find methods with RouteHandlerBuilder parameter
 	[Fact]
 	public void GetVerbAndPattern_WithConfigureMethodWithDifferentParameters_ReturnsNullAndReportsDiagnostic()
 	{

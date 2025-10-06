@@ -357,7 +357,11 @@ public class WithTagsHelpersTests
 	[InlineData("/{userId}/{postId}")]
 	[InlineData("/api/{id}")]
 	[InlineData("/api/v1/{userId}")]
-	public void GenerateAndAddTags_WithOnlyParametersAndVersions_DoesNotGenerateTags(string pattern)
+	[InlineData("/v1")]
+	[InlineData("/api")]
+	[InlineData("/api/v1")]
+	[InlineData("/api/v{version:apiVersion}")]
+	public void GenerateAndAddTags_WithOnlyParametersAndOrVersions_DoesNotGenerateTags(string pattern)
 	{
 		// Arrange
 		using IndentedTextBuilder builder = new();
@@ -374,23 +378,6 @@ public class WithTagsHelpersTests
 
 	#region ExtractApiNameFromPattern Integration Tests (via GenerateAndAddTags)
 
-	[Theory]
-	[InlineData("/v1")]
-	[InlineData("/api")]
-	[InlineData("/api/v1")]
-	[InlineData("/api/v{version:apiVersion}")]
-	public void GenerateAndAddTags_WithOnlyVersionOrApiSegments_DoesNotGenerateTags(string pattern)
-	{
-		// Arrange
-		using IndentedTextBuilder builder = new();
-
-		// Act
-		builder.GenerateAndAddTags(pattern);
-		string result = builder.ToString();
-
-		// Assert
-		result.ShouldBeEmpty();
-	}
 
 	[Fact]
 	public void GenerateAndAddTags_WithEdgeCaseAllParameters_DoesNotGenerateTags()

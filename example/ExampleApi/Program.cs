@@ -18,6 +18,3 @@ app.MapEndpointsFromExampleApi();
 app.UseScalar();
 
 await app.RunAsync();
-
-// Make the implicit Program class accessible for testing
-public partial class Program { }
