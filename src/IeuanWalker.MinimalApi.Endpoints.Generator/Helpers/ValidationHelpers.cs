@@ -7,25 +7,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 
 static class ValidationHelpers
 {
-	const string validator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
-
-	/// <summary>
-	/// Validates whether the specified type declaration requires validation.
-	/// </summary>
-	/// <param name="typeDeclaration">The type declaration to validate</param>
-	/// <param name="compilation">The compilation context</param>
-	/// <param name="requestClass">The request class symbol</param>
-	/// <returns>Validation information if validation is required, null otherwise</returns>
-	public static INamedTypeSymbol? Validate(this TypeDeclarationSyntax typeDeclaration, Compilation compilation, ITypeSymbol requestClass)
-	{
-		if (typeDeclaration.DontValidate())
-		{
-			return null;
-		}
-
-		return GetFluentValidationClass(compilation, requestClass);
-	}
-
 	/// <summary>
 	/// Determines if validation should be skipped for the given type declaration.
 	/// </summary>
@@ -50,66 +31,6 @@ static class ValidationHelpers
 			.Any(invocation =>
 				invocation.Expression is MemberAccessExpressionSyntax memberAccess &&
 				memberAccess.Name.Identifier.ValueText == "DisableValidation");
-	}
-
-	/// <summary>
-	/// Finds the FluentValidation validator class for the specified request type.
-	/// </summary>
-	/// <param name="compilation">The compilation context</param>
-	/// <param name="requestClass">The request class to find validator for</param>
-	/// <returns>The validator class name if found, null otherwise</returns>
-	static INamedTypeSymbol? GetFluentValidationClass(Compilation compilation, ITypeSymbol requestClass)
-	{
-		if (compilation is null || requestClass is null)
-		{
-			return null;
-		}
-
-		// Get the Validator`1 base class symbol to check against
-		INamedTypeSymbol? validatorBase = compilation.GetTypeByMetadataName(validator);
-
-		if (validatorBase is null)
-		{
-			return null;
-		}
-
-		// Use the requestClass ITypeSymbol directly
-		if (requestClass is not INamedTypeSymbol requestTypeSymbol)
-		{
-			return null;
-		}
-
-		// Construct the specific Validator<TRequest> type
-		INamedTypeSymbol validatorOfRequest = validatorBase.Construct(requestTypeSymbol);
-
-		return FindValidatorInSourceTrees(compilation, validatorOfRequest);
-	}
-
-	/// <summary>
-	/// Searches for validator implementations in the source trees.
-	/// </summary>
-	/// <param name="compilation">The compilation context</param>
-	/// <param name="validatorOfRequest">The specific validator base class to search for</param>
-	/// <returns>The validator class name if found, null otherwise</returns>
-	static INamedTypeSymbol? FindValidatorInSourceTrees(Compilation compilation, INamedTypeSymbol validatorOfRequest)
-	{
-		// Only search in source trees (user's code), not all referenced assemblies
-		foreach (SyntaxTree syntaxTree in compilation.SyntaxTrees)
-		{
-			SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
-			SyntaxNode root = syntaxTree.GetRoot();
-
-			foreach (TypeDeclarationSyntax typeDeclaration in root.DescendantNodes().OfType<TypeDeclarationSyntax>())
-			{
-				INamedTypeSymbol? typeSymbol = semanticModel.GetDeclaredSymbol(typeDeclaration) as INamedTypeSymbol;
-				if (typeSymbol is not null && typeSymbol.InheritsFromValidatorBase(validatorOfRequest))
-				{
-					return typeSymbol;
-				}
-			}
-		}
-
-		return null;
 	}
 
 	/// <summary>
@@ -147,8 +68,7 @@ static class ValidationHelpers
 		while (current != null)
 		{
 			// Check if this is the Validator<T> base class
-			if (current.IsGenericType &&
-				SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseSymbol))
+			if (current.IsGenericType && SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseSymbol))
 			{
 				// Return the first type argument (the T in Validator<T>)
 				return current.TypeArguments.Length > 0 ? current.TypeArguments[0] : null;
