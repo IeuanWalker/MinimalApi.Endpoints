@@ -19,8 +19,6 @@ public static class OpenApiExtensions
 	{
 		builder.WithResponse(typeof(T), statusCode, description, contentType, additionalContentTypes);
 
-		builder.Produces(200);
-
 		return builder;
 	}
 
