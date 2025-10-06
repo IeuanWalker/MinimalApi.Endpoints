@@ -1,9 +1,8 @@
 using Shouldly;
-using IeuanWalker.MinimalApi.Endpoints.Generator;
 using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 using Microsoft.CodeAnalysis;
 
-namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
+namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests.Helpers;
 
 public class EndpointGeneratorHelpersTests
 {
