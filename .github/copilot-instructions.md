@@ -136,9 +136,10 @@ The solution includes **3 comprehensive test projects** with 26 tests:
    - 4 tests covering constructor validation, pass/fail scenarios
 
 2. **`tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/`** - Unit tests for the source generator
+   - **Snapshot tests** for generated code (10 comprehensive scenarios using Verify)
    - String utility extension tests (Sanitize, ToLowerFirstLetter, ToUpperFirstLetter)
-   - Uses xUnit and Shouldly
-   - 7 tests total
+   - Uses xUnit, Shouldly, and **Verify** for snapshot testing
+   - 17+ tests total
 
 3. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi
    - Tests for endpoint handlers with mocked dependencies
@@ -156,11 +157,48 @@ Comprehensive testing documentation is available in the `tests/` directory:
 
 When writing tests for this project:
 - Use **Shouldly** for assertions (e.g., `result.ShouldBe(expected)`, `result.ShouldNotBeNull()`)
+- Use **Verify** for snapshot testing source generator output
 - Follow **Arrange-Act-Assert** pattern
 - Use descriptive test names: `MethodName_Scenario_ExpectedBehavior`
 - Use **NSubstitute** for mocking dependencies
 - Keep tests independent and isolated
 - Test edge cases (null values, empty collections, not found scenarios)
+
+### Snapshot Testing for Source Generators
+
+The project uses **Verify** (https://github.com/VerifyTests/Verify) for snapshot testing the source generator:
+
+**Key Files:**
+- `SnapshotTests.cs` - Contains snapshot test scenarios for different endpoint configurations
+- `TestHelper.cs` - Helper for running the generator and creating compilations
+- `ModuleInitializer.cs` - Initializes Verify settings with `VerifySourceGenerators.Initialize()`
+
+**How It Works:**
+1. Test creates sample source code with endpoint definitions
+2. `TestHelper.Verify()` runs the source generator on the code
+3. Verify captures the generated output and stores it in `/Snapshots` directory
+4. On subsequent runs, Verify compares new output with stored snapshots
+5. If output changes, test fails and shows diff
+
+**Running Snapshot Tests:**
+```bash
+dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests
+```
+
+**Updating Snapshots:**
+When generated code legitimately changes:
+1. Review the diff in the test output
+2. If changes are expected, update snapshots by accepting the new `.received.` files
+3. Commit the updated `.verified.` snapshot files to version control
+
+**Snapshot Test Scenarios:**
+- Simple endpoints (`IEndpoint<TRequest, TResponse>`)
+- Endpoints without request/response
+- Endpoints with groups
+- Endpoints with validators
+- Multiple endpoints
+- Complex group hierarchies
+- Different request binding types (FromBody, AsParameters)
 
 ### CI/CD Integration
 
@@ -186,12 +224,29 @@ To adjust the minimum coverage threshold, update `MINIMUM_COVERAGE` in `.github/
 ### Testing Source Generator Changes
 
 When modifying the source generator:
-1. Update or add tests in `IeuanWalker.MinimalApi.Endpoints.Generator.Tests`
+1. Update or add **snapshot tests** in `IeuanWalker.MinimalApi.Endpoints.Generator.Tests/SnapshotTests.cs`
 2. Run generator tests: `dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests`
-3. Verify generated code in `example/ExampleApi/obj/.../EndpointExtensions.g.cs`
-4. Run the ExampleApi project to verify runtime behavior
-5. Check for any diagnostic warnings/errors in build output
-6. Ensure code coverage remains above threshold
+3. Review snapshot diffs - if output changed, verify it's correct then update snapshots
+4. Verify generated code in `example/ExampleApi/obj/.../EndpointExtensions.g.cs`
+5. Run the ExampleApi project to verify runtime behavior
+6. Check for any diagnostic warnings/errors in build output
+7. Ensure code coverage remains above threshold
+
+**Adding New Snapshot Tests:**
+```csharp
+[Fact]
+public Task GeneratesEndpointExtensions_ForMyNewScenario()
+{
+    const string source = """
+        using IeuanWalker.MinimalApi.Endpoints;
+        // ... your test endpoint code
+        """;
+    
+    return TestHelper.Verify(source);
+}
+```
+
+The test will automatically create snapshot files in the `Snapshots/` directory on first run.
 
 ### Diagnostic IDs
 Current diagnostic rules (from `AnalyzerReleases.Shipped.md`):
