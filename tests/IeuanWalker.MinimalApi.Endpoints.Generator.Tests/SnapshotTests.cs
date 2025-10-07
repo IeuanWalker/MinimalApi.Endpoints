@@ -1059,4 +1059,294 @@ public class SnapshotTests
 		// Act & Assert
 		return TestHelper.Verify(source);
 	}
+
+
+	#region Nested Groups Tests
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithNestedEndpointGroups()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class ApiEndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/api")
+							.WithTags("API");
+					}
+				}
+
+				public class V1EndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/v1")
+							.WithTags("V1");
+					}
+				}
+
+				public class UsersEndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/users")
+							.WithTags("Users");
+					}
+				}
+
+				public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<ApiEndpointGroup>()
+							.Get("/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
+					}
+				}
+
+				public class GetUserV1Endpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<V1EndpointGroup>()
+							.Get("/user/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John V1")));
+					}
+				}
+
+				public class GetAllUsersEndpoint : IEndpointWithoutRequest<Ok<List<UserResponse>>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<UsersEndpointGroup>()
+							.Get("/");
+					}
+
+					public Task<Ok<List<UserResponse>>> Handle(CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new List<UserResponse>()));
+					}
+				}
+
+				public record GetUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	#endregion
+
+	#region Real-World Combination Test
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithRealWorldCombination()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using FluentValidation;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				// Endpoint Groups
+				public class ApiEndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/api")
+							.WithTags("API")
+							.WithName("APIGroup");
+					}
+				}
+
+				public class UsersEndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/users")
+							.WithTags("Users");
+					}
+				}
+
+				// Create User Endpoint with validation
+				public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Results<Created<UserResponse>, BadRequest, Conflict>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<ApiEndpointGroup>()
+							.Post("/")
+							.RequestFromBody()
+							.WithName("CreateUser")
+							.WithSummary("Create a new user")
+							.WithDescription("Creates a new user in the system");
+					}
+
+					public Task<Results<Created<UserResponse>, BadRequest, Conflict>> Handle(CreateUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult<Results<Created<UserResponse>, BadRequest, Conflict>>(
+							TypedResults.Created($"/api/users/{1}", new UserResponse(1, request.Name, request.Email)));
+					}
+				}
+
+				// Get User by ID with route binding
+				public class GetUserByIdEndpoint : IEndpoint<GetUserByIdRequest, Results<Ok<UserResponse>, NotFound>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<UsersEndpointGroup>()
+							.Get("/{id}")
+							.RequestFromRoute()
+							.WithName("GetUserById")
+							.WithTags("Queries");
+					}
+
+					public Task<Results<Ok<UserResponse>, NotFound>> Handle(GetUserByIdRequest request, CancellationToken ct)
+					{
+						return Task.FromResult<Results<Ok<UserResponse>, NotFound>>(
+							TypedResults.Ok(new UserResponse(request.Id, "John", "john@example.com")));
+					}
+				}
+
+				// Search Users with query parameters
+				public class SearchUsersEndpoint : IEndpoint<SearchUsersRequest, Ok<List<UserResponse>>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<ApiEndpointGroup>()
+							.Get("/search")
+							.RequestAsParameters()
+							.WithName("SearchUsers")
+							.WithTags("Queries", "Search");
+					}
+
+					public Task<Ok<List<UserResponse>>> Handle(SearchUsersRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new List<UserResponse>()));
+					}
+				}
+
+				// Update User
+				public class UpdateUserEndpoint : IEndpoint<UpdateUserRequest, Results<Ok<UserResponse>, NotFound, BadRequest>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<UsersEndpointGroup>()
+							.Put("/{id}")
+							.RequestFromBody()
+							.WithName("UpdateUser");
+					}
+
+					public Task<Results<Ok<UserResponse>, NotFound, BadRequest>> Handle(UpdateUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult<Results<Ok<UserResponse>, NotFound, BadRequest>>(
+							TypedResults.Ok(new UserResponse(request.Id, request.Name, request.Email)));
+					}
+				}
+
+				// Delete User
+				public class DeleteUserEndpoint : IEndpointWithoutResponse<DeleteUserRequest>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<UsersEndpointGroup>()
+							.Delete("/{id}")
+							.RequestFromRoute()
+							.WithName("DeleteUser");
+					}
+
+					public Task Handle(DeleteUserRequest request, CancellationToken ct)
+					{
+						return Task.CompletedTask;
+					}
+				}
+
+				// Health Check without request or response
+				public class HealthCheckEndpoint : IEndpoint
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Get("/health")
+							.WithName("HealthCheck")
+							.WithTags("Health");
+					}
+
+					public Task Handle(CancellationToken ct)
+					{
+						return Task.CompletedTask;
+					}
+				}
+
+				// Request Models
+				public record CreateUserRequest(string Name, string Email, string Password);
+				public record GetUserByIdRequest(int Id);
+				public record SearchUsersRequest(string Query, int Page, int PageSize);
+				public record UpdateUserRequest(int Id, string Name, string Email);
+				public record DeleteUserRequest(int Id);
+
+				// Response Models
+				public record UserResponse(int Id, string Name, string Email);
+
+				// Validators
+				public class CreateUserRequestValidator : Validator<CreateUserRequest>
+				{
+					public CreateUserRequestValidator()
+					{
+						RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+						RuleFor(x => x.Email).NotEmpty().EmailAddress();
+						RuleFor(x => x.Password).NotEmpty().MinimumLength(8);
+					}
+				}
+
+				public class UpdateUserRequestValidator : Validator<UpdateUserRequest>
+				{
+					public UpdateUserRequestValidator()
+					{
+						RuleFor(x => x.Id).GreaterThan(0);
+						RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+						RuleFor(x => x.Email).NotEmpty().EmailAddress();
+					}
+				}
+
+				public class SearchUsersRequestValidator : Validator<SearchUsersRequest>
+				{
+					public SearchUsersRequestValidator()
+					{
+						RuleFor(x => x.Query).NotEmpty().MinimumLength(2);
+						RuleFor(x => x.Page).GreaterThanOrEqualTo(1);
+						RuleFor(x => x.PageSize).InclusiveBetween(1, 100);
+					}
+				}
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	#endregion
 }
