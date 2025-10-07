@@ -10,8 +10,5 @@ public static class ModuleInitializer
 	{
 		// Initialize Verify settings for source generators
 		VerifySourceGenerators.Initialize();
-		
-		// Configure Verify to use deterministic GUIDs for snapshots
-		VerifierSettings.UniqueForRuntimeAndVersion();
 	}
 }
