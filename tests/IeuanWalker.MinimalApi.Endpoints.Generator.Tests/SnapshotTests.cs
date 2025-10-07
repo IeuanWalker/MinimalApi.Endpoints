@@ -653,410 +653,410 @@ public class SnapshotTests
 		return TestHelper.Verify(source);
 	}
 
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithGroupHavingWithName()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class UserEndpointGroup : IEndpointGroup
-	//			{
-	//				public static RouteGroupBuilder Configure(WebApplication app)
-	//				{
-	//					return app.MapGroup("/api/users")
-	//						.WithName("UserGroup");
-	//				}
-	//			}
-
-	//			public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Group<UserEndpointGroup>()
-	//						.Get("/{id}");
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
-	//				}
-	//			}
-
-	//			public record GetUserRequest(int Id);
-	//			public record UserResponse(int Id, string Name);
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithGroupHavingWithTags()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class UserEndpointGroup : IEndpointGroup
-	//			{
-	//				public static RouteGroupBuilder Configure(WebApplication app)
-	//				{
-	//					return app.MapGroup("/api/users")
-	//						.WithTags("Users");
-	//				}
-	//			}
-
-	//			public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Group<UserEndpointGroup>()
-	//						.Get("/{id}");
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
-	//				}
-	//			}
-
-	//			public record GetUserRequest(int Id);
-	//			public record UserResponse(int Id, string Name);
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithDisableValidation()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using FluentValidation;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Post("/api/users")
-	//						.DisableValidation();
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(CreateUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(1, request.Name)));
-	//				}
-	//			}
-
-	//			public record CreateUserRequest(string Name);
-	//			public record UserResponse(int Id, string Name);
-
-	//			public class CreateUserRequestValidator : Validator<CreateUserRequest>
-	//			{
-	//				public CreateUserRequestValidator()
-	//				{
-	//					RuleFor(x => x.Name).NotEmpty();
-	//				}
-	//			}
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithNonRequestModelValidator()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using FluentValidation;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder.Get("/api/users/{id}");
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
-	//				}
-	//			}
-
-	//			public record GetUserRequest(int Id);
-	//			public record UserResponse(int Id, string Name);
-	//			public record NestedModel(string Value);
-
-	//			public class NestedModelValidator : Validator<NestedModel>
-	//			{
-	//				public NestedModelValidator()
-	//				{
-	//					RuleFor(x => x.Value).NotEmpty();
-	//				}
-	//			}
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithDifferentHttpVerbs()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class UpdateUserEndpoint : IEndpoint<UpdateUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder.Put("/api/users/{id}");
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(UpdateUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, request.Name)));
-	//				}
-	//			}
-
-	//			public class PatchUserEndpoint : IEndpoint<PatchUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder.Patch("/api/users/{id}");
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(PatchUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "Updated")));
-	//				}
-	//			}
-
-	//			public record UpdateUserRequest(int Id, string Name);
-	//			public record PatchUserRequest(int Id);
-	//			public record UserResponse(int Id, string Name);
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithResultsUnionResponse()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class GetUserEndpoint : IEndpoint<GetUserRequest, Results<Ok<UserResponse>, NotFound, BadRequest>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder.Get("/api/users/{id}");
-	//				}
-
-	//				public Task<Results<Ok<UserResponse>, NotFound, BadRequest>> Handle(GetUserRequest request, CancellationToken ct)
-	//				{
-	//					if (request.Id <= 0)
-	//					{
-	//						return Task.FromResult<Results<Ok<UserResponse>, NotFound, BadRequest>>(TypedResults.BadRequest());
-	//					}
-
-	//					return Task.FromResult<Results<Ok<UserResponse>, NotFound, BadRequest>>(TypedResults.Ok(new UserResponse(request.Id, "John")));
-	//				}
-	//			}
-
-	//			public record GetUserRequest(int Id);
-	//			public record UserResponse(int Id, string Name);
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithComplexCombination()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using FluentValidation;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class UserEndpointGroup : IEndpointGroup
-	//			{
-	//				public static RouteGroupBuilder Configure(WebApplication app)
-	//				{
-	//					return app.MapGroup("/api/v1/users");
-	//				}
-	//			}
-
-	//			public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Results<Ok<UserResponse>, BadRequest>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Group<UserEndpointGroup>()
-	//						.Post("/")
-	//						.RequestFromBody()
-	//						.WithName("CreateUser")
-	//						.WithTags("UserManagement");
-	//				}
-
-	//				public Task<Results<Ok<UserResponse>, BadRequest>> Handle(CreateUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult<Results<Ok<UserResponse>, BadRequest>>(TypedResults.Ok(new UserResponse(1, request.Name)));
-	//				}
-	//			}
-
-	//			public record CreateUserRequest(string Name, string Email);
-	//			public record UserResponse(int Id, string Name);
-
-	//			public class CreateUserRequestValidator : Validator<CreateUserRequest>
-	//			{
-	//				public CreateUserRequestValidator()
-	//				{
-	//					RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
-	//					RuleFor(x => x.Email).EmailAddress();
-	//				}
-	//			}
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithMinimalRoutePattern()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class RootEndpoint : IEndpoint<RootRequest, Ok<RootResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder.Get("/");
-	//				}
-
-	//				public Task<Ok<RootResponse>> Handle(RootRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new RootResponse("Welcome")));
-	//				}
-	//			}
-
-	//			public record RootRequest();
-	//			public record RootResponse(string Message);
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
-
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithMultipleValidatorsForDifferentTypes()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using FluentValidation;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
-
-	//			namespace TestNamespace;
-
-	//			public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder.Post("/api/users");
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(CreateUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(1, request.Name)));
-	//				}
-	//			}
-
-	//			public class UpdateUserEndpoint : IEndpoint<UpdateUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder.Put("/api/users/{id}");
-	//				}
-
-	//				public Task<Ok<UserResponse>> Handle(UpdateUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, request.Name)));
-	//				}
-	//			}
-
-	//			public record CreateUserRequest(string Name, string Email);
-	//			public record UpdateUserRequest(int Id, string Name, string Email);
-	//			public record UserResponse(int Id, string Name);
-	//			public record Address(string Street, string City);
-
-	//			public class CreateUserRequestValidator : Validator<CreateUserRequest>
-	//			{
-	//				public CreateUserRequestValidator()
-	//				{
-	//					RuleFor(x => x.Name).NotEmpty();
-	//					RuleFor(x => x.Email).EmailAddress();
-	//				}
-	//			}
-
-	//			public class UpdateUserRequestValidator : Validator<UpdateUserRequest>
-	//			{
-	//				public UpdateUserRequestValidator()
-	//				{
-	//					RuleFor(x => x.Id).GreaterThan(0);
-	//					RuleFor(x => x.Name).NotEmpty();
-	//				}
-	//			}
-
-	//			public class AddressValidator : Validator<Address>
-	//			{
-	//				public AddressValidator()
-	//				{
-	//					RuleFor(x => x.Street).NotEmpty();
-	//					RuleFor(x => x.City).NotEmpty();
-	//				}
-	//			}
-	//			""";
-
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithGroupHavingWithName()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class UserEndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/api/users")
+							.WithName("UserGroup");
+					}
+				}
+
+				public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<UserEndpointGroup>()
+							.Get("/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
+					}
+				}
+
+				public record GetUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithGroupHavingWithTags()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class UserEndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/api/users")
+							.WithTags("Users");
+					}
+				}
+
+				public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<UserEndpointGroup>()
+							.Get("/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
+					}
+				}
+
+				public record GetUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithDisableValidation()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using FluentValidation;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Post("/api/users")
+							.DisableValidation();
+					}
+
+					public Task<Ok<UserResponse>> Handle(CreateUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(1, request.Name)));
+					}
+				}
+
+				public record CreateUserRequest(string Name);
+				public record UserResponse(int Id, string Name);
+
+				public class CreateUserRequestValidator : Validator<CreateUserRequest>
+				{
+					public CreateUserRequestValidator()
+					{
+						RuleFor(x => x.Name).NotEmpty();
+					}
+				}
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithNonRequestModelValidator()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using FluentValidation;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder.Get("/api/users/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
+					}
+				}
+
+				public record GetUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				public record NestedModel(string Value);
+
+				public class NestedModelValidator : Validator<NestedModel>
+				{
+					public NestedModelValidator()
+					{
+						RuleFor(x => x.Value).NotEmpty();
+					}
+				}
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithDifferentHttpVerbs()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class UpdateUserEndpoint : IEndpoint<UpdateUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder.Put("/api/users/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(UpdateUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, request.Name)));
+					}
+				}
+
+				public class PatchUserEndpoint : IEndpoint<PatchUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder.Patch("/api/users/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(PatchUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "Updated")));
+					}
+				}
+
+				public record UpdateUserRequest(int Id, string Name);
+				public record PatchUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithResultsUnionResponse()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class GetUserEndpoint : IEndpoint<GetUserRequest, Results<Ok<UserResponse>, NotFound, BadRequest>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder.Get("/api/users/{id}");
+					}
+
+					public Task<Results<Ok<UserResponse>, NotFound, BadRequest>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						if (request.Id <= 0)
+						{
+							return Task.FromResult<Results<Ok<UserResponse>, NotFound, BadRequest>>(TypedResults.BadRequest());
+						}
+
+						return Task.FromResult<Results<Ok<UserResponse>, NotFound, BadRequest>>(TypedResults.Ok(new UserResponse(request.Id, "John")));
+					}
+				}
+
+				public record GetUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithComplexCombination()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using FluentValidation;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class UserEndpointGroup : IEndpointGroup
+				{
+					public static RouteGroupBuilder Configure(WebApplication app)
+					{
+						return app.MapGroup("/api/v1/users");
+					}
+				}
+
+				public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Results<Ok<UserResponse>, BadRequest>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Group<UserEndpointGroup>()
+							.Post("/")
+							.RequestFromBody()
+							.WithName("CreateUser")
+							.WithTags("UserManagement");
+					}
+
+					public Task<Results<Ok<UserResponse>, BadRequest>> Handle(CreateUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult<Results<Ok<UserResponse>, BadRequest>>(TypedResults.Ok(new UserResponse(1, request.Name)));
+					}
+				}
+
+				public record CreateUserRequest(string Name, string Email);
+				public record UserResponse(int Id, string Name);
+
+				public class CreateUserRequestValidator : Validator<CreateUserRequest>
+				{
+					public CreateUserRequestValidator()
+					{
+						RuleFor(x => x.Name).NotEmpty().MaximumLength(100);
+						RuleFor(x => x.Email).EmailAddress();
+					}
+				}
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithMinimalRoutePattern()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class RootEndpoint : IEndpoint<RootRequest, Ok<RootResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder.Get("/");
+					}
+
+					public Task<Ok<RootResponse>> Handle(RootRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new RootResponse("Welcome")));
+					}
+				}
+
+				public record RootRequest();
+				public record RootResponse(string Message);
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithMultipleValidatorsForDifferentTypes()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using FluentValidation;
+				using Microsoft.AspNetCore.Http.HttpResults;
+
+				namespace TestNamespace;
+
+				public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder.Post("/api/users");
+					}
+
+					public Task<Ok<UserResponse>> Handle(CreateUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(1, request.Name)));
+					}
+				}
+
+				public class UpdateUserEndpoint : IEndpoint<UpdateUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder.Put("/api/users/{id}");
+					}
+
+					public Task<Ok<UserResponse>> Handle(UpdateUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, request.Name)));
+					}
+				}
+
+				public record CreateUserRequest(string Name, string Email);
+				public record UpdateUserRequest(int Id, string Name, string Email);
+				public record UserResponse(int Id, string Name);
+				public record Address(string Street, string City);
+
+				public class CreateUserRequestValidator : Validator<CreateUserRequest>
+				{
+					public CreateUserRequestValidator()
+					{
+						RuleFor(x => x.Name).NotEmpty();
+						RuleFor(x => x.Email).EmailAddress();
+					}
+				}
+
+				public class UpdateUserRequestValidator : Validator<UpdateUserRequest>
+				{
+					public UpdateUserRequestValidator()
+					{
+						RuleFor(x => x.Id).GreaterThan(0);
+						RuleFor(x => x.Name).NotEmpty();
+					}
+				}
+
+				public class AddressValidator : Validator<Address>
+				{
+					public AddressValidator()
+					{
+						RuleFor(x => x.Street).NotEmpty();
+						RuleFor(x => x.City).NotEmpty();
+					}
+				}
+				""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
 }
