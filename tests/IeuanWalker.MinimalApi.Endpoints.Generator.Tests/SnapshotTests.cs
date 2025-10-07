@@ -521,137 +521,137 @@ public class SnapshotTests
 		return TestHelper.Verify(source);
 	}
 
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithFromQueryBindingWithName()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithFromQueryBindingWithName()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
 
-	//			namespace TestNamespace;
+				namespace TestNamespace;
 
-	//			public class SearchUsersEndpoint : IEndpoint<SearchUsersRequest, Ok<List<UserResponse>>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Get("/api/users")
-	//						.RequestFromQuery("searchTerm");
-	//				}
+				public class SearchUsersEndpoint : IEndpoint<SearchUsersRequest, Ok<List<UserResponse>>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Get("/api/users")
+							.RequestFromQuery("searchTerm");
+					}
 
-	//				public Task<Ok<List<UserResponse>>> Handle(SearchUsersRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new List<UserResponse>()));
-	//				}
-	//			}
+					public Task<Ok<List<UserResponse>>> Handle(SearchUsersRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new List<UserResponse>()));
+					}
+				}
 
-	//			public record SearchUsersRequest(string Query);
-	//			public record UserResponse(int Id, string Name);
-	//			""";
+				public record SearchUsersRequest(string Query);
+				public record UserResponse(int Id, string Name);
+				""";
 
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
 
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithFromFormBinding()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithFromFormBinding()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
 
-	//			namespace TestNamespace;
+				namespace TestNamespace;
 
-	//			public class UploadFileEndpoint : IEndpoint<UploadFileRequest, Ok<UploadFileResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Post("/api/files")
-	//						.RequestFromForm();
-	//				}
+				public class UploadFileEndpoint : IEndpoint<UploadFileRequest, Ok<UploadFileResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Post("/api/files")
+							.RequestFromForm();
+					}
 
-	//				public Task<Ok<UploadFileResponse>> Handle(UploadFileRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UploadFileResponse(request.FileName)));
-	//				}
-	//			}
+					public Task<Ok<UploadFileResponse>> Handle(UploadFileRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UploadFileResponse(request.FileName)));
+					}
+				}
 
-	//			public record UploadFileRequest(string FileName, string Description);
-	//			public record UploadFileResponse(string FileName);
-	//			""";
+				public record UploadFileRequest(string FileName, string Description);
+				public record UploadFileResponse(string FileName);
+				""";
 
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
 
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithExplicitWithName()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithExplicitWithName()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
 
-	//			namespace TestNamespace;
+				namespace TestNamespace;
 
-	//			public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Get("/api/users/{id}")
-	//						.WithName("GetUserById");
-	//				}
+				public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Get("/api/users/{id}")
+							.WithName("GetUserById");
+					}
 
-	//				public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
-	//				}
-	//			}
+					public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
+					}
+				}
 
-	//			public record GetUserRequest(int Id);
-	//			public record UserResponse(int Id, string Name);
-	//			""";
+				public record GetUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				""";
 
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
 
-	//	[Fact]
-	//	public Task GeneratesEndpointExtensions_WithExplicitWithTags()
-	//	{
-	//		// Arrange
-	//		const string source = """
-	//			using IeuanWalker.MinimalApi.Endpoints;
-	//			using Microsoft.AspNetCore.Http.HttpResults;
+	[Fact]
+	public Task GeneratesEndpointExtensions_WithExplicitWithTags()
+	{
+		// Arrange
+		const string source = """
+				using IeuanWalker.MinimalApi.Endpoints;
+				using Microsoft.AspNetCore.Http.HttpResults;
 
-	//			namespace TestNamespace;
+				namespace TestNamespace;
 
-	//			public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
-	//			{
-	//				public static void Configure(RouteHandlerBuilder builder)
-	//				{
-	//					builder
-	//						.Get("/api/users/{id}")
-	//						.WithTags("UserManagement");
-	//				}
+				public class GetUserEndpoint : IEndpoint<GetUserRequest, Ok<UserResponse>>
+				{
+					public static void Configure(RouteHandlerBuilder builder)
+					{
+						builder
+							.Get("/api/users/{id}")
+							.WithTags("UserManagement");
+					}
 
-	//				public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
-	//				{
-	//					return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
-	//				}
-	//			}
+					public Task<Ok<UserResponse>> Handle(GetUserRequest request, CancellationToken ct)
+					{
+						return Task.FromResult(TypedResults.Ok(new UserResponse(request.Id, "John")));
+					}
+				}
 
-	//			public record GetUserRequest(int Id);
-	//			public record UserResponse(int Id, string Name);
-	//			""";
+				public record GetUserRequest(int Id);
+				public record UserResponse(int Id, string Name);
+				""";
 
-	//		// Act & Assert
-	//		return TestHelper.Verify(source);
-	//	}
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
 
 	//	[Fact]
 	//	public Task GeneratesEndpointExtensions_WithGroupHavingWithName()
