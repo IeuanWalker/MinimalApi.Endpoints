@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using IeuanWalker.MinimalApi.Endpoints.Generator;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
@@ -18,9 +19,10 @@ public static class TestHelper
 
 		// Create a compilation with the source code
 		CSharpCompilation compilation = CSharpCompilation.Create(
-			assemblyName: "Tests",
+			assemblyName: "TestAssembly",
 			syntaxTrees: [syntaxTree],
-			references: references);
+			references: references,
+			options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
 		// Create an instance of the source generator
 		EndpointGenerator generator = new();
@@ -39,32 +41,55 @@ public static class TestHelper
 	static IEnumerable<PortableExecutableReference> GetReferences()
 	{
 		// Get references to core .NET assemblies
-		Assembly[] assemblies =
-		[
-			typeof(object).Assembly,                          // System.Private.CoreLib
-			typeof(Console).Assembly,                         // System.Console
-			typeof(Enumerable).Assembly,                      // System.Linq
-			typeof(ImmutableArray).Assembly,                  // System.Collections.Immutable
-			Assembly.Load("System.Runtime"),
-			Assembly.Load("System.Collections"),
-			Assembly.Load("netstandard"),
+		List<PortableExecutableReference> references = [];
+
+		// Add core .NET references
+		references.Add(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+		references.Add(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location));
+		references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location));
+		references.Add(MetadataReference.CreateFromFile(typeof(ImmutableArray).Assembly.Location));
+		
+		// Add System references
+		string[] systemAssemblies = [
+			"System.Runtime",
+			"System.Collections", 
+			"System.Threading.Tasks",
+			"System.ComponentModel.Annotations",
+			"netstandard"
 		];
 
-		List<PortableExecutableReference> references = assemblies
-			.Select(assembly => MetadataReference.CreateFromFile(assembly.Location))
-			.ToList();
+		foreach (string assemblyName in systemAssemblies)
+		{
+			try
+			{
+				references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
+			}
+			catch
+			{
+				// Skip if assembly can't be loaded
+			}
+		}
 
 		// Add ASP.NET Core references
-		try
+		string[] aspNetAssemblies = [
+			"Microsoft.AspNetCore.Http",
+			"Microsoft.AspNetCore.Http.Abstractions", 
+			"Microsoft.AspNetCore.Routing",
+			"Microsoft.AspNetCore.Http.Results",
+			"Microsoft.AspNetCore.Authorization",
+			"Microsoft.Extensions.DependencyInjection.Abstractions"
+		];
+
+		foreach (string assemblyName in aspNetAssemblies)
 		{
-			references.Add(MetadataReference.CreateFromFile(Assembly.Load("Microsoft.AspNetCore.Http").Location));
-			references.Add(MetadataReference.CreateFromFile(Assembly.Load("Microsoft.AspNetCore.Http.Abstractions").Location));
-			references.Add(MetadataReference.CreateFromFile(Assembly.Load("Microsoft.AspNetCore.Routing").Location));
-			references.Add(MetadataReference.CreateFromFile(Assembly.Load("Microsoft.AspNetCore.Http.Results").Location));
-		}
-		catch
-		{
-			// If we can't load ASP.NET Core assemblies, that's okay for basic tests
+			try
+			{
+				references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
+			}
+			catch
+			{
+				// Skip if assembly can't be loaded - we'll try to find it via file system
+			}
 		}
 
 		// Add reference to the library project containing the interfaces
@@ -75,7 +100,7 @@ public static class TestHelper
 		}
 		catch
 		{
-			// Try alternative loading method
+			// Try alternative loading method via file system
 			string? assemblyPath = Assembly.GetExecutingAssembly().Location;
 			if (!string.IsNullOrEmpty(assemblyPath))
 			{
@@ -99,7 +124,7 @@ public static class TestHelper
 		}
 		catch
 		{
-			// FluentValidation is optional
+			// FluentValidation is optional for some tests
 		}
 
 		return references;

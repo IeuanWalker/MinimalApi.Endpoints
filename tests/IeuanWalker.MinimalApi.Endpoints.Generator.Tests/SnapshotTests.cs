@@ -3,7 +3,6 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
-[UsesVerify]
 public class SnapshotTests
 {
 	[Fact]
