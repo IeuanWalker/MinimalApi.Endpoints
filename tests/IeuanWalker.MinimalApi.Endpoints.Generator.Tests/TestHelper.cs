@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Verify.SourceGenerators;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 

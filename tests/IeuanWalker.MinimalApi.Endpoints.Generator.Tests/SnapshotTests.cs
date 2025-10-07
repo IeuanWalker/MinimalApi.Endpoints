@@ -1,8 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Verify
-
-.Xunit;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
