@@ -12,23 +12,22 @@ public static class EndpointExtensions
 {
     public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddScoped<global::TestNamespace.SearchUsersEndpoint>();
+        builder.Services.AddScoped<global::TestNamespace.GetUserEndpoint>();
         
         return builder;
     }
     
     public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
     {
-        // GET: /api/users
+        // GET: /api/users/{id}
         RouteHandlerBuilder get_Users_0 = app
-            .MapGet("/api/users", async (
-                [FromQuery] global::TestNamespace.SearchUsersRequest request,
-                [FromServices] global::TestNamespace.SearchUsersEndpoint endpoint,
+            .MapGet("/api/users/{id}", async (
+                global::TestNamespace.GetUserRequest request,
+                [FromServices] global::TestNamespace.GetUserEndpoint endpoint,
                 CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("get_Users_0");
+            .WithTags("Users");
         
-        global::TestNamespace.SearchUsersEndpoint.Configure(get_Users_0);
+        global::TestNamespace.GetUserEndpoint.Configure(get_Users_0);
         
         return app;
     }

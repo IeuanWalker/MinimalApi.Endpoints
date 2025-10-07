@@ -5,6 +5,8 @@
 // </auto-generated>
 
 using Microsoft.AspNetCore.Mvc;
+using IeuanWalker.MinimalApi.Endpoints.Filters;
+using FluentValidation;
 
 namespace TestAssembly;
 
@@ -14,6 +16,9 @@ public static class EndpointExtensions
     {
         builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
         
+        // Validators not directly related to an endpoints request model
+        builder.Services.AddSingleton<IValidator<global::TestNamespace.CreateUserRequest>, global::TestNamespace.CreateUserRequestValidator>();
+        
         return builder;
     }
     
@@ -22,7 +27,7 @@ public static class EndpointExtensions
         // POST: /api/users
         RouteHandlerBuilder post_Users_0 = app
             .MapPost("/api/users", async (
-                [FromBody] global::TestNamespace.CreateUserRequest request,
+                global::TestNamespace.CreateUserRequest request,
                 [FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
                 CancellationToken ct) => await endpoint.Handle(request, ct))
             .WithTags("Users")

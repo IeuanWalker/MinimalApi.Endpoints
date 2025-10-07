@@ -12,23 +12,23 @@ public static class EndpointExtensions
 {
     public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
     {
-        builder.Services.AddScoped<global::TestNamespace.SearchUsersEndpoint>();
+        builder.Services.AddScoped<global::TestNamespace.UploadFileEndpoint>();
         
         return builder;
     }
     
     public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
     {
-        // GET: /api/users
-        RouteHandlerBuilder get_Users_0 = app
-            .MapGet("/api/users", async (
-                [FromQuery] global::TestNamespace.SearchUsersRequest request,
-                [FromServices] global::TestNamespace.SearchUsersEndpoint endpoint,
+        // POST: /api/files
+        RouteHandlerBuilder post_Files_0 = app
+            .MapPost("/api/files", async (
+                [FromForm] global::TestNamespace.UploadFileRequest request,
+                [FromServices] global::TestNamespace.UploadFileEndpoint endpoint,
                 CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("get_Users_0");
+            .WithTags("Files")
+            .WithName("post_Files_0");
         
-        global::TestNamespace.SearchUsersEndpoint.Configure(get_Users_0);
+        global::TestNamespace.UploadFileEndpoint.Configure(post_Files_0);
         
         return app;
     }

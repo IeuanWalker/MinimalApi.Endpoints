@@ -19,16 +19,16 @@ public static class EndpointExtensions
     
     public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
     {
-        // GET: /api/users
-        RouteHandlerBuilder get_Users_0 = app
-            .MapGet("/api/users", async (
-                [FromQuery] global::TestNamespace.SearchUsersRequest request,
+        // GET: /api/users/search
+        RouteHandlerBuilder get_UsersSearch_0 = app
+            .MapGet("/api/users/search", async (
+                [AsParameters] global::TestNamespace.SearchUsersRequest request,
                 [FromServices] global::TestNamespace.SearchUsersEndpoint endpoint,
                 CancellationToken ct) => await endpoint.Handle(request, ct))
             .WithTags("Users")
-            .WithName("get_Users_0");
+            .WithName("get_UsersSearch_0");
         
-        global::TestNamespace.SearchUsersEndpoint.Configure(get_Users_0);
+        global::TestNamespace.SearchUsersEndpoint.Configure(get_UsersSearch_0);
         
         return app;
     }

@@ -260,17 +260,21 @@ public class EndpointGenerator : IIncrementalGenerator
 			builder.AppendLine($"public static IHostApplicationBuilder AddEndpointsFrom{sanitisedAssemblyName}(this IHostApplicationBuilder builder)");
 			using (builder.AppendBlock())
 			{
+				List<ValidatorInfo> validatorsCopy = validators.ToList();
+
 				foreach (IGrouping<string?, EndpointInfo> group in groupedEndpoints)
 				{
 					foreach (EndpointInfo? endpoint in group.OrderBy(x => x.HttpVerb).ThenBy(x => x.RoutePattern))
 					{
-						if (endpoint.RequestType is not null)
+						if (endpoint.RequestType is not null && !endpoint.DisableValidation)
 						{
-							ValidatorInfo? requestValidator = validators.FirstOrDefault(x => x.ValidatedTypeName.Equals(endpoint.RequestType));
+							ValidatorInfo? requestValidator = validatorsCopy.FirstOrDefault(x => x.ValidatedTypeName.Equals(endpoint.RequestType));
 
 							if (requestValidator is not null)
 							{
 								builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{endpoint.RequestType}>, global::{requestValidator.TypeName}>();");
+
+								validatorsCopy.Remove(requestValidator);
 							}
 						}
 
@@ -280,11 +284,10 @@ public class EndpointGenerator : IIncrementalGenerator
 
 				builder.AppendLine();
 
-				List<ValidatorInfo> nonRequestModelValidators = [.. validators.Where(v => !endpointClasses.Any(e => e.RequestType == v.ValidatedTypeName))];
-				if (nonRequestModelValidators.Any())
+				if (validatorsCopy.Any())
 				{
 					builder.AppendLine("// Validators not directly related to an endpoints request model");
-					foreach (ValidatorInfo validator in nonRequestModelValidators)
+					foreach (ValidatorInfo validator in validatorsCopy)
 					{
 						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{validator.ValidatedTypeName}>, global::{validator.TypeName}>();");
 					}

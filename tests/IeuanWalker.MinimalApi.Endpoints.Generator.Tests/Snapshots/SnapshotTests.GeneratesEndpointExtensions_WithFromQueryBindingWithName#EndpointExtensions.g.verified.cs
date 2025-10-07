@@ -22,7 +22,7 @@ public static class EndpointExtensions
         // GET: /api/users
         RouteHandlerBuilder get_Users_0 = app
             .MapGet("/api/users", async (
-                [FromQuery] global::TestNamespace.SearchUsersRequest request,
+                [FromQuery(Name = "searchTerm")] global::TestNamespace.SearchUsersRequest request,
                 [FromServices] global::TestNamespace.SearchUsersEndpoint endpoint,
                 CancellationToken ct) => await endpoint.Handle(request, ct))
             .WithTags("Users")
