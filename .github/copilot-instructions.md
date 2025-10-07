@@ -35,7 +35,7 @@ The repository consists of three main projects and four test projects:
 
 6. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi (15 tests)
 
-All test projects use **xUnit** as the test framework, **Shouldly** for assertions, and **NSubstitute** for mocking.
+All test projects use **xUnit** as the test framework, **Shouldly** for assertions, and **Verify** (Verify.Xunit / Verify.SourceGenerators) for snapshot testing of generated code.
 
 ## Architecture & Design Principles
 
@@ -84,6 +84,45 @@ Each endpoint must implement:
 - Endpoint classes should be in feature-based folders (e.g., `Endpoints/Todos/GetById/`)
 - Each endpoint typically has its own RequestModel and ResponseModel in the same folder
 
+## Snapshot Testing for Source Generators (Verify)
+
+This project uses `Verify` (https://github.com/VerifyTests/Verify) to snapshot-test generated code from the source generator. The following points summarize how snapshot testing works, file conventions, and the recommended workflow for updating snapshots.
+
+- **How it works**
+  - Tests compile small sample source inputs and run the source generator.
+  - The generated source output (and diagnostics) are captured by Verify.
+  - Verify compares the captured output with the stored verified snapshot files under `tests/.../Snapshots/`.
+  - If the outputs differ, Verify writes a `.received.*` file and the test fails showing the diff.
+
+- **File naming and locations**
+  - Verified snapshots are named with `.verified.*` and stored in the `Snapshots` folder next to the test file.
+  - When Verify detects a change it creates `.received.*` files, e.g. `SnapshotTests.MyTest#EndpointExtensions.g.received.cs`.
+  - The test harness supports multiple TFMs and will include TFM-specific verified files (e.g. `.DotNet10_0#...verified.cs`).
+
+- **Running snapshot tests**
+  - Run just the generator tests to validate generated output:
+    - `dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests`
+  - Or run all tests via `dotnet test` if you prefer.
+
+- **Updating snapshots** (accepted, intentional changes)
+  1. Run the failing test(s) locally.
+  2. Inspect the `.received.*` files in `tests/.../Snapshots/` to review the differences.
+  3. If changes are intended, replace the `.verified.*` file with the `.received.*` content. Two common approaches:
+     - Rename the `.received.*` file to `.verified.*` (ensure the file name and TFM suffix match the expected convention).
+     - Copy the content of `.received.*` into the existing `.verified.*` file and commit the change.
+  4. Re-run tests to ensure there are no further diffs.
+  5. Commit the updated `.verified.*` files to version control.
+
+- **Best practices**
+  - Keep snapshots minimal and focused: only capture the generated code that matters for the test scenario.
+  - Review diffs carefully — source generator output should not be updated casually.
+  - Include any new diagnostics (warnings/errors) in the snapshot so tests verify behavior consistently.
+  - When generator changes are broad, add/adjust tests to make expectations explicit rather than accepting many snapshot changes at once.
+
+- **Troubleshooting**
+  - If tests are failing due to environment or SDK differences, ensure the local SDK matches project TFMs (this repo targets .NET 10).
+  - Verify writes both `.received.*` and helpful `.verified.txt` diffs in the `Snapshots` directory; inspect those files for context.
+
 ## Common Tasks
 
 ### Adding a New Endpoint Interface Variant
@@ -100,7 +139,7 @@ Each endpoint must implement:
 3. Report diagnostic using `context.ReportDiagnostic()` during generation
 4. Follow ID pattern: `MINAPI###` (see existing diagnostics)
 
-### Modifying Generated Code
+## Modifying Generated Code
 - Update `GenerateEndpointExtensions()` in `EndpointGenerator.cs`
 - Use `IndentedTextBuilder` for clean, indented output
 - Generated file is always named `EndpointExtensions.g.cs`
@@ -119,136 +158,14 @@ dotnet build
 # Run all tests
 dotnet test
 
-# Run tests with code coverage
-dotnet test --collect:"XPlat Code Coverage"
-
 # Run specific test project
-dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Tests
-```
-
-### Test Projects
-
-The solution includes **3 comprehensive test projects** with 26 tests:
-
-1. **`tests/IeuanWalker.MinimalApi.Endpoints.Tests/`** - Unit tests for the main library
-   - Tests for `FluentValidationFilter` covering all scenarios
-   - Uses xUnit, Shouldly, and NSubstitute
-   - 4 tests covering constructor validation, pass/fail scenarios
-
-2. **`tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/`** - Unit tests for the source generator
-   - **Snapshot tests** for generated code (10 comprehensive scenarios using Verify)
-   - String utility extension tests (Sanitize, ToLowerFirstLetter, ToUpperFirstLetter)
-   - Uses xUnit, Shouldly, and **Verify** for snapshot testing
-   - 17+ tests total
-
-3. **`tests/ExampleApi.Tests/`** - Unit tests for ExampleApi
-   - Tests for endpoint handlers with mocked dependencies
-   - Complete test coverage for `InMemoryTodoStore` (all CRUD operations)
-   - 15 tests covering endpoints and services
-
-### Test Documentation
-
-Comprehensive testing documentation is available in the `tests/` directory:
-- **`tests/README.md`** - Overview of test projects and how to run tests
-- **`tests/CONTRIBUTING.md`** - Guide for adding new tests with patterns and examples
-- **`tests/TEST_SUMMARY.md`** - Detailed coverage statistics and recommendations
-
-### Testing Best Practices
-
-When writing tests for this project:
-- Use **Shouldly** for assertions (e.g., `result.ShouldBe(expected)`, `result.ShouldNotBeNull()`)
-- Use **Verify** for snapshot testing source generator output
-- Follow **Arrange-Act-Assert** pattern
-- Use descriptive test names: `MethodName_Scenario_ExpectedBehavior`
-- Use **NSubstitute** for mocking dependencies
-- Keep tests independent and isolated
-- Test edge cases (null values, empty collections, not found scenarios)
-
-### Snapshot Testing for Source Generators
-
-The project uses **Verify** (https://github.com/VerifyTests/Verify) for snapshot testing the source generator:
-
-**Key Files:**
-- `SnapshotTests.cs` - Contains snapshot test scenarios for different endpoint configurations
-- `TestHelper.cs` - Helper for running the generator and creating compilations
-- `ModuleInitializer.cs` - Initializes Verify settings with `VerifySourceGenerators.Initialize()`
-
-**How It Works:**
-1. Test creates sample source code with endpoint definitions
-2. `TestHelper.Verify()` runs the source generator on the code
-3. Verify captures the generated output and stores it in `/Snapshots` directory
-4. On subsequent runs, Verify compares new output with stored snapshots
-5. If output changes, test fails and shows diff
-
-**Running Snapshot Tests:**
-```bash
 dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests
 ```
 
-**Updating Snapshots:**
-When generated code legitimately changes:
-1. Review the diff in the test output
-2. If changes are expected, update snapshots by accepting the new `.received.` files
-3. Commit the updated `.verified.` snapshot files to version control
+### Updating Snapshots
+- Follow the "Updating snapshots" steps above. Only commit updated `.verified.*` files when you have reviewed the changes.
 
-**Snapshot Test Scenarios:**
-- Simple endpoints (`IEndpoint<TRequest, TResponse>`)
-- Endpoints without request/response
-- Endpoints with groups
-- Endpoints with validators
-- Multiple endpoints
-- Complex group hierarchies
-- Different request binding types (FromBody, AsParameters)
-
-### CI/CD Integration
-
-Tests run automatically via GitHub Actions on:
-- Every push to master branch
-- Every pull request to master
-- Scheduled runs (every 3 months)
-
-The workflow includes:
-- **Test Execution**: All test projects run with `dotnet test`
-- **Code Coverage**: Collected using XPlat Code Coverage
-- **Coverage Enforcement**: Build fails if coverage drops below 80% (configurable via `MINIMUM_COVERAGE` env var)
-- **PR Comments**: Automatic coverage reports posted to pull requests
-
-### Code Coverage Thresholds
-
-- **Minimum Required**: 80% (enforced - build fails below this)
-- **Target**: 95% (warning level)
-- **Tracked Metrics**: Both line and branch coverage
-
-To adjust the minimum coverage threshold, update `MINIMUM_COVERAGE` in `.github/workflows/build.yml`.
-
-### Testing Source Generator Changes
-
-When modifying the source generator:
-1. Update or add **snapshot tests** in `IeuanWalker.MinimalApi.Endpoints.Generator.Tests/SnapshotTests.cs`
-2. Run generator tests: `dotnet test tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests`
-3. Review snapshot diffs - if output changed, verify it's correct then update snapshots
-4. Verify generated code in `example/ExampleApi/obj/.../EndpointExtensions.g.cs`
-5. Run the ExampleApi project to verify runtime behavior
-6. Check for any diagnostic warnings/errors in build output
-7. Ensure code coverage remains above threshold
-
-**Adding New Snapshot Tests:**
-```csharp
-[Fact]
-public Task GeneratesEndpointExtensions_ForMyNewScenario()
-{
-    const string source = """
-        using IeuanWalker.MinimalApi.Endpoints;
-        // ... your test endpoint code
-        """;
-    
-    return TestHelper.Verify(source);
-}
-```
-
-The test will automatically create snapshot files in the `Snapshots/` directory on first run.
-
-### Diagnostic IDs
+## Diagnostic IDs
 Current diagnostic rules (from `AnalyzerReleases.Shipped.md`):
 - `MINAPI001` - Missing HTTP verb in Configure method
 - `MINAPI002` - Multiple HTTP verbs configured

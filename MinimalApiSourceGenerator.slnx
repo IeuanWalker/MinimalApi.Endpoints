@@ -7,12 +7,13 @@
     <Project Path="src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/IeuanWalker.MinimalApi.Endpoints.Tests/IeuanWalker.MinimalApi.Endpoints.Tests.csproj" />
-    <Project Path="tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests.csproj" />
     <Project Path="tests/ExampleApi.Tests/ExampleApi.Tests.csproj" />
+    <Project Path="tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests.csproj" />
+    <Project Path="tests/IeuanWalker.MinimalApi.Endpoints.Tests/IeuanWalker.MinimalApi.Endpoints.Tests.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path=".editorconfig" />
+    <File Path=".github/copilot-instructions.md" />
     <File Path="README.md" />
   </Folder>
 </Solution>
