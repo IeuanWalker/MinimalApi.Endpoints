@@ -165,4 +165,138 @@ public class InMemoryTodoStoreTests
 		// Assert
 		result.ShouldBeNull();
 	}
+
+	[Fact]
+	public async Task CreateAsync_AssignsSequentialIds()
+	{
+		// Arrange
+		InMemoryTodoStore store = new();
+		Todo todo1 = new() { Title = "Todo 1", Description = "Description 1", IsCompleted = false };
+		Todo todo2 = new() { Title = "Todo 2", Description = "Description 2", IsCompleted = false };
+
+		// Act
+		Todo created1 = await store.CreateAsync(todo1, CancellationToken.None);
+		Todo created2 = await store.CreateAsync(todo2, CancellationToken.None);
+
+		// Assert
+		created1.Id.ShouldBe(4); // After 3 seed items
+		created2.Id.ShouldBe(5);
+	}
+
+	[Fact]
+	public async Task CreateAsync_SetsCreatedAtAndNullUpdatedAt()
+	{
+		// Arrange
+		InMemoryTodoStore store = new();
+		Todo newTodo = new()
+		{
+			Title = "Test Todo",
+			Description = "Test Description",
+			IsCompleted = false
+		};
+
+		// Act
+		Todo created = await store.CreateAsync(newTodo, CancellationToken.None);
+
+		// Assert
+		created.CreatedAt.ShouldBe(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+		created.UpdatedAt.ShouldBeNull();
+	}
+
+	[Fact]
+	public async Task PatchAsync_PreservesUnmodifiedProperties()
+	{
+		// Arrange
+		InMemoryTodoStore store = new();
+		Todo? original = await store.GetByIdAsync(1, CancellationToken.None);
+
+		// Act
+		Todo? result = await store.PatchAsync(1, todo => todo.IsCompleted = true, CancellationToken.None);
+
+		// Assert
+		result.ShouldNotBeNull();
+		result.Id.ShouldBe(original!.Id);
+		result.Title.ShouldBe(original.Title);
+		result.Description.ShouldBe(original.Description);
+		result.CreatedAt.ShouldBe(original.CreatedAt);
+		result.IsCompleted.ShouldBeTrue(); // Only this should change
+		result.UpdatedAt.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public async Task PatchAsync_CanModifyMultipleProperties()
+	{
+		// Arrange
+		InMemoryTodoStore store = new();
+
+		// Act
+		Todo? result = await store.PatchAsync(1, todo =>
+		{
+			todo.Title = "Patched Title";
+			todo.Description = "Patched Description";
+			todo.IsCompleted = true;
+		}, CancellationToken.None);
+
+		// Assert
+		result.ShouldNotBeNull();
+		result.Title.ShouldBe("Patched Title");
+		result.Description.ShouldBe("Patched Description");
+		result.IsCompleted.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task GetAllAsync_ReturnsOrderedById()
+	{
+		// Arrange
+		InMemoryTodoStore store = new();
+
+		// Act
+		IEnumerable<Todo> todos = await store.GetAllAsync(CancellationToken.None);
+
+		// Assert
+		List<Todo> todoList = todos.ToList();
+		todoList.Count.ShouldBe(3);
+		todoList[0].Id.ShouldBe(1);
+		todoList[1].Id.ShouldBe(2);
+		todoList[2].Id.ShouldBe(3);
+	}
+
+	[Fact]
+	public async Task DeleteAsync_RemovedTodoNotInGetAll()
+	{
+		// Arrange
+		InMemoryTodoStore store = new();
+
+		// Act
+		bool deleted = await store.DeleteAsync(2, CancellationToken.None);
+		IEnumerable<Todo> remaining = await store.GetAllAsync(CancellationToken.None);
+
+		// Assert
+		deleted.ShouldBeTrue();
+		remaining.Count().ShouldBe(2);
+		remaining.Any(t => t.Id == 2).ShouldBeFalse();
+	}
+
+	[Fact]
+	public async Task CreateAsync_AfterDelete_ReusesIdSpace()
+	{
+		// Arrange
+		InMemoryTodoStore store = new();
+		await store.DeleteAsync(1, CancellationToken.None);
+		await store.DeleteAsync(2, CancellationToken.None);
+		await store.DeleteAsync(3, CancellationToken.None);
+
+		Todo newTodo = new()
+		{
+			Title = "New After Delete",
+			Description = "Description",
+			IsCompleted = false
+		};
+
+		// Act
+		Todo created = await store.CreateAsync(newTodo, CancellationToken.None);
+
+		// Assert
+		created.Id.ShouldBe(4); // ID counter continues, doesn't reset
+	}
 }
