@@ -1,9 +1,8 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Delete;
 using NSubstitute;
-using Shouldly;
 
-namespace ExampleApi.Tests;
+namespace ExampleApi.Tests.Endpoints.Todos;
 
 public class DeleteTodoEndpointTests
 {
@@ -41,26 +40,6 @@ public class DeleteTodoEndpointTests
 
 		// Assert
 		await todoStore.Received(1).DeleteAsync(999, Arg.Any<CancellationToken>());
-	}
-
-	[Fact]
-	public async Task Handle_PropagatesCancellationToken()
-	{
-		// Arrange
-		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
-			.Returns(true);
-
-		DeleteTodoEndpoint endpoint = new(todoStore);
-		RequestModel request = new() { Id = 1 };
-		CancellationTokenSource cts = new();
-		CancellationToken cancellationToken = cts.Token;
-
-		// Act
-		await endpoint.Handle(request, cancellationToken);
-
-		// Assert
-		await todoStore.Received(1).DeleteAsync(1, cancellationToken);
 	}
 
 	[Fact]

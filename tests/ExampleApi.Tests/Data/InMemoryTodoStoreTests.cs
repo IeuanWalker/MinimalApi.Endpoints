@@ -1,7 +1,7 @@
 using ExampleApi.Data;
 using Shouldly;
 
-namespace ExampleApi.Tests;
+namespace ExampleApi.Tests.Data;
 
 public class InMemoryTodoStoreTests
 {

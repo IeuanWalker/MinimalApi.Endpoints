@@ -3,7 +3,7 @@ using ExampleApi.Endpoints.Todos.GetById;
 using NSubstitute;
 using Shouldly;
 
-namespace ExampleApi.Tests;
+namespace ExampleApi.Tests.Endpoints.Todos;
 
 public class GetTodoByIdEndpointTests
 {
