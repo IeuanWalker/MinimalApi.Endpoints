@@ -1,5 +1,6 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.GetById;
+using Microsoft.AspNetCore.Http.HttpResults;
 using NSubstitute;
 using Shouldly;
 
@@ -8,7 +9,7 @@ namespace ExampleApi.Tests.Endpoints.Todos;
 public class GetTodoByIdEndpointTests
 {
 	[Fact]
-	public async Task Handle_WithExistingId_ReturnsTodo()
+	public async Task Handle_WithExistingId_ReturnsOkWithTodo()
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
@@ -28,18 +29,21 @@ public class GetTodoByIdEndpointTests
 		RequestModel request = new() { Id = 1 };
 
 		// Act
-		ResponseModel? result = await endpoint.Handle(request, CancellationToken.None);
+		Results<Ok<ResponseModel>, NoContent> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldNotBeNull();
-		result.Id.ShouldBe(1);
-		result.Title.ShouldBe("Test Todo");
-		result.Description.ShouldBe("Test Description");
-		result.IsCompleted.ShouldBeFalse();
+		result.ShouldBeOfType<Results<Ok<ResponseModel>, NoContent>>();
+
+		Ok<ResponseModel>? okResult = result.Result as Ok<ResponseModel>;
+		okResult.ShouldNotBeNull();
+		okResult.Value!.Id.ShouldBe(1);
+		okResult.Value!.Title.ShouldBe("Test Todo");
+		okResult.Value!.Description.ShouldBe("Test Description");
+		okResult.Value!.IsCompleted.ShouldBeFalse();
 	}
 
 	[Fact]
-	public async Task Handle_WithNonExistingId_ReturnsNull()
+	public async Task Handle_WithNonExistingId_ReturnsNotFound()
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
@@ -50,9 +54,13 @@ public class GetTodoByIdEndpointTests
 		RequestModel request = new() { Id = 999 };
 
 		// Act
-		ResponseModel? result = await endpoint.Handle(request, CancellationToken.None);
+		Results<Ok<ResponseModel>, NoContent> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldBeNull();
+		result.ShouldBeOfType<Results<Ok<ResponseModel>, NoContent>>();
+
+		NoContent? noContentResult = result.Result as NoContent;
+		noContentResult.ShouldNotBeNull();
+		noContentResult.ToString()!.ShouldContain("NoContent");
 	}
 }

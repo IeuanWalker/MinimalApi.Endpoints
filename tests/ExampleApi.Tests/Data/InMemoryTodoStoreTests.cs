@@ -254,7 +254,7 @@ public class InMemoryTodoStoreTests
 		IEnumerable<Todo> todos = await store.GetAllAsync(CancellationToken.None);
 
 		// Assert
-		List<Todo> todoList = todos.ToList();
+		List<Todo> todoList = [.. todos];
 		todoList.Count.ShouldBe(3);
 		todoList[0].Id.ShouldBe(1);
 		todoList[1].Id.ShouldBe(2);

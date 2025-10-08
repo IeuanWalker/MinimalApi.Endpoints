@@ -1,9 +1,9 @@
 using System.Collections.Immutable;
+using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Shouldly;
-using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests.Extensions;
 
@@ -50,7 +50,7 @@ public class SourceGeneratorExtensionsTests
 			}
 			""";
 
-		(INamedTypeSymbol symbol1, ImmutableArray<TypeDeclarationSyntax?> typeDeclarations1, Compilation compilation1) = CreateTestData(sourceCode1);
+		(INamedTypeSymbol _, ImmutableArray<TypeDeclarationSyntax?> typeDeclarations1, Compilation compilation1) = CreateTestData(sourceCode1);
 		(INamedTypeSymbol symbol2, _, _) = CreateTestData(sourceCode2);
 
 		// Act - try to find symbol2 in typeDeclarations1
@@ -75,7 +75,7 @@ public class SourceGeneratorExtensionsTests
 
 		// Add null entries to the array
 		TypeDeclarationSyntax?[] arrayWithNulls = [null, typeDeclarations[0], null];
-		ImmutableArray<TypeDeclarationSyntax?> typeDeclarationsWithNulls = arrayWithNulls.ToImmutableArray();
+		ImmutableArray<TypeDeclarationSyntax?> typeDeclarationsWithNulls = [.. arrayWithNulls];
 
 		// Act
 		TypeDeclarationSyntax? result = symbol.ToTypeDeclarationSyntax(typeDeclarationsWithNulls, compilation);
@@ -129,15 +129,11 @@ public class SourceGeneratorExtensionsTests
 
 		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 		CompilationUnitSyntax root = syntaxTree.GetCompilationUnitRoot();
-		
+
 		// Get all type declarations
-		TypeDeclarationSyntax[] allTypeDeclarations = root.DescendantNodes()
-			.OfType<TypeDeclarationSyntax>()
-			.ToArray();
-		
-		ImmutableArray<TypeDeclarationSyntax?> typeDeclarations = allTypeDeclarations
-			.Cast<TypeDeclarationSyntax?>()
-			.ToImmutableArray();
+		TypeDeclarationSyntax[] allTypeDeclarations = [.. root.DescendantNodes().OfType<TypeDeclarationSyntax>()];
+
+		ImmutableArray<TypeDeclarationSyntax?> typeDeclarations = [.. allTypeDeclarations.Cast<TypeDeclarationSyntax?>()];
 
 		// Create compilation and get symbol for SecondClass
 		Compilation compilation = CSharpCompilation.Create("TestCompilation")
@@ -502,7 +498,7 @@ public class SourceGeneratorExtensionsTests
 	public void GetConfigureMethod_WithEmptyMembersList_ReturnsNull()
 	{
 		// Arrange
-		SyntaxList<MemberDeclarationSyntax> emptyMembers = new();
+		SyntaxList<MemberDeclarationSyntax> emptyMembers = [];
 
 		// Act
 		MethodDeclarationSyntax? result = emptyMembers.GetConfigureMethod();
@@ -793,7 +789,7 @@ public class SourceGeneratorExtensionsTests
 		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 		CompilationUnitSyntax root = syntaxTree.GetCompilationUnitRoot();
 		TypeDeclarationSyntax typeDeclaration = root.DescendantNodes().OfType<TypeDeclarationSyntax>().First();
-		
+
 		ImmutableArray<TypeDeclarationSyntax?> typeDeclarations = [typeDeclaration];
 
 		Compilation compilation = CSharpCompilation.Create("TestCompilation")
@@ -811,7 +807,7 @@ public class SourceGeneratorExtensionsTests
 		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 		CompilationUnitSyntax root = syntaxTree.GetCompilationUnitRoot();
 		TypeDeclarationSyntax typeDeclaration = root.DescendantNodes().OfType<TypeDeclarationSyntax>().First();
-		
+
 		return typeDeclaration.Members;
 	}
 

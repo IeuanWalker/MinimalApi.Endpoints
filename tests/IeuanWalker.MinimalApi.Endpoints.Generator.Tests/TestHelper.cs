@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using IeuanWalker.MinimalApi.Endpoints.Generator;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
@@ -38,7 +37,7 @@ public static class TestHelper
 			.UseDirectory("Snapshots");
 	}
 
-	static IEnumerable<PortableExecutableReference> GetReferences()
+	static List<PortableExecutableReference> GetReferences()
 	{
 		// Get references to core .NET assemblies
 		List<PortableExecutableReference> references = [];
@@ -48,11 +47,11 @@ public static class TestHelper
 		references.Add(MetadataReference.CreateFromFile(typeof(Console).Assembly.Location));
 		references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location));
 		references.Add(MetadataReference.CreateFromFile(typeof(ImmutableArray).Assembly.Location));
-		
+
 		// Add System references
 		string[] systemAssemblies = [
 			"System.Runtime",
-			"System.Collections", 
+			"System.Collections",
 			"System.Threading.Tasks",
 			"System.ComponentModel.Annotations",
 			"netstandard"
@@ -73,7 +72,7 @@ public static class TestHelper
 		// Add ASP.NET Core references
 		string[] aspNetAssemblies = [
 			"Microsoft.AspNetCore.Http",
-			"Microsoft.AspNetCore.Http.Abstractions", 
+			"Microsoft.AspNetCore.Http.Abstractions",
 			"Microsoft.AspNetCore.Routing",
 			"Microsoft.AspNetCore.Http.Results",
 			"Microsoft.AspNetCore.Authorization",

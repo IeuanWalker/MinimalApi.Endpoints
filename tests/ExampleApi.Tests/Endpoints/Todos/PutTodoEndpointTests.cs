@@ -1,5 +1,6 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Put;
+using Microsoft.AspNetCore.Http.HttpResults;
 using NSubstitute;
 using Shouldly;
 
@@ -8,7 +9,7 @@ namespace ExampleApi.Tests.Endpoints.Todos;
 public class PutTodoEndpointTests
 {
 	[Fact]
-	public async Task Handle_WithExistingId_CallsUpdateAndReturnsResult()
+	public async Task Handle_WithExistingIdAndValidData_CallsUpdateAndReturnsOk()
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
@@ -29,15 +30,24 @@ public class PutTodoEndpointTests
 		RequestModel request = new() { Id = 5, Body = new RequestBodyModel { Title = "Updated", Description = "Updated Desc", IsCompleted = true } };
 
 		// Act
-		ResponseModel? result = await endpoint.Handle(request, CancellationToken.None);
+		Results<Ok<ResponseModel>, Conflict> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldNotBeNull();
-		await todoStore.Received(1).UpdateAsync(5, Arg.Is<Todo>(t => t.Title == "Updated" && t.Description == "Updated Desc" && t.IsCompleted == true), Arg.Any<CancellationToken>());
+		result.ShouldBeOfType<Results<Ok<ResponseModel>, Conflict>>();
+
+		Ok<ResponseModel>? okResult = result.Result as Ok<ResponseModel>;
+		okResult.ShouldNotBeNull();
+		okResult.Value.ShouldNotBeNull();
+		okResult.Value.Id.ShouldBe(5);
+		okResult.Value.Title.ShouldBe("Updated");
+		okResult.Value.Description.ShouldBe("Updated Desc");
+		okResult.Value.IsCompleted.ShouldBeTrue();
+
+		await todoStore.Received(1).UpdateAsync(5, Arg.Is<Todo>(t => t.Title == "Updated" && t.Description == "Updated Desc" && t.IsCompleted), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
-	public async Task Handle_WithNonExistingId_ReturnsNull()
+	public async Task Handle_WithNonExistingId_ReturnsNotFound()
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
@@ -48,9 +58,12 @@ public class PutTodoEndpointTests
 		RequestModel request = new() { Id = 999, Body = new RequestBodyModel { Title = "Missing", Description = "N/A", IsCompleted = false } };
 
 		// Act
-		ResponseModel? result = await endpoint.Handle(request, CancellationToken.None);
+		Results<Ok<ResponseModel>, Conflict> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldBeNull();
+		result.ShouldBeOfType<Results<Ok<ResponseModel>, Conflict>>();
+
+		Conflict? conflictResult = result.Result as Conflict;
+		conflictResult.ShouldNotBeNull();
 	}
 }

@@ -7,6 +7,7 @@
     <Project Path="src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/ExampleApi.IntegrationTests/ExampleApi.IntegrationTests.csproj" />
     <Project Path="tests/ExampleApi.Tests/ExampleApi.Tests.csproj" />
     <Project Path="tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests/IeuanWalker.MinimalApi.Endpoints.Generator.Tests.csproj" />
     <Project Path="tests/IeuanWalker.MinimalApi.Endpoints.Tests/IeuanWalker.MinimalApi.Endpoints.Tests.csproj" />

@@ -260,7 +260,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			builder.AppendLine($"public static IHostApplicationBuilder AddEndpointsFrom{sanitisedAssemblyName}(this IHostApplicationBuilder builder)");
 			using (builder.AppendBlock())
 			{
-				List<ValidatorInfo> validatorsCopy = validators.ToList();
+				List<ValidatorInfo> validatorsCopy = [.. validators];
 
 				foreach (IGrouping<string?, EndpointInfo> group in groupedEndpoints)
 				{
