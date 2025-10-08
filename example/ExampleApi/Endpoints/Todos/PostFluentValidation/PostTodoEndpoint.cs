@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using ExampleApi.Data;
 using ExampleApi.Infrastructure;
-using ExampleApi.Models;
-using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 

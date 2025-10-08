@@ -1,6 +1,6 @@
 using ExampleApi.Infrastructure;
-using ExampleApi.Services;
 using ExampleApi;
+using ExampleApi.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddProblemDetails();

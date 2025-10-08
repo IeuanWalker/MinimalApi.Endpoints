@@ -1,6 +1,5 @@
+using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.GetAll;
-using ExampleApi.Models;
-using ExampleApi.Services;
 using NSubstitute;
 using Shouldly;
 

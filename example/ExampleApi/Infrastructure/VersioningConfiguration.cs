@@ -1,9 +1,11 @@
-﻿using Asp.Versioning;
+﻿using System.Diagnostics.CodeAnalysis;
+using Asp.Versioning;
 using Asp.Versioning.Builder;
 using ExampleApi.Infrastructure;
 
 namespace ExampleApi.Infrastructure;
 
+[ExcludeFromCodeCoverage]
 public static class VersioningConfiguration
 {
 	public static IHostApplicationBuilder AddApiVersioning(this IHostApplicationBuilder builder)

@@ -1,10 +1,12 @@
-﻿using Asp.Versioning;
+﻿using System.Diagnostics.CodeAnalysis;
+using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
 namespace ExampleApi.Infrastructure;
 
+[ExcludeFromCodeCoverage]
 static class ScalarConfiguration
 {
 	internal static IHostApplicationBuilder AddScalar(this IHostApplicationBuilder builder)

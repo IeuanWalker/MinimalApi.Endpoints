@@ -1,5 +1,4 @@
-using ExampleApi.Models;
-using ExampleApi.Services;
+using ExampleApi.Data;
 using Shouldly;
 
 namespace ExampleApi.Tests;
