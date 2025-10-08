@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+	<DataCollectionRunSettings>
+		<DataCollectors>
+			<DataCollector friendlyName="XPlat code coverage">
+				<Configuration>
+					<Format>cobertura</Format>
+					<ExcludeByFile>
+						<!-- Exclude generated files -->
+						<Exclude>**/*.g.cs</Exclude>
+						<Exclude>**/*.generated.cs</Exclude>
+					</ExcludeByFile>
+					<ExcludeByAttribute>
+						<!-- Exclude methods/classes with these attributes -->
+						<Exclude>Obsolete</Exclude>
+						<Exclude>GeneratedCodeAttribute</Exclude>
+						<Exclude>CompilerGeneratedAttribute</Exclude>
+					</ExcludeByAttribute>
+					<ExcludeByAssembly>
+						<!-- Exclude Microsoft and System assemblies -->
+						<Exclude>Microsoft.*</Exclude>
+						<Exclude>System.*</Exclude>
+						<Exclude>*.Tests</Exclude>
+						<Exclude>xunit.*</Exclude>
+						<Exclude>Shouldly</Exclude>
+					</ExcludeByAssembly>
+				</Configuration>
+			</DataCollector>
+		</DataCollectors>
+	</DataCollectionRunSettings>
+</RunSettings>
