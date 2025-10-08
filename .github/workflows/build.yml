@@ -46,7 +46,7 @@ jobs:
         targetdir: 'coveragereport'
         reporttypes: 'MarkdownSummaryGithub;Cobertura'
         verbosity: 'Info'
-        assemblyfilters: '-Microsoft.*;-System.*;-ExampleApi'
+        assemblyfilters: '-Microsoft.*;-System.*;'
         classfilters: '-Microsoft.*;-System.*'
         filefilters: '-**/obj/**;-**/bin/**;-**/*.g.cs;-**/*.generated.cs'
         

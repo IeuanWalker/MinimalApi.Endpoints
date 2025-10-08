@@ -16,6 +16,7 @@
     <File Path=".github/copilot-instructions.md" />
     <File Path=".github/workflows/build.yml" />
     <File Path=".github/workflows/release.yml" />
+    <File Path="coverlet.runsettings" />
     <File Path="README.md" />
   </Folder>
 </Solution>
