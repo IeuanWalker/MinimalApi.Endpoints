@@ -46,6 +46,9 @@ jobs:
         targetdir: 'coveragereport'
         reporttypes: 'MarkdownSummaryGithub;Cobertura'
         verbosity: 'Info'
+        assemblyfilters: '-Microsoft.*;-System.*;-ExampleApi'
+        classfilters: '-Microsoft.*;-System.*'
+        filefilters: '-**/obj/**;-**/bin/**;-**/*.g.cs;-**/*.generated.cs'
         
     - name: Write to Job Summary
       run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
