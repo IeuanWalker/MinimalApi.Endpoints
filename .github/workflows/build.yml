@@ -8,6 +8,10 @@ on:
   schedule:
     - cron:  '0 0 1 */3 *'    # Every 3 months
 
+permissions:
+  pull-requests: write
+  contents: read
+
 env:
   NET_VERSION: 10.0.x
   NUGET_PATH: './**/IeuanWalker.MinimalApi.Endpoints.1.0.0.nupkg'
