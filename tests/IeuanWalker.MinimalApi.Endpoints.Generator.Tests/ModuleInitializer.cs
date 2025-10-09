@@ -1,5 +1,4 @@
 using System.Runtime.CompilerServices;
-using VerifyTests;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 

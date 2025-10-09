@@ -3,7 +3,6 @@ using FluentValidation.Results;
 using IeuanWalker.MinimalApi.Endpoints.Filters;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
-using Shouldly;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests;
 

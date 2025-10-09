@@ -1,4 +1,3 @@
-using Shouldly;
 using ExampleApi.Endpoints.WeatherForecast.Get.V1;
 
 namespace ExampleApi.Tests.Endpoints.WeatherForecast;

@@ -1,5 +1,3 @@
-using Shouldly;
-
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
 public sealed class IndentedTextBuilderTests : IDisposable

@@ -1,8 +1,6 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Put;
 using Microsoft.AspNetCore.Http.HttpResults;
-using NSubstitute;
-using Shouldly;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 

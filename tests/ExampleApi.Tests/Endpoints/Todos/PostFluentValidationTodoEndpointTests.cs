@@ -1,6 +1,5 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.PostFluentValidation;
-using NSubstitute;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 

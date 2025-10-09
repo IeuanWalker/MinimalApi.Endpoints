@@ -1,6 +1,5 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Delete;
-using NSubstitute;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 

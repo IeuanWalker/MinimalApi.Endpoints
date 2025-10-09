@@ -1,7 +1,5 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Patch;
-using NSubstitute;
-using Shouldly;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 

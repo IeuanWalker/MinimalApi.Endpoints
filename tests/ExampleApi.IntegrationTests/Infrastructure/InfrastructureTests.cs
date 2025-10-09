@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Shouldly;
 
 namespace ExampleApi.IntegrationTests.Infrastructure;
 
