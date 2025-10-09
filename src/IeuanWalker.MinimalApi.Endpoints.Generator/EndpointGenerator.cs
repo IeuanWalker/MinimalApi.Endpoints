@@ -225,13 +225,11 @@ public class EndpointGenerator : IIncrementalGenerator
 		}
 
 		// Check if a validator is on a DontValidateEndpoint
-		Dictionary<string, ValidatorInfo> validatorByTypeName = allValidators
-			.Where(v => v.ValidatedTypeName is not null)
-			.ToDictionary(v => v.ValidatedTypeName, v => v);
-
 		foreach (EndpointInfo endpoint in allEndpoints.Where(e => e.DisableValidation && e.RequestType is not null))
 		{
-			if (validatorByTypeName.TryGetValue(endpoint.RequestType!, out ValidatorInfo? validator))
+			ValidatorInfo? validator = allValidators.FirstOrDefault(v => v.ValidatedTypeName.Equals(endpoint.RequestType));
+
+			if (validator is not null)
 			{
 				context.ReportDiagnostic(Diagnostic.Create(
 					hasValidatorButEndpointDisablesValidation,
