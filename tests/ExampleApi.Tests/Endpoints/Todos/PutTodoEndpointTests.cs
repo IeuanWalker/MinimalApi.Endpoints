@@ -1,8 +1,6 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Put;
 using Microsoft.AspNetCore.Http.HttpResults;
-using NSubstitute;
-using Shouldly;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
@@ -23,7 +21,8 @@ public class PutTodoEndpointTests
 			UpdatedAt = DateTime.UtcNow
 		};
 
-		todoStore.UpdateAsync(5, Arg.Any<Todo>(), Arg.Any<CancellationToken>())
+		todoStore
+			.UpdateAsync(5, Arg.Any<Todo>(), Arg.Any<CancellationToken>())
 			.Returns(updated);
 
 		PutTodoEndpoint endpoint = new(todoStore);
@@ -43,7 +42,9 @@ public class PutTodoEndpointTests
 		okResult.Value.Description.ShouldBe("Updated Desc");
 		okResult.Value.IsCompleted.ShouldBeTrue();
 
-		await todoStore.Received(1).UpdateAsync(5, Arg.Is<Todo>(t => t.Title == "Updated" && t.Description == "Updated Desc" && t.IsCompleted), Arg.Any<CancellationToken>());
+		await todoStore
+			.Received(1)
+			.UpdateAsync(5, Arg.Is<Todo>(t => t.Title == "Updated" && t.Description == "Updated Desc" && t.IsCompleted), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -51,7 +52,8 @@ public class PutTodoEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.UpdateAsync(Arg.Any<int>(), Arg.Any<Todo>(), Arg.Any<CancellationToken>())
+		todoStore
+			.UpdateAsync(Arg.Any<int>(), Arg.Any<Todo>(), Arg.Any<CancellationToken>())
 			.Returns((Todo?)null);
 
 		PutTodoEndpoint endpoint = new(todoStore);

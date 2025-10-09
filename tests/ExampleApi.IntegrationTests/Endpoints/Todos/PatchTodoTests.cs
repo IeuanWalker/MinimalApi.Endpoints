@@ -1,9 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
-using ExampleApi.IntegrationTests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Todos;
 

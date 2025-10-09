@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
-using Shouldly;
 using PostTodoFluentValidation = ExampleApi.Endpoints.Todos.PostFluentValidation;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Todos;

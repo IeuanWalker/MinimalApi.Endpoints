@@ -1,7 +1,5 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.GetAll;
-using NSubstitute;
-using Shouldly;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
@@ -39,7 +37,8 @@ public class GetAllTodosEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.GetAllAsync(Arg.Any<CancellationToken>())
+		todoStore
+			.GetAllAsync(Arg.Any<CancellationToken>())
 			.Returns([]);
 
 		GetAllTodosEndpoint endpoint = new(todoStore);

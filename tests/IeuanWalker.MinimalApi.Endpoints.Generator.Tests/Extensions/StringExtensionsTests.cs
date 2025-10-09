@@ -1,4 +1,3 @@
-using Shouldly;
 using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests.Extensions;

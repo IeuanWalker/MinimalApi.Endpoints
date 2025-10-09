@@ -1,8 +1,6 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.GetById;
 using Microsoft.AspNetCore.Http.HttpResults;
-using NSubstitute;
-using Shouldly;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
@@ -22,7 +20,8 @@ public class GetTodoByIdEndpointTests
 			CreatedAt = DateTime.UtcNow
 		};
 
-		todoStore.GetByIdAsync(1, Arg.Any<CancellationToken>())
+		todoStore
+			.GetByIdAsync(1, Arg.Any<CancellationToken>())
 			.Returns(existingTodo);
 
 		GetTodoByIdEndpoint endpoint = new(todoStore);
@@ -47,7 +46,8 @@ public class GetTodoByIdEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.GetByIdAsync(999, Arg.Any<CancellationToken>())
+		todoStore
+			.GetByIdAsync(999, Arg.Any<CancellationToken>())
 			.Returns((Todo?)null);
 
 		GetTodoByIdEndpoint endpoint = new(todoStore);
