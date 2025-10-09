@@ -233,8 +233,8 @@ public class EndpointGenerator : IIncrementalGenerator
 				context.ReportDiagnostic(Diagnostic.Create(
 					hasValidatorButEndpointDisablesValidation,
 					validator.Location,
-					validator.ValidatedTypeName,
-					endpoint.RequestType));
+					endpoint.RequestType,
+					validator.ValidatedTypeName));
 			}
 		}
 
