@@ -4,31 +4,35 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<global::TestNamespace.RootEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // GET: /
-        RouteHandlerBuilder get__0 = app
-            .MapGet("/", async (
-                global::TestNamespace.RootRequest request,
-                [FromServices] global::TestNamespace.RootEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithName("get__0");
-        
-        global::TestNamespace.RootEndpoint.Configure(get__0);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddScoped<global::TestNamespace.RootEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// GET: /
+		RouteHandlerBuilder get__0 = app
+			.MapGet("/", async (
+				global::TestNamespace.RootRequest request,
+				[FromServices] global::TestNamespace.RootEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithName("get__0");
+
+		global::TestNamespace.RootEndpoint.Configure(get__0);
+
+		return app;
+	}
 }

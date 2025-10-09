@@ -4,44 +4,48 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<global::TestNamespace.UpdateUserEndpoint>();
-        builder.Services.AddScoped<global::TestNamespace.PatchUserEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // PUT: /api/users/{id}
-        RouteHandlerBuilder put_Users_0 = app
-            .MapPut("/api/users/{id}", async (
-                global::TestNamespace.UpdateUserRequest request,
-                [FromServices] global::TestNamespace.UpdateUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("put_Users_0");
-        
-        global::TestNamespace.UpdateUserEndpoint.Configure(put_Users_0);
-        
-        // PATCH: /api/users/{id}
-        RouteHandlerBuilder patch_Users_1 = app
-            .MapPatch("/api/users/{id}", async (
-                global::TestNamespace.PatchUserRequest request,
-                [FromServices] global::TestNamespace.PatchUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("patch_Users_1");
-        
-        global::TestNamespace.PatchUserEndpoint.Configure(patch_Users_1);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddScoped<global::TestNamespace.UpdateUserEndpoint>();
+		builder.Services.AddScoped<global::TestNamespace.PatchUserEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// PUT: /api/users/{id}
+		RouteHandlerBuilder put_Users_0 = app
+			.MapPut("/api/users/{id}", async (
+				global::TestNamespace.UpdateUserRequest request,
+				[FromServices] global::TestNamespace.UpdateUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("put_Users_0");
+
+		global::TestNamespace.UpdateUserEndpoint.Configure(put_Users_0);
+
+		// PATCH: /api/users/{id}
+		RouteHandlerBuilder patch_Users_1 = app
+			.MapPatch("/api/users/{id}", async (
+				global::TestNamespace.PatchUserRequest request,
+				[FromServices] global::TestNamespace.PatchUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("patch_Users_1");
+
+		global::TestNamespace.PatchUserEndpoint.Configure(patch_Users_1);
+
+		return app;
+	}
 }
