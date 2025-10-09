@@ -231,7 +231,7 @@ public class EndpointGenerator : IIncrementalGenerator
 
 		foreach (EndpointInfo endpoint in allEndpoints.Where(e => e.DisableValidation && e.RequestType is not null))
 		{
-			if (validatorByTypeName.TryGetValue(endpoint.RequestType, out ValidatorInfo? validator))
+			if (validatorByTypeName.TryGetValue(endpoint.RequestType!, out ValidatorInfo? validator))
 			{
 				context.ReportDiagnostic(Diagnostic.Create(
 					hasValidatorButEndpointDisablesValidation,
