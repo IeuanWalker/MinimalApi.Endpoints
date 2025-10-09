@@ -240,7 +240,6 @@ public class EndpointGenerator : IIncrementalGenerator
 			  //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 			  // </auto-generated>
 
-			  using Microsoft.AspNetCore.Mvc;
 			  using Microsoft.AspNetCore.Builder;
 			  using Microsoft.AspNetCore.Http;
 			  using Microsoft.AspNetCore.Mvc;
