@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -16,10 +17,7 @@ static class RequestBindingTypeHelpers
 
 	public static (RequestBindingTypeEnum requestType, string? name)? GetRequestTypeAndName(this TypeDeclarationSyntax typeDeclaration, List<DiagnosticInfo> diagnostics)
 	{
-		// Find the Configure method
-		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
-			.OfType<MethodDeclarationSyntax>()
-			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members.GetConfigureMethod();
 
 		if (configureMethod is null)
 		{

@@ -1,10 +1,12 @@
-﻿using ExampleApi.Infrastructure;
+﻿using System.Diagnostics.CodeAnalysis;
+using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.WeatherForecast.Get.V2;
 
 public class GetWeatherForecastEndpoint : IEndpointWithoutRequest<ResponseModel[]>
 {
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
@@ -22,12 +24,16 @@ public class GetWeatherForecastEndpoint : IEndpointWithoutRequest<ResponseModel[
 	public async Task<ResponseModel[]> Handle(CancellationToken ct)
 	{
 		ResponseModel[] forecast = [.. Enumerable.Range(1, 5).Select(index =>
-			new ResponseModel
+		{
+			var tempC = Random.Shared.Next(-20, 55);
+			return new ResponseModel
 			{
 				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-				TemperatureC = Random.Shared.Next(-20, 55),
+				TemperatureC = tempC,
+				TemperatureF = 32 + (int)(tempC / 0.5556),
 				Summary = summaries[Random.Shared.Next(summaries.Length)]
-			})];
+			};
+		})];
 
 		return await Task.FromResult(forecast);
 	}

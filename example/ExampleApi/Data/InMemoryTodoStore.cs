@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
-using ExampleApi.Models;
 
-namespace ExampleApi.Services;
+namespace ExampleApi.Data;
 
 public interface ITodoStore
 {

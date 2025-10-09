@@ -1,11 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+using ExampleApi.Data;
 using ExampleApi.Infrastructure;
-using ExampleApi.Models;
-using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ExampleApi.Endpoints.Todos.Put;
 
-public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
+public class PutTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel>, Conflict>>
 {
 	readonly ITodoStore _todoStore;
 
@@ -14,6 +15,7 @@ public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 		_todoStore = todoStore;
 	}
 
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
@@ -25,7 +27,7 @@ public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 			.Version(1.0);
 	}
 
-	public async Task<ResponseModel?> Handle(RequestModel request, CancellationToken ct)
+	public async Task<Results<Ok<ResponseModel>, Conflict>> Handle(RequestModel request, CancellationToken ct)
 	{
 		Todo todo = new()
 		{
@@ -36,16 +38,19 @@ public class PutTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 
 		Todo? updatedTodo = await _todoStore.UpdateAsync(request.Id, todo, ct);
 
-		return updatedTodo is null
-			? null
-			: new ResponseModel
-			{
-				Id = todo.Id,
-				Title = todo.Title,
-				Description = todo.Description,
-				IsCompleted = todo.IsCompleted,
-				CreatedAt = todo.CreatedAt,
-				UpdatedAt = todo.UpdatedAt
-			};
+		if (updatedTodo is null)
+		{
+			return TypedResults.Conflict();
+		}
+
+		return TypedResults.Ok(new ResponseModel
+		{
+			Id = updatedTodo.Id,
+			Title = updatedTodo.Title,
+			Description = updatedTodo.Description,
+			IsCompleted = updatedTodo.IsCompleted,
+			CreatedAt = updatedTodo.CreatedAt,
+			UpdatedAt = updatedTodo.UpdatedAt
+		});
 	}
 }

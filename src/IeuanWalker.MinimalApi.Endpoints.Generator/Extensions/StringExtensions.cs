@@ -2,7 +2,7 @@
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 
-static class Extensions
+static class StringExtensions
 {
 	static readonly Regex regex = new("[^a-zA-Z0-9]+", RegexOptions.Compiled);
 

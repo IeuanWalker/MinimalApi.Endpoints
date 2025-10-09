@@ -1,8 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
+using ExampleApi.Data;
 using ExampleApi.Infrastructure;
-using ExampleApi.Models;
-using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -17,6 +17,7 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 		_todoStore = todoStore;
 	}
 
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder

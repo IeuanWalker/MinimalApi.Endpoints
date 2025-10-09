@@ -1,4 +1,4 @@
-using ExampleApi.Models;
+using ExampleApi.Data;
 
 namespace ExampleApi.Endpoints.Todos.PostDataAnnotation;
 

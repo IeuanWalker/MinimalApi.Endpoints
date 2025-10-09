@@ -37,7 +37,7 @@ static class EndpointGeneratorHelpers
 			builder.Append($".WithName(\"{uniqueRootName}\")");
 		}
 
-		if (endpoint.RequestType is not null)
+		if (endpoint.RequestType is not null && !endpoint.DisableValidation)
 		{
 			ValidatorInfo? requestValidator = validators.FirstOrDefault(x => x.ValidatedTypeName.Equals(endpoint.RequestType));
 

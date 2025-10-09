@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -24,10 +25,7 @@ static class HttpVerbRouteHelpers
 
 	public static (HttpVerb verb, string pattern)? GetVerbAndPattern(this TypeDeclarationSyntax typeDeclaration, string typeName, List<DiagnosticInfo> diagnostics)
 	{
-		// Find the Configure method
-		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
-			.OfType<MethodDeclarationSyntax>()
-			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members.GetConfigureMethod();
 
 		if (configureMethod is null)
 		{

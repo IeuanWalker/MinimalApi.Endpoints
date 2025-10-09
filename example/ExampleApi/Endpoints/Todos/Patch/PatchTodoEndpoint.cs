@@ -1,6 +1,6 @@
+using System.Diagnostics.CodeAnalysis;
+using ExampleApi.Data;
 using ExampleApi.Infrastructure;
-using ExampleApi.Models;
-using ExampleApi.Services;
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Todos.Patch;
@@ -14,6 +14,7 @@ public class PatchTodoEndpoint : IEndpoint<RequestModel, ResponseModel?>
 		_todoStore = todoStore;
 	}
 
+	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder

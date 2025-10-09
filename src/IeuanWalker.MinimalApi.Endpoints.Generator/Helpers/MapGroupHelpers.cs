@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -37,10 +38,7 @@ static class MapGroupHelpers
 			return null;
 		}
 
-		// Find the Configure method
-		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
-			.OfType<MethodDeclarationSyntax>()
-			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members.GetConfigureMethod();
 
 		if (configureMethod is null)
 		{
@@ -116,10 +114,7 @@ static class MapGroupHelpers
 			SyntaxNode syntaxNode = syntaxRef.GetSyntax();
 			if (syntaxNode is TypeDeclarationSyntax typeDeclaration)
 			{
-				// Find the Configure method in the endpoint group
-				MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
-					.OfType<MethodDeclarationSyntax>()
-					.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+				MethodDeclarationSyntax? configureMethod = typeDeclaration.Members.GetConfigureMethod();
 
 				if (configureMethod is not null)
 				{

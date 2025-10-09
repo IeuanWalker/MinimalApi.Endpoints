@@ -1,4 +1,4 @@
-namespace ExampleApi.Models;
+namespace ExampleApi.Data;
 
 public class Todo
 {

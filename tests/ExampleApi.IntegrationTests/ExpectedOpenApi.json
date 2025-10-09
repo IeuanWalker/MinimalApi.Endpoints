@@ -1,0 +1,751 @@
+{
+	"openapi": "3.0.4",
+	"info": {
+		"title": "Test API",
+		"version": "1"
+	},
+	"servers": [
+		{
+			"url": "https://localhost:7224/"
+		}
+	],
+	"paths": {
+		"/api/v1/todos": {
+			"get": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Get all todos",
+				"description": "Retrieves all todos from the store",
+				"operationId": "get_Todos_0",
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/todos/{id}": {
+			"get": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Get todo by ID",
+				"description": "Retrieves a specific todo by its ID",
+				"operationId": "get_Todos_1",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Int32"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetById.ResponseModel"
+								}
+							}
+						}
+					},
+					"204": {
+						"description": "No Content"
+					}
+				}
+			},
+			"put": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Update a todo",
+				"description": "Updates an existing todo item completely",
+				"operationId": "put_Todos_5",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Int32"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Put.RequestBodyModel"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Put.ResponseModel"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Conflict"
+					}
+				}
+			},
+			"patch": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Partially update a todo",
+				"description": "Updates specific fields of an existing todo item",
+				"operationId": "patch_Todos_6",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Int32"
+						}
+					}
+				],
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Patch.RequestBodyModel"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Patch.ResponseModel"
+								}
+							}
+						}
+					}
+				}
+			},
+			"delete": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Delete a todo",
+				"description": "Deletes an existing todo item",
+				"operationId": "delete_Todos_7",
+				"parameters": [
+					{
+						"name": "id",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Int32"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK"
+					}
+				}
+			}
+		},
+		"/api/v1/todos/export": {
+			"get": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Export todos",
+				"description": "Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.",
+				"operationId": "get_TodosExport_2",
+				"responses": {
+					"204": {
+						"description": "No Content"
+					},
+					"200": {
+						"description": "Downloadable HTML file containing all todos in a formatted table",
+						"content": {
+							"text/html": {
+								"schema": {
+									"$ref": "#/components/schemas/System.String"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/todos/DataAnnotation": {
+			"post": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Create a new todo",
+				"description": "Creates a new todo item",
+				"operationId": "post_TodosDataAnnotation_3",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostDataAnnotation.RequestModel"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostDataAnnotation.ResponseModel"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Conflict"
+					}
+				}
+			}
+		},
+		"/api/v1/todos/FluentValidation": {
+			"post": {
+				"tags": [
+					"Todos"
+				],
+				"summary": "Create a new todo",
+				"description": "Creates a new todo item",
+				"operationId": "post_TodosFluentValidation_4",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.RequestModel"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.ResponseModel"
+								}
+							}
+						}
+					},
+					"409": {
+						"description": "Conflict"
+					},
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/weatherforecast": {
+			"get": {
+				"tags": [
+					"Weatherforecast"
+				],
+				"operationId": "get_Weatherforecast_8",
+				"parameters": [
+					{
+						"name": "api-version",
+						"in": "query",
+						"schema": {
+							"$ref": "#/components/schemas/System.String"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]"
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"ExampleApi.Endpoints.Todos.GetAll.ResponseModel": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					},
+					"createdAt": {
+						"$ref": "#/components/schemas/System.DateTime"
+					},
+					"updatedAt": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetAll.ResponseModel"
+				}
+			},
+			"ExampleApi.Endpoints.Todos.GetById.ResponseModel": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					},
+					"createdAt": {
+						"$ref": "#/components/schemas/System.DateTime"
+					},
+					"updatedAt": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.Patch.RequestBodyModel": {
+				"type": "object",
+				"properties": {
+					"title": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"description": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"isCompleted": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.Patch.ResponseModel": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					},
+					"createdAt": {
+						"$ref": "#/components/schemas/System.DateTime"
+					},
+					"updatedAt": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.PostDataAnnotation.RequestModel": {
+				"required": [
+					"title",
+					"description"
+				],
+				"type": "object",
+				"properties": {
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.PostDataAnnotation.ResponseModel": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					},
+					"createdAt": {
+						"$ref": "#/components/schemas/System.DateTime"
+					},
+					"updatedAt": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model": {
+				"type": "object",
+				"properties": {
+					"note": {
+						"$ref": "#/components/schemas/System.String"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"age": {
+						"$ref": "#/components/schemas/System.Int32"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.PostFluentValidation.RequestModel": {
+				"type": "object",
+				"properties": {
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"nestedObject": {
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel"
+					},
+					"nestedObject2": {
+						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					},
+					"isTest": {
+						"$ref": "#/components/schemas/System.Boolean"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.PostFluentValidation.ResponseModel": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					},
+					"createdAt": {
+						"$ref": "#/components/schemas/System.DateTime"
+					},
+					"updatedAt": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.Put.RequestBodyModel": {
+				"required": [
+					"title"
+				],
+				"type": "object",
+				"properties": {
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Todos.Put.ResponseModel": {
+				"type": "object",
+				"properties": {
+					"id": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"title": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"description": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"isCompleted": {
+						"$ref": "#/components/schemas/System.Boolean"
+					},
+					"createdAt": {
+						"$ref": "#/components/schemas/System.DateTime"
+					},
+					"updatedAt": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel": {
+				"type": "object",
+				"properties": {
+					"date": {
+						"$ref": "#/components/schemas/System.DateOnly"
+					},
+					"temperatureC": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"summary": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel"
+				}
+			},
+			"Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
+				"type": "object",
+				"properties": {
+					"type": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"title": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"status": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					},
+					"detail": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"instance": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"errors": {
+						"$ref": "#/components/schemas/System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+					}
+				}
+			},
+			"System.Boolean": {
+				"type": "boolean"
+			},
+			"System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+				"type": "object",
+				"additionalProperties": {
+					"$ref": "#/components/schemas/System.String[]"
+				}
+			},
+			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model"
+				}
+			},
+			"System.DateOnly": {
+				"type": "string",
+				"format": "date"
+			},
+			"System.DateTime": {
+				"type": "string",
+				"format": "date-time"
+			},
+			"System.Int32": {
+				"pattern": "^-?(?:0|[1-9]\\d*)$",
+				"format": "int32"
+			},
+			"System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+				"type": "boolean"
+			},
+			"System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+				"type": "string",
+				"format": "date-time"
+			},
+			"System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+				"pattern": "^-?(?:0|[1-9]\\d*)$",
+				"format": "int32"
+			},
+			"System.String": {
+				"type": "string"
+			},
+			"System.String[]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/System.String"
+				}
+			}
+		}
+	},
+	"tags": [
+		{
+			"name": "Todos"
+		},
+		{
+			"name": "Weatherforecast"
+		}
+	]
+}

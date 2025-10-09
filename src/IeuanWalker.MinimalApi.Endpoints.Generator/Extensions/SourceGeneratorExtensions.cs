@@ -28,4 +28,34 @@ static class SourceGeneratorExtensions
 
 		return null;
 	}
+
+	internal static MethodDeclarationSyntax? GetConfigureMethod(this SyntaxList<MemberDeclarationSyntax> members)
+	{
+		return members
+			.OfType<MethodDeclarationSyntax>()
+			.FirstOrDefault(m => m.Identifier.ValueText == "Configure"
+				&& m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword))
+				&& HasRouteHandlerBuilderParameter(m));
+
+		static bool HasRouteHandlerBuilderParameter(MethodDeclarationSyntax method)
+		{
+			// Check if method has exactly one parameter of type RouteHandlerBuilder
+			if (method.ParameterList.Parameters.Count != 1)
+			{
+				return false;
+			}
+
+			ParameterSyntax parameter = method.ParameterList.Parameters[0];
+
+			// Check if parameter type is RouteHandlerBuilder (handle both simple and qualified names)
+			return parameter.Type switch
+			{
+				IdentifierNameSyntax identifierName => identifierName.Identifier.ValueText is "RouteHandlerBuilder" or "WebApplication",
+				QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.ValueText is "RouteHandlerBuilder" or "WebApplication",
+				_ => false
+			};
+		}
+	}
+
+
 }

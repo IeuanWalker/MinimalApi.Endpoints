@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -9,10 +10,7 @@ static class WithNameHelpers
 {
 	public static string? GetWithName(this TypeDeclarationSyntax typeDeclaration)
 	{
-		// Find the Configure method
-		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members
-			.OfType<MethodDeclarationSyntax>()
-			.FirstOrDefault(m => m.Identifier.ValueText == "Configure" && m.Modifiers.Any(mod => mod.IsKind(SyntaxKind.StaticKeyword)));
+		MethodDeclarationSyntax? configureMethod = typeDeclaration.Members.GetConfigureMethod();
 
 		if (configureMethod is null)
 		{
@@ -42,11 +40,11 @@ static class WithNameHelpers
 
 	public static string GenerateWithName(HttpVerb verb, string pattern, int routeNumber)
 	{
-		pattern = Regex.Replace(pattern, @"\{[^}]+\}", "");
-		pattern = Regex.Replace(pattern, @"[^\w]", " ");
-		pattern = Regex.Replace(pattern, @"\s+", " ").Trim();
-		pattern = Regex.Replace(pattern, @"\bapi\b", "", RegexOptions.IgnoreCase).Trim();
-		pattern = Regex.Replace(pattern, @"\bv\b", "", RegexOptions.IgnoreCase).Trim();
+		pattern = Regex.Replace(pattern, @"\{[^}]+\}", ""); // Remove route parameters
+		pattern = Regex.Replace(pattern, @"\bapi\b", "", RegexOptions.IgnoreCase); // Remove "api"
+		pattern = Regex.Replace(pattern, @"\bv\d*(?:\.\d+)*\b", "", RegexOptions.IgnoreCase); // Remove version numbers
+		pattern = Regex.Replace(pattern, @"[^\w]", " "); // Convert non-word chars to spaces
+		pattern = Regex.Replace(pattern, @"\s+", " ").Trim(); // Normalize whitespace
 		try
 		{
 			pattern = string.Concat(pattern.Split(' ').Select(word => char.ToUpperInvariant(word[0]) + word.Substring(1)));

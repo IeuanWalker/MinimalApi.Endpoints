@@ -9,22 +9,27 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 [SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "<Pending>")]
 public static class MapEndpointExtensions
 {
+	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
+	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder Post(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
+	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder Put(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
+	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder Patch(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
+	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder Delete(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
