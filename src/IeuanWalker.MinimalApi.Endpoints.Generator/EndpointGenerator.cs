@@ -174,13 +174,6 @@ public class EndpointGenerator : IIncrementalGenerator
 		List<EndpointGroupInfo> allEndpointGroups = [.. typeInfos.OfType<EndpointGroupInfo>()];
 		List<ValidatorInfo> allValidators = [.. typeInfos.OfType<ValidatorInfo>()];
 
-		if (allEndpoints.Count == 0)
-		{
-			context.AddSource("EndpointExtensions.g.cs", SourceText.From(GenerateBlankExtensions(assemblyName), Encoding.UTF8));
-
-			return;
-		}
-
 		// Report diagnostics
 		foreach (DiagnosticInfo diagnosticInfo in typeInfos.Where(x => x is not null).SelectMany(x => x?.Diagnostics))
 		{
@@ -208,7 +201,6 @@ public class EndpointGenerator : IIncrementalGenerator
 					group.TypeName));
 		}
 
-
 		// Handle duplicate validators
 		IEnumerable<IGrouping<string, ValidatorInfo>> validatorGroups = allValidators.GroupBy(v => v.ValidatedTypeName);
 
@@ -222,6 +214,13 @@ public class EndpointGenerator : IIncrementalGenerator
 					validator.Location,
 					validator.ValidatedTypeName));
 			}
+		}
+
+		if (allEndpoints.Count == 0)
+		{
+			context.AddSource("EndpointExtensions.g.cs", SourceText.From(GenerateBlankExtensions(assemblyName), Encoding.UTF8));
+
+			return;
 		}
 
 		string source = GenerateEndpointExtensions(allEndpoints, allEndpointGroups, allValidators, assemblyName);

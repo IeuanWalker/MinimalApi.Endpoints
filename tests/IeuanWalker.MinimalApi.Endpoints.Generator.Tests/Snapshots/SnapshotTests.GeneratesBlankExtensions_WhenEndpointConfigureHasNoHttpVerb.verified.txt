@@ -1,0 +1,23 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+{
+	public static void Configure(RouteHandlerBuilder builder)
+                    ^^^^^^^^^
+	{
+*/
+ : (7,20)-(7,29),
+      Message: Type 'NoVerbEndpoint' has no HTTP verb configured in the Configure method. At least one HTTP verb (Get, Post, Put, Patch, Delete) must be specified.,
+      Severity: Error,
+      Descriptor: {
+        Id: MINAPI001,
+        Title: No HTTP verb configured,
+        MessageFormat: Type '{0}' has no HTTP verb configured in the Configure method. At least one HTTP verb (Get, Post, Put, Patch, Delete) must be specified.,
+        Category: MinimalApiEndpoints,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}
