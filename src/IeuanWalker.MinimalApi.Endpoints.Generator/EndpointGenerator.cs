@@ -224,7 +224,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			}
 		}
 
-		// Check if a validate is on a DontValidateEndpoint
+		// Check if a validator is on a DontValidateEndpoint
 		foreach (EndpointInfo endpoint in allEndpoints.Where(e => e.DisableValidation && e.RequestType is not null))
 		{
 			ValidatorInfo? validator = allValidators.FirstOrDefault(v => v.ValidatedTypeName.Equals(endpoint.RequestType));
