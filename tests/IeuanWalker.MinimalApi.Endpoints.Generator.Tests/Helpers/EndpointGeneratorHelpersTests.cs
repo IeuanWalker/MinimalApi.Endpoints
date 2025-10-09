@@ -1,6 +1,5 @@
 using IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 using Microsoft.CodeAnalysis;
-using Shouldly;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests.Helpers;
 
