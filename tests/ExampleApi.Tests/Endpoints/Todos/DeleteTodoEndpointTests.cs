@@ -1,6 +1,5 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Delete;
-using NSubstitute;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
@@ -11,7 +10,8 @@ public class DeleteTodoEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+		todoStore
+			.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
 			.Returns(true);
 
 		DeleteTodoEndpoint endpoint = new(todoStore);
@@ -21,7 +21,9 @@ public class DeleteTodoEndpointTests
 		await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		await todoStore.Received(1).DeleteAsync(42, Arg.Any<CancellationToken>());
+		await todoStore
+			.Received(1)
+			.DeleteAsync(42, Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -29,7 +31,8 @@ public class DeleteTodoEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+		todoStore
+			.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
 			.Returns(false);
 
 		DeleteTodoEndpoint endpoint = new(todoStore);
@@ -39,7 +42,9 @@ public class DeleteTodoEndpointTests
 		await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		await todoStore.Received(1).DeleteAsync(999, Arg.Any<CancellationToken>());
+		await todoStore
+			.Received(1)
+			.DeleteAsync(999, Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -47,7 +52,8 @@ public class DeleteTodoEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
+		todoStore
+			.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>())
 			.Returns(true);
 
 		DeleteTodoEndpoint endpoint = new(todoStore);
@@ -57,6 +63,8 @@ public class DeleteTodoEndpointTests
 		await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		await todoStore.Received(1).DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>());
+		await todoStore
+			.Received(1)
+			.DeleteAsync(Arg.Any<int>(), Arg.Any<CancellationToken>());
 	}
 }

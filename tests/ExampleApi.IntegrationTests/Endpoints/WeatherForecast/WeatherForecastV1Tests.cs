@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using Shouldly;
 
 namespace ExampleApi.IntegrationTests.Endpoints.WeatherForecast;
 

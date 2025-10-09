@@ -1,5 +1,4 @@
 using ExampleApi.Data;
-using Shouldly;
 
 namespace ExampleApi.Tests.Data;
 

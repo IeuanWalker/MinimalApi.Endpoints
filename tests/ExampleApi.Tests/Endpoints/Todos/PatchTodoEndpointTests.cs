@@ -1,7 +1,5 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Patch;
-using NSubstitute;
-using Shouldly;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
@@ -14,7 +12,8 @@ public class PatchTodoEndpointTests
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
 		Todo patched = new() { Id = 1, Title = "Patched", Description = "Patched Desc", IsCompleted = true, CreatedAt = DateTime.UtcNow, UpdatedAt = DateTime.UtcNow };
 
-		todoStore.PatchAsync(1, Arg.Any<Action<Todo>>(), Arg.Any<CancellationToken>())
+		todoStore
+			.PatchAsync(1, Arg.Any<Action<Todo>>(), Arg.Any<CancellationToken>())
 			.Returns(patched);
 
 		PatchTodoEndpoint endpoint = new(todoStore);
@@ -26,7 +25,9 @@ public class PatchTodoEndpointTests
 		// Assert
 		result.ShouldNotBeNull();
 		result.Title.ShouldBe("Patched");
-		await todoStore.Received(1).PatchAsync(1, Arg.Any<Action<Todo>>(), Arg.Any<CancellationToken>());
+		await todoStore
+			.Received(1)
+			.PatchAsync(1, Arg.Any<Action<Todo>>(), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]
@@ -34,7 +35,8 @@ public class PatchTodoEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.PatchAsync(Arg.Any<int>(), Arg.Any<Action<Todo>>(), Arg.Any<CancellationToken>())
+		todoStore
+			.PatchAsync(Arg.Any<int>(), Arg.Any<Action<Todo>>(), Arg.Any<CancellationToken>())
 			.Returns((Todo?)null);
 
 		PatchTodoEndpoint endpoint = new(todoStore);
