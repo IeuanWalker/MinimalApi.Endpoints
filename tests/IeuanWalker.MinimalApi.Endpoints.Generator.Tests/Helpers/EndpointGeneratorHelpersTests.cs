@@ -20,11 +20,11 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /users
 			RouteHandlerBuilder get_Users_0 = app
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Users")
-			    .WithName("get_Users_0");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Users")
+				.WithName("get_Users_0");
 
 			global::GetUsersEndpoint.Configure(get_Users_0);
 
@@ -52,12 +52,12 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// POST: /users
 			RouteHandlerBuilder post_Users_1 = app
-			    .MapPost("/users", async (
-			        global::CreateUserRequest request,
-			        [FromServices] global::CreateUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("post_Users_1");
+				.MapPost("/users", async (
+					global::CreateUserRequest request,
+					[FromServices] global::CreateUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("post_Users_1");
 
 			global::CreateUserEndpoint.Configure(post_Users_1);
 			
@@ -86,12 +86,12 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// POST: /users
 			RouteHandlerBuilder post_Users_2 = app
-			    .MapPost("/users", async (
-			        [FromBody] global::CreateUserRequest request,
-			        [FromServices] global::CreateUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("post_Users_2");
+				.MapPost("/users", async (
+					[FromBody] global::CreateUserRequest request,
+					[FromServices] global::CreateUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("post_Users_2");
 
 			global::CreateUserEndpoint.Configure(post_Users_2);
 
@@ -120,12 +120,12 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /users/{id}
 			RouteHandlerBuilder get_Users_3 = app
-			    .MapGet("/users/{id}", async (
-			        [FromRoute] global::GetUserRequest request,
-			        [FromServices] global::GetUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("get_Users_3");
+				.MapGet("/users/{id}", async (
+					[FromRoute] global::GetUserRequest request,
+					[FromServices] global::GetUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("get_Users_3");
 
 			global::GetUserEndpoint.Configure(get_Users_3);
 			
@@ -154,12 +154,12 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /users/{id}
 			RouteHandlerBuilder get_Users_4 = app
-			    .MapGet("/users/{id}", async (
-			        [FromRoute(Name = "userId")] global::GetUserRequest request,
-			        [FromServices] global::GetUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("get_Users_4");
+				.MapGet("/users/{id}", async (
+					[FromRoute(Name = "userId")] global::GetUserRequest request,
+					[FromServices] global::GetUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("get_Users_4");
 
 			global::GetUserEndpoint.Configure(get_Users_4);
 
@@ -192,12 +192,12 @@ public class EndpointGeneratorHelpersTests
 		string expected = $"""
 			// POST: /test
 			RouteHandlerBuilder post_Test_5 = app
-			    .MapPost("/test", async (
-			        {expectedAttribute}global::TestRequest request,
-			        [FromServices] global::TestEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Test")
-			    .WithName("post_Test_5");
+				.MapPost("/test", async (
+					{expectedAttribute}global::TestRequest request,
+					[FromServices] global::TestEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Test")
+				.WithName("post_Test_5");
 
 			global::TestEndpoint.Configure(post_Test_5);
 
@@ -226,12 +226,12 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// POST: /users
 			RouteHandlerBuilder post_Users_6 = app
-			    .MapPost("/users", async (
-			        global::CreateUserRequest request,
-			        [FromServices] global::CreateUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("post_Users_6");
+				.MapPost("/users", async (
+					global::CreateUserRequest request,
+					[FromServices] global::CreateUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("post_Users_6");
 
 			global::CreateUserEndpoint.Configure(post_Users_6);
 			
@@ -261,11 +261,11 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /api/v1/users
 			RouteHandlerBuilder get_Users_7 = userGroup
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Users")
-			    .WithName("get_Users_7");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Users")
+				.WithName("get_Users_7");
 
 			global::GetUsersEndpoint.Configure(get_Users_7);
 			
@@ -293,10 +293,10 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /users
 			RouteHandlerBuilder get_Users_8 = app
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Users");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Users");
 
 			global::GetUsersEndpoint.Configure(get_Users_8);
 			
@@ -326,10 +326,10 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /api/v1/users
 			RouteHandlerBuilder get_Users_9 = userGroup
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Users");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Users");
 
 			global::GetUsersEndpoint.Configure(get_Users_9);
 			
@@ -357,10 +357,10 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /users
 			RouteHandlerBuilder get_Users_10 = app
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithName("get_Users_10");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithName("get_Users_10");
 
 			global::GetUsersEndpoint.Configure(get_Users_10);
 			
@@ -390,10 +390,10 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /api/v1/users
 			RouteHandlerBuilder get_Users_11 = userGroup
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithName("get_Users_11");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithName("get_Users_11");
 
 			global::GetUsersEndpoint.Configure(get_Users_11);
 			
@@ -425,15 +425,15 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// POST: /users
 			RouteHandlerBuilder post_Users_12 = app
-			    .MapPost("/users", async (
-			        global::CreateUserRequest request,
-			        [FromServices] global::CreateUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("post_Users_12")
-			    .DisableValidation()
-			    .AddEndpointFilter<FluentValidationFilter<global::CreateUserRequest>>()
-			    .ProducesValidationProblem();
+				.MapPost("/users", async (
+					global::CreateUserRequest request,
+					[FromServices] global::CreateUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("post_Users_12")
+				.DisableValidation()
+				.AddEndpointFilter<FluentValidationFilter<global::CreateUserRequest>>()
+				.ProducesValidationProblem();
 
 			global::CreateUserEndpoint.Configure(post_Users_12);
 			
@@ -465,12 +465,12 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// POST: /users
 			RouteHandlerBuilder post_Users_13 = app
-			    .MapPost("/users", async (
-			        global::CreateUserRequest request,
-			        [FromServices] global::CreateUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("post_Users_13");
+				.MapPost("/users", async (
+					global::CreateUserRequest request,
+					[FromServices] global::CreateUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("post_Users_13");
 
 			global::CreateUserEndpoint.Configure(post_Users_13);
 			
@@ -502,11 +502,11 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /users
 			RouteHandlerBuilder get_Users_14 = app
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Users")
-			    .WithName("get_Users_14");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Users")
+				.WithName("get_Users_14");
 
 			global::GetUsersEndpoint.Configure(get_Users_14);
 			
@@ -538,11 +538,11 @@ public class EndpointGeneratorHelpersTests
 		string expected = $"""
 			// {httpVerb.ToString().ToUpper()}: /test
 			RouteHandlerBuilder {httpVerb.ToString().ToLower()}_Test_15 = app
-			    .{expectedMapMethod}("/test", async (
-			        [FromServices] global::TestEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Test")
-			    .WithName("{httpVerb.ToString().ToLower()}_Test_15");
+				.{expectedMapMethod}("/test", async (
+					[FromServices] global::TestEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Test")
+				.WithName("{httpVerb.ToString().ToLower()}_Test_15");
 
 			global::TestEndpoint.Configure({httpVerb.ToString().ToLower()}_Test_15);
 			
@@ -572,11 +572,11 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /api/v1/users/{id}/posts/{postId}
 			RouteHandlerBuilder get_UsersPosts_16 = userGroup
-			    .MapGet("/users/{id}/posts/{postId}", async (
-			        [FromServices] global::GetUserPostEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Users")
-			    .WithName("get_UsersPosts_16");
+				.MapGet("/users/{id}/posts/{postId}", async (
+					[FromServices] global::GetUserPostEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Users")
+				.WithName("get_UsersPosts_16");
 
 			global::GetUserPostEndpoint.Configure(get_UsersPosts_16);
 			
@@ -617,11 +617,11 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /test
 			RouteHandlerBuilder get_Test_18 = app
-			    .MapGet("/test", async (
-			        [FromServices] global::TestEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Test")
-			    .WithName("get_Test_18");
+				.MapGet("/test", async (
+					[FromServices] global::TestEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Test")
+				.WithName("get_Test_18");
 
 			global::TestEndpoint.Configure(get_Test_18);
 			
@@ -649,12 +649,12 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// POST: /users
 			RouteHandlerBuilder post_Users_19 = app
-			    .MapPost("/users", async (
-			        global::CreateUserRequest request,
-			        [FromServices] global::CreateUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("post_Users_19");
+				.MapPost("/users", async (
+					global::CreateUserRequest request,
+					[FromServices] global::CreateUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("post_Users_19");
 
 			global::CreateUserEndpoint.Configure(post_Users_19);
 			
@@ -683,11 +683,11 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// GET: /users
 			RouteHandlerBuilder get_Users_20 = app
-			    .MapGet("/users", async (
-			        [FromServices] global::GetUsersEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(ct))
-			    .WithTags("Users")
-			    .WithName("get_Users_20");
+				.MapGet("/users", async (
+					[FromServices] global::GetUsersEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(ct))
+				.WithTags("Users")
+				.WithName("get_Users_20");
 
 			global::GetUsersEndpoint.Configure(get_Users_20);
 			
@@ -721,15 +721,15 @@ public class EndpointGeneratorHelpersTests
 		const string expected = """
 			// POST: /users
 			RouteHandlerBuilder post_Users_21 = app
-			    .MapPost("/users", async (
-			        global::CreateUserRequest request,
-			        [FromServices] global::CreateUserEndpoint endpoint,
-			        CancellationToken ct) => await endpoint.Handle(request, ct))
-			    .WithTags("Users")
-			    .WithName("post_Users_21")
-			    .DisableValidation()
-			    .AddEndpointFilter<FluentValidationFilter<global::CreateUserRequest>>()
-			    .ProducesValidationProblem();
+				.MapPost("/users", async (
+					global::CreateUserRequest request,
+					[FromServices] global::CreateUserEndpoint endpoint,
+					CancellationToken ct) => await endpoint.Handle(request, ct))
+				.WithTags("Users")
+				.WithName("post_Users_21")
+				.DisableValidation()
+				.AddEndpointFilter<FluentValidationFilter<global::CreateUserRequest>>()
+				.ProducesValidationProblem();
 
 			global::CreateUserEndpoint.Configure(post_Users_21);
 			

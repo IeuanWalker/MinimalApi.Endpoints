@@ -4,56 +4,61 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<global::TestNamespace.GetUsersEndpoint>();
-        builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
-        builder.Services.AddScoped<global::TestNamespace.DeleteUserEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // GET: /api/users
-        RouteHandlerBuilder get_Users_0 = app
-            .MapGet("/api/users", async (
-                global::TestNamespace.GetUsersRequest request,
-                [FromServices] global::TestNamespace.GetUsersEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("get_Users_0");
-        
-        global::TestNamespace.GetUsersEndpoint.Configure(get_Users_0);
-        
-        // POST: /api/users
-        RouteHandlerBuilder post_Users_1 = app
-            .MapPost("/api/users", async (
-                global::TestNamespace.CreateUserRequest request,
-                [FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("post_Users_1");
-        
-        global::TestNamespace.CreateUserEndpoint.Configure(post_Users_1);
-        
-        // DELETE: /api/users/{id}
-        RouteHandlerBuilder delete_Users_2 = app
-            .MapDelete("/api/users/{id}", async (
-                global::TestNamespace.DeleteUserRequest request,
-                [FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("delete_Users_2");
-        
-        global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_2);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddScoped<global::TestNamespace.GetUsersEndpoint>();
+		builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
+		builder.Services.AddScoped<global::TestNamespace.DeleteUserEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// GET: /api/users
+		RouteHandlerBuilder get_Users_0 = app
+			.MapGet("/api/users", async (
+				global::TestNamespace.GetUsersRequest request,
+				[FromServices] global::TestNamespace.GetUsersEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("get_Users_0");
+
+		global::TestNamespace.GetUsersEndpoint.Configure(get_Users_0);
+
+		// POST: /api/users
+		RouteHandlerBuilder post_Users_1 = app
+			.MapPost("/api/users", async (
+				global::TestNamespace.CreateUserRequest request,
+				[FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("post_Users_1");
+
+		global::TestNamespace.CreateUserEndpoint.Configure(post_Users_1);
+
+		// DELETE: /api/users/{id}
+		RouteHandlerBuilder delete_Users_2 = app
+			.MapDelete("/api/users/{id}", async (
+				global::TestNamespace.DeleteUserRequest request,
+				[FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("delete_Users_2");
+
+		global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_2);
+
+		return app;
+	}
 }

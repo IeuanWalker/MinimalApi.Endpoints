@@ -4,7 +4,12 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 using IeuanWalker.MinimalApi.Endpoints.Filters;
 using FluentValidation;
 
@@ -12,30 +17,30 @@ namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddSingleton<IValidator<global::TestNamespace.CreateUserRequest>, global::TestNamespace.CreateUserRequestValidator>();
-        builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // POST: /api/users
-        RouteHandlerBuilder post_Users_0 = app
-            .MapPost("/api/users", async (
-                global::TestNamespace.CreateUserRequest request,
-                [FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("post_Users_0")
-            .DisableValidation()
-            .AddEndpointFilter<FluentValidationFilter<global::TestNamespace.CreateUserRequest>>()
-            .ProducesValidationProblem();
-        
-        global::TestNamespace.CreateUserEndpoint.Configure(post_Users_0);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddSingleton<IValidator<global::TestNamespace.CreateUserRequest>, global::TestNamespace.CreateUserRequestValidator>();
+		builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// POST: /api/users
+		RouteHandlerBuilder post_Users_0 = app
+			.MapPost("/api/users", async (
+				global::TestNamespace.CreateUserRequest request,
+				[FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("post_Users_0")
+			.DisableValidation()
+			.AddEndpointFilter<FluentValidationFilter<global::TestNamespace.CreateUserRequest>>()
+			.ProducesValidationProblem();
+
+		global::TestNamespace.CreateUserEndpoint.Configure(post_Users_0);
+
+		return app;
+	}
 }

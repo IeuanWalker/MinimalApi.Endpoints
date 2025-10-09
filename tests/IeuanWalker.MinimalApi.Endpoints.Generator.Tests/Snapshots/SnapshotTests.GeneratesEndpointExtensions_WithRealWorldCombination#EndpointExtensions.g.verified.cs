@@ -4,7 +4,12 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 using IeuanWalker.MinimalApi.Endpoints.Filters;
 using FluentValidation;
 
@@ -12,102 +17,102 @@ namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddSingleton<IValidator<global::TestNamespace.SearchUsersRequest>, global::TestNamespace.SearchUsersRequestValidator>();
-        builder.Services.AddScoped<global::TestNamespace.SearchUsersEndpoint>();
-        builder.Services.AddSingleton<IValidator<global::TestNamespace.CreateUserRequest>, global::TestNamespace.CreateUserRequestValidator>();
-        builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
-        builder.Services.AddScoped<global::TestNamespace.GetUserByIdEndpoint>();
-        builder.Services.AddSingleton<IValidator<global::TestNamespace.UpdateUserRequest>, global::TestNamespace.UpdateUserRequestValidator>();
-        builder.Services.AddScoped<global::TestNamespace.UpdateUserEndpoint>();
-        builder.Services.AddScoped<global::TestNamespace.DeleteUserEndpoint>();
-        builder.Services.AddScoped<global::TestNamespace.HealthCheckEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // *************************************
-        // GROUP: TestNamespace.ApiEndpointGroup
-        // 2 endpoints
-        // *************************************
-        RouteGroupBuilder group_apiEndpointGroup_0 = TestNamespace.ApiEndpointGroup.Configure(app);
-        
-        // GET: /api/search
-        RouteHandlerBuilder get_Search_0 = group_apiEndpointGroup_0
-            .MapGet("/search", async (
-                [AsParameters] global::TestNamespace.SearchUsersRequest request,
-                [FromServices] global::TestNamespace.SearchUsersEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .DisableValidation()
-            .AddEndpointFilter<FluentValidationFilter<global::TestNamespace.SearchUsersRequest>>()
-            .ProducesValidationProblem();
-        
-        global::TestNamespace.SearchUsersEndpoint.Configure(get_Search_0);
-        
-        // POST: /api/
-        RouteHandlerBuilder post__1 = group_apiEndpointGroup_0
-            .MapPost("/", async (
-                [FromBody] global::TestNamespace.CreateUserRequest request,
-                [FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .DisableValidation()
-            .AddEndpointFilter<FluentValidationFilter<global::TestNamespace.CreateUserRequest>>()
-            .ProducesValidationProblem();
-        
-        global::TestNamespace.CreateUserEndpoint.Configure(post__1);
-        
-        // ***************************************
-        // GROUP: TestNamespace.UsersEndpointGroup
-        // 3 endpoints
-        // ***************************************
-        RouteGroupBuilder group_usersEndpointGroup_1 = TestNamespace.UsersEndpointGroup.Configure(app);
-        
-        // GET: /users/{id}
-        RouteHandlerBuilder get_Users_2 = group_usersEndpointGroup_1
-            .MapGet("/{id}", async (
-                [FromRoute] global::TestNamespace.GetUserByIdRequest request,
-                [FromServices] global::TestNamespace.GetUserByIdEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct));
-        
-        global::TestNamespace.GetUserByIdEndpoint.Configure(get_Users_2);
-        
-        // PUT: /users/{id}
-        RouteHandlerBuilder put_Users_3 = group_usersEndpointGroup_1
-            .MapPut("/{id}", async (
-                [FromBody] global::TestNamespace.UpdateUserRequest request,
-                [FromServices] global::TestNamespace.UpdateUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .DisableValidation()
-            .AddEndpointFilter<FluentValidationFilter<global::TestNamespace.UpdateUserRequest>>()
-            .ProducesValidationProblem();
-        
-        global::TestNamespace.UpdateUserEndpoint.Configure(put_Users_3);
-        
-        // DELETE: /users/{id}
-        RouteHandlerBuilder delete_Users_4 = group_usersEndpointGroup_1
-            .MapDelete("/{id}", async (
-                [FromRoute] global::TestNamespace.DeleteUserRequest request,
-                [FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct));
-        
-        global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_4);
-        
-        // *********************
-        // Not grouped endpoints
-        // 1 endpoints
-        // *********************
-        
-        // GET: /health
-        RouteHandlerBuilder get_Health_5 = app
-            .MapGet("/health", async (
-                [FromServices] global::TestNamespace.HealthCheckEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(ct));
-        
-        global::TestNamespace.HealthCheckEndpoint.Configure(get_Health_5);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddSingleton<IValidator<global::TestNamespace.SearchUsersRequest>, global::TestNamespace.SearchUsersRequestValidator>();
+		builder.Services.AddScoped<global::TestNamespace.SearchUsersEndpoint>();
+		builder.Services.AddSingleton<IValidator<global::TestNamespace.CreateUserRequest>, global::TestNamespace.CreateUserRequestValidator>();
+		builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
+		builder.Services.AddScoped<global::TestNamespace.GetUserByIdEndpoint>();
+		builder.Services.AddSingleton<IValidator<global::TestNamespace.UpdateUserRequest>, global::TestNamespace.UpdateUserRequestValidator>();
+		builder.Services.AddScoped<global::TestNamespace.UpdateUserEndpoint>();
+		builder.Services.AddScoped<global::TestNamespace.DeleteUserEndpoint>();
+		builder.Services.AddScoped<global::TestNamespace.HealthCheckEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// *************************************
+		// GROUP: TestNamespace.ApiEndpointGroup
+		// 2 endpoints
+		// *************************************
+		RouteGroupBuilder group_apiEndpointGroup_0 = TestNamespace.ApiEndpointGroup.Configure(app);
+
+		// GET: /api/search
+		RouteHandlerBuilder get_Search_0 = group_apiEndpointGroup_0
+			.MapGet("/search", async (
+				[AsParameters] global::TestNamespace.SearchUsersRequest request,
+				[FromServices] global::TestNamespace.SearchUsersEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.DisableValidation()
+			.AddEndpointFilter<FluentValidationFilter<global::TestNamespace.SearchUsersRequest>>()
+			.ProducesValidationProblem();
+
+		global::TestNamespace.SearchUsersEndpoint.Configure(get_Search_0);
+
+		// POST: /api/
+		RouteHandlerBuilder post__1 = group_apiEndpointGroup_0
+			.MapPost("/", async (
+				[FromBody] global::TestNamespace.CreateUserRequest request,
+				[FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.DisableValidation()
+			.AddEndpointFilter<FluentValidationFilter<global::TestNamespace.CreateUserRequest>>()
+			.ProducesValidationProblem();
+
+		global::TestNamespace.CreateUserEndpoint.Configure(post__1);
+
+		// ***************************************
+		// GROUP: TestNamespace.UsersEndpointGroup
+		// 3 endpoints
+		// ***************************************
+		RouteGroupBuilder group_usersEndpointGroup_1 = TestNamespace.UsersEndpointGroup.Configure(app);
+
+		// GET: /users/{id}
+		RouteHandlerBuilder get_Users_2 = group_usersEndpointGroup_1
+			.MapGet("/{id}", async (
+				[FromRoute] global::TestNamespace.GetUserByIdRequest request,
+				[FromServices] global::TestNamespace.GetUserByIdEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct));
+
+		global::TestNamespace.GetUserByIdEndpoint.Configure(get_Users_2);
+
+		// PUT: /users/{id}
+		RouteHandlerBuilder put_Users_3 = group_usersEndpointGroup_1
+			.MapPut("/{id}", async (
+				[FromBody] global::TestNamespace.UpdateUserRequest request,
+				[FromServices] global::TestNamespace.UpdateUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.DisableValidation()
+			.AddEndpointFilter<FluentValidationFilter<global::TestNamespace.UpdateUserRequest>>()
+			.ProducesValidationProblem();
+
+		global::TestNamespace.UpdateUserEndpoint.Configure(put_Users_3);
+
+		// DELETE: /users/{id}
+		RouteHandlerBuilder delete_Users_4 = group_usersEndpointGroup_1
+			.MapDelete("/{id}", async (
+				[FromRoute] global::TestNamespace.DeleteUserRequest request,
+				[FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct));
+
+		global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_4);
+
+		// *********************
+		// Not grouped endpoints
+		// 1 endpoints
+		// *********************
+
+		// GET: /health
+		RouteHandlerBuilder get_Health_5 = app
+			.MapGet("/health", async (
+				[FromServices] global::TestNamespace.HealthCheckEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(ct));
+
+		global::TestNamespace.HealthCheckEndpoint.Configure(get_Health_5);
+
+		return app;
+	}
 }

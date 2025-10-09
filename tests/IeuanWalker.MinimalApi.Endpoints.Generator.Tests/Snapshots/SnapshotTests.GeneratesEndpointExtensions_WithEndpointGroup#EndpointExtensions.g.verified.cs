@@ -4,38 +4,43 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<global::TestNamespace.GetUserByIdEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // **************************************
-        // GROUP: TestNamespace.UserEndpointGroup
-        // 1 endpoints
-        // **************************************
-        RouteGroupBuilder group_userEndpointGroup_0 = TestNamespace.UserEndpointGroup.Configure(app);
-        
-        // GET: /api/v1/users/{id}
-        RouteHandlerBuilder get_Users_0 = group_userEndpointGroup_0
-            .MapGet("/{id}", async (
-                global::TestNamespace.GetUserRequest request,
-                [FromServices] global::TestNamespace.GetUserByIdEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("get_Users_0");
-        
-        global::TestNamespace.GetUserByIdEndpoint.Configure(get_Users_0);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddScoped<global::TestNamespace.GetUserByIdEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// **************************************
+		// GROUP: TestNamespace.UserEndpointGroup
+		// 1 endpoints
+		// **************************************
+		RouteGroupBuilder group_userEndpointGroup_0 = TestNamespace.UserEndpointGroup.Configure(app);
+
+		// GET: /api/v1/users/{id}
+		RouteHandlerBuilder get_Users_0 = group_userEndpointGroup_0
+			.MapGet("/{id}", async (
+				global::TestNamespace.GetUserRequest request,
+				[FromServices] global::TestNamespace.GetUserByIdEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("get_Users_0");
+
+		global::TestNamespace.GetUserByIdEndpoint.Configure(get_Users_0);
+
+		return app;
+	}
 }

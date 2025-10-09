@@ -4,32 +4,37 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<global::TestNamespace.DeleteUserEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // DELETE: /api/users/{id}
-        RouteHandlerBuilder delete_Users_0 = app
-            .MapDelete("/api/users/{id}", async (
-                global::TestNamespace.DeleteUserRequest request,
-                [FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("delete_Users_0");
-        
-        global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_0);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddScoped<global::TestNamespace.DeleteUserEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// DELETE: /api/users/{id}
+		RouteHandlerBuilder delete_Users_0 = app
+			.MapDelete("/api/users/{id}", async (
+				global::TestNamespace.DeleteUserRequest request,
+				[FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("delete_Users_0");
+
+		global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_0);
+
+		return app;
+	}
 }

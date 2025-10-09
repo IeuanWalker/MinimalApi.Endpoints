@@ -4,31 +4,36 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<global::TestNamespace.GetAllUsersEndpoint>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // GET: /api/users/all
-        RouteHandlerBuilder get_UsersAll_0 = app
-            .MapGet("/api/users/all", async (
-                [FromServices] global::TestNamespace.GetAllUsersEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(ct))
-            .WithTags("Users")
-            .WithName("get_UsersAll_0");
-        
-        global::TestNamespace.GetAllUsersEndpoint.Configure(get_UsersAll_0);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddScoped<global::TestNamespace.GetAllUsersEndpoint>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// GET: /api/users/all
+		RouteHandlerBuilder get_UsersAll_0 = app
+			.MapGet("/api/users/all", async (
+				[FromServices] global::TestNamespace.GetAllUsersEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(ct))
+			.WithTags("Users")
+			.WithName("get_UsersAll_0");
+
+		global::TestNamespace.GetAllUsersEndpoint.Configure(get_UsersAll_0);
+
+		return app;
+	}
 }

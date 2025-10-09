@@ -240,7 +240,12 @@ public class EndpointGenerator : IIncrementalGenerator
 			  //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 			  // </auto-generated>
 
+			  using Microsoft.AspNetCore.Builder;
+			  using Microsoft.AspNetCore.Http;
 			  using Microsoft.AspNetCore.Mvc;
+			  using Microsoft.Extensions.DependencyInjection;
+			  using Microsoft.Extensions.Hosting;
+			  using System.Threading;
 			  """);
 
 		if (validators.Any())
@@ -249,9 +254,9 @@ public class EndpointGenerator : IIncrementalGenerator
 			builder.AppendLine("using FluentValidation;");
 		}
 
-		builder.AppendLine();
+		builder.AppendEmptyLine();
 		builder.AppendLine($"namespace {assemblyName};");
-		builder.AppendLine();
+		builder.AppendEmptyLine();
 
 		builder.AppendLine("public static class EndpointExtensions");
 		using (builder.AppendBlock())
@@ -282,7 +287,7 @@ public class EndpointGenerator : IIncrementalGenerator
 					}
 				}
 
-				builder.AppendLine();
+				builder.AppendEmptyLine();
 
 				if (validatorsCopy.Any())
 				{
@@ -291,13 +296,13 @@ public class EndpointGenerator : IIncrementalGenerator
 					{
 						builder.AppendLine($"builder.Services.AddSingleton<IValidator<global::{validator.ValidatedTypeName}>, global::{validator.TypeName}>();");
 					}
-					builder.AppendLine();
+					builder.AppendEmptyLine();
 				}
 
 				builder.AppendLine("return builder;");
 			}
 
-			builder.AppendLine();
+			builder.AppendEmptyLine();
 
 			// Generate MapEndpoints method with grouping
 			builder.AppendLine($"public static WebApplication MapEndpointsFrom{sanitisedAssemblyName}(this WebApplication app)");
@@ -321,12 +326,12 @@ public class EndpointGenerator : IIncrementalGenerator
 						builder.AppendLine($"// {endpointGroup.Count()} endpoints");
 						builder.AppendLine($"// {new string('*', group.TypeName.Length + 7)}");
 						builder.AppendLine($"RouteGroupBuilder {groupName} = {group.TypeName}.Configure(app);");
-						builder.AppendLine();
+						builder.AppendEmptyLine();
 
 						foreach (EndpointInfo endpoint in endpointGroup.OrderBy(x => x.HttpVerb).ThenBy(x => x.RoutePattern))
 						{
 							builder.ToEndpoint(endpoint, endpointIndex, validators, (group, groupName));
-							builder.AppendLine();
+							builder.AppendEmptyLine();
 
 							endpointIndex++;
 						}
@@ -339,14 +344,14 @@ public class EndpointGenerator : IIncrementalGenerator
 							builder.AppendLine("// Not grouped endpoints");
 							builder.AppendLine($"// {endpointGroup.Count()} endpoints");
 							builder.AppendLine("// *********************");
-							builder.AppendLine();
+							builder.AppendEmptyLine();
 						}
 
 						// Endpoints without a group
 						foreach (EndpointInfo endpoint in endpointGroup.OrderBy(x => x.HttpVerb).ThenBy(x => x.RoutePattern))
 						{
 							builder.ToEndpoint(endpoint, endpointIndex, validators, null);
-							builder.AppendLine();
+							builder.AppendEmptyLine();
 
 							endpointIndex++;
 						}

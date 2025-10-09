@@ -4,7 +4,12 @@
 //   https://github.com/IeuanWalker/IeuanWalker.MinimalApi.Endpoints
 // </auto-generated>
 
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 using IeuanWalker.MinimalApi.Endpoints.Filters;
 using FluentValidation;
 
@@ -12,29 +17,29 @@ namespace TestAssembly;
 
 public static class EndpointExtensions
 {
-    public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
-    {
-        builder.Services.AddScoped<global::TestNamespace.GetUserEndpoint>();
-        
-        // Validators not directly related to an endpoints request model
-        builder.Services.AddSingleton<IValidator<global::TestNamespace.NestedModel>, global::TestNamespace.NestedModelValidator>();
-        
-        return builder;
-    }
-    
-    public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
-    {
-        // GET: /api/users/{id}
-        RouteHandlerBuilder get_Users_0 = app
-            .MapGet("/api/users/{id}", async (
-                global::TestNamespace.GetUserRequest request,
-                [FromServices] global::TestNamespace.GetUserEndpoint endpoint,
-                CancellationToken ct) => await endpoint.Handle(request, ct))
-            .WithTags("Users")
-            .WithName("get_Users_0");
-        
-        global::TestNamespace.GetUserEndpoint.Configure(get_Users_0);
-        
-        return app;
-    }
+	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
+	{
+		builder.Services.AddScoped<global::TestNamespace.GetUserEndpoint>();
+
+		// Validators not directly related to an endpoints request model
+		builder.Services.AddSingleton<IValidator<global::TestNamespace.NestedModel>, global::TestNamespace.NestedModelValidator>();
+
+		return builder;
+	}
+
+	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
+	{
+		// GET: /api/users/{id}
+		RouteHandlerBuilder get_Users_0 = app
+			.MapGet("/api/users/{id}", async (
+				global::TestNamespace.GetUserRequest request,
+				[FromServices] global::TestNamespace.GetUserEndpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithTags("Users")
+			.WithName("get_Users_0");
+
+		global::TestNamespace.GetUserEndpoint.Configure(get_Users_0);
+
+		return app;
+	}
 }
