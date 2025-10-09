@@ -11,7 +11,9 @@ public class GetExportEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.GetAllAsync(Arg.Any<CancellationToken>()).Returns(Array.Empty<Todo>());
+		todoStore
+			.GetAllAsync(Arg.Any<CancellationToken>())
+			.Returns(Array.Empty<Todo>());
 
 		GetExportEndpoint endpoint = new(todoStore);
 
@@ -28,7 +30,9 @@ public class GetExportEndpointTests
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
 		Todo t = new() { Id = 1, Title = "T", Description = "D", IsCompleted = false, CreatedAt = DateTime.UtcNow };
-		todoStore.GetAllAsync(Arg.Any<CancellationToken>()).Returns(new[] { t });
+		todoStore
+			.GetAllAsync(Arg.Any<CancellationToken>())
+			.Returns(new[] { t });
 
 		GetExportEndpoint endpoint = new(todoStore);
 

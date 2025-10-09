@@ -37,7 +37,8 @@ public class GetAllTodosEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		todoStore.GetAllAsync(Arg.Any<CancellationToken>())
+		todoStore
+			.GetAllAsync(Arg.Any<CancellationToken>())
 			.Returns([]);
 
 		GetAllTodosEndpoint endpoint = new(todoStore);
