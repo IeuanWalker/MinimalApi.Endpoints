@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net10.0</TargetFramework>
@@ -27,6 +27,12 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\example\ExampleApi\ExampleApi.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="ExpectedOpenApi.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
 
 </Project>

@@ -1,4 +1,6 @@
 using System.Net;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using Shouldly;
 
 namespace ExampleApi.IntegrationTests.Infrastructure;
@@ -6,7 +8,7 @@ namespace ExampleApi.IntegrationTests.Infrastructure;
 /// <summary>
 /// Integration tests for infrastructure concerns like API documentation, health checks, etc.
 /// </summary>
-public class InfrastructureTests : IClassFixture<ExampleApiWebApplicationFactory>
+public partial class InfrastructureTests : IClassFixture<ExampleApiWebApplicationFactory>
 {
 	readonly HttpClient _client;
 
@@ -14,6 +16,10 @@ public class InfrastructureTests : IClassFixture<ExampleApiWebApplicationFactory
 	{
 		_client = factory.CreateClient();
 	}
+
+	[GeneratedRegex(@"""url""\s*:\s*""[^""]*""", RegexOptions.IgnoreCase, "en-GB")]
+	private static partial Regex OpenApiServerUrl();
+
 
 	[Fact]
 	public async Task OpenApiJson_ReturnsValidResponse()
@@ -25,11 +31,35 @@ public class InfrastructureTests : IClassFixture<ExampleApiWebApplicationFactory
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
 		response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
 
-		string content = await response.Content.ReadAsStringAsync();
-		content.ShouldNotBeNullOrWhiteSpace();
-		content.ShouldContain("\"openapi\":");
-		content.ShouldContain("\"info\":");
+		string actualContent = await response.Content.ReadAsStringAsync();
+		actualContent.ShouldNotBeNullOrWhiteSpace();
+
+		// Load expected OpenAPI JSON
+		string expectedContent = await File.ReadAllTextAsync("ExpectedOpenApi.json");
+
+		// Normalize both JSON strings (URLs and formatting) before comparison
+		string normalizedActual = NormalizeOpenApiJson(actualContent, GetOptions());
+		string normalizedExpected = NormalizeOpenApiJson(expectedContent, GetOptions());
+
+		// Compare the normalized JSON strings
+		normalizedActual.ShouldBe(normalizedExpected, "The actual OpenAPI JSON should match the expected OpenAPI JSON exactly (ignoring server URL and formatting differences)");
+
+		static JsonSerializerOptions GetOptions()
+		{
+			return new() { WriteIndented = false };
+		}
+
+		static string NormalizeOpenApiJson(string jsonContent, JsonSerializerOptions options)
+		{
+			// Normalize server URLs
+			string normalized = OpenApiServerUrl().Replace(jsonContent, @"""url"": ""http://localhost/""");
+
+			// Parse and reserialize to normalize formatting (whitespace, indentation, line endings)
+			JsonDocument doc = JsonDocument.Parse(normalized);
+			return JsonSerializer.Serialize(doc, options);
+		}
 	}
+
 
 	[Fact]
 	public async Task ScalarUI_ReturnsValidResponse()
