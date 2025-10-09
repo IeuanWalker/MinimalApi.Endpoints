@@ -24,6 +24,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 			.RequestFromBody()
 			.WithSummary("Create a new todo")
 			.WithDescription("Creates a new todo item")
+			.DisableValidation()
 			.Version(1.0);
 	}
 
