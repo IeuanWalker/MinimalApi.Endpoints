@@ -943,7 +943,7 @@ public class SnapshotTests
 	}
 
 	[Fact]
-	public Task GeneratesEndpointExtensions_WithDisableValidation()
+	public Task GeneratesEndpointExtensions_WithDisableValidationButWithValidator_ShouldHaveWarning()
 	{
 		// Arrange
 		const string source = """

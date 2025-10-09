@@ -28,6 +28,14 @@ public class EndpointGenerator : IIncrementalGenerator
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true);
 
+	static readonly DiagnosticDescriptor hasValidatorButEndpointDisablesValidation = new(
+		id: "MINAPI008",
+		title: "Validator on DisableValidation Endpoint",
+		messageFormat: "The endpoint '{0}' is calling 'DisableValidation', but a validator for its request type '{1}' exists. Either remove the validator or remove `DisableValidation` from the endpoint.",
+		category: "Validation",
+		defaultSeverity: DiagnosticSeverity.Warning,
+		isEnabledByDefault: true);
+
 	const string fullValidator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
 	const string fullIEndpointGroup = "IeuanWalker.MinimalApi.Endpoints.IEndpointGroup";
 	const string fullIEndpointBase = "IeuanWalker.MinimalApi.Endpoints.IEndpointBase";
@@ -212,6 +220,21 @@ public class EndpointGenerator : IIncrementalGenerator
 				context.ReportDiagnostic(Diagnostic.Create(
 					duplicateValidatorsDescriptor,
 					validator.Location,
+					validator.ValidatedTypeName));
+			}
+		}
+
+		// Check if a validator is on a DontValidateEndpoint
+		foreach (EndpointInfo endpoint in allEndpoints.Where(e => e.DisableValidation && e.RequestType is not null))
+		{
+			ValidatorInfo? validator = allValidators.FirstOrDefault(v => v.ValidatedTypeName.Equals(endpoint.RequestType));
+
+			if (validator is not null)
+			{
+				context.ReportDiagnostic(Diagnostic.Create(
+					hasValidatorButEndpointDisablesValidation,
+					validator.Location,
+					endpoint.TypeName,
 					validator.ValidatedTypeName));
 			}
 		}

@@ -1,0 +1,35 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+
+public class CreateUserRequestValidator : Validator<CreateUserRequest>
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+{
+^
+	public CreateUserRequestValidator()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	{
+^^
+		RuleFor(x => x.Name).NotEmpty();
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	}
+^^
+}
+^
+*/
+ : (24,0)-(30,1),
+      Message: The endpoint 'TestNamespace.CreateUserEndpoint' is calling 'DisableValidation', but a validator for its request type 'TestNamespace.CreateUserRequest' exists. Either remove the validator or remove `DisableValidation` from the endpoint.,
+      Severity: Warning,
+      WarningLevel: 1,
+      Descriptor: {
+        Id: MINAPI008,
+        Title: Validator on DisableValidation Endpoint,
+        MessageFormat: The endpoint '{0}' is calling 'DisableValidation', but a validator for its request type '{1}' exists. Either remove the validator or remove `DisableValidation` from the endpoint.,
+        Category: Validation,
+        DefaultSeverity: Warning,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}
