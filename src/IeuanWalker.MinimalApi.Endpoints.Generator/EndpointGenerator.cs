@@ -216,14 +216,9 @@ public class EndpointGenerator : IIncrementalGenerator
 			}
 		}
 
-		if (allEndpoints.Count == 0)
-		{
-			context.AddSource("EndpointExtensions.g.cs", SourceText.From(GenerateBlankExtensions(assemblyName), Encoding.UTF8));
-
-			return;
-		}
-
-		string source = GenerateEndpointExtensions(allEndpoints, allEndpointGroups, allValidators, assemblyName);
+		string source = allEndpoints.Count == 0
+			? GenerateBlankExtensions(assemblyName)
+			: GenerateEndpointExtensions(allEndpoints, allEndpointGroups, allValidators, assemblyName);
 
 		context.AddSource("EndpointExtensions.g.cs", SourceText.From(source, Encoding.UTF8));
 	}
