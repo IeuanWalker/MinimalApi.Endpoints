@@ -64,7 +64,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		_builder.AppendLine("Also Indented");
 
 		// Assert
-		_builder.ToString().ShouldBe("    Indented\r\n    Also Indented\r\n");
+		_builder.ToString().ShouldBe("\tIndented\r\n\tAlso Indented\r\n");
 	}
 
 	[Fact]
@@ -80,7 +80,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		_builder.AppendLine("Single Indented");
 
 		// Assert
-		_builder.ToString().ShouldBe("        Double Indented\r\n    Single Indented\r\n");
+		_builder.ToString().ShouldBe("\t\tDouble Indented\r\n\tSingle Indented\r\n");
 	}
 
 	[Fact]
@@ -103,11 +103,11 @@ public sealed class IndentedTextBuilderTests : IDisposable
 
 		// Assert
 		const string expected = "No Indent\r\n" +
-						  "    Level 1\r\n" +
-						  "        Level 2\r\n" +
-						  "            Level 3\r\n" +
-						  "        Back to Level 2\r\n" +
-						  "    Back to Level 1\r\n" +
+						  "\tLevel 1\r\n" +
+						  "\t\tLevel 2\r\n" +
+						  "\t\t\tLevel 3\r\n" +
+						  "\t\tBack to Level 2\r\n" +
+						  "\tBack to Level 1\r\n" +
 						  "Back to No Indent\r\n";
 
 		_builder.ToString().ShouldBe(expected);
@@ -121,7 +121,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		_builder.AppendLine("Inside block");
 
 		// Assert - Check during block scope
-		_builder.ToString().ShouldBe("{\r\n    Inside block\r\n");
+		_builder.ToString().ShouldBe("{\r\n\tInside block\r\n");
 
 		// Block will be closed when exiting using scope
 	}
@@ -136,7 +136,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		}
 
 		// Assert - Block should be closed after dispose
-		_builder.ToString().ShouldBe("{\r\n    Inside block\r\n}\r\n");
+		_builder.ToString().ShouldBe("{\r\n\tInside block\r\n}\r\n");
 	}
 
 	[Fact]
@@ -149,7 +149,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		}
 
 		// Assert
-		_builder.ToString().ShouldBe("{\r\n    Inside block\r\n}");
+		_builder.ToString().ShouldBe("{\r\n\tInside block\r\n}");
 	}
 
 	[Fact]
@@ -162,7 +162,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		}
 
 		// Assert
-		_builder.ToString().ShouldBe("public class Test\r\n{\r\n    // Class content\r\n}\r\n");
+		_builder.ToString().ShouldBe("public class Test\r\n{\r\n\t// Class content\r\n}\r\n");
 	}
 
 	[Fact]
@@ -175,7 +175,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		}
 
 		// Assert
-		_builder.ToString().ShouldBe("public void Method()\r\n{\r\n    // Method content\r\n}");
+		_builder.ToString().ShouldBe("public void Method()\r\n{\r\n\t// Method content\r\n}");
 	}
 
 	[Fact]
@@ -199,16 +199,16 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		// Assert
 		const string expected = "namespace Test\r\n" +
 						  "{\r\n" +
-						  "    \r\n" +
-						  "    public class MyClass\r\n" +
-						  "    {\r\n" +
-						  "        public int Id { get; set; }\r\n" +
-						  "        \r\n" +
-						  "        public void DoSomething()\r\n" +
-						  "        {\r\n" +
-						  "            // Method implementation\r\n" +
-						  "        }\r\n" +
-						  "    }\r\n" +
+						  "\t\r\n" +
+						  "\tpublic class MyClass\r\n" +
+						  "\t{\r\n" +
+						  "\t\tpublic int Id { get; set; }\r\n" +
+						  "\t\t\r\n" +
+						  "\t\tpublic void DoSomething()\r\n" +
+						  "\t\t{\r\n" +
+						  "\t\t\t// Method implementation\r\n" +
+						  "\t\t}\r\n" +
+						  "\t}\r\n" +
 						  "}\r\n";
 
 		_builder.ToString().ShouldBe(expected);
@@ -263,7 +263,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		_builder.AppendLine("Another indented line");
 
 		// Assert
-		_builder.ToString().ShouldBe("Start of line\r\n    Indented text\r\n    Another indented line\r\n");
+		_builder.ToString().ShouldBe("Start of line\r\n\tIndented text\r\n\tAnother indented line\r\n");
 	}
 
 	[Fact]
@@ -293,6 +293,44 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		// Note: This tests that Dispose doesn't break the object immediately
 		// The actual resource cleanup is internal
 		builder.ToString().ShouldBe("Test content\r\n");
+	}
+
+	[Fact]
+	public void AppendEmptyLine_AddsBlankLineWithoutIndentation()
+	{
+		// Act
+		_builder.IncreaseIndent();
+		_builder.AppendLine("Indented line");
+		_builder.AppendEmptyLine();
+		_builder.AppendLine("Another indented line");
+
+		// Assert
+		_builder.ToString().ShouldBe("\tIndented line\r\n\r\n\tAnother indented line\r\n");
+	}
+
+	[Fact]
+	public void AppendEmptyLine_WithoutIndentation_AddsBlankLine()
+	{
+		// Act
+		_builder.AppendLine("First line");
+		_builder.AppendEmptyLine();
+		_builder.AppendLine("Third line");
+
+		// Assert
+		_builder.ToString().ShouldBe("First line\r\n\r\nThird line\r\n");
+	}
+
+	[Fact]
+	public void AppendLine_WithIndentation_AddsIndentedBlankLine()
+	{
+		// Act
+		_builder.IncreaseIndent();
+		_builder.AppendLine("Indented line");
+		_builder.AppendLine(); // This should add indented blank line
+		_builder.AppendLine("Another indented line");
+
+		// Assert
+		_builder.ToString().ShouldBe("\tIndented line\r\n\t\r\n\tAnother indented line\r\n");
 	}
 }
 
@@ -349,7 +387,7 @@ public class BlockTests
 		block.Dispose();
 
 		// Assert
-		builder.ToString().ShouldBe("{\r\n    Content\r\n}\r\n");
+		builder.ToString().ShouldBe("{\r\n\tContent\r\n}\r\n");
 	}
 
 	[Fact]
@@ -366,7 +404,7 @@ public class BlockTests
 		block.Dispose();
 
 		// Assert
-		builder.ToString().ShouldBe("{\r\n    Content\r\n}");
+		builder.ToString().ShouldBe("{\r\n\tContent\r\n}");
 	}
 
 	[Fact]
@@ -393,7 +431,7 @@ public class BlockTests
 		block.Dispose();
 
 		// Assert - Should end with newline by default
-		builder.ToString().ShouldBe("{\r\n    Content\r\n}\r\n");
+		builder.ToString().ShouldBe("{\r\n\tContent\r\n}\r\n");
 	}
 
 	[Fact]
@@ -415,7 +453,7 @@ public class BlockTests
 		string afterSecondDispose = builder.ToString();
 
 		// Assert - Content should be the same after multiple disposes
-		afterFirstDispose.ShouldBe("{\r\n    Content\r\n}\r\n");
+		afterFirstDispose.ShouldBe("{\r\n\tContent\r\n}\r\n");
 		afterSecondDispose.ShouldBe(afterFirstDispose);
 	}
 
@@ -434,6 +472,6 @@ public class BlockTests
 		block.Dispose();
 
 		// Assert - Should decrease indent and close block at correct level
-		builder.ToString().ShouldBe("    {\r\n        Nested content\r\n    }\r\n");
+		builder.ToString().ShouldBe("\t{\r\n\t\tNested content\r\n\t}\r\n");
 	}
 }

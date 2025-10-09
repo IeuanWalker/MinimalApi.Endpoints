@@ -10,7 +10,7 @@ sealed class IndentedTextBuilder : IDisposable
 	public IndentedTextBuilder()
 	{
 		_output = new StringWriter();
-		_writer = new IndentedTextWriter(_output);
+		_writer = new IndentedTextWriter(_output, "\t");
 	}
 
 	public void Append(string value) => _writer.Write(value);
@@ -18,6 +18,8 @@ sealed class IndentedTextBuilder : IDisposable
 	public void AppendLine(string value) => _writer.WriteLine(value);
 
 	public void AppendLine() => _writer.WriteLine();
+
+	public void AppendEmptyLine() => _output.WriteLine();
 
 	public void IncreaseIndent() => _writer.Indent++;
 

@@ -52,7 +52,7 @@ static class EndpointGeneratorHelpers
 
 		builder.AppendLine(";");
 		builder.DecreaseIndent();
-		builder.AppendLine();
+		builder.AppendEmptyLine();
 
 		// Configure the endpoint
 		builder.AppendLine($"global::{endpoint.TypeName}.Configure({uniqueRootName});");
