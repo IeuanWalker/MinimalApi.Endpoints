@@ -15,5 +15,6 @@ MINAPI005 | Map group    | Error   | Has multiple Group calls configured in the 
 MINAPI006 | Map group    | Warning | Unused endpoint group
 MINAPI007 | Validation   | Error   | Has multiple validators for the same type
 MINAPI008 | Validation   | Warning | Has validator but disabling validation
-MINAPI009 | Request type | Error   | Has multiple request types configured in the Configure method
+MINAPI009 | Validation   | Warning | Using FluentValidation abstract validator on request type
+MINAPI010 | Request type | Error   | Has multiple request types configured in the Configure method
 
