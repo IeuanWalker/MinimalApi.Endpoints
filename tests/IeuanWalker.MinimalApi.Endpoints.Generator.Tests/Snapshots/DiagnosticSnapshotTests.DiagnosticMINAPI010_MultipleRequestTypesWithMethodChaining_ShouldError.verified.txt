@@ -1,0 +1,50 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+		{
+			builder
+   ^^^^^^^
+				.RequestFromForm("formData")
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				.Put("/api/items/{id}")
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				.RequestFromHeader("headerData")
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				.WithName("UpdateItem");
+*/
+ : (9,3)-(12,36),
+      Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromHeader' call or the other conflicting request type method calls.,
+      Severity: Error,
+      Descriptor: {
+        Id: MINAPI010,
+        Title: Multiple request type methods configured,
+        MessageFormat: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.,
+        Category: Request type,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+		{
+			builder
+   ^^^^^^^
+				.RequestFromForm("formData")
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+				.Put("/api/items/{id}")
+*/
+ : (9,3)-(10,32),
+      Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromForm' call or the other conflicting request type method calls.,
+      Severity: Error,
+      Descriptor: {
+        Id: MINAPI010,
+        Title: Multiple request type methods configured,
+        MessageFormat: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.,
+        Category: Request type,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

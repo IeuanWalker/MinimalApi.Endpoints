@@ -149,13 +149,13 @@ public class RequestBindingTypeHelpersTests
 		result.ShouldBeNull();
 		diagnostics.Count.ShouldBe(2);
 
-		diagnostics[0].Id.ShouldBe("MINAPI009");
+		diagnostics[0].Id.ShouldBe("MINAPI010");
 		diagnostics[0].Title.ShouldBe("Multiple request type methods configured");
 		diagnostics[0].MessageFormat.ShouldBe("Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.");
 		diagnostics[0].MessageArgs.ShouldHaveSingleItem();
 		diagnostics[0].MessageArgs[0].ShouldBe("RequestFromBody");
 
-		diagnostics[1].Id.ShouldBe("MINAPI009");
+		diagnostics[1].Id.ShouldBe("MINAPI010");
 		diagnostics[1].Title.ShouldBe("Multiple request type methods configured");
 		diagnostics[1].MessageFormat.ShouldBe("Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.");
 		diagnostics[1].MessageArgs.ShouldHaveSingleItem();
@@ -187,7 +187,7 @@ public class RequestBindingTypeHelpersTests
 		// Assert
 		result.ShouldBeNull();
 		diagnostics.Count.ShouldBe(3);
-		diagnostics.All(d => d.Id == "MINAPI009").ShouldBeTrue();
+		diagnostics.All(d => d.Id == "MINAPI010").ShouldBeTrue();
 		diagnostics.All(d => d.Title == "Multiple request type methods configured").ShouldBeTrue();
 		diagnostics[0].MessageArgs[0].ShouldBe("RequestFromBody");
 		diagnostics[1].MessageArgs[0].ShouldBe("RequestFromQuery");
@@ -222,7 +222,7 @@ public class RequestBindingTypeHelpersTests
 		// Assert
 		result.ShouldBeNull();
 		diagnostics.Count.ShouldBe(6);
-		diagnostics.All(d => d.Id == "MINAPI009").ShouldBeTrue();
+		diagnostics.All(d => d.Id == "MINAPI010").ShouldBeTrue();
 		diagnostics.All(d => d.Title == "Multiple request type methods configured").ShouldBeTrue();
 
 		string[] expectedMethods = ["RequestFromBody", "RequestFromQuery", "RequestFromRoute", "RequestFromHeader", "RequestFromForm", "RequestAsParameters"];

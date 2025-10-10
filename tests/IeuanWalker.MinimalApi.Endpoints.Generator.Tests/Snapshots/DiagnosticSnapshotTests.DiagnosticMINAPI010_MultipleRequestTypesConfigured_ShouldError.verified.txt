@@ -1,0 +1,42 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+			builder.Post("/api/items");
+			builder.RequestFromBody();
+   ^^^^^^^^^^^^^^^^^^^^^^^^^
+			builder.RequestFromQuery();
+*/
+ : (10,3)-(10,28),
+      Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromBody' call or the other conflicting request type method calls.,
+      Severity: Error,
+      Descriptor: {
+        Id: MINAPI010,
+        Title: Multiple request type methods configured,
+        MessageFormat: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.,
+        Category: Request type,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+			builder.RequestFromBody();
+			builder.RequestFromQuery();
+   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+		}
+*/
+ : (11,3)-(11,29),
+      Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromQuery' call or the other conflicting request type method calls.,
+      Severity: Error,
+      Descriptor: {
+        Id: MINAPI010,
+        Title: Multiple request type methods configured,
+        MessageFormat: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.,
+        Category: Request type,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

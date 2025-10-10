@@ -353,7 +353,7 @@ public class DiagnosticSnapshotTests
 
 	#endregion
 
-	#region MINAPI009 - Request type: Multiple request types / Abstract Validator
+	#region MINAPI009 - Validatio: AbstractValidator used instead of Validator<T>
 
 	[Fact]
 	public Task DiagnosticMINAPI009_AbstractValidatorOnRequest_ShouldWarn()
@@ -617,6 +617,146 @@ public class DiagnosticSnapshotTests
 					RuleFor(x => x.Email).EmailAddress();
 				}
 			}
+		""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	#endregion
+
+	#region MINAPI010 - Request type: Multiple request types configured
+
+	[Fact]
+	public Task DiagnosticMINAPI010_MultipleRequestTypesConfigured_ShouldError()
+	{
+		// Arrange - This test covers the MINAPI010 diagnostic
+		const string source = """
+			using IeuanWalker.MinimalApi.Endpoints;
+			using Microsoft.AspNetCore.Http.HttpResults;
+
+			namespace TestNamespace;
+
+			public class MultipleRequestTypesEndpoint : IEndpoint<CreateRequest, Ok<CreateResponse>>
+			{
+				public static void Configure(RouteHandlerBuilder builder)
+				{
+					builder.Post("/api/items");
+					builder.RequestFromBody();
+					builder.RequestFromQuery();
+				}
+
+				public Task<Ok<CreateResponse>> Handle(CreateRequest request, CancellationToken ct)
+				{
+					return Task.FromResult(TypedResults.Ok(new CreateResponse(1)));
+				}
+			}
+
+			public record CreateRequest(string Name);
+			public record CreateResponse(int Id);
+		""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task DiagnosticMINAPI010_ThreeRequestTypesConfigured_ShouldError()
+	{
+		// Arrange - Test with three different request type methods
+		const string source = """
+			using IeuanWalker.MinimalApi.Endpoints;
+			using Microsoft.AspNetCore.Http.HttpResults;
+
+			namespace TestNamespace;
+
+			public class TripleRequestTypesEndpoint : IEndpoint<CreateRequest, Ok<CreateResponse>>
+			{
+				public static void Configure(RouteHandlerBuilder builder)
+				{
+					builder.Post("/api/items");
+					builder.RequestFromBody("body");
+					builder.RequestFromQuery("query");
+					builder.RequestFromRoute("route");
+				}
+
+				public Task<Ok<CreateResponse>> Handle(CreateRequest request, CancellationToken ct)
+				{
+					return Task.FromResult(TypedResults.Ok(new CreateResponse(1)));
+				}
+			}
+
+			public record CreateRequest(string Name);
+			public record CreateResponse(int Id);
+		""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task DiagnosticMINAPI010_MultipleRequestTypesWithMethodChaining_ShouldError()
+	{
+		// Arrange - Test with method chaining pattern
+		const string source = """
+			using IeuanWalker.MinimalApi.Endpoints;
+			using Microsoft.AspNetCore.Http.HttpResults;
+
+			namespace TestNamespace;
+
+			public class ChainedRequestTypesEndpoint : IEndpoint<UpdateRequest, Ok<UpdateResponse>>
+			{
+				public static void Configure(RouteHandlerBuilder builder)
+				{
+					builder
+						.RequestFromForm("formData")
+						.Put("/api/items/{id}")
+						.RequestFromHeader("headerData")
+						.WithName("UpdateItem");
+				}
+
+				public Task<Ok<UpdateResponse>> Handle(UpdateRequest request, CancellationToken ct)
+				{
+					return Task.FromResult(TypedResults.Ok(new UpdateResponse(true)));
+				}
+			}
+
+			public record UpdateRequest(int Id, string Value);
+			public record UpdateResponse(bool Success);
+		""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
+	public Task DiagnosticMINAPI010_SingleRequestType_ShouldNotError()
+	{
+		// Arrange - Test that single request type works correctly (no errors)
+		const string source = """
+			using IeuanWalker.MinimalApi.Endpoints;
+			using Microsoft.AspNetCore.Http.HttpResults;
+
+			namespace TestNamespace;
+
+			public class SingleRequestTypeEndpoint : IEndpoint<CreateRequest, Ok<CreateResponse>>
+			{
+				public static void Configure(RouteHandlerBuilder builder)
+				{
+					builder
+						.RequestFromBody("request")
+						.Post("/api/items")
+						.WithName("CreateItem");
+				}
+
+				public Task<Ok<CreateResponse>> Handle(CreateRequest request, CancellationToken ct)
+				{
+					return Task.FromResult(TypedResults.Ok(new CreateResponse(1)));
+				}
+			}
+
+			public record CreateRequest(string Name);
+			public record CreateResponse(int Id);
 		""";
 
 		// Act & Assert

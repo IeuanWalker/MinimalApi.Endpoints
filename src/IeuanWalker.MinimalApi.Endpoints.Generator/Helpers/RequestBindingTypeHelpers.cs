@@ -8,7 +8,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 static class RequestBindingTypeHelpers
 {
 	static readonly DiagnosticDescriptor multipleRequestTypeMethodsDescriptor = new(
-		id: "MINAPI009",
+		id: "MINAPI010",
 		title: "Multiple request type methods configured",
 		messageFormat: "Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this '{0}' call or the other conflicting request type method calls.",
 		category: "Request type",
