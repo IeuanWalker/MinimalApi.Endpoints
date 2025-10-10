@@ -2,12 +2,12 @@
   Diagnostics: [
     {
       Location: /*
-{
-	public static void Configure(RouteHandlerBuilder builder)
-                    ^^^^^^^^^
 	{
+		public static void Configure(RouteHandlerBuilder builder)
+                     ^^^^^^^^^
+		{
 */
- : (7,20)-(7,29),
+ : (7,21)-(7,30),
       Message: Type 'NoVerbEndpoint' has no HTTP verb configured in the Configure method. At least one HTTP verb (Get, Post, Put, Patch, Delete) must be specified.,
       Severity: Error,
       Descriptor: {

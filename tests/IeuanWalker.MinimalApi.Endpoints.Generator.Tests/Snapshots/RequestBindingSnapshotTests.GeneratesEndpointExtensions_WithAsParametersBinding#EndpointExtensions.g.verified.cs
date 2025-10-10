@@ -10,8 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
-using IeuanWalker.MinimalApi.Endpoints.Filters;
-using FluentValidation;
 
 namespace TestAssembly;
 
@@ -19,26 +17,23 @@ public static class EndpointExtensions
 {
 	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
 	{
-		builder.Services.AddScoped<global::TestNamespace.CreateUserEndpoint>();
-
-		// Validators not directly related to an endpoints request model
-		builder.Services.AddSingleton<IValidator<global::TestNamespace.CreateUserRequest>, global::TestNamespace.CreateUserRequestValidator>();
+		builder.Services.AddScoped<global::TestNamespace.SearchUsersEndpoint>();
 
 		return builder;
 	}
 
 	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
 	{
-		// POST: /api/users
-		RouteHandlerBuilder post_Users_0 = app
-			.MapPost("/api/users", async (
-				global::TestNamespace.CreateUserRequest request,
-				[FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
+		// GET: /api/users/search
+		RouteHandlerBuilder get_UsersSearch_0 = app
+			.MapGet("/api/users/search", async (
+				[AsParameters] global::TestNamespace.SearchUsersRequest request,
+				[FromServices] global::TestNamespace.SearchUsersEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("post_Users_0");
+			.WithName("get_UsersSearch_0");
 
-		global::TestNamespace.CreateUserEndpoint.Configure(post_Users_0);
+		global::TestNamespace.SearchUsersEndpoint.Configure(get_UsersSearch_0);
 
 		return app;
 	}

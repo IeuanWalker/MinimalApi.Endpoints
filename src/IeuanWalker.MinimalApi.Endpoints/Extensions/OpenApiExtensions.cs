@@ -7,6 +7,7 @@ using Microsoft.OpenApi;
 namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
+[ExcludeFromCodeCoverage]
 public static class OpenApiExtensions
 {
 	[ExcludeFromCodeCoverage]

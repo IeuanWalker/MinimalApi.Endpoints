@@ -7,6 +7,7 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 
 [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 [SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "<Pending>")]
+[ExcludeFromCodeCoverage]
 public static class MapEndpointExtensions
 {
 	[ExcludeFromCodeCoverage]

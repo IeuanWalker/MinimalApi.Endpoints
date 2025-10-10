@@ -27,9 +27,9 @@ public class NestedObject2Model
 }
 
 
-sealed class ConfirmationEmailSettingsValidator : Validator<RequestModel>
+sealed class RequestModelValidator : Validator<RequestModel>
 {
-	public ConfirmationEmailSettingsValidator()
+	public RequestModelValidator()
 	{
 		RuleFor(x => x.Title)
 			.NotEmpty()

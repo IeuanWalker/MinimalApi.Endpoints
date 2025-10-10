@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
+[ExcludeFromCodeCoverage]
 public static class EndpointGroupExtensions
 {
 	[SuppressMessage("Major Code Smell", "S2326:Unused type parameters should be removed", Justification = "<Pending>")]

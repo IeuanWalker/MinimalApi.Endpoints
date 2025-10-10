@@ -1,0 +1,65 @@
+﻿{
+  Diagnostics: [
+    {
+      Location: /*
+
+	public class CreateRequestValidatorA : Validator<CreateRequest>
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	{
+^^
+		public CreateRequestValidatorA()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		{
+^^^
+			RuleFor(x => x.Name).NotEmpty();
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		}
+^^^
+	}
+^^
+
+*/
+ : (22,1)-(28,2),
+      Message: Multiple validators found for the model type 'TestNamespace.CreateRequest'. Only one validator per model type is allowed. Remove this validator or the other conflicting validators for the same model type.,
+      Severity: Error,
+      Descriptor: {
+        Id: MINAPI007,
+        Title: Duplicate Validator,
+        MessageFormat: Multiple validators found for the model type '{0}'. Only one validator per model type is allowed. Remove this validator or the other conflicting validators for the same model type.,
+        Category: Validation,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    },
+    {
+      Location: /*
+
+	public class CreateRequestValidatorB : Validator<CreateRequest>
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	{
+^^
+		public CreateRequestValidatorB()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		{
+^^^
+			RuleFor(x => x.Name).MinimumLength(3);
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		}
+^^^
+	}
+^^
+*/
+ : (30,1)-(36,2),
+      Message: Multiple validators found for the model type 'TestNamespace.CreateRequest'. Only one validator per model type is allowed. Remove this validator or the other conflicting validators for the same model type.,
+      Severity: Error,
+      Descriptor: {
+        Id: MINAPI007,
+        Title: Duplicate Validator,
+        MessageFormat: Multiple validators found for the model type '{0}'. Only one validator per model type is allowed. Remove this validator or the other conflicting validators for the same model type.,
+        Category: Validation,
+        DefaultSeverity: Error,
+        IsEnabledByDefault: true
+      }
+    }
+  ]
+}

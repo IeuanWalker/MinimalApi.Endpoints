@@ -28,6 +28,17 @@ public sealed class ValidatorInfo : TypeInfo
 	public string ValidatedTypeName { get; }
 }
 
+public sealed class AbstractValidatorInfo : TypeInfo
+{
+	public AbstractValidatorInfo(string typeName, string validatedTypeName, Location location, List<DiagnosticInfo> diagnostics)
+		: base(typeName, location, diagnostics)
+	{
+		ValidatedTypeName = validatedTypeName;
+	}
+
+	public string ValidatedTypeName { get; }
+}
+
 public sealed class EndpointGroupInfo : TypeInfo
 {
 	public EndpointGroupInfo(string typeName, string pattern, string? withName, string? withTags, Location location, List<DiagnosticInfo> diagnostics)
