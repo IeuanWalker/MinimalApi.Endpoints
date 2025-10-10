@@ -17,7 +17,7 @@ public class TypeInfo
 	public List<DiagnosticInfo> Diagnostics { get; }
 }
 
-public class ValidatorInfo : TypeInfo
+public sealed class ValidatorInfo : TypeInfo
 {
 	public ValidatorInfo(string typeName, string validatedTypeName, Location location, List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
