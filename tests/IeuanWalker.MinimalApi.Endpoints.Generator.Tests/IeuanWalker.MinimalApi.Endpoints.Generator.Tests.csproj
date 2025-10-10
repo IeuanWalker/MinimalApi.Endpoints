@@ -8,9 +8,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Snapshots\DiagnosticSnapshotTests.GeneratesEndpointExtensions_WithMultipleAbstractValidatorsOnRequestTypes_ShouldHaveMultipleWarnings#EndpointExtensions.g.received.cs\**" />
-	  <EmbeddedResource Remove="Snapshots\DiagnosticSnapshotTests.GeneratesEndpointExtensions_WithMultipleAbstractValidatorsOnRequestTypes_ShouldHaveMultipleWarnings#EndpointExtensions.g.received.cs\**" />
-	  <None Remove="Snapshots\DiagnosticSnapshotTests.GeneratesEndpointExtensions_WithMultipleAbstractValidatorsOnRequestTypes_ShouldHaveMultipleWarnings#EndpointExtensions.g.received.cs\**" />
 	</ItemGroup>
 
 	<ItemGroup>
