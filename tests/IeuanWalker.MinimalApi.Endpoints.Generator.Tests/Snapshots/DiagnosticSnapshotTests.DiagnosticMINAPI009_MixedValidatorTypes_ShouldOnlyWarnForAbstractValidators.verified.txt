@@ -2,27 +2,27 @@
   Diagnostics: [
     {
       Location: /*
-// This should trigger MINAPI009 warning - using AbstractValidator
-public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-{
-^
-	public UpdateUserRequestValidator()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+	// This should trigger MINAPI009 warning - using AbstractValidator
+	public class UpdateUserRequestValidator : AbstractValidator<UpdateUserRequest>
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 	{
 ^^
-		RuleFor(x => x.Id).GreaterThan(0);
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		RuleFor(x => x.Name).NotEmpty();
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		RuleFor(x => x.Email).EmailAddress();
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		public UpdateUserRequestValidator()
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		{
+^^^
+			RuleFor(x => x.Id).GreaterThan(0);
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+			RuleFor(x => x.Name).NotEmpty();
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+			RuleFor(x => x.Email).EmailAddress();
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+		}
+^^^
 	}
 ^^
-}
-^
 */
- : (47,0)-(55,1),
+ : (47,1)-(55,2),
       Message: The abstract validator TestNamespace.UpdateUserRequestValidator, is used for the request model TestNamespace.UpdateUserRequest. This validator isn't automatically registered and validation will not be applied to the endpoint. Please inherit from Validator and not AbstractValidator.,
       Severity: Warning,
       WarningLevel: 1,
