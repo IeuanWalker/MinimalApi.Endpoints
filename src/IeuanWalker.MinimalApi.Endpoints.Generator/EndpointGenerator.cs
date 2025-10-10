@@ -36,12 +36,21 @@ public class EndpointGenerator : IIncrementalGenerator
 		defaultSeverity: DiagnosticSeverity.Warning,
 		isEnabledByDefault: true);
 
+	static readonly DiagnosticDescriptor usingAbstractValidatorOnRequestType = new(
+		id: "MINAPI009",
+		title: "Using FluentValidation abstract validator on request type",
+		messageFormat: "The abstract validator {0}, is used for the request model {1}. This validator isn't automatically registered and validation will not be applied to the endpoint. Please inherit from Validator and not AbstractValidator.",
+		category: "Validation",
+		defaultSeverity: DiagnosticSeverity.Warning,
+		isEnabledByDefault: true);
+
 	const string fullValidator = "IeuanWalker.MinimalApi.Endpoints.Validator`1";
 	const string fullIEndpointGroup = "IeuanWalker.MinimalApi.Endpoints.IEndpointGroup";
 	const string fullIEndpointBase = "IeuanWalker.MinimalApi.Endpoints.IEndpointBase";
 	const string fullIEndpointWithRequestAndResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpoint`2";
 	const string fullIEndpointWithoutRequest = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutRequest`1";
 	const string fullIEndpointWithoutResponse = "IeuanWalker.MinimalApi.Endpoints.IEndpointWithoutResponse`1";
+	const string fullAbstractValidator = "FluentValidation.AbstractValidator`1";
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
@@ -99,6 +108,19 @@ public class EndpointGenerator : IIncrementalGenerator
 			if (validatedTypeName != null)
 			{
 				return new ValidatorInfo(typeName, validatedTypeName, location, [.. diagnostics]);
+			}
+		}
+
+		// Check if this is an AbstractValidator from FluentValidation
+		INamedTypeSymbol abstractValidatorSymbol = compilation.GetTypeByMetadataName(fullAbstractValidator)!;
+		bool isAbstractValidator = typeSymbol.InheritsFromValidatorBase(abstractValidatorSymbol);
+		if (isAbstractValidator)
+		{
+			ITypeSymbol? validatedType = typeSymbol.GetValidatedTypeFromValidator(abstractValidatorSymbol);
+			string? validatedTypeName = validatedType?.ToDisplayString();
+			if (validatedTypeName != null)
+			{
+				return new AbstractValidatorInfo(typeName, validatedTypeName, location, [.. diagnostics]);
 			}
 		}
 
@@ -181,6 +203,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		List<EndpointInfo> allEndpoints = [.. typeInfos.OfType<EndpointInfo>()];
 		List<EndpointGroupInfo> allEndpointGroups = [.. typeInfos.OfType<EndpointGroupInfo>()];
 		List<ValidatorInfo> allValidators = [.. typeInfos.OfType<ValidatorInfo>()];
+		List<AbstractValidatorInfo> allAbstractValidators = [.. typeInfos.OfType<AbstractValidatorInfo>()];
 
 		// Report diagnostics
 		foreach (DiagnosticInfo diagnosticInfo in typeInfos.Where(x => x is not null).SelectMany(x => x?.Diagnostics))
@@ -236,6 +259,20 @@ public class EndpointGenerator : IIncrementalGenerator
 					validator.Location,
 					endpoint.TypeName,
 					validator.ValidatedTypeName));
+			}
+		}
+
+		// Check if abstract validators match a request type
+		foreach (AbstractValidatorInfo abstractValidator in allAbstractValidators)
+		{
+			bool matchesRequestType = allEndpoints.Any(e => e.RequestType != null && e.RequestType.Equals(abstractValidator.ValidatedTypeName));
+			if (matchesRequestType)
+			{
+				context.ReportDiagnostic(Diagnostic.Create(
+					usingAbstractValidatorOnRequestType,
+					abstractValidator.Location,
+					abstractValidator.TypeName,
+					abstractValidator.ValidatedTypeName));
 			}
 		}
 
