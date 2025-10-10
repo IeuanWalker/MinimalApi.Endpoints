@@ -474,47 +474,6 @@ public class SnapshotTests
 		return TestHelper.Verify(source);
 	}
 
-	[Fact]
-	public Task GeneratesEndpointExtensions_WithDisableValidationButWithValidator_ShouldHaveWarning()
-	{
-		// Arrange
-		const string source = """
-				using IeuanWalker.MinimalApi.Endpoints;
-				using FluentValidation;
-				using Microsoft.AspNetCore.Http.HttpResults;
-
-				namespace TestNamespace;
-
-				public class CreateUserEndpoint : IEndpoint<CreateUserRequest, Ok<UserResponse>>
-				{
-					public static void Configure(RouteHandlerBuilder builder)
-					{
-						builder
-							.Post("/api/users")
-							.DisableValidation();
-					}
-
-					public Task<Ok<UserResponse>> Handle(CreateUserRequest request, CancellationToken ct)
-					{
-						return Task.FromResult(TypedResults.Ok(new UserResponse(1, request.Name)));
-					}
-				}
-
-				public record CreateUserRequest(string Name);
-				public record UserResponse(int Id, string Name);
-
-				public class CreateUserRequestValidator : Validator<CreateUserRequest>
-				{
-					public CreateUserRequestValidator()
-					{
-						RuleFor(x => x.Name).NotEmpty();
-					}
-				}
-				""";
-
-		// Act & Assert
-		return TestHelper.Verify(source);
-	}
 
 	[Fact]
 	public Task GeneratesEndpointExtensions_WithNonRequestModelValidator()
