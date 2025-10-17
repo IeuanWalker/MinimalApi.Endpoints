@@ -8,9 +8,9 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 /// This allows the incremental generator to cache diagnostics without holding references to syntax trees.
 /// Based on: https://github.com/dotnet/roslyn/issues/62269
 /// </summary>
-public readonly struct LocationInfo : IEquatable<LocationInfo>
+public readonly struct CachableLocation : IEquatable<CachableLocation>
 {
-	public LocationInfo(Location location)
+	public CachableLocation(Location location)
 	{
 		FilePath = location.SourceTree?.FilePath ?? string.Empty;
 		StartLine = location.GetLineSpan().StartLinePosition.Line;
@@ -37,7 +37,7 @@ public readonly struct LocationInfo : IEquatable<LocationInfo>
 		return Location.Create(FilePath, default, lineSpan);
 	}
 
-	public bool Equals(LocationInfo other)
+	public bool Equals(CachableLocation other)
 	{
 		return FilePath == other.FilePath
 			&& StartLine == other.StartLine
@@ -48,7 +48,7 @@ public readonly struct LocationInfo : IEquatable<LocationInfo>
 
 	public override bool Equals(object? obj)
 	{
-		return obj is LocationInfo other && Equals(other);
+		return obj is CachableLocation other && Equals(other);
 	}
 
 	public override int GetHashCode()
@@ -65,12 +65,12 @@ public readonly struct LocationInfo : IEquatable<LocationInfo>
 		}
 	}
 
-	public static bool operator ==(LocationInfo left, LocationInfo right)
+	public static bool operator ==(CachableLocation left, CachableLocation right)
 	{
 		return left.Equals(right);
 	}
 
-	public static bool operator !=(LocationInfo left, LocationInfo right)
+	public static bool operator !=(CachableLocation left, CachableLocation right)
 	{
 		return !left.Equals(right);
 	}

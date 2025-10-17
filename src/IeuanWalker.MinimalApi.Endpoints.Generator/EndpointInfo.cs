@@ -4,7 +4,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 
 public class TypeInfo
 {
-	public TypeInfo(string typeName, LocationInfo location, List<DiagnosticInfo> diagnostics)
+	public TypeInfo(string typeName, CachableLocation location, List<DiagnosticInfo> diagnostics)
 	{
 		TypeName = typeName;
 		Location = location;
@@ -12,13 +12,13 @@ public class TypeInfo
 	}
 
 	public string TypeName { get; }
-	public LocationInfo Location { get; }
+	public CachableLocation Location { get; }
 	public List<DiagnosticInfo> Diagnostics { get; }
 }
 
 public sealed class ValidatorInfo : TypeInfo
 {
-	public ValidatorInfo(string typeName, string validatedTypeName, LocationInfo location, List<DiagnosticInfo> diagnostics)
+	public ValidatorInfo(string typeName, string validatedTypeName, CachableLocation location, List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
 	{
 		ValidatedTypeName = validatedTypeName;
@@ -29,7 +29,7 @@ public sealed class ValidatorInfo : TypeInfo
 
 public sealed class AbstractValidatorInfo : TypeInfo
 {
-	public AbstractValidatorInfo(string typeName, string validatedTypeName, LocationInfo location, List<DiagnosticInfo> diagnostics)
+	public AbstractValidatorInfo(string typeName, string validatedTypeName, CachableLocation location, List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
 	{
 		ValidatedTypeName = validatedTypeName;
@@ -40,7 +40,7 @@ public sealed class AbstractValidatorInfo : TypeInfo
 
 public sealed class EndpointGroupInfo : TypeInfo
 {
-	public EndpointGroupInfo(string typeName, string pattern, string? withName, string? withTags, LocationInfo location, List<DiagnosticInfo> diagnostics)
+	public EndpointGroupInfo(string typeName, string pattern, string? withName, string? withTags, CachableLocation location, List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
 	{
 		Pattern = pattern;
@@ -66,7 +66,7 @@ public sealed class EndpointInfo : TypeInfo
 		(RequestBindingTypeEnum requestType, string? name)? requestBindingType,
 		bool disableValidation,
 		string? responseType,
-		LocationInfo location,
+		CachableLocation location,
 		List<DiagnosticInfo> diagnostics)
 		: base(typeName, location, diagnostics)
 	{
