@@ -64,7 +64,7 @@ static class MapGroupHelpers
 					multipleGroupCallsDescriptor.MessageFormat.ToString(),
 					multipleGroupCallsDescriptor.Category,
 					multipleGroupCallsDescriptor.DefaultSeverity,
-					new LocationInfo(groupCall.GetLocation())));
+					groupCall.GetLocation().ToCachableLocation()));
 			}
 			return null;
 		}
@@ -135,7 +135,7 @@ static class MapGroupHelpers
 							noMapGroupDescriptor.MessageFormat.ToString(),
 							noMapGroupDescriptor.Category,
 							noMapGroupDescriptor.DefaultSeverity,
-							new LocationInfo(configureMethod.Identifier.GetLocation()),
+							configureMethod.Identifier.GetLocation().ToCachableLocation(),
 							endpointGroupSymbol.Name));
 						return null;
 					}
@@ -151,7 +151,7 @@ static class MapGroupHelpers
 								multipleMapGroupsDescriptor.MessageFormat.ToString(),
 								multipleMapGroupsDescriptor.Category,
 								multipleMapGroupsDescriptor.DefaultSeverity,
-								new LocationInfo(mapGroupCall.GetLocation())));
+								mapGroupCall.GetLocation().ToCachableLocation()));
 						}
 						return null;
 					}
