@@ -95,7 +95,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		Compilation compilation = semanticModel.Compilation;
 
 		List<DiagnosticInfo> diagnostics = [];
-		Location location = typeDeclaration.GetLocation();
+		LocationInfo location = new(typeDeclaration.GetLocation());
 		string typeName = typeSymbol.ToDisplayString();
 
 		// Check if this is a validator
@@ -215,7 +215,7 @@ public class EndpointGenerator : IIncrementalGenerator
 				diagnosticInfo.Category,
 				diagnosticInfo.Severity,
 				isEnabledByDefault: true);
-			context.ReportDiagnostic(Diagnostic.Create(descriptor, diagnosticInfo.Location, diagnosticInfo.MessageArgs));
+			context.ReportDiagnostic(Diagnostic.Create(descriptor, diagnosticInfo.Location.ToLocation(), diagnosticInfo.MessageArgs));
 		}
 
 		// Check for unused groups
@@ -228,7 +228,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		{
 			context.ReportDiagnostic(Diagnostic.Create(
 					unusedGroupDescriptor,
-					group.Location,
+					group.Location.ToLocation(),
 					group.TypeName));
 		}
 
@@ -242,7 +242,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			{
 				context.ReportDiagnostic(Diagnostic.Create(
 					duplicateValidatorsDescriptor,
-					validator.Location,
+					validator.Location.ToLocation(),
 					validator.ValidatedTypeName));
 			}
 		}
@@ -256,7 +256,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			{
 				context.ReportDiagnostic(Diagnostic.Create(
 					hasValidatorButEndpointDisablesValidation,
-					validator.Location,
+					validator.Location.ToLocation(),
 					endpoint.TypeName,
 					validator.ValidatedTypeName));
 			}
@@ -270,7 +270,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			{
 				context.ReportDiagnostic(Diagnostic.Create(
 					usingAbstractValidatorOnRequestType,
-					abstractValidator.Location,
+					abstractValidator.Location.ToLocation(),
 					abstractValidator.TypeName,
 					abstractValidator.ValidatedTypeName));
 			}

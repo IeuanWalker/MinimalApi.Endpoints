@@ -50,7 +50,7 @@ static class HttpVerbRouteHelpers
 				noHttpVerbDescriptor.MessageFormat.ToString(),
 				noHttpVerbDescriptor.Category,
 				noHttpVerbDescriptor.DefaultSeverity,
-				configureMethod.Identifier.GetLocation(),
+				new LocationInfo(configureMethod.Identifier.GetLocation()),
 				typeName));
 			return null;
 		}
@@ -68,7 +68,7 @@ static class HttpVerbRouteHelpers
 						multipleHttpVerbsDescriptor.MessageFormat.ToString(),
 						multipleHttpVerbsDescriptor.Category,
 						multipleHttpVerbsDescriptor.DefaultSeverity,
-						httpVerbCall.GetLocation(),
+						new LocationInfo(httpVerbCall.GetLocation()),
 						memberAccess.Name.Identifier.ValueText));
 				}
 			}
