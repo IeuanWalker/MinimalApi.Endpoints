@@ -14,7 +14,7 @@ public sealed class DiagnosticInfo
 		string messageFormat,
 		string category,
 		DiagnosticSeverity severity,
-		Location location,
+		CachableLocation location,
 		params object[] messageArgs)
 	{
 		Id = id;
@@ -31,6 +31,6 @@ public sealed class DiagnosticInfo
 	public string MessageFormat { get; }
 	public string Category { get; }
 	public DiagnosticSeverity Severity { get; }
-	public Location Location { get; }
+	public CachableLocation Location { get; }
 	public object[] MessageArgs { get; }
 }
