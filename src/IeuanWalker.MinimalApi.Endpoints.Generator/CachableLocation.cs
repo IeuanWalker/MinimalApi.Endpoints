@@ -6,7 +6,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 /// <summary>
 /// A cache-friendly wrapper around Location that extracts and stores only the essential data.
 /// This allows the incremental generator to cache diagnostics without holding references to syntax trees.
-/// Based on: https://github.com/dotnet/roslyn/issues/62269
+/// Based on: https://github.com/dotnet/roslyn/issues/62269, implementation from: https://gist.github.com/dferretti/9d41651178a847ccf56dc2c5f9ab788f
 /// </summary>
 public readonly struct CachableLocation : IEquatable<CachableLocation>
 {
