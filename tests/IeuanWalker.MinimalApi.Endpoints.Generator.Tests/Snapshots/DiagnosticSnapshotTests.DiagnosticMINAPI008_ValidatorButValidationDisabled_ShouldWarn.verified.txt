@@ -1,24 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-
-	public class CreateRequestValidator : Validator<CreateRequest>
- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	{
-^^
-		public CreateRequestValidator()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		{
-^^^
-			RuleFor(x => x.Name).NotEmpty();
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		}
-^^^
-	}
-^^
-*/
- : (22,1)-(28,2),
+      Location: : (22,1)-(28,2),
       Message: The endpoint 'TestNamespace.DisabledValidationEndpoint' is calling 'DisableValidation', but a validator for its request type 'TestNamespace.CreateRequest' exists. Either remove the validator or remove `DisableValidation` from the endpoint.,
       Severity: Warning,
       WarningLevel: 1,

@@ -7,7 +7,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 public sealed class CachableLocationTests
 {
 	[Fact]
-	public void Constructor_WithValidLocation_ExtractsAllProperties()
+	public void FromLocation_WithValidLocation_CreatesInstance()
 	{
 		// Arrange
 		string filePath = "C:\\test\\file.cs";
@@ -17,18 +17,27 @@ public sealed class CachableLocationTests
 		Location location = Location.Create(filePath, default, lineSpan);
 
 		// Act
-		CachableLocation cachableLocation = new(location);
+		CachableLocation cachableLocation = CachableLocation.FromLocation(location);
 
-		// Assert
-		cachableLocation.FilePath.ShouldBe(filePath);
-		cachableLocation.StartLine.ShouldBe(5);
-		cachableLocation.StartCharacter.ShouldBe(10);
-		cachableLocation.EndLine.ShouldBe(5);
-		cachableLocation.EndCharacter.ShouldBe(20);
+		// Assert - Verify by converting back to Location
+		Location reconstructed = cachableLocation.ToLocation();
+		FileLinePositionSpan reconstructedSpan = reconstructed.GetLineSpan();
+		reconstructedSpan.Path.ShouldBe(filePath);
+		reconstructedSpan.StartLinePosition.Line.ShouldBe(5);
+		reconstructedSpan.StartLinePosition.Character.ShouldBe(10);
+		reconstructedSpan.EndLinePosition.Line.ShouldBe(5);
+		reconstructedSpan.EndLinePosition.Character.ShouldBe(20);
 	}
 
 	[Fact]
-	public void Constructor_WithLocationWithoutSourceTree_UsesEmptyFilePath()
+	public void FromLocation_WithNullLocation_ThrowsArgumentNullException()
+	{
+		// Act & Assert
+		Should.Throw<ArgumentNullException>(() => CachableLocation.FromLocation(null!));
+	}
+
+	[Fact]
+	public void FromLocation_WithLocationWithoutSourceTree_UsesEmptyFilePath()
 	{
 		// Arrange
 		LinePositionSpan lineSpan = new(
@@ -37,18 +46,20 @@ public sealed class CachableLocationTests
 		Location location = Location.Create(string.Empty, default, lineSpan);
 
 		// Act
-		CachableLocation cachableLocation = new(location);
+		CachableLocation cachableLocation = CachableLocation.FromLocation(location);
 
 		// Assert
-		cachableLocation.FilePath.ShouldBe(string.Empty);
-		cachableLocation.StartLine.ShouldBe(1);
-		cachableLocation.StartCharacter.ShouldBe(0);
-		cachableLocation.EndLine.ShouldBe(2);
-		cachableLocation.EndCharacter.ShouldBe(5);
+		Location reconstructed = cachableLocation.ToLocation();
+		FileLinePositionSpan reconstructedSpan = reconstructed.GetLineSpan();
+		reconstructedSpan.Path.ShouldBe(string.Empty);
+		reconstructedSpan.StartLinePosition.Line.ShouldBe(1);
+		reconstructedSpan.StartLinePosition.Character.ShouldBe(0);
+		reconstructedSpan.EndLinePosition.Line.ShouldBe(2);
+		reconstructedSpan.EndLinePosition.Character.ShouldBe(5);
 	}
 
 	[Fact]
-	public void Constructor_WithMultiLineLocation_PreservesAllLinePositions()
+	public void FromLocation_WithMultiLineLocation_PreservesAllLinePositions()
 	{
 		// Arrange
 		string filePath = "/unix/path/file.cs";
@@ -58,14 +69,16 @@ public sealed class CachableLocationTests
 		Location location = Location.Create(filePath, default, lineSpan);
 
 		// Act
-		CachableLocation cachableLocation = new(location);
+		CachableLocation cachableLocation = CachableLocation.FromLocation(location);
 
 		// Assert
-		cachableLocation.FilePath.ShouldBe(filePath);
-		cachableLocation.StartLine.ShouldBe(10);
-		cachableLocation.StartCharacter.ShouldBe(5);
-		cachableLocation.EndLine.ShouldBe(15);
-		cachableLocation.EndCharacter.ShouldBe(30);
+		Location reconstructed = cachableLocation.ToLocation();
+		FileLinePositionSpan reconstructedSpan = reconstructed.GetLineSpan();
+		reconstructedSpan.Path.ShouldBe(filePath);
+		reconstructedSpan.StartLinePosition.Line.ShouldBe(10);
+		reconstructedSpan.StartLinePosition.Character.ShouldBe(5);
+		reconstructedSpan.EndLinePosition.Line.ShouldBe(15);
+		reconstructedSpan.EndLinePosition.Character.ShouldBe(30);
 	}
 
 	[Fact]
@@ -77,7 +90,7 @@ public sealed class CachableLocationTests
 			new LinePosition(3, 7),
 			new LinePosition(3, 15));
 		Location originalLocation = Location.Create(filePath, default, originalLineSpan);
-		CachableLocation cachableLocation = new(originalLocation);
+		CachableLocation cachableLocation = CachableLocation.FromLocation(originalLocation);
 
 		// Act
 		Location reconstructedLocation = cachableLocation.ToLocation();
@@ -100,8 +113,8 @@ public sealed class CachableLocationTests
 			new LinePosition(3, 4));
 		Location location = Location.Create(filePath, default, lineSpan);
 
-		CachableLocation location1 = new(location);
-		CachableLocation location2 = new(location);
+		CachableLocation location1 = CachableLocation.FromLocation(location);
+		CachableLocation location2 = CachableLocation.FromLocation(location);
 
 		// Act & Assert
 		location1.Equals(location2).ShouldBeTrue();
@@ -119,8 +132,8 @@ public sealed class CachableLocationTests
 		Location location1 = Location.Create("file1.cs", default, lineSpan);
 		Location location2 = Location.Create("file2.cs", default, lineSpan);
 
-		CachableLocation cachable1 = new(location1);
-		CachableLocation cachable2 = new(location2);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location1);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location2);
 
 		// Act & Assert
 		cachable1.Equals(cachable2).ShouldBeFalse();
@@ -142,8 +155,8 @@ public sealed class CachableLocationTests
 		Location location1 = Location.Create(filePath, default, lineSpan1);
 		Location location2 = Location.Create(filePath, default, lineSpan2);
 
-		CachableLocation cachable1 = new(location1);
-		CachableLocation cachable2 = new(location2);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location1);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location2);
 
 		// Act & Assert
 		cachable1.Equals(cachable2).ShouldBeFalse();
@@ -163,8 +176,8 @@ public sealed class CachableLocationTests
 		Location location1 = Location.Create(filePath, default, lineSpan1);
 		Location location2 = Location.Create(filePath, default, lineSpan2);
 
-		CachableLocation cachable1 = new(location1);
-		CachableLocation cachable2 = new(location2);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location1);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location2);
 
 		// Act & Assert
 		cachable1.Equals(cachable2).ShouldBeFalse();
@@ -184,8 +197,8 @@ public sealed class CachableLocationTests
 		Location location1 = Location.Create(filePath, default, lineSpan1);
 		Location location2 = Location.Create(filePath, default, lineSpan2);
 
-		CachableLocation cachable1 = new(location1);
-		CachableLocation cachable2 = new(location2);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location1);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location2);
 
 		// Act & Assert
 		cachable1.Equals(cachable2).ShouldBeFalse();
@@ -205,8 +218,8 @@ public sealed class CachableLocationTests
 		Location location1 = Location.Create(filePath, default, lineSpan1);
 		Location location2 = Location.Create(filePath, default, lineSpan2);
 
-		CachableLocation cachable1 = new(location1);
-		CachableLocation cachable2 = new(location2);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location1);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location2);
 
 		// Act & Assert
 		cachable1.Equals(cachable2).ShouldBeFalse();
@@ -222,8 +235,8 @@ public sealed class CachableLocationTests
 			new LinePosition(3, 4));
 		Location location = Location.Create(filePath, default, lineSpan);
 
-		CachableLocation cachable1 = new(location);
-		CachableLocation cachable2 = new(location);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location);
 		object cachable2AsObject = cachable2;
 
 		// Act & Assert
@@ -239,7 +252,7 @@ public sealed class CachableLocationTests
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
 		Location location = Location.Create(filePath, default, lineSpan);
-		CachableLocation cachable = new(location);
+		CachableLocation cachable = CachableLocation.FromLocation(location);
 
 		// Act & Assert
 		cachable.Equals(null).ShouldBeFalse();
@@ -254,7 +267,7 @@ public sealed class CachableLocationTests
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
 		Location location = Location.Create(filePath, default, lineSpan);
-		CachableLocation cachable = new(location);
+		CachableLocation cachable = CachableLocation.FromLocation(location);
 		object differentType = "string";
 
 		// Act & Assert
@@ -271,8 +284,8 @@ public sealed class CachableLocationTests
 			new LinePosition(3, 4));
 		Location location = Location.Create(filePath, default, lineSpan);
 
-		CachableLocation cachable1 = new(location);
-		CachableLocation cachable2 = new(location);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location);
 
 		// Act & Assert
 		cachable1.GetHashCode().ShouldBe(cachable2.GetHashCode());
@@ -291,8 +304,8 @@ public sealed class CachableLocationTests
 		Location location1 = Location.Create("file1.cs", default, lineSpan1);
 		Location location2 = Location.Create("file2.cs", default, lineSpan2);
 
-		CachableLocation cachable1 = new(location1);
-		CachableLocation cachable2 = new(location2);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location1);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location2);
 
 		// Act & Assert
 		cachable1.GetHashCode().ShouldNotBe(cachable2.GetHashCode());
@@ -307,8 +320,8 @@ public sealed class CachableLocationTests
 			new LinePosition(1, 1));
 		Location location = Location.Create(string.Empty, default, lineSpan);
 
-		CachableLocation cachable1 = new(location);
-		CachableLocation cachable2 = new(location);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location);
 
 		// Act & Assert
 		cachable1.GetHashCode().ShouldBe(cachable2.GetHashCode());
@@ -324,8 +337,8 @@ public sealed class CachableLocationTests
 			new LinePosition(3, 4));
 		Location location = Location.Create(filePath, default, lineSpan);
 
-		CachableLocation cachable1 = new(location);
-		CachableLocation cachable2 = new(location);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location);
 
 		// Act & Assert
 		(cachable1 == cachable2).ShouldBeTrue();
@@ -341,8 +354,8 @@ public sealed class CachableLocationTests
 		Location location1 = Location.Create("file1.cs", default, lineSpan);
 		Location location2 = Location.Create("file2.cs", default, lineSpan);
 
-		CachableLocation cachable1 = new(location1);
-		CachableLocation cachable2 = new(location2);
+		CachableLocation cachable1 = CachableLocation.FromLocation(location1);
+		CachableLocation cachable2 = CachableLocation.FromLocation(location2);
 
 		// Act & Assert
 		(cachable1 != cachable2).ShouldBeTrue();
@@ -359,7 +372,7 @@ public sealed class CachableLocationTests
 		Location originalLocation = Location.Create(filePath, default, originalLineSpan);
 
 		// Act
-		CachableLocation cachable = new(originalLocation);
+		CachableLocation cachable = CachableLocation.FromLocation(originalLocation);
 		Location reconstructed = cachable.ToLocation();
 
 		// Assert
@@ -375,7 +388,7 @@ public sealed class CachableLocationTests
 	[InlineData(0, 0, 0, 0)]
 	[InlineData(100, 50, 100, 75)]
 	[InlineData(1000, 0, 1500, 0)]
-	public void Constructor_WithVariousLinePositions_StoresCorrectly(int startLine, int startChar, int endLine, int endChar)
+	public void FromLocation_WithVariousLinePositions_PreservesCorrectly(int startLine, int startChar, int endLine, int endChar)
 	{
 		// Arrange
 		LinePositionSpan lineSpan = new(
@@ -384,12 +397,14 @@ public sealed class CachableLocationTests
 		Location location = Location.Create("test.cs", default, lineSpan);
 
 		// Act
-		CachableLocation cachable = new(location);
+		CachableLocation cachable = CachableLocation.FromLocation(location);
 
-		// Assert
-		cachable.StartLine.ShouldBe(startLine);
-		cachable.StartCharacter.ShouldBe(startChar);
-		cachable.EndLine.ShouldBe(endLine);
-		cachable.EndCharacter.ShouldBe(endChar);
+		// Assert - Verify by converting back
+		Location reconstructed = cachable.ToLocation();
+		FileLinePositionSpan reconstructedSpan = reconstructed.GetLineSpan();
+		reconstructedSpan.StartLinePosition.Line.ShouldBe(startLine);
+		reconstructedSpan.StartLinePosition.Character.ShouldBe(startChar);
+		reconstructedSpan.EndLinePosition.Line.ShouldBe(endLine);
+		reconstructedSpan.EndLinePosition.Character.ShouldBe(endChar);
 	}
 }

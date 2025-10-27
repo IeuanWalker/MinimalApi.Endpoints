@@ -50,7 +50,7 @@ static class HttpVerbRouteHelpers
 				noHttpVerbDescriptor.MessageFormat.ToString(),
 				noHttpVerbDescriptor.Category,
 				noHttpVerbDescriptor.DefaultSeverity,
-				configureMethod.Identifier.GetLocation().ToCachableLocation(),
+				CachableLocation.FromLocation(configureMethod.Identifier.GetLocation()),
 				typeName));
 			return null;
 		}
@@ -68,7 +68,7 @@ static class HttpVerbRouteHelpers
 						multipleHttpVerbsDescriptor.MessageFormat.ToString(),
 						multipleHttpVerbsDescriptor.Category,
 						multipleHttpVerbsDescriptor.DefaultSeverity,
-						httpVerbCall.GetLocation().ToCachableLocation(),
+						CachableLocation.FromLocation(httpVerbCall.GetLocation()),
 						memberAccess.Name.Identifier.ValueText));
 				}
 			}

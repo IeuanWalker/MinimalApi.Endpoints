@@ -1,13 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-		{
-			builder.Get("/api/items");
-   ^^^^^^^^^^^^^^^^^^^^^^^^^
-			builder.Post("/api/items");
-*/
- : (9,3)-(9,28),
+      Location: : (9,3)-(9,28),
       Message: Multiple HTTP verbs are configured in the Configure method. Only one HTTP verb should be specified per endpoint. Remove this 'Get' call or the other conflicting HTTP verb calls.,
       Severity: Error,
       Descriptor: {
@@ -20,13 +14,7 @@
       }
     },
     {
-      Location: /*
-			builder.Get("/api/items");
-			builder.Post("/api/items");
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^
-		}
-*/
- : (10,3)-(10,29),
+      Location: : (10,3)-(10,29),
       Message: Multiple HTTP verbs are configured in the Configure method. Only one HTTP verb should be specified per endpoint. Remove this 'Post' call or the other conflicting HTTP verb calls.,
       Severity: Error,
       Descriptor: {

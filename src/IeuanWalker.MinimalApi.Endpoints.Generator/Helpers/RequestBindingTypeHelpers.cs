@@ -44,7 +44,7 @@ static class RequestBindingTypeHelpers
 						multipleRequestTypeMethodsDescriptor.MessageFormat.ToString(),
 						multipleRequestTypeMethodsDescriptor.Category,
 						multipleRequestTypeMethodsDescriptor.DefaultSeverity,
-						requestTypeCall.GetLocation().ToCachableLocation(),
+						CachableLocation.FromLocation(requestTypeCall.GetLocation()),
 						memberAccess.Name.Identifier.ValueText));
 				}
 			}

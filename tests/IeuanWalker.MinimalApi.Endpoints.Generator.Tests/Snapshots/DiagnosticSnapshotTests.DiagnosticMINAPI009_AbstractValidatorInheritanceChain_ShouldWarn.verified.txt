@@ -1,26 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	// This should trigger MINAPI009 warning - inherits from AbstractValidator through inheritance chain
-	public class CreateUserRequestValidator : BaseRequestValidator<CreateUserRequest>
- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	{
-^^
-		public CreateUserRequestValidator()
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		{
-^^^
-			RuleFor(x => x.Name).NotEmpty();
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			RuleFor(x => x.Email).EmailAddress();
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		}
-^^^
-	}
-^^
-*/
- : (32,1)-(39,2),
+      Location: : (32,1)-(39,2),
       Message: The abstract validator TestNamespace.CreateUserRequestValidator, is used for the request model TestNamespace.CreateUserRequest. This validator isn't automatically registered and validation will not be applied to the endpoint. Please inherit from Validator and not AbstractValidator.,
       Severity: Warning,
       WarningLevel: 1,

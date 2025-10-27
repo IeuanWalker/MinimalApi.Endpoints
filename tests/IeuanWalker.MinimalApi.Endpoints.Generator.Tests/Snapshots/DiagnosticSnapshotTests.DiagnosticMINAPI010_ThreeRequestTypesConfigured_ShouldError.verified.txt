@@ -1,13 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-			builder.Post("/api/items");
-			builder.RequestFromBody("body");
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			builder.RequestFromQuery("query");
-*/
- : (10,3)-(10,34),
+      Location: : (10,3)-(10,34),
       Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromBody' call or the other conflicting request type method calls.,
       Severity: Error,
       Descriptor: {
@@ -20,13 +14,7 @@
       }
     },
     {
-      Location: /*
-			builder.RequestFromBody("body");
-			builder.RequestFromQuery("query");
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			builder.RequestFromRoute("route");
-*/
- : (11,3)-(11,36),
+      Location: : (11,3)-(11,36),
       Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromQuery' call or the other conflicting request type method calls.,
       Severity: Error,
       Descriptor: {
@@ -39,13 +27,7 @@
       }
     },
     {
-      Location: /*
-			builder.RequestFromQuery("query");
-			builder.RequestFromRoute("route");
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		}
-*/
- : (12,3)-(12,36),
+      Location: : (12,3)-(12,36),
       Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromRoute' call or the other conflicting request type method calls.,
       Severity: Error,
       Descriptor: {

@@ -1,13 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-			builder.Post("/api/items");
-			builder.RequestFromBody();
-   ^^^^^^^^^^^^^^^^^^^^^^^^^
-			builder.RequestFromQuery();
-*/
- : (10,3)-(10,28),
+      Location: : (10,3)-(10,28),
       Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromBody' call or the other conflicting request type method calls.,
       Severity: Error,
       Descriptor: {
@@ -20,13 +14,7 @@
       }
     },
     {
-      Location: /*
-			builder.RequestFromBody();
-			builder.RequestFromQuery();
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^
-		}
-*/
- : (11,3)-(11,29),
+      Location: : (11,3)-(11,29),
       Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromQuery' call or the other conflicting request type method calls.,
       Severity: Error,
       Descriptor: {

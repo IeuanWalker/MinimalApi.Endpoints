@@ -10,68 +10,39 @@ namespace IeuanWalker.MinimalApi.Endpoints.Generator;
 /// </summary>
 public readonly struct CachableLocation : IEquatable<CachableLocation>
 {
-	public CachableLocation(Location location)
+	readonly TextSpan _sourceSpan;
+	readonly FileLinePositionSpan _fileLineSpan;
+
+	CachableLocation(TextSpan sourceSpan, FileLinePositionSpan fileLineSpan)
 	{
-		FilePath = location.SourceTree?.FilePath ?? string.Empty;
-		StartLine = location.GetLineSpan().StartLinePosition.Line;
-		StartCharacter = location.GetLineSpan().StartLinePosition.Character;
-		EndLine = location.GetLineSpan().EndLinePosition.Line;
-		EndCharacter = location.GetLineSpan().EndLinePosition.Character;
+		_sourceSpan = sourceSpan;
+		_fileLineSpan = fileLineSpan;
 	}
 
-	public string FilePath { get; }
-	public int StartLine { get; }
-	public int StartCharacter { get; }
-	public int EndLine { get; }
-	public int EndCharacter { get; }
+	public static CachableLocation FromLocation(Location location)
+	{
+		if (location is null)
+		{
+			throw new ArgumentNullException(nameof(location));
+		}
 
-	/// <summary>
-	/// Reconstructs a Location from the stored information.
-	/// </summary>
+		return new(location.SourceSpan, location.GetLineSpan());
+	}
+
 	public Location ToLocation()
-	{
-		LinePositionSpan lineSpan = new(
-			new LinePosition(StartLine, StartCharacter),
-			new LinePosition(EndLine, EndCharacter));
-
-		return Location.Create(FilePath, default, lineSpan);
-	}
+		=> Location.Create(_fileLineSpan.Path, _sourceSpan, _fileLineSpan.Span);
 
 	public bool Equals(CachableLocation other)
-	{
-		return FilePath == other.FilePath
-			&& StartLine == other.StartLine
-			&& StartCharacter == other.StartCharacter
-			&& EndLine == other.EndLine
-			&& EndCharacter == other.EndCharacter;
-	}
+		=> _sourceSpan.Equals(other._sourceSpan)
+		&& _fileLineSpan.Equals(other._fileLineSpan);
 
-	public override bool Equals(object? obj)
-	{
-		return obj is CachableLocation other && Equals(other);
-	}
-
-	public override int GetHashCode()
-	{
-		unchecked
-		{
-			int hash = 17;
-			hash = hash * 23 + (FilePath?.GetHashCode() ?? 0);
-			hash = hash * 23 + StartLine.GetHashCode();
-			hash = hash * 23 + StartCharacter.GetHashCode();
-			hash = hash * 23 + EndLine.GetHashCode();
-			hash = hash * 23 + EndCharacter.GetHashCode();
-			return hash;
-		}
-	}
+	public override bool Equals(object obj) => obj is CachableLocation x && this.Equals(x);
 
 	public static bool operator ==(CachableLocation left, CachableLocation right)
-	{
-		return left.Equals(right);
-	}
+		=> left.Equals(right);
 
 	public static bool operator !=(CachableLocation left, CachableLocation right)
-	{
-		return !left.Equals(right);
-	}
+		=> !left.Equals(right);
+
+	public override int GetHashCode() => (37 * _sourceSpan.GetHashCode()) + _fileLineSpan.GetHashCode();
 }

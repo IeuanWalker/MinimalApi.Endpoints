@@ -95,7 +95,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		Compilation compilation = semanticModel.Compilation;
 
 		List<DiagnosticInfo> diagnostics = [];
-		CachableLocation location = typeDeclaration.GetLocation().ToCachableLocation();
+		CachableLocation location = CachableLocation.FromLocation(typeDeclaration.GetLocation());
 		string typeName = typeSymbol.ToDisplayString();
 
 		// Check if this is a validator
