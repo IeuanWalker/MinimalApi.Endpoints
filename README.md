@@ -11,6 +11,7 @@ A source generator that brings **clean, class-based endpoints** to .NET Minimal 
 ## Why Use This?
 - **🚀 Zero Runtime Overhead**: Source-generated code with no reflection
 - **🏗️ Clean Architecture**: Organized, testable endpoint classes  
+   - Nudges you towards [REPR Design Pattern (Request-Endpoint-Response)](https://deviq.com/design-patterns/repr-design-pattern) and [Vertical Slice Architecture](https://www.milanjovanovic.tech/blog/vertical-slice-architecture)
 - **🔧 Full Control**: Complete access to `RouteHandlerBuilder` and `RouteGroupBuilder` - it's just Minimal APIs underneath
 - **📁 Better Organization**: Clear project structure with endpoint grouping _(check out the example project)_
 - **🔓 No Lock-In**: Copy the generated code and remove the library anytime - you own the output
