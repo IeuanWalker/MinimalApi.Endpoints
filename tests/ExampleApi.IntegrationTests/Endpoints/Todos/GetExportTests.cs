@@ -66,7 +66,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		htmlContent.ShouldContain("<h1>Todo Export</h1>");
 		htmlContent.ShouldContain("<table>");
 
-		// Verify todo data is present
+		// Verify data is present
 		htmlContent.ShouldContain("Test Todo 1");
 		htmlContent.ShouldContain("Description 1");
 		htmlContent.ShouldContain("Test Todo 2");
@@ -86,7 +86,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		// Create todo with special characters that need HTML encoding
+		// Create item with special characters that need HTML encoding
 		Todo todoWithSpecialChars = TestHelpers.CreateTestTodo(
 			"Test <script>alert('xss')</script> & \"quotes\"",
 			"Description with & ampersand < > brackets");
@@ -132,7 +132,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		fileName.ShouldEndWith(".html");
 
 		// Extract date part and verify it's a valid format
-		string datePart = fileName.Substring(6, fileName.Length - 11); // Remove "todos-" and ".html"
+		string datePart = fileName[6..^5]; // Remove "todos-" and ".html"
 		datePart.Length.ShouldBe(19); // YYYY-MM-DD-HH-mm-ss format
 		datePart.ShouldMatch(@"^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$");
 	}
@@ -149,7 +149,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		{
 			largeTodoSet.Add(TestHelpers.CreateTestTodo($"Todo {i}", $"Description for todo {i}", i % 2 == 0));
 		}
-		todoStore.SeedData(largeTodoSet.ToArray());
+		todoStore.SeedData([.. largeTodoSet]);
 
 		// Act
 		using CancellationTokenSource cts = new(TimeSpan.FromSeconds(10)); // 10 second timeout

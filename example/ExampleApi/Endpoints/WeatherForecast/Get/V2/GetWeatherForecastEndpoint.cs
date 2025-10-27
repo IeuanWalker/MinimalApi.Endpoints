@@ -25,7 +25,7 @@ public class GetWeatherForecastEndpoint : IEndpointWithoutRequest<ResponseModel[
 	{
 		ResponseModel[] forecast = [.. Enumerable.Range(1, 5).Select(index =>
 		{
-			var tempC = Random.Shared.Next(-20, 55);
+			int tempC = Random.Shared.Next(-20, 55);
 			return new ResponseModel
 			{
 				Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),

@@ -63,10 +63,12 @@ public static class TestHelper
 			{
 				references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
 			}
+#pragma warning disable CA1031 // Do not catch general exception types
 			catch
 			{
 				// Skip if assembly can't be loaded
 			}
+#pragma warning restore CA1031 // Do not catch general exception types
 		}
 
 		// Add ASP.NET Core references
@@ -85,10 +87,12 @@ public static class TestHelper
 			{
 				references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
 			}
+#pragma warning disable CA1031 // Do not catch general exception types
 			catch
 			{
 				// Skip if assembly can't be loaded - we'll try to find it via file system
 			}
+#pragma warning restore CA1031 // Do not catch general exception types
 		}
 
 		// Add reference to the library project containing the interfaces
@@ -97,6 +101,7 @@ public static class TestHelper
 			Assembly endpointsAssembly = Assembly.Load("IeuanWalker.MinimalApi.Endpoints");
 			references.Add(MetadataReference.CreateFromFile(endpointsAssembly.Location));
 		}
+#pragma warning disable CA1031 // Do not catch general exception types
 		catch
 		{
 			// Try alternative loading method via file system
@@ -114,6 +119,7 @@ public static class TestHelper
 				}
 			}
 		}
+#pragma warning restore CA1031 // Do not catch general exception types
 
 		// Add FluentValidation reference
 		try
@@ -121,10 +127,12 @@ public static class TestHelper
 			Assembly fluentValidationAssembly = Assembly.Load("FluentValidation");
 			references.Add(MetadataReference.CreateFromFile(fluentValidationAssembly.Location));
 		}
+#pragma warning disable CA1031 // Do not catch general exception types
 		catch
 		{
 			// FluentValidation is optional for some tests
 		}
+#pragma warning restore CA1031 // Do not catch general exception types
 
 		return references;
 	}

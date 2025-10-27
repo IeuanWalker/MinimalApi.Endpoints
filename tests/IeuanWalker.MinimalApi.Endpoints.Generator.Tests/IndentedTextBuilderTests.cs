@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
 public sealed class IndentedTextBuilderTests : IDisposable
@@ -183,6 +185,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 		using (Block outerBlock = _builder.AppendBlock("namespace Test"))
 		{
 			_builder.AppendLine();
+#pragma warning disable IDE0063 // Use simple 'using' statement
 			using (Block innerBlock = _builder.AppendBlock("public class MyClass"))
 			{
 				_builder.AppendLine("public int Id { get; set; }");
@@ -192,6 +195,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 					_builder.AppendLine("// Method implementation");
 				}
 			}
+#pragma warning restore IDE0063 // Use simple 'using' statement
 		}
 
 		// Assert
@@ -213,6 +217,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 	}
 
 	[Fact]
+	[SuppressMessage("Blocker Code Smell", "S2699:Tests should include assertions", Justification = "<Pending>")]
 	public void Block_DoubleDispose_DoesNotThrow()
 	{
 		// Act & Assert - Should not throw
@@ -222,6 +227,7 @@ public sealed class IndentedTextBuilderTests : IDisposable
 	}
 
 	[Fact]
+	[SuppressMessage("Blocker Code Smell", "S2699:Tests should include assertions", Justification = "<Pending>")]
 	public void Block_DisposeWithoutBuilder_DoesNotThrow()
 	{
 		// Arrange

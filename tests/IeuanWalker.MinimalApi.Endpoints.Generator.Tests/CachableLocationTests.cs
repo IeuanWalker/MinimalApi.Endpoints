@@ -1,6 +1,5 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
-using Shouldly;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
@@ -10,7 +9,7 @@ public sealed class CachableLocationTests
 	public void FromLocation_WithValidLocation_CreatesInstance()
 	{
 		// Arrange
-		string filePath = "C:\\test\\file.cs";
+		const string filePath = "C:\\test\\file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(5, 10),
 			new LinePosition(5, 20));
@@ -62,7 +61,7 @@ public sealed class CachableLocationTests
 	public void FromLocation_WithMultiLineLocation_PreservesAllLinePositions()
 	{
 		// Arrange
-		string filePath = "/unix/path/file.cs";
+		const string filePath = "/unix/path/file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(10, 5),
 			new LinePosition(15, 30));
@@ -85,7 +84,7 @@ public sealed class CachableLocationTests
 	public void ToLocation_ReconstructsLocationWithSameLineSpan()
 	{
 		// Arrange
-		string filePath = "test.cs";
+		const string filePath = "test.cs";
 		LinePositionSpan originalLineSpan = new(
 			new LinePosition(3, 7),
 			new LinePosition(3, 15));
@@ -107,7 +106,7 @@ public sealed class CachableLocationTests
 	public void Equals_WithSameValues_ReturnsTrue()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -145,7 +144,7 @@ public sealed class CachableLocationTests
 	public void Equals_WithDifferentStartLine_ReturnsFalse()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan1 = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -166,7 +165,7 @@ public sealed class CachableLocationTests
 	public void Equals_WithDifferentStartCharacter_ReturnsFalse()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan1 = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -187,7 +186,7 @@ public sealed class CachableLocationTests
 	public void Equals_WithDifferentEndLine_ReturnsFalse()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan1 = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -208,7 +207,7 @@ public sealed class CachableLocationTests
 	public void Equals_WithDifferentEndCharacter_ReturnsFalse()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan1 = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -229,7 +228,7 @@ public sealed class CachableLocationTests
 	public void Equals_WithObject_ComparesCorrectly()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -247,7 +246,7 @@ public sealed class CachableLocationTests
 	public void Equals_WithNull_ReturnsFalse()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -255,14 +254,14 @@ public sealed class CachableLocationTests
 		CachableLocation cachable = CachableLocation.FromLocation(location);
 
 		// Act & Assert
-		cachable.Equals(null).ShouldBeFalse();
+		cachable.Equals(null!).ShouldBeFalse();
 	}
 
 	[Fact]
 	public void Equals_WithDifferentType_ReturnsFalse()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -278,7 +277,7 @@ public sealed class CachableLocationTests
 	public void GetHashCode_WithSameValues_ReturnsSameHashCode()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -331,7 +330,7 @@ public sealed class CachableLocationTests
 	public void OperatorEquals_WithEqualValues_ReturnsTrue()
 	{
 		// Arrange
-		string filePath = "file.cs";
+		const string filePath = "file.cs";
 		LinePositionSpan lineSpan = new(
 			new LinePosition(1, 2),
 			new LinePosition(3, 4));
@@ -365,7 +364,7 @@ public sealed class CachableLocationTests
 	public void RoundTrip_Location_To_CachableLocation_To_Location_PreservesData()
 	{
 		// Arrange
-		string filePath = "example.cs";
+		const string filePath = "example.cs";
 		LinePositionSpan originalLineSpan = new(
 			new LinePosition(42, 13),
 			new LinePosition(42, 26));
