@@ -17,7 +17,7 @@ A source generator that brings **clean, class-based endpoints** to .NET Minimal 
 - **🔓 No Lock-In**: Copy the generated code and remove the library anytime - you own the output
 
 ## How It Works _(see [wiki](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/How-does-it-work) for more detailed explanation)_
-1. **Create endpoint classes** implementing one of the [endpoint interfaces](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Endpoints)
+1. **Create endpoint classes** implementing one of the [endpoint interfaces](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Interfaces)
 2. **Source generator scans** your assembly at compile time
 3. **Generates extension methods** for dependency injection and route mapping
 4. **Call the extensions** in your `Program.cs`:
