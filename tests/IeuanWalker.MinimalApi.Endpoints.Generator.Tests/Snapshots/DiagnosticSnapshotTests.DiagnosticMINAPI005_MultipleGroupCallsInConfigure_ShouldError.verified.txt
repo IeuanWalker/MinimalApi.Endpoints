@@ -1,13 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-			// Call Group twice on the same builder
-			builder.Group<UserEndpointGroup>();
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			builder.Group<UserEndpointGroup>();
-*/
- : (10,3)-(10,37),
+      Location: : (10,3)-(10,37),
       Message: Multiple Group calls are configured in the Configure method. Only one Group call should be specified per endpoint. Remove this 'Group' call or the other conflicting Group calls.,
       Severity: Error,
       Descriptor: {
@@ -20,13 +14,7 @@
       }
     },
     {
-      Location: /*
-			builder.Group<UserEndpointGroup>();
-			builder.Group<UserEndpointGroup>();
-   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-			builder.Get("/api/multi/{id}");
-*/
- : (11,3)-(11,37),
+      Location: : (11,3)-(11,37),
       Message: Multiple Group calls are configured in the Configure method. Only one Group call should be specified per endpoint. Remove this 'Group' call or the other conflicting Group calls.,
       Severity: Error,
       Descriptor: {
@@ -39,24 +27,7 @@
       }
     },
     {
-      Location: /*
-
-	public class UserEndpointGroup : IEndpointGroup
- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	{
-^^
-		public static RouteGroupBuilder Configure(WebApplication app)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		{
-^^^
-			return app.MapGroup("/api/users");
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		}
-^^^
-	}
-^^
-*/
- : (24,1)-(30,2),
+      Location: : (24,1)-(30,2),
       Message: The endpoint group 'TestNamespace.UserEndpointGroup' is defined but not used by any endpoints. Remove this group or assign it to an endpoint.,
       Severity: Warning,
       WarningLevel: 1,

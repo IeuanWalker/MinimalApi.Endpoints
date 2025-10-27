@@ -1,13 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	{
-		public static RouteGroupBuilder Configure(WebApplication app)
-                                  ^^^^^^^^^
-		{
-*/
- : (25,34)-(25,43),
+      Location: : (25,34)-(25,43),
       Message: Endpoint group 'UserEndpointGroup' has no MapGroup configured in the Configure method. Exactly one MapGroup call must be specified.,
       Severity: Error,
       Descriptor: {

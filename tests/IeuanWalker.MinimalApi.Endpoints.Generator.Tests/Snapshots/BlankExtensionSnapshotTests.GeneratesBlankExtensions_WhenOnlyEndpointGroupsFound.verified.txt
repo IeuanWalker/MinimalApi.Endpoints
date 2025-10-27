@@ -1,25 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-
-public class UserEndpointGroup : IEndpointGroup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-{
-^
-	public static RouteGroupBuilder Configure(WebApplication app)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	{
-^^
-		return app.MapGroup("/api/users");
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	}
-^^
-}
-^
-
-*/
- : (4,0)-(10,1),
+      Location: : (4,0)-(10,1),
       Message: The endpoint group 'TestNamespace.UserEndpointGroup' is defined but not used by any endpoints. Remove this group or assign it to an endpoint.,
       Severity: Warning,
       WarningLevel: 1,
@@ -33,24 +15,7 @@ public class UserEndpointGroup : IEndpointGroup
       }
     },
     {
-      Location: /*
-
-public class AdminEndpointGroup : IEndpointGroup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-{
-^
-	public static RouteGroupBuilder Configure(WebApplication app)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	{
-^^
-		return app.MapGroup("/api/admin");
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	}
-^^
-}
-^
-*/
- : (12,0)-(18,1),
+      Location: : (12,0)-(18,1),
       Message: The endpoint group 'TestNamespace.AdminEndpointGroup' is defined but not used by any endpoints. Remove this group or assign it to an endpoint.,
       Severity: Warning,
       WarningLevel: 1,

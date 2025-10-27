@@ -770,7 +770,7 @@ public class EndpointGeneratorHelpersTests
 			requestBindingType,
 			disableValidation,
 			responseType,
-			Location.None,
+			CachableLocation.FromLocation(Location.None),
 			[]);
 	}
 
@@ -785,7 +785,7 @@ public class EndpointGeneratorHelpersTests
 			pattern,
 			withName,
 			withTags,
-			Location.None,
+			CachableLocation.FromLocation(Location.None),
 			[]);
 	}
 
@@ -794,7 +794,7 @@ public class EndpointGeneratorHelpersTests
 		return new ValidatorInfo(
 			typeName,
 			validatedTypeName,
-			Location.None,
+			CachableLocation.FromLocation(Location.None),
 			[]);
 	}
 

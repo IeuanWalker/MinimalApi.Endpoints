@@ -1,24 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-	// This group is defined but not used - should trigger MINAPI006 warning
-	public class UnusedGroup : IEndpointGroup
- ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-	{
-^^
-		public static RouteGroupBuilder Configure(WebApplication app)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		{
-^^^
-			return app.MapGroup("/unused");
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-		}
-^^^
-	}
-^^
-*/
- : (23,1)-(29,2),
+      Location: : (23,1)-(29,2),
       Message: The endpoint group 'TestNamespace.UnusedGroup' is defined but not used by any endpoints. Remove this group or assign it to an endpoint.,
       Severity: Warning,
       WarningLevel: 1,

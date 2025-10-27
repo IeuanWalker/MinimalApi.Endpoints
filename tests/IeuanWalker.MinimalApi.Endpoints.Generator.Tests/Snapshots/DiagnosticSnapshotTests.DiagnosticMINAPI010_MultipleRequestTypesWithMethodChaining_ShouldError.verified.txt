@@ -1,19 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-		{
-			builder
-   ^^^^^^^
-				.RequestFromForm("formData")
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-				.Put("/api/items/{id}")
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-				.RequestFromHeader("headerData")
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-				.WithName("UpdateItem");
-*/
- : (9,3)-(12,36),
+      Location: : (9,3)-(12,36),
       Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromHeader' call or the other conflicting request type method calls.,
       Severity: Error,
       Descriptor: {
@@ -26,15 +14,7 @@
       }
     },
     {
-      Location: /*
-		{
-			builder
-   ^^^^^^^
-				.RequestFromForm("formData")
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-				.Put("/api/items/{id}")
-*/
- : (9,3)-(10,32),
+      Location: : (9,3)-(10,32),
       Message: Multiple request type methods are configured in the Configure method. Only one request type method should be specified per endpoint. Remove this 'RequestFromForm' call or the other conflicting request type method calls.,
       Severity: Error,
       Descriptor: {

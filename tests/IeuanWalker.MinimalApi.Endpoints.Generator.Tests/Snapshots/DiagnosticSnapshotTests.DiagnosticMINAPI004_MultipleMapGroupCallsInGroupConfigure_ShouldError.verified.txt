@@ -1,13 +1,7 @@
 ﻿{
   Diagnostics: [
     {
-      Location: /*
-		{
-			app.MapGroup("/a");
-   ^^^^^^^^^^^^^^^^^^
-			app.MapGroup("/b");
-*/
- : (27,3)-(27,21),
+      Location: : (27,3)-(27,21),
       Message: Multiple MapGroup calls are configured in the Configure method. Only one MapGroup call should be specified per endpoint group. Remove this 'MapGroup' call or the other conflicting MapGroup calls.,
       Severity: Error,
       Descriptor: {
@@ -20,13 +14,7 @@
       }
     },
     {
-      Location: /*
-			app.MapGroup("/a");
-			app.MapGroup("/b");
-   ^^^^^^^^^^^^^^^^^^
-			return app.MapGroup("/a");
-*/
- : (28,3)-(28,21),
+      Location: : (28,3)-(28,21),
       Message: Multiple MapGroup calls are configured in the Configure method. Only one MapGroup call should be specified per endpoint group. Remove this 'MapGroup' call or the other conflicting MapGroup calls.,
       Severity: Error,
       Descriptor: {
@@ -39,13 +27,7 @@
       }
     },
     {
-      Location: /*
-			app.MapGroup("/b");
-			return app.MapGroup("/a");
-          ^^^^^^^^^^^^^^^^^^
-		}
-*/
- : (29,10)-(29,28),
+      Location: : (29,10)-(29,28),
       Message: Multiple MapGroup calls are configured in the Configure method. Only one MapGroup call should be specified per endpoint group. Remove this 'MapGroup' call or the other conflicting MapGroup calls.,
       Severity: Error,
       Descriptor: {
