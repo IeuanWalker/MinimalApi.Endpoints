@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<PackageType>Template</PackageType>
+		<PackageVersion>1.0.0</PackageVersion>
+		<PackageId>IeuanWalker.MinimalApi.Endpoints.TemplatePack</PackageId>
+		<Title>MinimalApi.Endpoints Template Pack</Title>
+		<Authors>Ieuan Walker</Authors>
+		<Description>Template pack for MinimalApi.Endpoints to quickly scaffold endpoint file sets using 'dotnet new' command line tool.</Description>
+		<PackageTags>dotnet-new;templates;aspnetcore;minimal-api;endpoints;source-generator</PackageTags>
+		<PackageProjectUrl>https://github.com/IeuanWalker/MinimalApi.Endpoints</PackageProjectUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/IeuanWalker/MinimalApi.Endpoints</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<IncludeContentInPack>true</IncludeContentInPack>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+		<ContentTargetFolders>content</ContentTargetFolders>
+		<NoWarn>$(NoWarn);NU5128</NoWarn>
+		<NoDefaultExcludes>true</NoDefaultExcludes>
+		<TargetFramework>net10.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<LocalizeTemplates>false</LocalizeTemplates>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="templates\**\*" Exclude="templates\**\bin\**;templates\**\obj\**" />
+		<Compile Remove="**\*" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+</Project>

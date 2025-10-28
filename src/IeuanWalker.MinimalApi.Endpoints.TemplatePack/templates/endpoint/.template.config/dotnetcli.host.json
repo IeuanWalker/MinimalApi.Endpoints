@@ -1,0 +1,30 @@
+{
+	"$schema": "http://json.schemastore.org/dotnetcli.host",
+	"symbolInfo": {
+		"method": {
+			"longName": "method",
+			"shortName": "m",
+			"description": "The HTTP method for the endpoint (GET, POST, PUT, DELETE, PATCH)"
+		},
+		"route": {
+			"longName": "route",
+			"shortName": "r",
+			"description": "The route path for the endpoint (e.g., /api/users/{id})"
+		},
+		"withRequest": {
+			"longName": "with-request",
+			"shortName": "req",
+			"description": "Include a request model for the endpoint"
+		},
+		"withResponse": {
+			"longName": "with-response",
+			"shortName": "res",
+			"description": "Include a response model for the endpoint"
+		},
+		"validator": {
+			"longName": "validator",
+			"shortName": "val",
+			"description": "Include a FluentValidation validator for the request model"
+		}
+	}
+}

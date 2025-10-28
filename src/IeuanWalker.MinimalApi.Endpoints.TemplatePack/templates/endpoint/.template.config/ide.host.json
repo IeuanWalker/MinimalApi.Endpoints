@@ -1,0 +1,41 @@
+{
+	"$schema": "http://json.schemastore.org/ide.host",
+	"icon": "icon.png",
+	"symbolInfo": [
+		{
+			"id": "method",
+			"name": {
+				"text": "HTTP Method"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "route",
+			"name": {
+				"text": "Route Path"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "withRequest",
+			"name": {
+				"text": "Include Request Model"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "withResponse",
+			"name": {
+				"text": "Include Response Model"
+			},
+			"isVisible": true
+		},
+		{
+			"id": "validator",
+			"name": {
+				"text": "Include FluentValidation Validator"
+			},
+			"isVisible": true
+		}
+	]
+}

@@ -1,0 +1,108 @@
+{
+	"$schema": "http://json.schemastore.org/template",
+	"author": "Ieuan Walker",
+	"classifications": [ "MinimalApi", "Endpoints", "ASP.NET Core" ],
+	"identity": "IeuanWalker.MinimalApi.Endpoints",
+	"name": "MinimalApi.Endpoints",
+	"shortName": "endpoint",
+	"tags": {
+		"language": "C#",
+		"type": "item"
+	},
+	"sourceName": "FeatureName",
+	"preferNameDirectory": false,
+	"symbols": {
+		"method": {
+			"type": "parameter",
+			"datatype": "choice",
+			"defaultValue": "GET",
+			"choices": [
+				{
+					"choice": "GET",
+					"description": "HTTP GET method"
+				},
+				{
+					"choice": "POST",
+					"description": "HTTP POST method"
+				},
+				{
+					"choice": "PUT",
+					"description": "HTTP PUT method"
+				},
+				{
+					"choice": "DELETE",
+					"description": "HTTP DELETE method"
+				},
+				{
+					"choice": "PATCH",
+					"description": "HTTP PATCH method"
+				}
+			],
+			"description": "Endpoint HTTP method",
+			"displayName": "HTTP Method"
+		},
+		"route": {
+			"type": "parameter",
+			"datatype": "string",
+			"defaultValue": "/api/route/here",
+			"replaces": "RouteToReplace",
+			"description": "Endpoint route path",
+			"displayName": "Route Path"
+		},
+		"withRequest": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "true",
+			"description": "Whether to include a request model",
+			"displayName": "Include Request Model"
+		},
+		"withResponse": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "true",
+			"description": "Whether to include a response model",
+			"displayName": "Include Response Model"
+		},
+		"validator": {
+			"type": "parameter",
+			"datatype": "bool",
+			"defaultValue": "false",
+			"description": "Whether to include FluentValidation validator",
+			"displayName": "Include FluentValidation Validator"
+		},
+		"isGet": {
+			"type": "computed",
+			"value": "(method == \"GET\")"
+		},
+		"isPost": {
+			"type": "computed",
+			"value": "(method == \"POST\")"
+		},
+		"isPut": {
+			"type": "computed",
+			"value": "(method == \"PUT\")"
+		},
+		"isDelete": {
+			"type": "computed",
+			"value": "(method == \"DELETE\")"
+		},
+		"isPatch": {
+			"type": "computed",
+			"value": "(method == \"PATCH\")"
+		}
+	},
+	"sources": [
+		{
+			"modifiers": [
+				{
+					"condition": "(!withRequest)",
+					"exclude": [ "RequestModel.cs" ]
+				},
+				{
+					"condition": "(!withResponse)",
+					"exclude": [ "ResponseModel.cs" ]
+				}
+			]
+		}
+	]
+}
