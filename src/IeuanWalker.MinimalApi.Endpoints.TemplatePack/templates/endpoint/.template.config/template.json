@@ -12,6 +12,12 @@
 	"sourceName": "FeatureName",
 	"preferNameDirectory": false,
 	"symbols": {
+		"namespace": {
+			"type": "parameter",
+			"datatype": "string",
+			"replaces": "NamespaceToReplace",
+			"description": "The namespace for the endpoint"
+		},
 		"method": {
 			"type": "parameter",
 			"datatype": "choice",

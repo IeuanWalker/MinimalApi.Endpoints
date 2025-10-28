@@ -3,6 +3,13 @@
 	"icon": "icon.png",
 	"symbolInfo": [
 		{
+			"id": "namespace",
+			"name": {
+				"text": "Namespace"
+			},
+			"isVisible": false
+		},
+		{
 			"id": "method",
 			"name": {
 				"text": "HTTP Method"
