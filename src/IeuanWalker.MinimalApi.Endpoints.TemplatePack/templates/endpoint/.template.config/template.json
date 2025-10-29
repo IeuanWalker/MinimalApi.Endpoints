@@ -11,6 +11,9 @@
 	},
 	"sourceName": "FeatureName",
 	"preferNameDirectory": false,
+	"guids": [
+		"98048C9C-BF28-46BA-A98E-63767EE5E3A8"
+	],
 	"symbols": {
 		"namespace": {
 			"type": "parameter",
@@ -109,6 +112,19 @@
 					"exclude": [ "ResponseModel.cs" ]
 				}
 			]
+		}
+	],
+	"primaryOutputs": [
+		{
+			"path": "FeatureNameEndpoint.cs"
+		},
+		{
+			"path": "RequestModel.cs",
+			"condition": "(withRequest)"
+		},
+		{
+			"path": "ResponseModel.cs",
+			"condition": "(withResponse)"
 		}
 	]
 }
