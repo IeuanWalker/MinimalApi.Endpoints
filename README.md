@@ -32,6 +32,23 @@ app.MapEndpointsFromYourAssembly();     // Maps all routes
 
 That's it! Your endpoints are now mapped with zero runtime reflection.
 
+## Visual Studio Extension
+
+We provide a **Visual Studio 2022 extension** that makes creating endpoints even easier! Install it to add an "Endpoint" item template to the **Add New Item** dialog.
+
+### Features
+- 🎯 **Interactive Wizard**: Customize endpoint generation through a guided dialog
+- 🔧 **HTTP Verb Selection**: Choose GET, POST, PUT, DELETE, or PATCH
+- 📦 **Optional Components**: Toggle request/response models
+- ✅ **Validation Support**: Auto-generate FluentValidation validators
+
+### Installation
+1. Download the `.vsix` file from the [Releases page](https://github.com/IeuanWalker/MinimalApi.Endpoints/releases)
+2. Double-click to install in Visual Studio 2022
+3. Right-click any folder → **Add** → **New Item...** → **Endpoint**
+
+📖 **[Extension Documentation →](src/IeuanWalker.MinimalApi.Endpoints.VsExtension/README.md)**
+
 ## Full access to configure your endpoints
 You have complete access to the `RouteHandlerBuilder`, so you can configure endpoints exactly like standard Minimal APIs:
 
