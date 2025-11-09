@@ -21,11 +21,17 @@ This Visual Studio extension provides item templates for creating MinimalApi.End
 
 ### Manual Installation
 
-1. Build the extension project
-2. Navigate to `src/IeuanWalker.MinimalApi.Endpoints.VsExtension/bin/Debug/net9.0-windows/`
-3. Double-click the generated `.vsix` file
+1. Build the extension project:
+   ```bash
+   cd src/IeuanWalker.MinimalApi.Endpoints.VsExtension
+   dotnet build --configuration Release
+   ```
+2. Navigate to `src/IeuanWalker.MinimalApi.Endpoints.VsExtension/bin/Release/net9.0-windows/`
+3. Double-click the generated `IeuanWalker.MinimalApi.Endpoints.VsExtension.vsix` file
 4. Follow the installation wizard
 5. Restart Visual Studio
+
+**Note**: The VSIX file is automatically generated during the build process on all platforms (Windows, Linux, macOS).
 
 ## Usage
 

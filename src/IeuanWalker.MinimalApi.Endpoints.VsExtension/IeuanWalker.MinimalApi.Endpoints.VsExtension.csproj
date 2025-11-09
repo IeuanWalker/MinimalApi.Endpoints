@@ -41,7 +41,10 @@
 
 	<ItemGroup>
 		<Compile Remove="Templates\**\*.cs" />
-		<None Include="source.extension.vsixmanifest" SubType="Designer" />
+		<None Include="source.extension.vsixmanifest">
+			<SubType>Designer</SubType>
+		</None>
+		<VSIXSourceItem Include="source.extension.vsixmanifest" />
 		<None Include="Templates\**\*.cs">
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
@@ -67,6 +70,45 @@
 	<Target Name="CreateItemTemplate" AfterTargets="Build">
 		<MakeDir Directories="$(OutputPath)ItemTemplates" />
 		<ZipDirectory SourceDirectory="$(ProjectDir)Templates\CSharp" DestinationFile="$(OutputPath)ItemTemplates\EndpointTemplate.zip" Overwrite="true" />
+	</Target>
+
+	<Target Name="CreateVsixManually" AfterTargets="CreateItemTemplate" Condition="'$(OS)' != 'Windows_NT'">
+		<!-- Create VSIX on non-Windows platforms by manually zipping the content -->
+		<PropertyGroup>
+			<VsixOutputPath>$(OutputPath)$(AssemblyName).vsix</VsixOutputPath>
+			<VsixStagingPath>$(IntermediateOutputPath)vsix\</VsixStagingPath>
+		</PropertyGroup>
+		
+		<Message Text="Creating VSIX manually for non-Windows platform..." Importance="high" />
+		
+		<!-- Clean and create staging directory -->
+		<RemoveDir Directories="$(VsixStagingPath)" />
+		<MakeDir Directories="$(VsixStagingPath)" />
+		<MakeDir Directories="$(VsixStagingPath)ItemTemplates\" />
+		
+		<!-- Copy files to staging -->
+		<Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(VsixStagingPath)" />
+		<Copy SourceFiles="$(OutputPath)$(AssemblyName).deps.json" DestinationFolder="$(VsixStagingPath)" />
+		<Copy SourceFiles="$(ProjectDir)source.extension.vsixmanifest" DestinationFiles="$(VsixStagingPath)extension.vsixmanifest" />
+		<Copy SourceFiles="$(OutputPath)ItemTemplates\EndpointTemplate.zip" DestinationFolder="$(VsixStagingPath)ItemTemplates\" />
+		<Copy SourceFiles="$(OutputPath)LICENSE.txt" DestinationFolder="$(VsixStagingPath)" />
+		<Copy SourceFiles="$(OutputPath)icon.png" DestinationFolder="$(VsixStagingPath)" />
+		
+		<!-- Create [Content_Types].xml -->
+		<WriteLinesToFile File="$(VsixStagingPath)[Content_Types].xml" Lines="&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;Types xmlns=&quot;http://schemas.openxmlformats.org/package/2006/content-types&quot;&gt;
+  &lt;Default Extension=&quot;vsixmanifest&quot; ContentType=&quot;text/xml&quot; /&gt;
+  &lt;Default Extension=&quot;dll&quot; ContentType=&quot;application/octet-stream&quot; /&gt;
+  &lt;Default Extension=&quot;json&quot; ContentType=&quot;application/json&quot; /&gt;
+  &lt;Default Extension=&quot;zip&quot; ContentType=&quot;application/zip&quot; /&gt;
+  &lt;Default Extension=&quot;txt&quot; ContentType=&quot;text/plain&quot; /&gt;
+  &lt;Default Extension=&quot;png&quot; ContentType=&quot;image/png&quot; /&gt;
+&lt;/Types&gt;" Overwrite="true" Encoding="utf-8" />
+		
+		<!-- Create the VSIX (which is just a ZIP file) -->
+		<ZipDirectory SourceDirectory="$(VsixStagingPath)" DestinationFile="$(VsixOutputPath)" Overwrite="true" />
+		
+		<Message Text="VSIX created at: $(VsixOutputPath)" Importance="high" />
 	</Target>
 
 </Project>

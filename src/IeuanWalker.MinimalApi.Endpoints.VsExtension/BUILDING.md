@@ -34,6 +34,8 @@ src/IeuanWalker.MinimalApi.Endpoints.VsExtension/bin/Release/net9.0-windows/
 
 Look for the file: `IeuanWalker.MinimalApi.Endpoints.VsExtension.vsix`
 
+**Note**: The VSIX file is created automatically on all platforms (Windows, Linux, macOS) using a custom MSBuild target that packages the extension files.
+
 ### 4. Install the Extension
 
 Double-click the `.vsix` file to install it in Visual Studio 2022.
@@ -46,6 +48,17 @@ The extension targets:
 - **Architecture**: AMD64
 
 ## Troubleshooting
+
+### VSIX File Generation
+
+The project includes a custom MSBuild target (`CreateVsixManually`) that generates the VSIX file on non-Windows platforms. On Windows, the Microsoft VSSDK.BuildTools handles VSIX creation automatically. The custom target:
+
+1. Creates a staging directory
+2. Copies all necessary files (DLL, manifest, templates, assets)
+3. Creates the `[Content_Types].xml` file required by VSIX format
+4. Zips everything into a `.vsix` file
+
+This ensures the extension can be built on any platform, though it can only be **installed and run** on Windows with Visual Studio 2022.
 
 ### Build Errors on Non-Windows Systems
 
