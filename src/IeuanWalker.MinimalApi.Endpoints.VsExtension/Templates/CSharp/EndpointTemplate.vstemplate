@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+	<TemplateData>
+		<Name>Endpoint</Name>
+		<Description>Creates a new MinimalApi.Endpoints endpoint with optional request and response models</Description>
+		<Icon>icon.png</Icon>
+		<ProjectType>CSharp</ProjectType>
+		<RequiredFrameworkVersion>9.0</RequiredFrameworkVersion>
+		<SortOrder>1000</SortOrder>
+		<TemplateID>IeuanWalker.MinimalApi.Endpoints.EndpointTemplate</TemplateID>
+		<CreateNewFolder>true</CreateNewFolder>
+		<DefaultName>Endpoint</DefaultName>
+		<ProvideDefaultName>true</ProvideDefaultName>
+	</TemplateData>
+	<TemplateContent>
+		<References />
+		<ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$Endpoint.cs">Endpoint.cs</ProjectItem>
+		<ProjectItem ReplaceParameters="true" TargetFileName="RequestModel.cs">RequestModel.cs</ProjectItem>
+		<ProjectItem ReplaceParameters="true" TargetFileName="ResponseModel.cs">ResponseModel.cs</ProjectItem>
+	</TemplateContent>
+	<WizardExtension>
+		<Assembly>IeuanWalker.MinimalApi.Endpoints.VsExtension, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</Assembly>
+		<FullClassName>IeuanWalker.MinimalApi.Endpoints.VsExtension.EndpointWizard</FullClassName>
+	</WizardExtension>
+</VSTemplate>
