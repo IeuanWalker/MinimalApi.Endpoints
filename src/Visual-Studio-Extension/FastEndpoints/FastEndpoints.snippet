@@ -1,0 +1,755 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<CodeSnippets xmlns="http://schemas.microsoft.com/VisualStudio/2005/CodeSnippet">
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint without request</Title>
+            <Description>scaffolds an endpoint without a request nor response dto</Description>
+            <Shortcut>epnoreq</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>epName</ID>
+                    <ToolTip>Enter a name for your endpoint...</ToolTip>
+                    <Default>My</Default>
+                </Literal>
+                <Literal>
+                    <ID>verb</ID>
+                    <ToolTip>Enter the http verb...</ToolTip>
+                    <Default>Get</Default>
+                </Literal>
+                <Literal>
+                    <ID>route</ID>
+                    <ToolTip>Enter the route pattern...</ToolTip>
+                    <Default>route-pattern</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $epName$Endpoint : EndpointWithoutRequest
+{
+    public override void Configure()
+    {
+        $verb$("$route$");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint with response only</Title>
+            <Description>scaffolds an endpoint without a request dto but with a response dto</Description>
+            <Shortcut>epres</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>epName</ID>
+                    <ToolTip>Enter a name for your endpoint...</ToolTip>
+                    <Default>My</Default>
+                </Literal>
+                <Literal>
+                    <ID>verb</ID>
+                    <ToolTip>Enter the http verb...</ToolTip>
+                    <Default>Get</Default>
+                </Literal>
+                <Literal>
+                    <ID>route</ID>
+                    <ToolTip>Enter the route pattern...</ToolTip>
+                    <Default>route-pattern</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $epName$Response
+{
+
+}
+
+sealed class $epName$Endpoint : EndpointWithoutRequest<$epName$Response>
+{
+    public override void Configure()
+    {
+        $verb$("$route$");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync(CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint with request only</Title>
+            <Description>scaffolds an endpoint with only a request dto</Description>
+            <Shortcut>epreq</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>epName</ID>
+                    <ToolTip>Enter a name for your endpoint...</ToolTip>
+                    <Default>My</Default>
+                </Literal>                
+                <Literal>
+                    <ID>verb</ID>
+                    <ToolTip>Enter the http verb...</ToolTip>
+                    <Default>Get</Default>
+                </Literal>
+                <Literal>
+                    <ID>route</ID>
+                    <ToolTip>Enter the route pattern...</ToolTip>
+                    <Default>route-pattern</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $epName$Request
+{
+
+}
+
+sealed class $epName$Endpoint : Endpoint<$epName$Request>
+{
+    public override void Configure()
+    {
+        $verb$("$route$");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync($epName$Request r, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint with request &amp; response</Title>
+            <Description>scaffolds an endpoint with request and response dtos</Description>
+            <Shortcut>epreqres</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>epName</ID>
+                    <ToolTip>Enter a name for your endpoint...</ToolTip>
+                    <Default>My</Default>
+                </Literal>                
+                <Literal>
+                    <ID>verb</ID>
+                    <ToolTip>Enter the http verb...</ToolTip>
+                    <Default>Get</Default>
+                </Literal>
+                <Literal>
+                    <ID>route</ID>
+                    <ToolTip>Enter the route pattern...</ToolTip>
+                    <Default>route-pattern</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $epName$Request
+{
+
+}
+
+sealed class $epName$Response
+{
+
+}
+
+sealed class $epName$Endpoint : Endpoint<$epName$Request, $epName$Response>
+{
+    public override void Configure()
+    {
+        $verb$("$route$");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync($epName$Request r, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint validator</Title>
+            <Description>scaffolds an endpoint validator for a given request dto</Description>
+            <Shortcut>epval</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for your validator...</ToolTip>
+                    <Default>My</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$Validator : Validator<$name$Request>
+{
+    public $name$Validator()
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint mapper</Title>
+            <Description>scaffolds an endpoint mapper class</Description>
+            <Shortcut>epmap</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>epName</ID>
+                    <ToolTip>Enter a name for your mapper...</ToolTip>
+                    <Default>My</Default>
+                </Literal>                
+                <Literal>
+                    <ID>entity</ID>
+                    <ToolTip>Enter the type of the entity being mapped...</ToolTip>
+                    <Default>Entity</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $epName$Mapper : Mapper<$epName$Request, $epName$Response, $entity$>
+{
+    public override $entity$ ToEntity($epName$Request r) => new()
+    {
+        $end$
+    };
+
+    public override $epName$Response FromEntity($entity$ e) => new()
+    {
+        
+    };
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint vertical slice</Title>
+            <Description>scaffolds the complete set of classes for a full vertical slice</Description>
+            <Shortcut>epfull</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>epName</ID>
+                    <ToolTip>Enter a name for your endpoint...</ToolTip>
+                    <Default>My</Default>
+                </Literal>
+                <Literal>
+                    <ID>verb</ID>
+                    <ToolTip>Enter the http verb...</ToolTip>
+                    <Default>Get</Default>
+                </Literal>
+                <Literal>
+                    <ID>route</ID>
+                    <ToolTip>Enter the route pattern...</ToolTip>
+                    <Default>route-pattern</Default>
+                </Literal>
+                <Literal>
+                    <ID>entity</ID>
+                    <ToolTip>Enter the type of the entity being mapped...</ToolTip>
+                    <Default>Entity</Default>
+                </Literal>                
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $epName$Endpoint : Endpoint<$epName$Request, $epName$Response, $epName$Mapper>
+{
+    public override void Configure()
+    {
+        $verb$("$route$");
+        AllowAnonymous();
+    }
+
+    public override async Task HandleAsync($epName$Request r, CancellationToken c)
+    {
+        $end$
+    }
+}
+
+sealed class $epName$Request
+{
+
+}
+
+sealed class $epName$Response
+{
+
+}
+
+sealed class $epName$Validator : Validator<$epName$Request>
+{
+    public $epName$Validator()
+    {
+
+    }
+}
+
+sealed class $epName$Mapper: Mapper<$epName$Request, $epName$Response, $entity$>
+{
+    public override $entity$ ToEntity($epName$Request r) => new()
+    {
+
+    };
+
+    public override $epName$Response FromEntity($entity$ e) => new()
+    {
+
+    };
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint request &amp; response dtos</Title>
+            <Description>scaffolds a request &amp; response dto for an endpoint</Description>
+            <Shortcut>epdto</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the DTOs...</ToolTip>
+                    <Default>My</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$Request
+{
+    $end$
+}
+
+sealed class $name$Response
+{
+
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint data</Title>
+            <Description>scaffolds a static data class for an endpoint</Description>
+            <Shortcut>epdat</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the data class...</ToolTip>
+                    <Default>My</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$Data
+{
+    $end$
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>endpoint summary</Title>
+            <Description>scaffolds a summary class for a given endpoint and request dto</Description>
+            <Shortcut>epsum</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the summary class...</ToolTip>
+                    <Default>My</Default>
+                </Literal>                
+                <Literal>
+                    <ID>summaryText</ID>
+                    <ToolTip>Enter the summary text...</ToolTip>
+                    <Default>Summary text goes here...</Default>
+                </Literal>
+                <Literal>
+                    <ID>descriptionText</ID>
+                    <ToolTip>Enter the description text...</ToolTip>
+                    <Default>Description text goes here...</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$Summary : Summary<$name$Endpoint, $name$Request>
+{
+    public $name$Summary()
+    {
+        Summary = "$summaryText$";
+        Description = "$descriptionText$";
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>event handler</Title>
+            <Description>scaffolds a event model and event handler combo</Description>
+            <Shortcut>evnt</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the event...</ToolTip>
+                    <Default>MyEvent</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$ : IEvent
+{
+
+}
+
+sealed class $name$Handler : IEventHandler<$name$>
+{
+    public Task HandleAsync($name$ e, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>command handler</Title>
+            <Description>scaffolds a command model and command handler combo</Description>
+            <Shortcut>cmd</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the command...</ToolTip>
+                    <Default>MyCommand</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$ : ICommand
+{
+
+}
+
+sealed class $name$Handler : ICommandHandler<$name$>
+{
+    public Task ExecuteAsync($name$ cmd, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>command handler with result</Title>
+            <Description>scaffolds a command model and command handler combo with result</Description>
+            <Shortcut>cmdres</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the command...</ToolTip>
+                    <Default>MyCommand</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$ : ICommand<$name$Result>
+{
+
+}
+
+sealed class $name$Result
+{
+
+}
+
+sealed class $name$Handler : ICommandHandler<$name$, $name$Result>
+{
+    public Task<$name$Result> ExecuteAsync($name$ cmd, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>pre-processor</Title>
+            <Description>scaffolds a pre-processor</Description>
+            <Shortcut>preproc</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the processor...</ToolTip>
+                    <Default>Processor</Default>
+                </Literal>
+                <Literal>
+                    <ID>req</ID>
+                    <ToolTip>Enter the name of the request DTO...</ToolTip>
+                    <Default>Request</Default>
+                </Literal>                
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$ : IPreProcessor<$req$Request>
+{
+    public Task PreProcessAsync(IPreProcessorContext<$req$Request> ctx, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>post-processor</Title>
+            <Description>scaffolds a post-processor</Description>
+            <Shortcut>postproc</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the processor...</ToolTip>
+                    <Default>Processor</Default>
+                </Literal>
+                <Literal>
+                    <ID>dto</ID>
+                    <ToolTip>Enter the name of the request/response DTO...</ToolTip>
+                    <Default>Request</Default>
+                </Literal>              
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$ : IPostProcessor<$dto$Request, $dto$Response>
+{
+    public Task PostProcessAsync(IPostProcessorContext<$dto$Request, $dto$Response> ctx, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>global post-processor</Title>
+            <Description>scaffolds a global post-processor</Description>
+            <Shortcut>postproc_g</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the processor...</ToolTip>
+                    <Default>Processor</Default>
+                </Literal>                
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$ : IGlobalPostProcessor
+{
+    public Task PostProcessAsync(IPostProcessorContext ctx, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>global pre-processor</Title>
+            <Description>scaffolds a global pre-processor</Description>
+            <Shortcut>preproc_g</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the processor...</ToolTip>
+                    <Default>Processor</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[sealed class $name$ : IGlobalPreProcessor
+{
+    public Task PreProcessAsync(IPreProcessorContext ctx, CancellationToken c)
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>test fixture</Title>
+            <Description>scaffolds a test class fixture</Description>
+            <Shortcut>tstfixture</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter a name for the test fixture...</ToolTip>
+                    <Default>App</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Tests;
+
+public class $name$ : AppFixture<Program>
+{
+    protected override Task SetupAsync()
+        => Task.CompletedTask;
+
+    protected override void ConfigureApp(IWebHostBuilder a) { }
+
+    protected override void ConfigureServices(IServiceCollection s)
+    {
+        $end$
+    }
+
+    protected override Task TearDownAsync()
+        => Task.CompletedTask;
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>test class</Title>
+            <Description>scaffolds a test class</Description>
+            <Shortcut>tstclass</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>name</ID>
+                    <ToolTip>Enter the name of the test class...</ToolTip>
+                    <Default>My</Default>
+                </Literal>
+                <Literal>
+                    <ID>fixture</ID>
+                    <ToolTip>Enter the name of the test fixture...</ToolTip>
+                    <Default>App</Default>
+                </Literal>
+                <Literal>
+                    <ID>test_name</ID>
+                    <ToolTip>Enter a name for the test...</ToolTip>
+                    <Default>Name_Of_The_Test</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[namespace Tests;
+
+public class $name$Tests($fixture$ App) : TestBase<$fixture$>
+{
+    [Fact]
+    public async Task $test_name$()
+    {
+        $end$
+    }
+}]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>
+
+    <CodeSnippet Format="1.0.0">
+        <Header>
+            <Title>test method</Title>
+            <Description>scaffolds a test method</Description>
+            <Shortcut>tstmethod</Shortcut>
+            <Author>FastEndpoints</Author>
+        </Header>
+        <Snippet>
+            <Declarations>
+                <Literal>
+                    <ID>test_name</ID>
+                    <ToolTip>Enter a name for the test...</ToolTip>
+                    <Default>Name_Of_The_Test</Default>
+                </Literal>
+            </Declarations>
+            <Code Language="csharp">
+                <![CDATA[    [Fact]
+    public async Task $test_name$()
+    {
+        $end$
+    }]]>
+            </Code>
+        </Snippet>
+    </CodeSnippet>    
+    
+</CodeSnippets>
