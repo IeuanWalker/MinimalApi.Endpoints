@@ -15,6 +15,9 @@
 		<StartArguments>/rootsuffix Exp</StartArguments>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+		<!-- Suppress NU1701 warning for Visual Studio SDK packages that target .NET Framework -->
+		<!-- These packages are designed to work with .NET 9 and are tested to be compatible -->
+		<NoWarn>$(NoWarn);NU1701</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup>

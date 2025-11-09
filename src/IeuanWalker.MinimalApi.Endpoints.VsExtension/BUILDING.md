@@ -65,6 +65,18 @@ If package restore fails:
 dotnet restore src/IeuanWalker.MinimalApi.Endpoints.VsExtension/IeuanWalker.MinimalApi.Endpoints.VsExtension.csproj
 ```
 
+### NU1701 Warning About .NET Framework Compatibility
+
+The warning `NU1701: Package 'Microsoft.VisualStudio.TemplateWizardInterface' was restored using '.NETFramework...' instead of the project target framework 'net9.0-windows'` has been intentionally suppressed in the project file.
+
+**Why this is safe:**
+- Visual Studio SDK packages (`Microsoft.VisualStudio.TemplateWizardInterface`, `EnvDTE`) still target .NET Framework
+- These packages are designed to work with modern .NET and are tested by Microsoft for compatibility
+- Visual Studio extensions load these packages in the VS process, which handles the framework bridging
+- This is a standard practice for VS extension development
+
+The warning is suppressed using `<NoWarn>$(NoWarn);NU1701</NoWarn>` in the project file.
+
 ## Development
 
 ### Project Structure
