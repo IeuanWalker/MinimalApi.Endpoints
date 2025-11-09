@@ -5,8 +5,8 @@ namespace IeuanWalker.MinimalApi.Endpoints.VsExtension;
 
 public class EndpointWizard : IWizard
 {
-	private WizardForm? _wizardForm;
-	private bool _shouldAddProjectItem = true;
+	WizardForm? _wizardForm;
+	bool _shouldAddProjectItem = true;
 
 	public void BeforeOpeningFile(ProjectItem projectItem)
 	{

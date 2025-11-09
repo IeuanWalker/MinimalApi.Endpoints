@@ -4,10 +4,8 @@
   </Folder>
   <Folder Name="/scr/">
     <Project Path="src/IeuanWalker.MinimalApi.Endpoints.Generator/IeuanWalker.MinimalApi.Endpoints.Generator.csproj" />
-    <Project Path="src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj" />
-  </Folder>
-  <Folder Name="/src/">
     <Project Path="src/IeuanWalker.MinimalApi.Endpoints.VsExtension/IeuanWalker.MinimalApi.Endpoints.VsExtension.csproj" />
+    <Project Path="src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ExampleApi.IntegrationTests/ExampleApi.IntegrationTests.csproj" />

@@ -3,21 +3,21 @@ namespace IeuanWalker.MinimalApi.Endpoints.VsExtension;
 #pragma warning disable CA2213 // Disposable fields should be disposed - Windows Forms designer handles disposal
 public partial class WizardForm : Form
 {
-	private ComboBox httpVerbComboBox = null!;
-	private CheckBox withRequestCheckBox = null!;
-	private CheckBox withResponseCheckBox = null!;
-	private CheckBox includeValidationCheckBox = null!;
-	private TextBox routeTextBox = null!;
-	private Button okButton = null!;
-	private Button cancelButton = null!;
-	private Label httpVerbLabel = null!;
-	private Label routeLabel = null!;
+	ComboBox _httpVerbComboBox = null!;
+	CheckBox _withRequestCheckBox = null!;
+	CheckBox _withResponseCheckBox = null!;
+	CheckBox _includeValidationCheckBox = null!;
+	TextBox _routeTextBox = null!;
+	Button _okButton = null!;
+	Button _cancelButton = null!;
+	Label _httpVerbLabel = null!;
+	Label _routeLabel = null!;
 
-	public string SelectedHttpVerb => httpVerbComboBox.SelectedItem?.ToString() ?? "Get";
-	public bool WithRequest => withRequestCheckBox.Checked;
-	public bool WithResponse => withResponseCheckBox.Checked;
-	public bool IncludeValidation => includeValidationCheckBox.Checked;
-	public string Route => routeTextBox.Text;
+	public string SelectedHttpVerb => _httpVerbComboBox.SelectedItem?.ToString() ?? "Get";
+	public bool WithRequest => _withRequestCheckBox.Checked;
+	public bool WithResponse => _withResponseCheckBox.Checked;
+	public bool IncludeValidation => _includeValidationCheckBox.Checked;
+	public string Route => _routeTextBox.Text;
 
 	public WizardForm()
 	{
@@ -25,170 +25,170 @@ public partial class WizardForm : Form
 		SetupEventHandlers();
 	}
 
-	private void InitializeComponent()
+	void InitializeComponent()
 	{
-		this.httpVerbLabel = new Label();
-		this.httpVerbComboBox = new ComboBox();
-		this.withRequestCheckBox = new CheckBox();
-		this.withResponseCheckBox = new CheckBox();
-		this.includeValidationCheckBox = new CheckBox();
-		this.routeLabel = new Label();
-		this.routeTextBox = new TextBox();
-		this.okButton = new Button();
-		this.cancelButton = new Button();
-		this.SuspendLayout();
+		_httpVerbLabel = new Label();
+		_httpVerbComboBox = new ComboBox();
+		_withRequestCheckBox = new CheckBox();
+		_withResponseCheckBox = new CheckBox();
+		_includeValidationCheckBox = new CheckBox();
+		_routeLabel = new Label();
+		_routeTextBox = new TextBox();
+		_okButton = new Button();
+		_cancelButton = new Button();
+		SuspendLayout();
 
 		// httpVerbLabel
-		this.httpVerbLabel.AutoSize = true;
-		this.httpVerbLabel.Location = new System.Drawing.Point(20, 20);
-		this.httpVerbLabel.Name = "httpVerbLabel";
-		this.httpVerbLabel.Size = new System.Drawing.Size(70, 15);
-		this.httpVerbLabel.TabIndex = 0;
-		this.httpVerbLabel.Text = "HTTP Verb:";
+		_httpVerbLabel.AutoSize = true;
+		_httpVerbLabel.Location = new Point(20, 20);
+		_httpVerbLabel.Name = "httpVerbLabel";
+		_httpVerbLabel.Size = new Size(70, 15);
+		_httpVerbLabel.TabIndex = 0;
+		_httpVerbLabel.Text = "HTTP Verb:";
 
 		// httpVerbComboBox
-		this.httpVerbComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-		this.httpVerbComboBox.FormattingEnabled = true;
-		this.httpVerbComboBox.Items.AddRange(new object[] { "Get", "Post", "Put", "Delete", "Patch" });
-		this.httpVerbComboBox.Location = new System.Drawing.Point(20, 40);
-		this.httpVerbComboBox.Name = "httpVerbComboBox";
-		this.httpVerbComboBox.Size = new System.Drawing.Size(350, 23);
-		this.httpVerbComboBox.TabIndex = 1;
-		this.httpVerbComboBox.SelectedIndex = 0;
+		_httpVerbComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+		_httpVerbComboBox.FormattingEnabled = true;
+		_httpVerbComboBox.Items.AddRange(["Get", "Post", "Put", "Delete", "Patch"]);
+		_httpVerbComboBox.Location = new Point(20, 40);
+		_httpVerbComboBox.Name = "httpVerbComboBox";
+		_httpVerbComboBox.Size = new Size(350, 23);
+		_httpVerbComboBox.TabIndex = 1;
+		_httpVerbComboBox.SelectedIndex = 0;
 
 		// withRequestCheckBox
-		this.withRequestCheckBox.AutoSize = true;
-		this.withRequestCheckBox.Checked = true;
-		this.withRequestCheckBox.CheckState = CheckState.Checked;
-		this.withRequestCheckBox.Location = new System.Drawing.Point(20, 80);
-		this.withRequestCheckBox.Name = "withRequestCheckBox";
-		this.withRequestCheckBox.Size = new System.Drawing.Size(120, 19);
-		this.withRequestCheckBox.TabIndex = 2;
-		this.withRequestCheckBox.Text = "Include Request";
-		this.withRequestCheckBox.UseVisualStyleBackColor = true;
+		_withRequestCheckBox.AutoSize = true;
+		_withRequestCheckBox.Checked = true;
+		_withRequestCheckBox.CheckState = CheckState.Checked;
+		_withRequestCheckBox.Location = new Point(20, 80);
+		_withRequestCheckBox.Name = "withRequestCheckBox";
+		_withRequestCheckBox.Size = new Size(120, 19);
+		_withRequestCheckBox.TabIndex = 2;
+		_withRequestCheckBox.Text = "Include Request";
+		_withRequestCheckBox.UseVisualStyleBackColor = true;
 
 		// withResponseCheckBox
-		this.withResponseCheckBox.AutoSize = true;
-		this.withResponseCheckBox.Checked = true;
-		this.withResponseCheckBox.CheckState = CheckState.Checked;
-		this.withResponseCheckBox.Location = new System.Drawing.Point(20, 110);
-		this.withResponseCheckBox.Name = "withResponseCheckBox";
-		this.withResponseCheckBox.Size = new System.Drawing.Size(125, 19);
-		this.withResponseCheckBox.TabIndex = 3;
-		this.withResponseCheckBox.Text = "Include Response";
-		this.withResponseCheckBox.UseVisualStyleBackColor = true;
+		_withResponseCheckBox.AutoSize = true;
+		_withResponseCheckBox.Checked = true;
+		_withResponseCheckBox.CheckState = CheckState.Checked;
+		_withResponseCheckBox.Location = new Point(20, 110);
+		_withResponseCheckBox.Name = "withResponseCheckBox";
+		_withResponseCheckBox.Size = new Size(125, 19);
+		_withResponseCheckBox.TabIndex = 3;
+		_withResponseCheckBox.Text = "Include Response";
+		_withResponseCheckBox.UseVisualStyleBackColor = true;
 
 		// includeValidationCheckBox
-		this.includeValidationCheckBox.AutoSize = true;
-		this.includeValidationCheckBox.Checked = true;
-		this.includeValidationCheckBox.CheckState = CheckState.Checked;
-		this.includeValidationCheckBox.Location = new System.Drawing.Point(40, 140);
-		this.includeValidationCheckBox.Name = "includeValidationCheckBox";
-		this.includeValidationCheckBox.Size = new System.Drawing.Size(200, 19);
-		this.includeValidationCheckBox.TabIndex = 4;
-		this.includeValidationCheckBox.Text = "Include Validation (FluentValidation)";
-		this.includeValidationCheckBox.UseVisualStyleBackColor = true;
+		_includeValidationCheckBox.AutoSize = true;
+		_includeValidationCheckBox.Checked = true;
+		_includeValidationCheckBox.CheckState = CheckState.Checked;
+		_includeValidationCheckBox.Location = new Point(40, 140);
+		_includeValidationCheckBox.Name = "includeValidationCheckBox";
+		_includeValidationCheckBox.Size = new Size(200, 19);
+		_includeValidationCheckBox.TabIndex = 4;
+		_includeValidationCheckBox.Text = "Include Validation (FluentValidation)";
+		_includeValidationCheckBox.UseVisualStyleBackColor = true;
 
 		// routeLabel
-		this.routeLabel.AutoSize = true;
-		this.routeLabel.Location = new System.Drawing.Point(20, 170);
-		this.routeLabel.Name = "routeLabel";
-		this.routeLabel.Size = new System.Drawing.Size(40, 15);
-		this.routeLabel.TabIndex = 5;
-		this.routeLabel.Text = "Route:";
+		_routeLabel.AutoSize = true;
+		_routeLabel.Location = new Point(20, 170);
+		_routeLabel.Name = "routeLabel";
+		_routeLabel.Size = new Size(40, 15);
+		_routeLabel.TabIndex = 5;
+		_routeLabel.Text = "Route:";
 
 		// routeTextBox
-		this.routeTextBox.Location = new System.Drawing.Point(20, 190);
-		this.routeTextBox.Name = "routeTextBox";
-		this.routeTextBox.Size = new System.Drawing.Size(350, 23);
-		this.routeTextBox.TabIndex = 6;
-		this.routeTextBox.Text = "/api/endpoint";
+		_routeTextBox.Location = new Point(20, 190);
+		_routeTextBox.Name = "routeTextBox";
+		_routeTextBox.Size = new Size(350, 23);
+		_routeTextBox.TabIndex = 6;
+		_routeTextBox.Text = "/api/endpoint";
 
 		// okButton
-		this.okButton.Location = new System.Drawing.Point(214, 230);
-		this.okButton.Name = "okButton";
-		this.okButton.Size = new System.Drawing.Size(75, 30);
-		this.okButton.TabIndex = 7;
-		this.okButton.Text = "OK";
-		this.okButton.UseVisualStyleBackColor = true;
-		this.okButton.Click += new EventHandler(this.OkButton_Click);
+		_okButton.Location = new Point(214, 230);
+		_okButton.Name = "okButton";
+		_okButton.Size = new Size(75, 30);
+		_okButton.TabIndex = 7;
+		_okButton.Text = "OK";
+		_okButton.UseVisualStyleBackColor = true;
+		_okButton.Click += OkButton_Click;
 
 		// cancelButton
-		this.cancelButton.DialogResult = DialogResult.Cancel;
-		this.cancelButton.Location = new System.Drawing.Point(295, 230);
-		this.cancelButton.Name = "cancelButton";
-		this.cancelButton.Size = new System.Drawing.Size(75, 30);
-		this.cancelButton.TabIndex = 8;
-		this.cancelButton.Text = "Cancel";
-		this.cancelButton.UseVisualStyleBackColor = true;
-		this.cancelButton.Click += new EventHandler(this.CancelButton_Click);
+		_cancelButton.DialogResult = DialogResult.Cancel;
+		_cancelButton.Location = new Point(295, 230);
+		_cancelButton.Name = "cancelButton";
+		_cancelButton.Size = new Size(75, 30);
+		_cancelButton.TabIndex = 8;
+		_cancelButton.Text = "Cancel";
+		_cancelButton.UseVisualStyleBackColor = true;
+		_cancelButton.Click += CancelButton_Click;
 
 		// WizardForm
-		this.AcceptButton = this.okButton;
-		this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-		this.AutoScaleMode = AutoScaleMode.Font;
-		this.CancelButton = this.cancelButton;
-		this.ClientSize = new System.Drawing.Size(390, 280);
-		this.Controls.Add(this.cancelButton);
-		this.Controls.Add(this.okButton);
-		this.Controls.Add(this.routeTextBox);
-		this.Controls.Add(this.routeLabel);
-		this.Controls.Add(this.includeValidationCheckBox);
-		this.Controls.Add(this.withResponseCheckBox);
-		this.Controls.Add(this.withRequestCheckBox);
-		this.Controls.Add(this.httpVerbComboBox);
-		this.Controls.Add(this.httpVerbLabel);
-		this.FormBorderStyle = FormBorderStyle.FixedDialog;
-		this.MaximizeBox = false;
-		this.MinimizeBox = false;
-		this.Name = "WizardForm";
-		this.StartPosition = FormStartPosition.CenterScreen;
-		this.Text = "Create Endpoint";
-		this.ResumeLayout(false);
-		this.PerformLayout();
+		AcceptButton = _okButton;
+		AutoScaleDimensions = new SizeF(7F, 15F);
+		AutoScaleMode = AutoScaleMode.Font;
+		CancelButton = _cancelButton;
+		ClientSize = new Size(390, 280);
+		Controls.Add(_cancelButton);
+		Controls.Add(_okButton);
+		Controls.Add(_routeTextBox);
+		Controls.Add(_routeLabel);
+		Controls.Add(_includeValidationCheckBox);
+		Controls.Add(_withResponseCheckBox);
+		Controls.Add(_withRequestCheckBox);
+		Controls.Add(_httpVerbComboBox);
+		Controls.Add(_httpVerbLabel);
+		FormBorderStyle = FormBorderStyle.FixedDialog;
+		MaximizeBox = false;
+		MinimizeBox = false;
+		Name = "WizardForm";
+		StartPosition = FormStartPosition.CenterScreen;
+		Text = "Create Endpoint";
+		ResumeLayout(false);
+		PerformLayout();
 	}
 
-	private void SetupEventHandlers()
+	void SetupEventHandlers()
 	{
-		withRequestCheckBox.CheckedChanged += WithRequestCheckBox_CheckedChanged;
-		withResponseCheckBox.CheckedChanged += WithResponseCheckBox_CheckedChanged;
+		_withRequestCheckBox.CheckedChanged += WithRequestCheckBox_CheckedChanged;
+		_withResponseCheckBox.CheckedChanged += WithResponseCheckBox_CheckedChanged;
 	}
 
-	private void WithRequestCheckBox_CheckedChanged(object? sender, EventArgs e)
+	void WithRequestCheckBox_CheckedChanged(object? sender, EventArgs e)
 	{
 		// Only enable validation checkbox if request is included
-		includeValidationCheckBox.Enabled = withRequestCheckBox.Checked;
-		if (!withRequestCheckBox.Checked)
+		_includeValidationCheckBox.Enabled = _withRequestCheckBox.Checked;
+		if (!_withRequestCheckBox.Checked)
 		{
-			includeValidationCheckBox.Checked = false;
+			_includeValidationCheckBox.Checked = false;
 		}
 	}
 
-	private void WithResponseCheckBox_CheckedChanged(object? sender, EventArgs e)
+	void WithResponseCheckBox_CheckedChanged(object? sender, EventArgs e)
 	{
 		// If response is checked and includeValidation wasn't explicitly unchecked, check it
-		if (withResponseCheckBox.Checked && withRequestCheckBox.Checked)
+		if (_withResponseCheckBox.Checked && _withRequestCheckBox.Checked)
 		{
-			includeValidationCheckBox.Enabled = true;
+			_includeValidationCheckBox.Enabled = true;
 		}
 	}
 
-	private void OkButton_Click(object? sender, EventArgs e)
+	void OkButton_Click(object? sender, EventArgs e)
 	{
-		if (string.IsNullOrWhiteSpace(routeTextBox.Text))
+		if (string.IsNullOrWhiteSpace(_routeTextBox.Text))
 		{
 			MessageBox.Show("Please enter a route.", "Validation Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
 			return;
 		}
 
-		this.DialogResult = DialogResult.OK;
-		this.Close();
+		DialogResult = DialogResult.OK;
+		Close();
 	}
 
-	private void CancelButton_Click(object? sender, EventArgs e)
+	void CancelButton_Click(object? sender, EventArgs e)
 	{
-		this.DialogResult = DialogResult.Cancel;
-		this.Close();
+		DialogResult = DialogResult.Cancel;
+		Close();
 	}
 }
 #pragma warning restore CA2213 // Disposable fields should be disposed
