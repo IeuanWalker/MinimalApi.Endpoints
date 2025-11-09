@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+  <TemplateData>
+    <DefaultName>Endpoint.cs</DefaultName>
+    <Name>Endpoint</Name>
+    <Description>Creates a new Minimal API endpoint with request and response models for the MinimalApi.Endpoints library.</Description>
+    <ProjectType>CSharp</ProjectType>
+    <TemplateGroupID>AspNetCore</TemplateGroupID>
+    <SortOrder>10</SortOrder>
+    <Icon>zicon.ico</Icon>
+    <PromptForSaveOnCreation>true</PromptForSaveOnCreation>
+  </TemplateData>
+  <TemplateContent>
+    <References />
+    <CustomParameters>
+      <CustomParameter Name="$httpVerb$" Value="Get" />
+      <CustomParameter Name="$withRequest$" Value="true" />
+      <CustomParameter Name="$withResponse$" Value="true" />
+      <CustomParameter Name="$includeValidation$" Value="true" />
+    </CustomParameters>
+    <ProjectItem ReplaceParameters="true" TargetFileName="$fileinputname$.cs">Endpoint.cs</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="RequestModel.cs">RequestModel.cs</ProjectItem>
+    <ProjectItem ReplaceParameters="true" TargetFileName="ResponseModel.cs">ResponseModel.cs</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

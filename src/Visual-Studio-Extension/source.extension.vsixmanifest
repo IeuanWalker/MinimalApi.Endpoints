@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
     <Metadata>
-        <Identity Id="FastEndpoints" Version="1.6.0" Language="en-US" Publisher="Dĵ ΝιΓΞΗΛψΚ" />
-        <DisplayName>FastEndpoints</DisplayName>
-        <Description xml:space="preserve">Adds a 'new item' template to Visual Studio 'new file' dialog as well as some useful code snippets for easily adding new vertical slice feature file sets and quickly scaffolding different classes for rapid endpoint creation with FastEndpoints.</Description>
-        <MoreInfo>https://fast-endpoints.com</MoreInfo>
+        <Identity Id="MinimalApiEndpoints" Version="1.0.0" Language="en-US" Publisher="Ieuan Walker" />
+        <DisplayName>MinimalApi.Endpoints</DisplayName>
+        <Description xml:space="preserve">Adds a 'new item' template to Visual Studio 'new file' dialog for easily creating endpoint classes for ASP.NET Core Minimal APIs using the MinimalApi.Endpoints library.</Description>
+        <MoreInfo>https://github.com/IeuanWalker/MinimalApi.Endpoints</MoreInfo>
         <License>LICENSE</License>
         <Icon>icon.png</Icon>
     </Metadata>
@@ -21,7 +21,7 @@
     </Dependencies>
     <Assets>
         <Asset Type="Microsoft.VisualStudio.ItemTemplate" d:Source="Project" d:ProjectName="ItemTemplate" d:TargetPath="|ItemTemplate;TemplateProjectOutputGroup|" Path="ItemTemplates" d:VsixSubPath="ItemTemplates" />
-        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="FastEndpoints\FastEndpoints.pkgdef" />
+        <Asset Type="Microsoft.VisualStudio.VsPackage" d:Source="File" Path="MinimalApiEndpoints\MinimalApiEndpoints.pkgdef" />
     </Assets>
     <Prerequisites>
         <Prerequisite Id="Microsoft.VisualStudio.Component.CoreEditor" Version="[16.0,18.0)" DisplayName="Visual Studio core editor" />
