@@ -1,5 +1,3 @@
-#if (withRequest)
-#if (includeValidation)
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace $rootnamespace$;
@@ -24,16 +22,3 @@ sealed class RequestModelValidator : Validator<RequestModel>
 		//     .MaximumLength(200);
 	}
 }
-#endif
-#if (!includeValidation)
-namespace $rootnamespace$;
-
-public sealed class RequestModel
-{
-	// TODO: Add request properties
-	// Example:
-	// public int Id { get; set; }
-	// public string Name { get; set; } = string.Empty;
-}
-#endif
-#endif

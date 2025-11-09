@@ -1,4 +1,3 @@
-#if (withResponse)
 namespace $rootnamespace$;
 
 public class ResponseModel
@@ -9,4 +8,3 @@ public class ResponseModel
 	// public string Name { get; set; } = string.Empty;
 	// public DateTime CreatedAt { get; set; }
 }
-#endif
