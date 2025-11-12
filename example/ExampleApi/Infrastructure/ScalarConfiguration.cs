@@ -55,7 +55,6 @@ static class ScalarConfiguration
 		{
 			options
 				.WithTheme(ScalarTheme.Default)
-				.WithLayout(ScalarLayout.Modern)
 				.WithFavicon("https://scalar.com/logo-light.svg")
 				.WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
 		});
