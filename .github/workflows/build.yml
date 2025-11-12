@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 env:
-  NET_VERSION: 10.0.x
+  NET_VERSION: 10.0.100
   NUGET_PATH: './**/IeuanWalker.MinimalApi.Endpoints.1.0.0.nupkg'
   MINIMUM_COVERAGE: 80
   

@@ -5,7 +5,7 @@ on:
     types: [published]
 
 env:
-  NET_VERSION: 10.0.x
+  NET_VERSION: 10.0.100
   PROJECT_GENERATOR: 'src/IeuanWalker.MinimalApi.Endpoints.Generator/IeuanWalker.MinimalApi.Endpoints.Generator.csproj'
   PROJECT_LIBRARY: 'src/IeuanWalker.MinimalApi.Endpoints/IeuanWalker.MinimalApi.Endpoints.csproj'
   NUGET_PATH: 'D:/a/MinimalApi.Endpoints/MinimalApi.Endpoints/src/IeuanWalker.MinimalApi.Endpoints/bin/Release/IeuanWalker.MinimalApi.Endpoints.${{ github.event.release.tag_name }}.nupkg'
