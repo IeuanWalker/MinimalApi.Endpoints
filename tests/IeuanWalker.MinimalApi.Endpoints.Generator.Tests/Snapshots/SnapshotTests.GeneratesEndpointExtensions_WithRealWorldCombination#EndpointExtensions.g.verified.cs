@@ -17,6 +17,7 @@ namespace TestAssembly;
 
 public static class EndpointExtensions
 {
+	public static IHostApplicationBuilder AddEndpoints(this IHostApplicationBuilder builder) => builder.AddEndpointsFromTestAssembly();
 	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
 	{
 		builder.Services.AddSingleton<IValidator<global::TestNamespace.SearchUsersRequest>, global::TestNamespace.SearchUsersRequestValidator>();
@@ -32,6 +33,7 @@ public static class EndpointExtensions
 		return builder;
 	}
 
+	public static WebApplication MapEndpoints(this WebApplication app) => app.MapEndpointsFromTestAssembly();
 	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
 	{
 		// *************************************
