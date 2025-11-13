@@ -317,7 +317,8 @@ public class EndpointGenerator : IIncrementalGenerator
 		builder.AppendLine("public static class EndpointExtensions");
 		using (builder.AppendBlock())
 		{
-			// Generate AddEndpoints method
+			// Generate AddEndpoints methods
+			builder.AppendLine($"public static IHostApplicationBuilder AddEndpoints(this IHostApplicationBuilder builder) => builder.AddEndpointsFrom{sanitisedAssemblyName}();");
 			builder.AppendLine($"public static IHostApplicationBuilder AddEndpointsFrom{sanitisedAssemblyName}(this IHostApplicationBuilder builder)");
 			using (builder.AppendBlock())
 			{
@@ -361,6 +362,7 @@ public class EndpointGenerator : IIncrementalGenerator
 			builder.AppendEmptyLine();
 
 			// Generate MapEndpoints method with grouping
+			builder.AppendLine($"public static WebApplication MapEndpoints(this WebApplication app) => app.MapEndpointsFrom{sanitisedAssemblyName}();");
 			builder.AppendLine($"public static WebApplication MapEndpointsFrom{sanitisedAssemblyName}(this WebApplication app)");
 			using (builder.AppendBlock())
 			{
@@ -440,7 +442,9 @@ public class EndpointGenerator : IIncrementalGenerator
 
 				public static class EndpointExtensions
 				{
+					public static IHostApplicationBuilder AddEndpoints(this IHostApplicationBuilder builder) => builder;
 					public static IHostApplicationBuilder AddEndpointsFrom{{sanitisedAssemblyName}}(this IHostApplicationBuilder builder) => builder;
+					public static WebApplication MapEndpoints(this WebApplication app) => app;
 					public static WebApplication MapEndpointsFrom{{sanitisedAssemblyName}}(this WebApplication app) => app;
 				}
 				""";

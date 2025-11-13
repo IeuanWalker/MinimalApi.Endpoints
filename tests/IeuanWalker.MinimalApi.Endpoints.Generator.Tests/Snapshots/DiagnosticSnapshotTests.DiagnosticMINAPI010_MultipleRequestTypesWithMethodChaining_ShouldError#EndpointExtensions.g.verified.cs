@@ -15,6 +15,7 @@ namespace TestAssembly;
 
 public static class EndpointExtensions
 {
+	public static IHostApplicationBuilder AddEndpoints(this IHostApplicationBuilder builder) => builder.AddEndpointsFromTestAssembly();
 	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
 	{
 		builder.Services.AddScoped<global::TestNamespace.ChainedRequestTypesEndpoint>();
@@ -22,6 +23,7 @@ public static class EndpointExtensions
 		return builder;
 	}
 
+	public static WebApplication MapEndpoints(this WebApplication app) => app.MapEndpointsFromTestAssembly();
 	public static WebApplication MapEndpointsFromTestAssembly(this WebApplication app)
 	{
 		// PUT: /api/items/{id}
