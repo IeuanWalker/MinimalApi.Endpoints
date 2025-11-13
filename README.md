@@ -11,7 +11,8 @@ A source generator that brings **clean, class-based endpoints** to .NET Minimal 
 - **🏗️ Clean Architecture**: Organized, testable endpoint classes  
    - Nudges you towards [REPR Design Pattern (Request-Endpoint-Response)](https://deviq.com/design-patterns/repr-design-pattern) and [Vertical Slice Architecture](https://www.milanjovanovic.tech/blog/vertical-slice-architecture)
 - **🔧 Full Control**: Complete access to `RouteHandlerBuilder` and `RouteGroupBuilder` - it's just Minimal APIs underneath
-- **📁 Better Organization**: Clear project structure with endpoint grouping _(check out the example project)_
+- **📁 Better Organization**: Clear project structure with [endpoint grouping](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Grouping) _(check out the example project)_
+- **✅ Built-In Validation**: Support for both [DataAnnotations](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Data-annotations) and [FluentValidation](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/Fluent-validation) for request validation
 - **🔓 No Lock-In**: Copy the generated code and remove the library anytime - you own the output
 
 ## How It Works _(see [wiki](https://github.com/IeuanWalker/MinimalApi.Endpoints/wiki/How-does-it-work) for more detailed explanation)_
