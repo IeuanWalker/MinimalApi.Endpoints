@@ -22,10 +22,10 @@ A source generator that brings **clean, class-based endpoints** to .NET Minimal 
 
 ```csharp
 var builder = WebApplication.CreateBuilder();
-builder.AddEndpointsFromYourAssembly(); // Registers endpoints as services
+builder.AddEndpoints(); // Registers endpoints as services
 
 var app = builder.Build();
-app.MapEndpointsFromYourAssembly();     // Maps all routes
+app.MapEndpoints();     // Maps all routes
 ```
 
 That's it! Your endpoints are now mapped with zero runtime reflection.
