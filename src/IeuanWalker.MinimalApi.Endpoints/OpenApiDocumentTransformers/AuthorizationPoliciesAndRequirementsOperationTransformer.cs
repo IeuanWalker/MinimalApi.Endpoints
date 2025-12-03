@@ -25,27 +25,21 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 		{
 			AuthorizationPolicy policy = policyObjects[i];
 			string policyName = $"Policy {i + 1}";
-			List<string> requirements = [];
 
-			// Extract requirements from the policy
-			foreach (IAuthorizationRequirement requirement in policy.Requirements)
-			{
-				string requirementText = requirement?.ToString() ?? string.Empty;
+			List<string> requirements = [.. policy.Requirements
+					.Select(requirement => requirement?.ToString() ?? string.Empty)
+					.Where(requirementText => !string.IsNullOrEmpty(requirementText))
+					.Select(requirementText =>
+					{
+						List<string> requirementTextSplit = requirementText.Split(':').ToList();
 
-				if (string.IsNullOrEmpty(requirementText))
-				{
-					continue;
-				}
+						if (requirementTextSplit.Count > 1)
+						{
+							requirementTextSplit.RemoveAt(0);
+						}
 
-				List<string> requirementTextSplit = requirementText.Split(':').ToList();
-
-				if (requirementTextSplit.Count > 1)
-				{
-					requirementTextSplit.RemoveAt(0);
-				}
-
-				requirements.Add(string.Join(string.Empty, requirementTextSplit));
-			}
+						return string.Join(string.Empty, requirementTextSplit);
+					})];
 
 			if (requirements.Count > 0)
 			{
