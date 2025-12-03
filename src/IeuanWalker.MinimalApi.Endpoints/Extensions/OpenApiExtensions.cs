@@ -117,7 +117,7 @@ public static class OpenApiExtensions
 		SecuritySchemeTransformerOptions securityOptions = new();
 		configure?.Invoke(securityOptions);
 
-		_ = options.AddDocumentTransformer(async (document, context, ct) =>
+		options.AddDocumentTransformer(async (document, context, ct) =>
 		{
 			IAuthenticationSchemeProvider? authProvider = context.ApplicationServices.GetService<IAuthenticationSchemeProvider>()
 				?? throw new InvalidOperationException("Authentication services are not registered. Add authentication to your application using 'builder.Services.AddAuthentication()' before calling 'AddSecuritySchemeTransformer()'.");
