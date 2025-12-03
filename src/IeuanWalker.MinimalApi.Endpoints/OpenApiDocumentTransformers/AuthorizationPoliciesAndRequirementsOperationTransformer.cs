@@ -78,24 +78,20 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 		}
 
 		// Build the description with hierarchical policy structure
-		if (policiesWithRequirements.Count > 0)
+		StringBuilder authDescription = new();
+		authDescription.AppendLine("**Authorization Policies:**");
+
+		foreach (KeyValuePair<string, List<string>> kvp in policiesWithRequirements)
 		{
-			StringBuilder authDescription = new();
-			authDescription.AppendLine("**Authorization Policies:**");
-
-			foreach (KeyValuePair<string, List<string>> kvp in policiesWithRequirements)
+			authDescription.AppendLine($"- **{kvp.Key}**");
+			foreach (string requirement in kvp.Value)
 			{
-				authDescription.AppendLine($"- **{kvp.Key}**");
-				foreach (string requirement in kvp.Value)
-				{
-					authDescription.AppendLine($"  - {requirement}");
-				}
+				authDescription.AppendLine($"  - {requirement}");
 			}
-
-			string authText = authDescription.ToString().TrimEnd();
-			operation.Description = string.IsNullOrEmpty(operation.Description) ? authText : $"{operation.Description}\n\n{authText}";
 		}
 
+		string authText = authDescription.ToString().TrimEnd();
+		operation.Description = string.IsNullOrEmpty(operation.Description) ? authText : $"{operation.Description}\n\n{authText}";
 		return Task.CompletedTask;
 	}
 }
