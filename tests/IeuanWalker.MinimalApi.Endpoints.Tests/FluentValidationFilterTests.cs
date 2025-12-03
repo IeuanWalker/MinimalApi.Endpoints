@@ -16,11 +16,8 @@ public class FluentValidationFilterTests
 	[Fact]
 	public void Constructor_WhenValidatorIsNull_ThrowsArgumentNullException()
 	{
-		// Arrange & Act
-		Action act = () => new FluentValidationFilter<TestModel>(null!);
-
-		// Assert
-		Should.Throw<ArgumentNullException>(act)
+		//  Arrange, Act & Assert
+		Should.Throw<ArgumentNullException>(() => new FluentValidationFilter<TestModel>(null!))
 			.ParamName.ShouldBe("validator");
 	}
 

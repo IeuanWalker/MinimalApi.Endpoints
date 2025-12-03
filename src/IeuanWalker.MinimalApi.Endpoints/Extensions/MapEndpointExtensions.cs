@@ -5,32 +5,35 @@ using Microsoft.AspNetCore.Builder;
 namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
-[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-[SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "<Pending>")]
 [ExcludeFromCodeCoverage]
 public static class MapEndpointExtensions
 {
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder Post(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder Put(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder Patch(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder Delete(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
 	{
 		return builder;
