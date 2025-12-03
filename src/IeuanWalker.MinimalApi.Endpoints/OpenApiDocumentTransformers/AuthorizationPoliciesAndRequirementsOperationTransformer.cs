@@ -38,7 +38,11 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 				}
 
 				List<string> requirementTextSplit = requirementText.Split(':').ToList();
-				requirementTextSplit.RemoveAt(0);
+
+				if (requirementTextSplit.Count > 1)
+				{
+					requirementTextSplit.RemoveAt(0);
+				}
 
 				requirements.Add(string.Join(string.Empty, requirementTextSplit));
 			}
