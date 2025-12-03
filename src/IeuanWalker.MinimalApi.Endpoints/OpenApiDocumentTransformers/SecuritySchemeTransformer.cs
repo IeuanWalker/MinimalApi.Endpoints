@@ -91,10 +91,10 @@ sealed class SecuritySchemeTransformer(
 public class SecuritySchemeTransformerOptions
 {
 	/// <summary>
-	/// Gets or sets the bearer token format (e.g., "Json Web Token").
-	/// Default: "Json Web Token"
+	/// Gets or sets the bearer token format (e.g., "JWT").
+	/// Default: "JWT"
 	/// </summary>
-	public string BearerFormat { get; set; } = "Json Web Token";
+	public string BearerFormat { get; set; } = "JWT";
 
 	/// <summary>
 	/// Gets or sets the API key header name.
