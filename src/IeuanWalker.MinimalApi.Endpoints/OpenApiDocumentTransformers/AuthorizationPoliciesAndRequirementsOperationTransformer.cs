@@ -58,9 +58,10 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 			return Task.CompletedTask;
 		}
 
+		StringBuilder authDescription = new();
+
 		if (policiesWithRequirements.Count == 1)
 		{
-			StringBuilder authDescription = new();
 			authDescription.AppendLine("**Authorization Requirements:**");
 
 			foreach (KeyValuePair<string, List<string>> kvp in policiesWithRequirements)
@@ -71,14 +72,13 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 				}
 			}
 
-			string authText = authDescription.ToString().TrimEnd();
-			operation.Description = string.IsNullOrEmpty(operation.Description) ? authText : $"{operation.Description}\n\n{authText}";
+			operation.Description = string.IsNullOrEmpty(operation.Description) ? authDescription.ToString() : $"{operation.Description}\n\n{authDescription}";
 
 			return Task.CompletedTask;
 		}
 
 		// Build the description with hierarchical policy structure
-		StringBuilder authDescription = new();
+		authDescription = new();
 		authDescription.AppendLine("**Authorization Policies:**");
 
 		foreach (KeyValuePair<string, List<string>> kvp in policiesWithRequirements)
@@ -90,8 +90,7 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 			}
 		}
 
-		string authText = authDescription.ToString().TrimEnd();
-		operation.Description = string.IsNullOrEmpty(operation.Description) ? authText : $"{operation.Description}\n\n{authText}";
+		operation.Description = string.IsNullOrEmpty(operation.Description) ? authDescription.ToString() : $"{operation.Description}\n\n{authDescription}";
 		return Task.CompletedTask;
 	}
 }
