@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
 public sealed class IndentedTextBuilderTests : IDisposable
@@ -217,7 +215,6 @@ public sealed class IndentedTextBuilderTests : IDisposable
 	}
 
 	[Fact]
-	[SuppressMessage("Blocker Code Smell", "S2699:Tests should include assertions", Justification = "<Pending>")]
 	public void Block_DoubleDispose_DoesNotThrow()
 	{
 		// Act & Assert - Should not throw
@@ -227,7 +224,6 @@ public sealed class IndentedTextBuilderTests : IDisposable
 	}
 
 	[Fact]
-	[SuppressMessage("Blocker Code Smell", "S2699:Tests should include assertions", Justification = "<Pending>")]
 	public void Block_DisposeWithoutBuilder_DoesNotThrow()
 	{
 		// Arrange

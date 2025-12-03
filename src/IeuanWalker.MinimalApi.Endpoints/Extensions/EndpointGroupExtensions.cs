@@ -8,7 +8,6 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 [ExcludeFromCodeCoverage]
 public static class EndpointGroupExtensions
 {
-	[SuppressMessage("Major Code Smell", "S2326:Unused type parameters should be removed", Justification = "<Pending>")]
 	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder Group<TEndpointGroup>(this RouteHandlerBuilder builder) where TEndpointGroup : IEndpointGroup
 	{

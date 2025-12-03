@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Builder;
 namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
-[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-[SuppressMessage("Roslynator", "RCS1163:Unused parameter", Justification = "<Pending>")]
 [ExcludeFromCodeCoverage]
 public static class RequestBindingTypeExtensions
 {
@@ -17,23 +15,27 @@ public static class RequestBindingTypeExtensions
 	}
 
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder RequestFromHeader(this RouteHandlerBuilder builder, string? name = null)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder RequestFromRoute(this RouteHandlerBuilder builder, string? name = null)
 	{
 		return builder;
 	}
 
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder RequestFromQuery(this RouteHandlerBuilder builder, string? name = null)
 	{
 		return builder;
 	}
 
 	[ExcludeFromCodeCoverage]
+	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 	public static RouteHandlerBuilder RequestFromForm(this RouteHandlerBuilder builder, string? name = null)
 	{
 		return builder;
