@@ -7,7 +7,7 @@ using Microsoft.OpenApi;
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 [ExcludeFromCodeCoverage]
-sealed class AuthenticationPoliciesAndRequirementsOperationTransformer : IOpenApiOperationTransformer
+sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApiOperationTransformer
 {
 	public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
 	{

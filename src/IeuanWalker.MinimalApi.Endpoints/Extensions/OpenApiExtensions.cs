@@ -140,14 +140,14 @@ public static class OpenApiExtensions
 	/// <code>
 	/// builder.Services.AddOpenApi(options =>
 	/// {
-	///     options.AddAuthenticationPoliciesAndRequirements();
+	///     options.AddAuthorizationPoliciesAndRequirements();
 	/// });
 	/// </code>
 	/// </example>
 	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions AddAuthenticationPoliciesAndRequirements(this OpenApiOptions options)
+	public static OpenApiOptions AddAuthorizationPoliciesAndRequirements(this OpenApiOptions options)
 	{
-		options.AddOperationTransformer<AuthenticationPoliciesAndRequirementsOperationTransformer>();
+		options.AddOperationTransformer<AuthorizationPoliciesAndRequirementsOperationTransformer>();
 		return options;
 	}
 }
