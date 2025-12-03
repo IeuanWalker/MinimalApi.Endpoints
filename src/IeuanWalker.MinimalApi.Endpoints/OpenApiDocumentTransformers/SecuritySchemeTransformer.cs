@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -6,7 +7,7 @@ using Microsoft.OpenApi;
 namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
-
+[ExcludeFromCodeCoverage]
 sealed class SecuritySchemeTransformer(
 	IAuthenticationSchemeProvider authenticationSchemeProvider,
 	SecuritySchemeTransformerOptions? options = null) : IOpenApiDocumentTransformer
@@ -86,6 +87,7 @@ sealed class SecuritySchemeTransformer(
 /// <summary>
 /// Configuration options for <see cref="SecuritySchemeTransformer"/>.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class SecuritySchemeTransformerOptions
 {
 	/// <summary>
