@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -74,14 +75,14 @@ public static class OpenApiExtensions
 	/// <code>
 	/// builder.Services.AddOpenApi(options =>
 	/// {
-	///     options.AddSecuritySchemeTransformer();
+	///     options.AddAuthenticationSchemes();
 	/// });
 	/// </code>
 	/// </example>
 	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions AddSecuritySchemeTransformer(this OpenApiOptions options)
+	public static OpenApiOptions AddAuthenticationSchemes(this OpenApiOptions options)
 	{
-		return options.AddSecuritySchemeTransformer(null);
+		return options.AddAuthenticationSchemes(null);
 	}
 
 	/// <summary>
@@ -96,7 +97,7 @@ public static class OpenApiExtensions
 	/// <code>
 	/// builder.Services.AddOpenApi(options =>
 	/// {
-	///     options.AddSecuritySchemeTransformer(o =>
+	///     options.AddAuthenticationSchemes(o =>
 	///     {
 	///         o.BearerFormat = "My Custom JWT";
 	///         o.ApiKeyHeaderName = "X-Custom-Key";
@@ -112,7 +113,7 @@ public static class OpenApiExtensions
 	/// </code>
 	/// </example>
 	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions AddSecuritySchemeTransformer(this OpenApiOptions options, Action<SecuritySchemeTransformerOptions>? configure)
+	public static OpenApiOptions AddAuthenticationSchemes(this OpenApiOptions options, Action<SecuritySchemeTransformerOptions>? configure)
 	{
 		SecuritySchemeTransformerOptions securityOptions = new();
 		configure?.Invoke(securityOptions);
@@ -126,6 +127,27 @@ public static class OpenApiExtensions
 			await transformer.TransformAsync(document, context, ct);
 		});
 
+		return options;
+	}
+
+	/// <summary>
+	/// Adds authorization policy documentation to the OpenAPI document.
+	/// This will automatically document all authorization policies applied to endpoints,
+	/// extracting and displaying their requirements in the operation descriptions.
+	/// </summary>
+	/// <example>
+	/// Usage with OpenAPI options:
+	/// <code>
+	/// builder.Services.AddOpenApi(options =>
+	/// {
+	///     options.AddAuthenticationPoliciesAndRequirements();
+	/// });
+	/// </code>
+	/// </example>
+	[ExcludeFromCodeCoverage]
+	public static OpenApiOptions AddAuthenticationPoliciesAndRequirements(this OpenApiOptions options)
+	{
+		options.AddOperationTransformer<AuthenticationPoliciesAndRequirementsOperationTransformer>();
 		return options;
 	}
 }
