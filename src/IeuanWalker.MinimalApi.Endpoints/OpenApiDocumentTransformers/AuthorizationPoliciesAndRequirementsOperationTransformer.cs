@@ -27,19 +27,19 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 			string policyName = $"Policy {i + 1}";
 
 			List<string> requirements = [.. policy.Requirements
-					.Select(requirement => requirement?.ToString() ?? string.Empty)
-					.Where(requirementText => !string.IsNullOrEmpty(requirementText))
-					.Select(requirementText =>
+				.Select(requirement => requirement?.ToString() ?? string.Empty)
+				.Where(requirementText => !string.IsNullOrEmpty(requirementText))
+				.Select(requirementText =>
+				{
+					List<string> requirementTextSplit = requirementText.Split(':').ToList();
+
+					if (requirementTextSplit.Count > 1)
 					{
-						List<string> requirementTextSplit = requirementText.Split(':').ToList();
+						requirementTextSplit.RemoveAt(0);
+					}
 
-						if (requirementTextSplit.Count > 1)
-						{
-							requirementTextSplit.RemoveAt(0);
-						}
-
-						return string.Join(string.Empty, requirementTextSplit);
-					})];
+					return string.Join(string.Empty, requirementTextSplit);
+				})];
 
 			if (requirements.Count > 0)
 			{
