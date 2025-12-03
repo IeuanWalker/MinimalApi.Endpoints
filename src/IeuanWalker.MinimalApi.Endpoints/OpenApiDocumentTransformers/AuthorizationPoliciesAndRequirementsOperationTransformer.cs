@@ -53,7 +53,6 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 			}
 		}
 
-
 		if (policiesWithRequirements.Count == 0)
 		{
 			return Task.CompletedTask;
