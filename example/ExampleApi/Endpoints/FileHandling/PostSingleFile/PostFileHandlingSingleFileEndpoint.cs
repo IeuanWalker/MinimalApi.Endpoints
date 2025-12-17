@@ -2,7 +2,7 @@
 
 namespace ExampleApi.Endpoints.FileHandling.PostSingleFile;
 
-public class PostFileHandlingEndpoint : IEndpoint<IFormFile, ResponseModel>
+public class PostFileHandlingSingleFileEndpoint : IEndpoint<IFormFile, ResponseModel>
 {
 	public static void Configure(RouteHandlerBuilder builder)
 	{

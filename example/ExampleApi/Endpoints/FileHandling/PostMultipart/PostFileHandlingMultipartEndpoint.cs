@@ -2,10 +2,10 @@
 
 namespace ExampleApi.Endpoints.FileHandling.PostMultipart;
 
-public class PostFileHandlingEndpoint : IEndpoint<RequestModel, ResponseModel>
+public class PostFileHandlingMultipartEndpoint : IEndpoint<RequestModel, ResponseModel>
 {
 	readonly IHttpContextAccessor _context;
-	public PostFileHandlingEndpoint(IHttpContextAccessor context)
+	public PostFileHandlingMultipartEndpoint(IHttpContextAccessor context)
 	{
 		_context = context ?? throw new ArgumentNullException(nameof(context));
 	}

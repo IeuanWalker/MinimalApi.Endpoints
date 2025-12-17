@@ -1,8 +1,8 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints;
 
-namespace ExampleApi.Endpoints.FileHandling.ListOfFiles;
+namespace ExampleApi.Endpoints.FileHandling.PostListOfFiles;
 
-public class PostFileHandlingEndpoint : IEndpoint<IFormFileCollection, IEnumerable<ResponseModel>>
+public class PostFileHandlingListOfFilesEndpoint : IEndpoint<IFormFileCollection, IEnumerable<ResponseModel>>
 {
 	public static void Configure(RouteHandlerBuilder builder)
 	{

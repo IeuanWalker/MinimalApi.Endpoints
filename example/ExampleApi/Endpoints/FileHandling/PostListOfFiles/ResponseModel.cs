@@ -1,4 +1,4 @@
-﻿namespace ExampleApi.Endpoints.FileHandling.ListOfFiles;
+﻿namespace ExampleApi.Endpoints.FileHandling.PostListOfFiles;
 
 public sealed class ResponseModel
 {
