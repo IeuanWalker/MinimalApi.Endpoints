@@ -8,6 +8,7 @@ builder.Services.AddValidation();
 builder.AddApiVersioning();
 builder.AddEndpoints();
 builder.Services.AddSingleton<ITodoStore, InMemoryTodoStore>();
+builder.Services.AddHttpContextAccessor();
 builder.AddScalar();
 
 WebApplication app = builder.Build();
