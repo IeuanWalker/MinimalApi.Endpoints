@@ -9,6 +9,7 @@ public class RequestModel
 	/// <summary>
 	/// Important: IFormFileCollection doesnt respect property names and binds all files in the request
 	/// IFormFile and IReadOnlyList respects property names and only binds the files relevant to its property name
+	/// https://github.com/dotnet/aspnetcore/issues/54999
 	/// </summary>
 	public required IFormFileCollection FileCollectionList { get; set; }
 }
