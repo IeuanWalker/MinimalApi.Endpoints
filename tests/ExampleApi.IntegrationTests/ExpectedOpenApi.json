@@ -6,10 +6,39 @@
 	},
 	"servers": [
 		{
-			"url": "https://localhost:7224/"
+			"url": "http://localhost/"
 		}
 	],
 	"paths": {
+		"/weatherforecast": {
+			"get": {
+				"tags": [
+					"Weatherforecast"
+				],
+				"operationId": "get_Weatherforecast_0",
+				"parameters": [
+					{
+						"name": "api-version",
+						"in": "query",
+						"schema": {
+							"$ref": "#/components/schemas/System.String"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/todos": {
 			"get": {
 				"tags": [
@@ -17,7 +46,7 @@
 				],
 				"summary": "Get all todos",
 				"description": "Retrieves all todos from the store",
-				"operationId": "get_Todos_0",
+				"operationId": "get_Todos_5",
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -39,7 +68,7 @@
 				],
 				"summary": "Get todo by ID",
 				"description": "Retrieves a specific todo by its ID",
-				"operationId": "get_Todos_1",
+				"operationId": "get_Todos_6",
 				"parameters": [
 					{
 						"name": "id",
@@ -72,7 +101,7 @@
 				],
 				"summary": "Update a todo",
 				"description": "Updates an existing todo item completely",
-				"operationId": "put_Todos_5",
+				"operationId": "put_Todos_10",
 				"parameters": [
 					{
 						"name": "id",
@@ -115,7 +144,7 @@
 				],
 				"summary": "Partially update a todo",
 				"description": "Updates specific fields of an existing todo item",
-				"operationId": "patch_Todos_6",
+				"operationId": "patch_Todos_11",
 				"parameters": [
 					{
 						"name": "id",
@@ -155,7 +184,7 @@
 				],
 				"summary": "Delete a todo",
 				"description": "Deletes an existing todo item",
-				"operationId": "delete_Todos_7",
+				"operationId": "delete_Todos_12",
 				"parameters": [
 					{
 						"name": "id",
@@ -180,7 +209,7 @@
 				],
 				"summary": "Export todos",
 				"description": "Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.",
-				"operationId": "get_TodosExport_2",
+				"operationId": "get_TodosExport_7",
 				"responses": {
 					"204": {
 						"description": "No Content"
@@ -205,7 +234,7 @@
 				],
 				"summary": "Create a new todo",
 				"description": "Creates a new todo item",
-				"operationId": "post_TodosDataAnnotation_3",
+				"operationId": "post_TodosDataAnnotation_8",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -239,7 +268,7 @@
 				],
 				"summary": "Create a new todo",
 				"description": "Creates a new todo item",
-				"operationId": "post_TodosFluentValidation_4",
+				"operationId": "post_TodosFluentValidation_9",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -276,28 +305,104 @@
 				}
 			}
 		},
-		"/weatherforecast": {
-			"get": {
+		"/api/v{version}/FileHandling/ListOfFiles": {
+			"post": {
 				"tags": [
-					"Weatherforecast"
+					"FileHandling"
 				],
-				"operationId": "get_Weatherforecast_8",
-				"parameters": [
-					{
-						"name": "api-version",
-						"in": "query",
-						"schema": {
-							"$ref": "#/components/schemas/System.String"
+				"operationId": "post_FileHandlingListOfFiles_2",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"request": {
+										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
+									}
+								}
+							}
 						}
-					}
-				],
+					},
+					"required": true
+				},
 				"responses": {
 					"200": {
 						"description": "OK",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]"
+									"$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v{version}/FileHandling/Multipart": {
+			"post": {
+				"tags": [
+					"FileHandling"
+				],
+				"operationId": "post_FileHandlingMultipart_3",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v{version}/FileHandling/SingleFile": {
+			"post": {
+				"tags": [
+					"FileHandling"
+				],
+				"operationId": "post_FileHandlingSingleFile_4",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"request": {
+										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel"
 								}
 							}
 						}
@@ -308,6 +413,117 @@
 	},
 	"components": {
 		"schemas": {
+			"ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel": {
+				"required": [
+					"fileName",
+					"propertyName"
+				],
+				"type": "object",
+				"properties": {
+					"fileName": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"propertyName": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"size": {
+						"$ref": "#/components/schemas/System.Int32"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo": {
+				"required": [
+					"fileName",
+					"propertyName"
+				],
+				"type": "object",
+				"properties": {
+					"fileName": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"propertyName": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"size": {
+						"$ref": "#/components/schemas/System.Int32"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel": {
+				"required": [
+					"someData",
+					"readOnlyList1",
+					"readOnlyList2",
+					"fileCollectionList"
+				],
+				"type": "object",
+				"properties": {
+					"someData": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"singleFile": {
+						"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+					},
+					"readOnlyList1": {
+						"$ref": "#/components/schemas/System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]"
+					},
+					"readOnlyList2": {
+						"$ref": "#/components/schemas/System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]"
+					},
+					"fileCollectionList": {
+						"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel": {
+				"required": [
+					"someData",
+					"singleFile",
+					"totalFileCount",
+					"readOnlyList1",
+					"readOnlyList2",
+					"fileCollectionList"
+				],
+				"type": "object",
+				"properties": {
+					"someData": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"singleFile": {
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
+					},
+					"totalFileCount": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"readOnlyList1": {
+						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+					},
+					"readOnlyList2": {
+						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+					},
+					"fileCollectionList": {
+						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel": {
+				"required": [
+					"fileName",
+					"propertyName"
+				],
+				"type": "object",
+				"properties": {
+					"fileName": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"propertyName": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"size": {
+						"$ref": "#/components/schemas/System.Int32"
+					}
+				}
+			},
 			"ExampleApi.Endpoints.Todos.GetAll.ResponseModel": {
 				"type": "object",
 				"properties": {
@@ -633,6 +849,10 @@
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel"
 				}
 			},
+			"IFormFile": {
+				"type": "string",
+				"format": "binary"
+			},
 			"Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
 				"type": "object",
 				"properties": {
@@ -691,6 +911,16 @@
 					}
 				}
 			},
+			"Microsoft.AspNetCore.Http.IFormFile": {
+				"type": "string",
+				"format": "binary"
+			},
+			"Microsoft.AspNetCore.Http.IFormFileCollection": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/IFormFile"
+				}
+			},
 			"System.Boolean": {
 				"type": "boolean"
 			},
@@ -698,6 +928,24 @@
 				"type": "object",
 				"additionalProperties": {
 					"$ref": "#/components/schemas/System.String[]"
+				}
+			},
+			"System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel"
+				}
+			},
+			"System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+				}
+			},
+			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
 				}
 			},
 			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
@@ -742,10 +990,13 @@
 	},
 	"tags": [
 		{
+			"name": "Weatherforecast"
+		},
+		{
 			"name": "Todos"
 		},
 		{
-			"name": "Weatherforecast"
+			"name": "FileHandling"
 		}
 	]
 }
