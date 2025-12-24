@@ -150,4 +150,26 @@ public static class OpenApiExtensions
 		options.AddOperationTransformer<AuthorizationPoliciesAndRequirementsOperationTransformer>();
 		return options;
 	}
+
+	/// <summary>
+	/// Enriches OpenAPI schemas with FluentValidation rules.
+	/// Extracts validation constraints from FluentValidation validators and applies them to the OpenAPI schema.
+	/// This will add constraints like minLength, maxLength, minimum, maximum, pattern, format, and required fields
+	/// based on the FluentValidation rules defined for your DTOs.
+	/// </summary>
+	/// <example>
+	/// Usage with OpenAPI options:
+	/// <code>
+	/// builder.Services.AddOpenApi(options =>
+	/// {
+	///     options.AddFluentValidationSchemas();
+	/// });
+	/// </code>
+	/// </example>
+	[ExcludeFromCodeCoverage]
+	public static OpenApiOptions AddFluentValidationSchemas(this OpenApiOptions options)
+	{
+		options.AddSchemaTransformer<OpenApiDocumentTransformers.FluentValidationSchemaTransformer>();
+		return options;
+	}
 }
