@@ -14,20 +14,6 @@ public class RequestModel
 	public string CreditCard { get; set; } = string.Empty;
 	public string Url { get; set; } = string.Empty;
 
-	// Numeric validation examples
-	public int IntGreaterThan { get; set; }
-	public int IntLessThan { get; set; }
-	public int IntRange { get; set; }
-	public decimal DecimalGreaterThanOrEqual { get; set; }
-	public decimal DecimalLessThanOrEqual { get; set; }
-	public double DoubleInclusiveBetween { get; set; }
-	public double DoubleExclusiveBetween { get; set; }
-	public decimal PrecisionScale { get; set; }
-
-	// Comparison validation examples
-	public int Equal { get; set; }
-	public int NotEqual { get; set; }
-
 	// Boolean validation
 	public bool IsCompleted { get; set; }
 	public bool IsTest { get; set; }
@@ -84,38 +70,6 @@ sealed class RequestModelValidator : Validator<RequestModel>
 			.Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
 			.WithMessage("Must be a valid URL");
 
-		// Numeric validation examples
-		RuleFor(x => x.IntGreaterThan)
-			.GreaterThan(0);
-
-		RuleFor(x => x.IntLessThan)
-			.LessThan(100);
-
-		RuleFor(x => x.IntRange)
-			.InclusiveBetween(1, 50);
-
-		RuleFor(x => x.DecimalGreaterThanOrEqual)
-			.GreaterThanOrEqualTo(0.0m);
-
-		RuleFor(x => x.DecimalLessThanOrEqual)
-			.LessThanOrEqualTo(1000.0m);
-
-		RuleFor(x => x.DoubleInclusiveBetween)
-			.InclusiveBetween(0.0, 100.0);
-
-		RuleFor(x => x.DoubleExclusiveBetween)
-			.ExclusiveBetween(0.0, 100.0);
-
-		RuleFor(x => x.PrecisionScale)
-			.PrecisionScale(10, 2, ignoreTrailingZeros: false);
-
-		// Comparison validation examples
-		RuleFor(x => x.Equal)
-			.Equal(42);
-
-		RuleFor(x => x.NotEqual)
-			.NotEqual(0);
-
 		// Complex type validation
 		RuleFor(x => x.NestedObject)
 			.NotNull()
@@ -142,10 +96,6 @@ sealed class NestedObjectModelValidator : Validator<NestedObjectModel>
 			.NotEmpty()
 			.MinimumLength(1)
 			.MaximumLength(200);
-
-		RuleFor(x => x.Age)
-			.GreaterThan(0)
-			.LessThan(80);
 	}
 }
 

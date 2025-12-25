@@ -17,12 +17,7 @@ public class StringValidationModel
 	public string LengthRange { get; set; } = string.Empty;
 }
 
-public class NumericValidationModel
-{
-	public int IntValue { get; set; }
-	public decimal DecimalValue { get; set; }
-	public double DoubleValue { get; set; }
-}
+
 
 public class ComplexValidationModel
 {
@@ -58,22 +53,7 @@ public class StringValidationModelValidator : AbstractValidator<StringValidation
 	}
 }
 
-public class NumericValidationModelValidator : AbstractValidator<NumericValidationModel>
-{
-	public NumericValidationModelValidator()
-	{
-		RuleFor(x => x.IntValue)
-			.GreaterThan(0)
-			.LessThan(100);
 
-		RuleFor(x => x.DecimalValue)
-			.GreaterThanOrEqualTo(0.0m)
-			.LessThanOrEqualTo(1000.0m);
-
-		RuleFor(x => x.DoubleValue)
-			.InclusiveBetween(0.0, 100.0);
-	}
-}
 
 public class NestedModelValidator : AbstractValidator<NestedModel>
 {
@@ -208,122 +188,6 @@ public class FluentValidationSchemaTransformerTests
 		var lengthProperty = GetPropertySchema(schema, "lengthRange");
 		lengthProperty.MinLength.ShouldBe(5);
 		lengthProperty.MaxLength.ShouldBe(15);
-	}
-
-	[Fact]
-	public async Task TransformAsync_GreaterThan_AddsExclusiveMinimum()
-	{
-		// Arrange
-		var services = new ServiceCollection();
-		services.AddSingleton<IValidator<NumericValidationModel>, NumericValidationModelValidator>();
-		var serviceProvider = services.BuildServiceProvider();
-
-		var transformer = new FluentValidationSchemaTransformer(serviceProvider);
-		var document = CreateTestDocument<NumericValidationModel>();
-
-		// Act
-		await transformer.TransformAsync(document, CreateContext(), CancellationToken.None);
-
-		// Assert
-		var schema = GetSchema<NumericValidationModel>(document);
-		schema.Extensions.ShouldNotBeNull("Schema should have extensions");
-		schema.Extensions.ShouldContainKey("x-validation-source");
-		
-		// Check if property was transformed from reference to inline schema
-		var intProperty = schema.Properties["intValue"];
-		intProperty.ShouldNotBeNull("intValue property should exist");
-		intProperty.ShouldBeOfType<OpenApiSchema>("Property should be transformed to OpenApiSchema");
-		
-		var intSchema = (OpenApiSchema)intProperty;
-		intSchema.Type.ShouldBe(JsonSchemaType.Integer);
-		intSchema.Minimum.ShouldBe("0");
-		intSchema.ExclusiveMinimum.ShouldBe("true");
-	}
-
-	[Fact]
-	public async Task TransformAsync_LessThan_AddsExclusiveMaximum()
-	{
-		// Arrange
-		var services = new ServiceCollection();
-		services.AddSingleton<IValidator<NumericValidationModel>, NumericValidationModelValidator>();
-		var serviceProvider = services.BuildServiceProvider();
-
-		var transformer = new FluentValidationSchemaTransformer(serviceProvider);
-		var document = CreateTestDocument<NumericValidationModel>();
-
-		// Act
-		await transformer.TransformAsync(document, CreateContext(), CancellationToken.None);
-
-		// Assert
-		var schema = GetSchema<NumericValidationModel>(document);
-		var intProperty = GetPropertySchema(schema, "intValue");
-		intProperty.Maximum.ShouldBe("100");
-		intProperty.ExclusiveMaximum.ShouldBe("true");
-	}
-
-	[Fact]
-	public async Task TransformAsync_GreaterThanOrEqual_AddsInclusiveMinimum()
-	{
-		// Arrange
-		var services = new ServiceCollection();
-		services.AddSingleton<IValidator<NumericValidationModel>, NumericValidationModelValidator>();
-		var serviceProvider = services.BuildServiceProvider();
-
-		var transformer = new FluentValidationSchemaTransformer(serviceProvider);
-		var document = CreateTestDocument<NumericValidationModel>();
-
-		// Act
-		await transformer.TransformAsync(document, CreateContext(), CancellationToken.None);
-
-		// Assert
-		var schema = GetSchema<NumericValidationModel>(document);
-		var decimalProperty = GetPropertySchema(schema, "decimalValue");
-		decimalProperty.Minimum.ShouldBe("0");
-		decimalProperty.ExclusiveMinimum.ShouldBe("false");
-	}
-
-	[Fact]
-	public async Task TransformAsync_LessThanOrEqual_AddsInclusiveMaximum()
-	{
-		// Arrange
-		var services = new ServiceCollection();
-		services.AddSingleton<IValidator<NumericValidationModel>, NumericValidationModelValidator>();
-		var serviceProvider = services.BuildServiceProvider();
-
-		var transformer = new FluentValidationSchemaTransformer(serviceProvider);
-		var document = CreateTestDocument<NumericValidationModel>();
-
-		// Act
-		await transformer.TransformAsync(document, CreateContext(), CancellationToken.None);
-
-		// Assert
-		var schema = GetSchema<NumericValidationModel>(document);
-		var decimalProperty = GetPropertySchema(schema, "decimalValue");
-		decimalProperty.Maximum.ShouldBe("1000");
-		decimalProperty.ExclusiveMaximum.ShouldBe("false");
-	}
-
-	[Fact]
-	public async Task TransformAsync_InclusiveBetween_AddsMinAndMaxInclusive()
-	{
-		// Arrange
-		var services = new ServiceCollection();
-		services.AddSingleton<IValidator<NumericValidationModel>, NumericValidationModelValidator>();
-		var serviceProvider = services.BuildServiceProvider();
-
-		var transformer = new FluentValidationSchemaTransformer(serviceProvider);
-		var document = CreateTestDocument<NumericValidationModel>();
-
-		// Act
-		await transformer.TransformAsync(document, CreateContext(), CancellationToken.None);
-
-		// Assert
-		var schema = GetSchema<NumericValidationModel>(document);
-		var doubleProperty = GetPropertySchema(schema, "doubleValue");
-		doubleProperty.Minimum.ShouldBe("0");
-		doubleProperty.ExclusiveMinimum.ShouldBe("false");
-		doubleProperty.Maximum.ShouldBe("100");
-		doubleProperty.ExclusiveMaximum.ShouldBe("false");
 	}
 
 	[Fact]

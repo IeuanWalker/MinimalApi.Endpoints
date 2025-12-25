@@ -38,20 +38,6 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 			CreditCard = "4111111111111111",
 			Url = "https://example.com",
 			
-			// Numeric validation examples
-			IntGreaterThan = 5,
-			IntLessThan = 50,
-			IntRange = 25,
-			DecimalGreaterThanOrEqual = 10.5m,
-			DecimalLessThanOrEqual = 500.0m,
-			DoubleInclusiveBetween = 50.0,
-			DoubleExclusiveBetween = 50.0,
-			PrecisionScale = 12345678.12m,
-			
-			// Comparison validation examples
-			Equal = 42,
-			NotEqual = 10,
-			
 			// Boolean validation
 			IsCompleted = false,
 			IsTest = true,
@@ -59,8 +45,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 			// Complex type validation
 			NestedObject = new PostTodoFluentValidation.NestedObjectModel
 			{
-				Name = "Valid Name",
-				Age = 25
+				Name = "Valid Name"
 			},
 			NestedObject2 = [],  // Empty list is allowed
 			
@@ -92,20 +77,9 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 			LengthRange = "12345",
 			CreditCard = "4111111111111111",
 			Url = "https://example.com",
-			IntGreaterThan = 5,
-			IntLessThan = 50,
-			IntRange = 25,
-			DecimalGreaterThanOrEqual = 10.5m,
-			DecimalLessThanOrEqual = 500.0m,
-			DoubleInclusiveBetween = 50.0,
-			DoubleExclusiveBetween = 50.0,
-			PrecisionScale = 12345678.12m,
-			Equal = 42,
-			NotEqual = 10,
 			NestedObject = new PostTodoFluentValidation.NestedObjectModel
 			{
-				Name = "Valid Name",
-				Age = 25
+				Name = "Valid Name"
 			},
 			NestedObject2 = [],
 			NullableString = "NotNull",
@@ -146,8 +120,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
 		request.NestedObject = new PostTodoFluentValidation.NestedObjectModel
 		{
-			Name = "", // Invalid - empty name
-			Age = 25
+			Name = "" // Invalid - empty name
 		};
 
 		// Act
@@ -158,59 +131,6 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 
 		string content = await response.Content.ReadAsStringAsync();
 		content.ShouldContain("name", Case.Insensitive);
-	}
-
-	[Fact]
-	public async Task PostTodoFluentValidation_WithInvalidAge_ReturnsBadRequest()
-	{
-		// Arrange
-		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
-		todoStore!.Clear();
-
-		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
-		request.NestedObject = new PostTodoFluentValidation.NestedObjectModel
-		{
-			Name = "Valid Name",
-			Age = -5 // Invalid - negative age
-		};
-
-		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
-
-		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-		string content = await response.Content.ReadAsStringAsync();
-		content.ShouldContain("age", Case.Insensitive);
-	}
-
-	[Fact]
-	public async Task PostTodoFluentValidation_WithAgeOverLimit_ReturnsBadRequest()
-	{
-		// Arrange
-		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
-		todoStore!.Clear();
-
-		PostTodoFluentValidation.RequestModel request = new()
-		{
-			Title = "Valid Title",
-			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "Valid Name",
-				Age = 85 // Invalid - over limit (should be less than 80)
-			},
-			NestedObject2 = []
-		};
-
-		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
-
-		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-		string content = await response.Content.ReadAsStringAsync();
-		content.ShouldContain("age", Case.Insensitive);
 	}
 
 	[Fact]
@@ -249,8 +169,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		request.Description = ""; // Invalid - empty description
 		request.NestedObject = new PostTodoFluentValidation.NestedObjectModel
 		{
-			Name = "", // Invalid - empty name
-			Age = -1 // Invalid - negative age
+			Name = "" // Invalid - empty name
 		};
 
 		// Act
@@ -265,7 +184,6 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		content.ShouldContain("title", Case.Insensitive);
 		content.ShouldContain("description", Case.Insensitive);
 		content.ShouldContain("name", Case.Insensitive);
-		content.ShouldContain("age", Case.Insensitive);
 	}
 
 	[Fact]
@@ -371,20 +289,6 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 			CreditCard = "4111111111111111",
 			Url = "https://example.com",
 			
-			// Numeric validation examples
-			IntGreaterThan = 5,
-			IntLessThan = 50,
-			IntRange = 25,
-			DecimalGreaterThanOrEqual = 10.5m,
-			DecimalLessThanOrEqual = 500.0m,
-			DoubleInclusiveBetween = 50.0,
-			DoubleExclusiveBetween = 50.0,
-			PrecisionScale = 12345678.12m,
-			
-			// Comparison validation examples
-			Equal = 42,
-			NotEqual = 10,
-			
 			// Boolean validation
 			IsCompleted = false,
 			IsTest = true,
@@ -392,8 +296,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 			// Complex type validation
 			NestedObject = new PostTodoFluentValidation.NestedObjectModel
 			{
-				Name = "Valid Name",
-				Age = 25
+				Name = "Valid Name"
 			},
 			NestedObject2 = [],
 			
