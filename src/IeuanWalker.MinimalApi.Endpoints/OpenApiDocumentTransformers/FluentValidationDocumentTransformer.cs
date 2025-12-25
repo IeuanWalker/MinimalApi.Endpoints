@@ -359,12 +359,38 @@ internal sealed class FluentValidationDocumentTransformer : IOpenApiDocumentTran
 	
 	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules)
 	{
-		// Get the schema name for the request type
-		string schemaName = requestType.FullName ?? requestType.Name;
+		// Try to find the schema using different naming strategies
+		// The schema name could be: FullName, FullName with + replaced by ., or just Name
+		if (document.Components?.Schemas == null)
+		{
+			return;
+		}
 		
-		// Find the schema in components
-		if (document.Components?.Schemas == null ||
-		    !document.Components.Schemas.TryGetValue(schemaName, out IOpenApiSchema? schemaInterface))
+		IOpenApiSchema? schemaInterface = null;
+		string? schemaKey = null;
+		
+		// Try full name as-is
+		string? fullName = requestType.FullName;
+		if (fullName != null && document.Components.Schemas.TryGetValue(fullName, out schemaInterface))
+		{
+			schemaKey = fullName;
+		}
+		// Try full name with + replaced by . (common convention for nested types)
+		else if (fullName != null && fullName.Contains('+'))
+		{
+			string modifiedName = fullName.Replace('+', '.');
+			if (document.Components.Schemas.TryGetValue(modifiedName, out schemaInterface))
+			{
+				schemaKey = modifiedName;
+			}
+		}
+		// Try just the type name
+		else if (document.Components.Schemas.TryGetValue(requestType.Name, out schemaInterface))
+		{
+			schemaKey = requestType.Name;
+		}
+		
+		if (schemaInterface == null || schemaKey == null)
 		{
 			return;
 		}
