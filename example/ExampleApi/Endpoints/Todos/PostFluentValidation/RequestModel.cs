@@ -5,14 +5,26 @@ namespace ExampleApi.Endpoints.Todos.PostFluentValidation;
 
 public class RequestModel
 {
+	// String validation examples
 	public string Title { get; set; } = string.Empty;
-
 	public string Description { get; set; } = string.Empty;
+	public string Email { get; set; } = string.Empty;
+	public string Pattern { get; set; } = string.Empty;
+	public string LengthRange { get; set; } = string.Empty;
+	public string CreditCard { get; set; } = string.Empty;
+	public string Url { get; set; } = string.Empty;
+
+	// Boolean validation
+	public bool IsCompleted { get; set; }
+	public bool IsTest { get; set; }
+
+	// Complex type validation
 	public NestedObjectModel NestedObject { get; set; } = new();
 	public List<NestedObject2Model> NestedObject2 { get; set; } = [];
 
-	public bool IsCompleted { get; set; }
-	public bool IsTest { get; set; }
+	// Null/empty validation
+	public string? NullableString { get; set; }
+	public string NonEmptyString { get; set; } = string.Empty;
 }
 
 public class NestedObjectModel
@@ -31,6 +43,7 @@ sealed class RequestModelValidator : Validator<RequestModel>
 {
 	public RequestModelValidator()
 	{
+		// String validation examples
 		RuleFor(x => x.Title)
 			.NotEmpty()
 			.MinimumLength(1)
@@ -40,6 +53,24 @@ sealed class RequestModelValidator : Validator<RequestModel>
 			.NotEmpty()
 			.MaximumLength(1000);
 
+		RuleFor(x => x.Email)
+			.EmailAddress();
+
+		RuleFor(x => x.Pattern)
+			.Matches(@"^[A-Z][a-z]+$")
+			.WithMessage("Must start with uppercase letter followed by lowercase letters");
+
+		RuleFor(x => x.LengthRange)
+			.Length(5, 15);
+
+		RuleFor(x => x.CreditCard)
+			.CreditCard();
+
+		RuleFor(x => x.Url)
+			.Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
+			.WithMessage("Must be a valid URL");
+
+		// Complex type validation
 		RuleFor(x => x.NestedObject)
 			.NotNull()
 			.SetValidator(new NestedObjectModelValidator());
@@ -48,6 +79,12 @@ sealed class RequestModelValidator : Validator<RequestModel>
 			.NotEmpty()
 			.SetValidator(new NestedObject2ModelValidator());
 
+		// Null/empty validation
+		RuleFor(x => x.NullableString)
+			.NotNull();
+
+		RuleFor(x => x.NonEmptyString)
+			.NotEmpty();
 	}
 }
 
@@ -59,10 +96,6 @@ sealed class NestedObjectModelValidator : Validator<NestedObjectModel>
 			.NotEmpty()
 			.MinimumLength(1)
 			.MaximumLength(200);
-
-		RuleFor(x => x.Age)
-			.GreaterThan(0)
-			.LessThan(80);
 	}
 }
 

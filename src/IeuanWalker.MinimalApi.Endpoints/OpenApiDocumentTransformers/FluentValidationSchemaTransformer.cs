@@ -1,0 +1,466 @@
+using System.Text.Json.Nodes;
+using FluentValidation;
+using FluentValidation.Validators;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi;
+
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+
+/// <summary>
+/// Transforms OpenAPI document by enriching schemas with FluentValidation rules.
+/// Extracts validation constraints from FluentValidation validators and applies them to the OpenAPI schemas.
+/// This transformer runs after all schemas are generated and modifies them to inline validation constraints.
+/// </summary>
+public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
+{
+	readonly IServiceProvider _serviceProvider;
+
+	public FluentValidationSchemaTransformer(IServiceProvider serviceProvider)
+	{
+		_serviceProvider = serviceProvider;
+	}
+
+	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return Task.CompletedTask;
+		}
+
+		// Process each schema in the document
+		foreach (var schemaEntry in document.Components.Schemas.ToList())
+		{
+			string schemaName = schemaEntry.Key;
+			IOpenApiSchema schemaInterface = schemaEntry.Value;
+
+			if (schemaInterface is not OpenApiSchema schema)
+			{
+				continue;
+			}
+
+			// Try to find the corresponding .NET type for this schema
+			Type? modelType = FindTypeForSchema(schemaName);
+			if (modelType is null)
+			{
+				continue;
+			}
+
+			// Get the validator for this type from DI
+			Type validatorType = typeof(IValidator<>).MakeGenericType(modelType);
+			object? validator = _serviceProvider.GetService(validatorType);
+
+			if (validator is null)
+			{
+				continue;
+			}
+
+			// Apply validation rules to this schema
+			ApplyValidationRules(schema, (IValidator)validator);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	static Type? FindTypeForSchema(string schemaName)
+	{
+		// Try to find the type by its full name
+		// Schema names are typically the full type name with + replaced by .
+		string typeName = schemaName.Replace('+', '.');
+		
+		// Try to load the type from all loaded assemblies
+		foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			Type? type = assembly.GetType(typeName);
+			if (type is not null)
+			{
+				return type;
+			}
+		}
+
+		return null;
+	}
+
+	static void ApplyValidationRules(OpenApiSchema schema, IValidator validator)
+	{
+		if (schema.Properties is null || schema.Properties.Count == 0)
+		{
+			return;
+		}
+
+		IValidatorDescriptor descriptor = validator.CreateDescriptor();
+		HashSet<string> requiredProperties = [];
+
+		// Get all members that have validators and process their rules
+		foreach (var memberGroup in descriptor.GetMembersWithValidators())
+		{
+			string memberName = memberGroup.Key;
+			foreach (IValidationRule rule in descriptor.GetRulesForMember(memberName))
+			{
+				ProcessRule(rule, schema, requiredProperties);
+			}
+		}
+
+		// Apply required properties to schema
+		if (requiredProperties.Count > 0)
+		{
+			schema.Required ??= new HashSet<string>();
+			foreach (string prop in requiredProperties)
+			{
+				schema.Required.Add(prop);
+			}
+		}
+
+		// Add extension to indicate schema is enriched with FluentValidation
+		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+		schema.Extensions["x-validation-source"] = new JsonNodeExtension(JsonValue.Create("FluentValidation"));
+	}
+
+	static void ProcessRule(IValidationRule rule, OpenApiSchema schema, HashSet<string> requiredProperties)
+	{
+		string? propertyName = rule.PropertyName;
+		if (string.IsNullOrEmpty(propertyName))
+		{
+			return;
+		}
+
+		// Convert property name to camelCase for OpenAPI
+		string schemaPropertyName = ToCamelCase(propertyName);
+
+		// Ensure the property exists in the schema
+		if (schema.Properties is null || !schema.Properties.ContainsKey(schemaPropertyName))
+		{
+			return;
+		}
+
+		IOpenApiSchema propertySchemaInterface = schema.Properties[schemaPropertyName];
+		OpenApiSchema propertySchema;
+		bool isComplexTypeReference = false;
+		
+		// If the property is a reference, we need to replace it with an inline schema
+		// so we can add validation constraints (but only for primitive types)
+		if (propertySchemaInterface is OpenApiSchemaReference schemaRef)
+		{
+			// Check if this is a primitive type that we can inline
+			string? refId = schemaRef.Reference?.Id;
+			if (refId is not null && IsPrimitiveType(refId))
+			{
+				// Create an inline schema based on the reference
+				propertySchema = CreateInlineSchemaFromReference(schemaRef);
+				// Replace the reference with the inline schema
+				schema.Properties[schemaPropertyName] = propertySchema;
+			}
+			else
+			{
+				// For complex types, keep the reference but still process NotNull/NotEmpty validators
+				// to add the property to the required array
+				isComplexTypeReference = true;
+				propertySchema = new OpenApiSchema(); // Dummy schema, won't be used
+			}
+		}
+		else if (propertySchemaInterface is OpenApiSchema existingSchema)
+		{
+			propertySchema = existingSchema;
+		}
+		else
+		{
+			return;
+		}
+
+		// Process each component validator for this property
+		foreach (IPropertyValidator validator in rule.Components.Select(c => c.Validator))
+		{
+			// For complex type references, only process NotNull/NotEmpty to add to required
+			if (isComplexTypeReference)
+			{
+				if (validator is INotNullValidator or INotEmptyValidator)
+				{
+					requiredProperties.Add(schemaPropertyName);
+				}
+			}
+			else
+			{
+				ApplyValidatorConstraints(validator, propertySchema, requiredProperties, schemaPropertyName);
+			}
+		}
+	}
+
+	static bool IsPrimitiveType(string refId)
+	{
+		return refId.Contains("System.String") ||
+		       refId.Contains("System.Int32") ||
+		       refId.Contains("System.Int64") ||
+		       refId.Contains("System.Decimal") ||
+		       refId.Contains("System.Double") ||
+		       refId.Contains("System.Single") ||
+		       refId.Contains("System.Boolean") ||
+		       refId.Contains("System.DateTime") ||
+		       refId.Contains("System.DateTimeOffset") ||
+		       refId.Contains("System.Guid");
+	}
+
+	static OpenApiSchema CreateInlineSchemaFromReference(OpenApiSchemaReference schemaRef)
+	{
+		// Map common system types to their OpenAPI equivalents
+		string? refId = schemaRef.Reference?.Id;
+		
+		if (refId is null)
+		{
+			return new OpenApiSchema();
+		}
+
+		// Handle common .NET types
+		if (refId.Contains("System.String"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.String };
+		}
+		if (refId.Contains("System.Int32") || refId.Contains("System.Int64"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.Integer };
+		}
+		if (refId.Contains("System.Decimal") || refId.Contains("System.Double") || refId.Contains("System.Single"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.Number };
+		}
+		if (refId.Contains("System.Boolean"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.Boolean };
+		}
+		if (refId.Contains("System.DateTime") || refId.Contains("System.DateTimeOffset"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.String, Format = "date-time" };
+		}
+		if (refId.Contains("System.Guid"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.String, Format = "uuid" };
+		}
+
+		// For complex types (non-primitives), we can't easily inline them
+		// Return a basic schema - the validation won't apply to these
+		return new OpenApiSchema();
+	}
+
+	static void ApplyValidatorConstraints(
+		IPropertyValidator validator,
+		OpenApiSchema propertySchema,
+		HashSet<string> requiredProperties,
+		string propertyName)
+	{
+		switch (validator)
+		{
+			case INotNullValidator:
+			case INotEmptyValidator:
+				requiredProperties.Add(propertyName);
+				// For strings, NotEmpty means minLength = 1
+				if (IsStringSchema(propertySchema))
+				{
+					propertySchema.MinLength = 1;
+				}
+				break;
+
+			// Check specific length validators before the general ILengthValidator
+			case IMinimumLengthValidator minLengthValidator:
+				if (IsStringSchema(propertySchema) && minLengthValidator.Min > 0)
+				{
+					propertySchema.MinLength = minLengthValidator.Min;
+				}
+				break;
+
+			case IMaximumLengthValidator maxLengthValidator:
+				if (IsStringSchema(propertySchema) && maxLengthValidator.Max > 0)
+				{
+					propertySchema.MaxLength = maxLengthValidator.Max;
+				}
+				break;
+
+			case ILengthValidator lengthValidator:
+				if (IsStringSchema(propertySchema))
+				{
+					if (lengthValidator.Max > 0)
+					{
+						propertySchema.MaxLength = lengthValidator.Max;
+					}
+					if (lengthValidator.Min > 0)
+					{
+						propertySchema.MinLength = lengthValidator.Min;
+					}
+				}
+				break;
+
+			case IComparisonValidator comparisonValidator:
+				ApplyComparisonConstraints(comparisonValidator, propertySchema);
+				break;
+
+			case IBetweenValidator betweenValidator:
+				ApplyBetweenConstraints(betweenValidator, propertySchema);
+				break;
+
+			case IRegularExpressionValidator regexValidator:
+				if (IsStringSchema(propertySchema) && !string.IsNullOrEmpty(regexValidator.Expression))
+				{
+					propertySchema.Pattern = regexValidator.Expression;
+				}
+				break;
+
+			case IEmailValidator:
+				if (IsStringSchema(propertySchema))
+				{
+					propertySchema.Format = "email";
+				}
+				break;
+		}
+	}
+
+	static void ApplyComparisonConstraints(IComparisonValidator comparisonValidator, OpenApiSchema propertySchema)
+	{
+		// FluentValidation 12.x changed the API - ValueToCompare is now a property that returns an object
+		// We need to use reflection to get the actual comparison value since it might be stored differently
+		object? valueToCompare = null;
+		
+		// Try to get ValueToCompare property
+		var valueProperty = comparisonValidator.GetType().GetProperty("ValueToCompare");
+		if (valueProperty is not null)
+		{
+			valueToCompare = valueProperty.GetValue(comparisonValidator);
+		}
+		
+		// If it's a Func<object>, invoke it to get the actual value
+		if (valueToCompare is Func<object> funcValue)
+		{
+			valueToCompare = funcValue();
+		}
+		else if (valueToCompare is Delegate delegateValue)
+		{
+			valueToCompare = delegateValue.DynamicInvoke();
+		}
+		
+		if (valueToCompare is null)
+		{
+			return;
+		}
+
+		string? numericValue = ConvertToString(valueToCompare);
+		if (numericValue is null)
+		{
+			return;
+		}
+
+		switch (comparisonValidator.Comparison)
+		{
+			case Comparison.GreaterThan:
+				propertySchema.Minimum = numericValue;
+				propertySchema.ExclusiveMinimum = "true";
+				break;
+			case Comparison.GreaterThanOrEqual:
+				propertySchema.Minimum = numericValue;
+				propertySchema.ExclusiveMinimum = "false";
+				break;
+			case Comparison.LessThan:
+				propertySchema.Maximum = numericValue;
+				propertySchema.ExclusiveMaximum = "true";
+				break;
+			case Comparison.LessThanOrEqual:
+				propertySchema.Maximum = numericValue;
+				propertySchema.ExclusiveMaximum = "false";
+				break;
+		}
+	}
+
+	static void ApplyBetweenConstraints(IBetweenValidator betweenValidator, OpenApiSchema propertySchema)
+	{
+		// Use reflection to get From and To properties since the interface might have changed
+		object? fromValue = null;
+		object? toValue = null;
+		
+		var fromProperty = betweenValidator.GetType().GetProperty("From");
+		var toProperty = betweenValidator.GetType().GetProperty("To");
+		
+		if (fromProperty is not null)
+		{
+			fromValue = fromProperty.GetValue(betweenValidator);
+		}
+		
+		if (toProperty is not null)
+		{
+			toValue = toProperty.GetValue(betweenValidator);
+		}
+		
+		// Handle Func values - FluentValidation may wrap values in Func<object>
+		if (fromValue is Func<object> fromFunc)
+		{
+			fromValue = fromFunc();
+		}
+		else if (fromValue is Delegate fromDelegate)
+		{
+			fromValue = fromDelegate.DynamicInvoke();
+		}
+		
+		if (toValue is Func<object> toFunc)
+		{
+			toValue = toFunc();
+		}
+		else if (toValue is Delegate toDelegate)
+		{
+			toValue = toDelegate.DynamicInvoke();
+		}
+		
+		string? from = ConvertToString(fromValue);
+		string? to = ConvertToString(toValue);
+
+		if (from is not null)
+		{
+			propertySchema.Minimum = from;
+			propertySchema.ExclusiveMinimum = "false";
+		}
+
+		if (to is not null)
+		{
+			propertySchema.Maximum = to;
+			propertySchema.ExclusiveMaximum = "false";
+		}
+	}
+
+	static string? ConvertToString(object value)
+	{
+		// Handle different types that FluentValidation might pass
+		switch (value)
+		{
+			case int intValue:
+				return intValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case long longValue:
+				return longValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case decimal decimalValue:
+				return decimalValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case double doubleValue:
+				return doubleValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case float floatValue:
+				return floatValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			default:
+				// Try to convert as a last resort
+				try
+				{
+					return Convert.ToDecimal(value).ToString(System.Globalization.CultureInfo.InvariantCulture);
+				}
+				catch
+				{
+					return null;
+				}
+		}
+	}
+
+	static bool IsStringSchema(OpenApiSchema schema)
+	{
+		// In OpenAPI 3.1, Type is JsonSchemaType? enum
+		return schema.Type.HasValue && schema.Type.Value == JsonSchemaType.String;
+	}
+
+	static string ToCamelCase(string str)
+	{
+		if (string.IsNullOrEmpty(str) || char.IsLower(str[0]))
+		{
+			return str;
+		}
+
+		return char.ToLowerInvariant(str[0]) + str[1..];
+	}
+}

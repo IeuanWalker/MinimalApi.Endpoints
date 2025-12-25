@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
@@ -27,6 +28,7 @@ static class ScalarConfiguration
 			{
 				options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
 				options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
+				options.AddFluentValidationSchemas();
 				options.AddDocumentTransformer((document, context, _) =>
 				{
 					IApiVersionDescriptionProvider provider = context.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
