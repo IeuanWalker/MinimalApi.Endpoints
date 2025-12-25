@@ -127,20 +127,23 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 		Console.WriteLine($"[DEBUG] Created inline schema: Type={inlineSchema.Type}, Format={inlineSchema.Format}");
 
-		// Collect custom rules for description
-		List<string> customRuleMessages = [];
+		// Collect all rule descriptions
+		List<string> ruleDescriptions = [];
 
 		// Apply all rules to this schema
 		foreach (var rule in rules)
 		{
 			Console.WriteLine($"[DEBUG] Applying rule: {rule.GetType().Name} for property {rule.PropertyName}");
 			
-			// Check if this is a custom rule
-			if (IsCustomRule(rule))
+			// Get human-readable description for this rule
+			string? ruleDescription = GetRuleDescription(rule);
+			if (!string.IsNullOrEmpty(ruleDescription))
 			{
-				customRuleMessages.Add(rule.ErrorMessage);
+				ruleDescriptions.Add(ruleDescription);
 			}
-			else
+			
+			// Apply rule to schema (for non-custom rules)
+			if (!IsCustomRule(rule))
 			{
 				ApplyRuleToSchema(rule, inlineSchema);
 			}
@@ -148,19 +151,19 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			Console.WriteLine($"[DEBUG] After applying rule - Minimum='{inlineSchema.Minimum}', Maximum='{inlineSchema.Maximum}'");
 		}
 
-		// Add custom rules to description if any exist
-		if (customRuleMessages.Count > 0)
+		// Add all rule descriptions to the description field if any exist
+		if (ruleDescriptions.Count > 0)
 		{
-			string customRulesSection = "Custom validation rules:\n" + string.Join("\n", customRuleMessages.Select(msg => $"- {msg}"));
+			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Select(msg => $"- {msg}"));
 			
 			// Append to existing description if present, otherwise set new description
 			if (!string.IsNullOrEmpty(inlineSchema.Description))
 			{
-				inlineSchema.Description = $"{inlineSchema.Description}\n\n{customRulesSection}";
+				inlineSchema.Description = $"{inlineSchema.Description}\n\n{rulesSection}";
 			}
 			else
 			{
-				inlineSchema.Description = customRulesSection;
+				inlineSchema.Description = rulesSection;
 			}
 		}
 
@@ -171,6 +174,75 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 	{
 		Type ruleType = rule.GetType();
 		return ruleType.IsGenericType && ruleType.GetGenericTypeDefinition() == typeof(Validation.CustomRule<>);
+	}
+
+	static string? GetRuleDescription(Validation.ValidationRule rule)
+	{
+		return rule switch
+		{
+			Validation.RequiredRule => "Required",
+			
+			Validation.StringLengthRule stringLengthRule => GetStringLengthDescription(stringLengthRule),
+			
+			Validation.PatternRule patternRule => $"Must match pattern: {patternRule.Pattern}",
+			
+			Validation.EmailRule => "Must be a valid email address",
+			
+			Validation.UrlRule => "Must be a valid URL",
+			
+			Validation.RangeRule<int> intRange => GetRangeDescription(intRange.Minimum, intRange.Maximum, intRange.ExclusiveMinimum, intRange.ExclusiveMaximum),
+			
+			Validation.RangeRule<long> longRange => GetRangeDescription(longRange.Minimum, longRange.Maximum, longRange.ExclusiveMinimum, longRange.ExclusiveMaximum),
+			
+			Validation.RangeRule<decimal> decimalRange => GetRangeDescription(decimalRange.Minimum, decimalRange.Maximum, decimalRange.ExclusiveMinimum, decimalRange.ExclusiveMaximum),
+			
+			Validation.RangeRule<double> doubleRange => GetRangeDescription(doubleRange.Minimum, doubleRange.Maximum, doubleRange.ExclusiveMinimum, doubleRange.ExclusiveMaximum),
+			
+			Validation.RangeRule<float> floatRange => GetRangeDescription(floatRange.Minimum, floatRange.Maximum, floatRange.ExclusiveMinimum, floatRange.ExclusiveMaximum),
+			
+			// For custom rules, return the error message directly
+			_ when IsCustomRule(rule) => rule.ErrorMessage,
+			
+			_ => null
+		};
+	}
+
+	static string? GetStringLengthDescription(Validation.StringLengthRule rule)
+	{
+		if (rule.MinLength.HasValue && rule.MaxLength.HasValue)
+		{
+			return $"Length must be between {rule.MinLength.Value} and {rule.MaxLength.Value} characters";
+		}
+		else if (rule.MinLength.HasValue)
+		{
+			return $"Minimum length: {rule.MinLength.Value} characters";
+		}
+		else if (rule.MaxLength.HasValue)
+		{
+			return $"Maximum length: {rule.MaxLength.Value} characters";
+		}
+		return null;
+	}
+
+	static string? GetRangeDescription<T>(T? minimum, T? maximum, bool exclusiveMin, bool exclusiveMax) where T : struct, IComparable<T>
+	{
+		if (minimum.HasValue && maximum.HasValue)
+		{
+			string minOperator = exclusiveMin ? ">" : ">=";
+			string maxOperator = exclusiveMax ? "<" : "<=";
+			return $"Must be {minOperator} {minimum.Value} and {maxOperator} {maximum.Value}";
+		}
+		else if (minimum.HasValue)
+		{
+			string minOperator = exclusiveMin ? ">" : ">=";
+			return $"Must be {minOperator} {minimum.Value}";
+		}
+		else if (maximum.HasValue)
+		{
+			string maxOperator = exclusiveMax ? "<" : "<=";
+			return $"Must be {maxOperator} {maximum.Value}";
+		}
+		return null;
 	}
 
 	static void ApplyRuleToSchema(Validation.ValidationRule rule, OpenApiSchema schema)
