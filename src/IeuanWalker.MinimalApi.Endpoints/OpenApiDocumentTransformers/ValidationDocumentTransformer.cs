@@ -42,10 +42,54 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 	
 	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules)
 	{
-		// Get all registered FluentValidation validators from DI
-		var validators = context.ApplicationServices.GetServices<IValidator>();
+		// FluentValidation validators are registered as IValidator<T>, not IValidator
+		// We need to scan assemblies to find all types that implement IValidator<T>
 		
-		Console.WriteLine($"[DEBUG-FV] Found {validators.Count()} FluentValidation validators");
+		List<IValidator> validators = [];
+		
+		// Get all loaded assemblies
+		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+		
+		foreach (Assembly assembly in assemblies)
+		{
+			// Skip system assemblies
+			if (assembly.FullName?.StartsWith("System.") == true || 
+			    assembly.FullName?.StartsWith("Microsoft.") == true ||
+			    assembly.FullName?.StartsWith("netstandard") == true)
+			{
+				continue;
+			}
+			
+			try
+			{
+				// Find all validator types in this assembly
+				Type[] types = assembly.GetTypes();
+				foreach (Type type in types)
+				{
+					// Check if this type implements IValidator<T>
+					Type? validatorInterface = type.GetInterfaces()
+						.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
+					
+					if (validatorInterface != null && !type.IsAbstract && !type.IsInterface)
+					{
+						// Try to get this validator from DI
+						object? validatorInstance = context.ApplicationServices.GetService(validatorInterface);
+						if (validatorInstance is IValidator validator)
+						{
+							validators.Add(validator);
+							Console.WriteLine($"[DEBUG-FV] Found validator: {type.Name} for {validatorInterface.GetGenericArguments()[0].Name}");
+						}
+					}
+				}
+			}
+			catch (ReflectionTypeLoadException)
+			{
+				// Skip assemblies that can't be reflected
+				continue;
+			}
+		}
+		
+		Console.WriteLine($"[DEBUG-FV] Found {validators.Count} FluentValidation validators");
 		
 		foreach (var validator in validators)
 		{
