@@ -29,14 +29,44 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 
 		PostTodoFluentValidation.RequestModel request = new()
 		{
+			// String validation examples
 			Title = "Valid Todo Title",
 			Description = "Valid Description",
+			Email = "test@example.com",
+			Pattern = "Hello",
+			LengthRange = "12345",
+			CreditCard = "4111111111111111",
+			Url = "https://example.com",
+			
+			// Numeric validation examples
+			IntGreaterThan = 5,
+			IntLessThan = 50,
+			IntRange = 25,
+			DecimalGreaterThanOrEqual = 10.5m,
+			DecimalLessThanOrEqual = 500.0m,
+			DoubleInclusiveBetween = 50.0,
+			DoubleExclusiveBetween = 50.0,
+			PrecisionScale = 12345678.12m,
+			
+			// Comparison validation examples
+			Equal = 42,
+			NotEqual = 10,
+			
+			// Boolean validation
+			IsCompleted = false,
+			IsTest = true,
+			
+			// Complex type validation
 			NestedObject = new PostTodoFluentValidation.NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
 			},
-			NestedObject2 = []  // Empty list is allowed
+			NestedObject2 = [],  // Empty list is allowed
+			
+			// Null/empty validation
+			NullableString = "NotNull",
+			NonEmptyString = "NotEmpty"
 		};
 
 		// Act
@@ -55,14 +85,31 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		// Arrange
 		PostTodoFluentValidation.RequestModel request = new()
 		{
-			Title = "", // ? Invalid - empty title
+			Title = "", // Invalid - empty title
 			Description = "Test Description",
+			Email = "test@example.com",
+			Pattern = "Hello",
+			LengthRange = "12345",
+			CreditCard = "4111111111111111",
+			Url = "https://example.com",
+			IntGreaterThan = 5,
+			IntLessThan = 50,
+			IntRange = 25,
+			DecimalGreaterThanOrEqual = 10.5m,
+			DecimalLessThanOrEqual = 500.0m,
+			DoubleInclusiveBetween = 50.0,
+			DoubleExclusiveBetween = 50.0,
+			PrecisionScale = 12345678.12m,
+			Equal = 42,
+			NotEqual = 10,
 			NestedObject = new PostTodoFluentValidation.NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
 			},
-			NestedObject2 = []
+			NestedObject2 = [],
+			NullableString = "NotNull",
+			NonEmptyString = "NotEmpty"
 		};
 
 		// Act
@@ -79,17 +126,8 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 	public async Task PostTodoFluentValidation_WithNullTitle_ReturnsBadRequest()
 	{
 		// Arrange
-		PostTodoFluentValidation.RequestModel request = new()
-		{
-			Title = null!, // ? Invalid - null title
-			Description = "Test Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "Valid Name",
-				Age = 25
-			},
-			NestedObject2 = []
-		};
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.Title = null!; // Invalid - null title
 
 		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
@@ -105,16 +143,11 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.NestedObject = new PostTodoFluentValidation.NestedObjectModel
 		{
-			Title = "Valid Title",
-			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "", // Invalid - empty name
-				Age = 25
-			},
-			NestedObject2 = []
+			Name = "", // Invalid - empty name
+			Age = 25
 		};
 
 		// Act
@@ -134,16 +167,11 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.NestedObject = new PostTodoFluentValidation.NestedObjectModel
 		{
-			Title = "Valid Title",
-			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "Valid Name",
-				Age = -5 // Invalid - negative age
-			},
-			NestedObject2 = []
+			Name = "Valid Name",
+			Age = -5 // Invalid - negative age
 		};
 
 		// Act
@@ -192,21 +220,12 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
-		{
-			Title = "Valid Title",
-			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "Valid Name",
-				Age = 25
-			},
-			NestedObject2 =
-			[
-				new PostTodoFluentValidation.NestedObject2Model { Note = "Valid note" },
-				new PostTodoFluentValidation.NestedObject2Model { Note = "" } // Invalid - empty note
-			]
-		};
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.NestedObject2 =
+		[
+			new PostTodoFluentValidation.NestedObject2Model { Note = "Valid note" },
+			new PostTodoFluentValidation.NestedObject2Model { Note = "" } // Invalid - empty note
+		];
 
 		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
@@ -225,16 +244,13 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.Title = ""; // Invalid - empty title
+		request.Description = ""; // Invalid - empty description
+		request.NestedObject = new PostTodoFluentValidation.NestedObjectModel
 		{
-			Title = "", // Invalid - empty title
-			Description = "", // Invalid - empty description  
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "", // Invalid - empty name
-				Age = -1 // Invalid - negative age
-			},
-			NestedObject2 = []
+			Name = "", // Invalid - empty name
+			Age = -1 // Invalid - negative age
 		};
 
 		// Act
@@ -261,17 +277,8 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 
 		string tooLongTitle = new('X', 201); // Over the 200 character limit
 
-		PostTodoFluentValidation.RequestModel request = new()
-		{
-			Title = tooLongTitle,
-			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "Valid Name",
-				Age = 25
-			},
-			NestedObject2 = []
-		};
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.Title = tooLongTitle;
 
 		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
@@ -292,17 +299,8 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 
 		string tooLongDescription = new('X', 1001); // Over the 1000 character limit
 
-		PostTodoFluentValidation.RequestModel request = new()
-		{
-			Title = "Valid Title",
-			Description = tooLongDescription,
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "Valid Name",
-				Age = 25
-			},
-			NestedObject2 = []
-		};
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.Description = tooLongDescription;
 
 		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
@@ -321,13 +319,8 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
-		{
-			Title = "Valid Title",
-			Description = "Valid Description",
-			NestedObject = null!, // Invalid - null nested object
-			NestedObject2 = []
-		};
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.NestedObject = null!; // Invalid - null nested object
 
 		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
@@ -346,22 +339,13 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
-		{
-			Title = "Valid Todo Title",
-			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
-			{
-				Name = "Valid Name",
-				Age = 25
-			},
-			NestedObject2 =
-			[
-				new PostTodoFluentValidation.NestedObject2Model { Note = "First note" },
-				new PostTodoFluentValidation.NestedObject2Model { Note = "Second note" },
-				new PostTodoFluentValidation.NestedObject2Model { Note = "Third note" }
-			]
-		};
+		PostTodoFluentValidation.RequestModel request = CreateValidRequest();
+		request.NestedObject2 =
+		[
+			new PostTodoFluentValidation.NestedObject2Model { Note = "First note" },
+			new PostTodoFluentValidation.NestedObject2Model { Note = "Second note" },
+			new PostTodoFluentValidation.NestedObject2Model { Note = "Third note" }
+		];
 
 		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
@@ -371,5 +355,51 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		PostTodoFluentValidation.ResponseModel? createdTodo = await response.Content.ReadFromJsonAsync<PostTodoFluentValidation.ResponseModel>();
 		createdTodo.ShouldNotBeNull();
 		createdTodo.Title.ShouldBe("Valid Todo Title");
+	}
+	
+	// Helper method to create a valid request with all required fields
+	static PostTodoFluentValidation.RequestModel CreateValidRequest()
+	{
+		return new PostTodoFluentValidation.RequestModel
+		{
+			// String validation examples
+			Title = "Valid Todo Title",
+			Description = "Valid Description",
+			Email = "test@example.com",
+			Pattern = "Hello",
+			LengthRange = "12345",
+			CreditCard = "4111111111111111",
+			Url = "https://example.com",
+			
+			// Numeric validation examples
+			IntGreaterThan = 5,
+			IntLessThan = 50,
+			IntRange = 25,
+			DecimalGreaterThanOrEqual = 10.5m,
+			DecimalLessThanOrEqual = 500.0m,
+			DoubleInclusiveBetween = 50.0,
+			DoubleExclusiveBetween = 50.0,
+			PrecisionScale = 12345678.12m,
+			
+			// Comparison validation examples
+			Equal = 42,
+			NotEqual = 10,
+			
+			// Boolean validation
+			IsCompleted = false,
+			IsTest = true,
+			
+			// Complex type validation
+			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			{
+				Name = "Valid Name",
+				Age = 25
+			},
+			NestedObject2 = [],
+			
+			// Null/empty validation
+			NullableString = "NotNull",
+			NonEmptyString = "NotEmpty"
+		};
 	}
 }

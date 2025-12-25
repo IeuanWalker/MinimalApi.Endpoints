@@ -742,8 +742,15 @@
         "required": [
           "title",
           "description",
+          "email",
+          "pattern",
+          "lengthRange",
+          "creditCard",
+          "url",
           "nestedObject",
-          "nestedObject2"
+          "nestedObject2",
+          "nullableString",
+          "nonEmptyString"
         ],
         "type": "object",
         "properties": {
@@ -757,17 +764,101 @@
             "minLength": 1,
             "type": "string"
           },
-          "nestedObject": {
-            "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel"
+          "email": {
+            "format": "email",
+            "type": "string"
           },
-          "nestedObject2": {
-            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          "pattern": {
+            "pattern": "^[A-Z][a-z]+$",
+            "type": "string"
+          },
+          "lengthRange": {
+            "maxLength": 15,
+            "minLength": 5,
+            "type": "string"
+          },
+          "creditCard": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "intGreaterThan": {
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "integer"
+          },
+          "intLessThan": {
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "integer"
+          },
+          "intRange": {
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "integer"
+          },
+          "decimalGreaterThanOrEqual": {
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "decimalLessThanOrEqual": {
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "doubleInclusiveBetween": {
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "doubleExclusiveBetween": {
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "number"
+          },
+          "precisionScale": {
+            "type": "number"
+          },
+          "equal": {
+            "type": "integer"
+          },
+          "notEqual": {
+            "type": "integer"
           },
           "isCompleted": {
             "$ref": "#/components/schemas/System.Boolean"
           },
           "isTest": {
             "$ref": "#/components/schemas/System.Boolean"
+          },
+          "nestedObject": {
+            "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel"
+          },
+          "nestedObject2": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          },
+          "nullableString": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "nonEmptyString": {
+            "minLength": 1,
+            "type": "string"
           }
         },
         "x-validation-source": "FluentValidation"
