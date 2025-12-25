@@ -313,7 +313,27 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 
 	static void ApplyComparisonConstraints(IComparisonValidator comparisonValidator, OpenApiSchema propertySchema)
 	{
-		object? valueToCompare = comparisonValidator.ValueToCompare;
+		// FluentValidation 12.x changed the API - ValueToCompare is now a property that returns an object
+		// We need to use reflection to get the actual comparison value since it might be stored differently
+		object? valueToCompare = null;
+		
+		// Try to get ValueToCompare property
+		var valueProperty = comparisonValidator.GetType().GetProperty("ValueToCompare");
+		if (valueProperty is not null)
+		{
+			valueToCompare = valueProperty.GetValue(comparisonValidator);
+		}
+		
+		// If it's a Func<object>, invoke it to get the actual value
+		if (valueToCompare is Func<object> funcValue)
+		{
+			valueToCompare = funcValue();
+		}
+		else if (valueToCompare is Delegate delegateValue)
+		{
+			valueToCompare = delegateValue.DynamicInvoke();
+		}
+		
 		if (valueToCompare is null)
 		{
 			return;
@@ -348,8 +368,44 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 
 	static void ApplyBetweenConstraints(IBetweenValidator betweenValidator, OpenApiSchema propertySchema)
 	{
-		string? from = ConvertToString(betweenValidator.From);
-		string? to = ConvertToString(betweenValidator.To);
+		// Use reflection to get From and To properties since the interface might have changed
+		object? fromValue = null;
+		object? toValue = null;
+		
+		var fromProperty = betweenValidator.GetType().GetProperty("From");
+		var toProperty = betweenValidator.GetType().GetProperty("To");
+		
+		if (fromProperty is not null)
+		{
+			fromValue = fromProperty.GetValue(betweenValidator);
+		}
+		
+		if (toProperty is not null)
+		{
+			toValue = toProperty.GetValue(betweenValidator);
+		}
+		
+		// Handle Func values - FluentValidation may wrap values in Func<object>
+		if (fromValue is Func<object> fromFunc)
+		{
+			fromValue = fromFunc();
+		}
+		else if (fromValue is Delegate fromDelegate)
+		{
+			fromValue = fromDelegate.DynamicInvoke();
+		}
+		
+		if (toValue is Func<object> toFunc)
+		{
+			toValue = toFunc();
+		}
+		else if (toValue is Delegate toDelegate)
+		{
+			toValue = toDelegate.DynamicInvoke();
+		}
+		
+		string? from = ConvertToString(fromValue);
+		string? to = ConvertToString(toValue);
 
 		if (from is not null)
 		{
@@ -366,21 +422,29 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 
 	static string? ConvertToString(object value)
 	{
-		try
+		// Handle different types that FluentValidation might pass
+		switch (value)
 		{
-			return Convert.ToDecimal(value).ToString(System.Globalization.CultureInfo.InvariantCulture);
-		}
-		catch (InvalidCastException)
-		{
-			return null;
-		}
-		catch (FormatException)
-		{
-			return null;
-		}
-		catch (OverflowException)
-		{
-			return null;
+			case int intValue:
+				return intValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case long longValue:
+				return longValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case decimal decimalValue:
+				return decimalValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case double doubleValue:
+				return doubleValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			case float floatValue:
+				return floatValue.ToString(System.Globalization.CultureInfo.InvariantCulture);
+			default:
+				// Try to convert as a last resort
+				try
+				{
+					return Convert.ToDecimal(value).ToString(System.Globalization.CultureInfo.InvariantCulture);
+				}
+				catch
+				{
+					return null;
+				}
 		}
 	}
 
