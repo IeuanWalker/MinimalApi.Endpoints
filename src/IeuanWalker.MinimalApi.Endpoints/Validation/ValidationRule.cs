@@ -111,6 +111,24 @@ public sealed record EmailRule : ValidationRule
 }
 
 /// <summary>
+/// Validation rule for URLs
+/// </summary>
+public sealed record UrlRule : ValidationRule
+{
+	static readonly UrlAttribute _urlValidator = new();
+
+	public override bool IsValid(object? value)
+	{
+		if (value is not string str)
+		{
+			return true; // Not a string, let other validators handle it
+		}
+
+		return _urlValidator.IsValid(str);
+	}
+}
+
+/// <summary>
 /// Validation rule for numeric range constraints
 /// </summary>
 public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable<T>

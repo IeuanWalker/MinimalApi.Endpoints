@@ -97,6 +97,19 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	}
 
 	/// <summary>
+	/// Requires string to be a valid URL
+	/// </summary>
+	public PropertyValidationBuilder<TRequest, TProperty> Url(string? errorMessage = null)
+	{
+		_rules.Add(new UrlRule
+		{
+			PropertyName = _propertyName,
+			ErrorMessage = errorMessage ?? $"{_propertyName} must be a valid URL"
+		});
+		return this;
+	}
+
+	/// <summary>
 	/// Applies a custom validation function
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> Custom(

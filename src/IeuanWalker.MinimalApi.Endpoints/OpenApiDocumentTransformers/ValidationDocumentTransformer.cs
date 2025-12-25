@@ -78,16 +78,31 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		// Group rules by property name
 		var rulesByProperty = rules.GroupBy(r => r.PropertyName);
 
+		// Track required properties
+		List<string> requiredProperties = [];
+
 		// Apply validation rules to properties
 		foreach (var propertyRules in rulesByProperty)
 		{
 			string propertyKey = ToCamelCase(propertyRules.Key);
+
+			// Check if any rule for this property is RequiredRule
+			if (propertyRules.Any(r => r is Validation.RequiredRule))
+			{
+				requiredProperties.Add(propertyKey);
+			}
 
 			if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 			{
 				// Create inline schema with all validation constraints for this property
 				schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, propertyRules.ToList());
 			}
+		}
+
+		// Set required properties on the schema
+		if (requiredProperties.Count > 0)
+		{
+			schema.Required = new HashSet<string>(requiredProperties);
 		}
 	}
 
@@ -138,6 +153,10 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 			case Validation.EmailRule:
 				schema.Format = "email";
+				break;
+
+			case Validation.UrlRule:
+				schema.Format = "uri";
 				break;
 
 			case Validation.RangeRule<int> intRangeRule:
@@ -214,6 +233,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			Validation.StringLengthRule => JsonSchemaType.String,
 			Validation.PatternRule => JsonSchemaType.String,
 			Validation.EmailRule => JsonSchemaType.String,
+			Validation.UrlRule => JsonSchemaType.String,
 			Validation.RangeRule<int> => JsonSchemaType.Integer,
 			Validation.RangeRule<long> => JsonSchemaType.Integer,
 			Validation.RangeRule<decimal> => JsonSchemaType.Number,
@@ -228,6 +248,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		return rule switch
 		{
 			Validation.EmailRule => "email",
+			Validation.UrlRule => "uri",
 			Validation.RangeRule<int> => "int32",
 			Validation.RangeRule<long> => "int64",
 			Validation.RangeRule<float> => "float",

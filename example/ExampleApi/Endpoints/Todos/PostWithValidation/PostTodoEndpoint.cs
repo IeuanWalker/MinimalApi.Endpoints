@@ -28,7 +28,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 			.Version(1.0)
 			.WithValidation<RequestModel>(config =>
 			{
-				// String validation
+				// String validation - required with length constraints
 				config.Property(x => x.Title)
 					.Required()
 					.MinLength(1)
@@ -38,21 +38,47 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 				config.Property(x => x.Description)
 					.MaxLength(1000);
 
-				// Email validation
+				// Email validation - required with format
 				config.Property(x => x.Email)
 					.Required()
 					.Email();
 
-				// Numeric range validation
+				// URL validation - optional with format
+				config.Property(x => x.Url)
+					.Url();
+
+				// Phone number with pattern validation
+				config.Property(x => x.PhoneNumber)
+					.Pattern(@"^\+?[1-9]\d{1,14}$", "Phone number must be in E.164 format");
+
+				// Numeric range validation - integer
 				config.Property(x => x.Priority)
 					.GreaterThanOrEqual(0)
 					.LessThanOrEqual(10);
 
-			// Date validation with custom rule
+				// Decimal range validation (optional, so we use Custom)
+				config.Property(x => x.Budget)
+					.Custom(
+						budget => budget == null || budget.Value > 0m,
+						"Budget must be greater than 0");
+
+				// Double range validation with custom implementation for nullable
+				config.Property(x => x.Rating)
+					.Custom(
+						rating => rating == null || (rating.Value >= 0.0 && rating.Value <= 5.0),
+						"Rating must be between 0 and 5");
+
+				// Date validation with custom rule
 				config.Property(x => x.DueDate)
 					.Custom(
 						dueDate => dueDate == null || dueDate.Value > DateTime.Now,
 						"Due date must be in the future");
+
+				// DateTimeOffset validation
+				config.Property(x => x.CreatedAt)
+					.Custom(
+						created => created == null || created.Value <= DateTimeOffset.Now,
+						"Created date cannot be in the future");
 
 				// Cross-field validation
 				config.CrossField(request =>
@@ -63,6 +89,12 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 					if (request.Priority >= 8 && request.DueDate == null)
 					{
 						errors["DueDate"] = ["High priority items (8+) must have a due date"];
+					}
+
+					// Validate that completed items have a completion date
+					if (request.IsCompleted && request.Status != TodoStatus.Completed)
+					{
+						errors["Status"] = ["Completed items must have Status set to Completed"];
 					}
 
 					return errors;
