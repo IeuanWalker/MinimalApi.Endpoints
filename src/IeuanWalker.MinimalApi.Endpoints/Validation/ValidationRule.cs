@@ -113,7 +113,7 @@ public sealed record EmailRule : ValidationRule
 /// <summary>
 /// Validation rule for numeric range constraints
 /// </summary>
-public sealed record RangeRule<T> : ValidationRule where T : IComparable<T>
+public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable<T>
 {
 	/// <summary>
 	/// Minimum allowed value
@@ -142,9 +142,9 @@ public sealed record RangeRule<T> : ValidationRule where T : IComparable<T>
 			return true; // Not the expected type, let other validators handle it
 		}
 
-		if (Minimum != null)
+		if (Minimum.HasValue)
 		{
-			int minCompare = comparable.CompareTo(Minimum);
+			int minCompare = comparable.CompareTo(Minimum.Value);
 			if (ExclusiveMinimum && minCompare <= 0)
 			{
 				return false;
@@ -156,9 +156,9 @@ public sealed record RangeRule<T> : ValidationRule where T : IComparable<T>
 			}
 		}
 
-		if (Maximum != null)
+		if (Maximum.HasValue)
 		{
-			int maxCompare = comparable.CompareTo(Maximum);
+			int maxCompare = comparable.CompareTo(Maximum.Value);
 			if (ExclusiveMaximum && maxCompare >= 0)
 			{
 				return false;

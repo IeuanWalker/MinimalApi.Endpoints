@@ -127,7 +127,7 @@ public static class PropertyValidationBuilderExtensions
 		this PropertyValidationBuilder<TRequest, TProperty> builder,
 		TProperty value,
 		string? errorMessage = null)
-		where TProperty : IComparable<TProperty>
+		where TProperty : struct, IComparable<TProperty>
 	{
 		// Use reflection to access the private members
 		string propertyName = GetPropertyName(builder);
@@ -150,7 +150,7 @@ public static class PropertyValidationBuilderExtensions
 		this PropertyValidationBuilder<TRequest, TProperty> builder,
 		TProperty value,
 		string? errorMessage = null)
-		where TProperty : IComparable<TProperty>
+		where TProperty : struct, IComparable<TProperty>
 	{
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
@@ -172,7 +172,7 @@ public static class PropertyValidationBuilderExtensions
 		this PropertyValidationBuilder<TRequest, TProperty> builder,
 		TProperty value,
 		string? errorMessage = null)
-		where TProperty : IComparable<TProperty>
+		where TProperty : struct, IComparable<TProperty>
 	{
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
@@ -194,7 +194,7 @@ public static class PropertyValidationBuilderExtensions
 		this PropertyValidationBuilder<TRequest, TProperty> builder,
 		TProperty value,
 		string? errorMessage = null)
-		where TProperty : IComparable<TProperty>
+		where TProperty : struct, IComparable<TProperty>
 	{
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
@@ -217,7 +217,7 @@ public static class PropertyValidationBuilderExtensions
 		TProperty min,
 		TProperty max,
 		string? errorMessage = null)
-		where TProperty : IComparable<TProperty>
+		where TProperty : struct, IComparable<TProperty>
 	{
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
