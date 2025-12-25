@@ -75,6 +75,42 @@ app.MapPost("/todos", async (TodoRequest request) =>
 
 ## Manual Validation Rules
 
+### Custom Property Descriptions
+
+You can add custom descriptions to properties that will appear before the validation rules:
+
+```csharp
+config.Property(x => x.Title)
+    .Description("The title of the todo item")
+    .Required()
+    .MinLength(1)
+    .MaxLength(200);
+
+config.Property(x => x.Email)
+    .Description("Contact email for notifications")
+    .Required()
+    .Email();
+```
+
+**Generated OpenAPI:**
+```json
+{
+  "title": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string",
+    "description": "The title of the todo item\n\nValidation rules:\n- Required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
+  },
+  "email": {
+    "type": "string",
+    "format": "email",
+    "description": "Contact email for notifications\n\nValidation rules:\n- Required\n- Must be a valid email address"
+  }
+}
+```
+
+**Note:** The custom description appears first, followed by a blank line, then the validation rules section.
+
 ### String Validation
 
 ```csharp

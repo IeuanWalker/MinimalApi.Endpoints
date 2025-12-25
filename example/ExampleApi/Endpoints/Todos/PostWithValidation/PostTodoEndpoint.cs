@@ -30,16 +30,19 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 			{
 				// String validation - required with length constraints
 				config.Property(x => x.Title)
+					.Description("The title of the todo item")
 					.Required()
 					.MinLength(1)
 					.MaxLength(200);
 
 				// Optional string with max length
 				config.Property(x => x.Description)
+					.Description("Optional detailed description of the task")
 					.MaxLength(1000);
 
 				// Email validation - required with format
 				config.Property(x => x.Email)
+					.Description("Contact email for notifications about this todo")
 					.Required()
 					.Email();
 

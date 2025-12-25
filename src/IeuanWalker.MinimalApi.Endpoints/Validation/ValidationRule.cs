@@ -88,3 +88,14 @@ public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable
 /// Custom validation rule (note: custom rules cannot be represented in OpenAPI schema and are ignored)
 /// </summary>
 public sealed record CustomRule<TProperty> : ValidationRule;
+
+/// <summary>
+/// Description rule for adding custom descriptions to properties in OpenAPI documentation
+/// </summary>
+public sealed record DescriptionRule : ValidationRule
+{
+	/// <summary>
+	/// Custom description to display for the property
+	/// </summary>
+	public required string Description { get; init; }
+}

@@ -124,6 +124,22 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		return this;
 	}
 
+	/// <summary>
+	/// Adds a custom description to the property in OpenAPI documentation.
+	/// The description will be prepended before validation rules.
+	/// </summary>
+	/// <param name="description">Custom description for the property</param>
+	public PropertyValidationBuilder<TRequest, TProperty> Description(string description)
+	{
+		_rules.Add(new DescriptionRule
+		{
+			PropertyName = _propertyName,
+			Description = description,
+			ErrorMessage = string.Empty // Not used for description rules
+		});
+		return this;
+	}
+
 	internal IEnumerable<ValidationRule> Build() => _rules;
 }
 

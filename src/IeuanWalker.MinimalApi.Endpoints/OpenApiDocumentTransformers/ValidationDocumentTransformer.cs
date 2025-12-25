@@ -475,13 +475,24 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 		Console.WriteLine($"[DEBUG] Created inline schema: Type={inlineSchema.Type}, Format={inlineSchema.Format}");
 
-		// Collect all rule descriptions
+		// Extract custom description from DescriptionRule if present
+		string? customDescription = rules
+			.OfType<Validation.DescriptionRule>()
+			.FirstOrDefault()?.Description;
+
+		// Collect all rule descriptions (excluding DescriptionRule)
 		List<string> ruleDescriptions = [];
 
 		// Apply all rules to this schema
 		foreach (var rule in rules)
 		{
 			Console.WriteLine($"[DEBUG] Applying rule: {rule.GetType().Name} for property {rule.PropertyName}");
+			
+			// Skip DescriptionRule - it's handled separately
+			if (rule is Validation.DescriptionRule)
+			{
+				continue;
+			}
 			
 			// Get human-readable description for this rule
 			string? ruleDescription = GetRuleDescription(rule);
@@ -490,7 +501,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 				ruleDescriptions.Add(ruleDescription);
 			}
 			
-			// Apply rule to schema (for non-custom rules)
+			// Apply rule to schema (for non-custom and non-description rules)
 			if (!IsCustomRule(rule))
 			{
 				ApplyRuleToSchema(rule, inlineSchema);
@@ -499,20 +510,26 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			Console.WriteLine($"[DEBUG] After applying rule - Minimum='{inlineSchema.Minimum}', Maximum='{inlineSchema.Maximum}'");
 		}
 
-		// Add all rule descriptions to the description field if any exist
+		// Build the complete description: custom description + validation rules
+		List<string> descriptionParts = [];
+		
+		// Add custom description first if present
+		if (!string.IsNullOrEmpty(customDescription))
+		{
+			descriptionParts.Add(customDescription);
+		}
+		
+		// Add validation rules section if any exist
 		if (ruleDescriptions.Count > 0)
 		{
 			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Select(msg => $"- {msg}"));
-			
-			// Append to existing description if present, otherwise set new description
-			if (!string.IsNullOrEmpty(inlineSchema.Description))
-			{
-				inlineSchema.Description = $"{inlineSchema.Description}\n\n{rulesSection}";
-			}
-			else
-			{
-				inlineSchema.Description = rulesSection;
-			}
+			descriptionParts.Add(rulesSection);
+		}
+		
+		// Set the final description
+		if (descriptionParts.Count > 0)
+		{
+			inlineSchema.Description = string.Join("\n\n", descriptionParts);
 		}
 
 		return inlineSchema;
