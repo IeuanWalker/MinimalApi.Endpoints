@@ -34,14 +34,7 @@ public static class OpenApiExtensions
 	[ExcludeFromCodeCoverage]
 	public static OpenApiOptions AddValidationSupport(this OpenApiOptions options)
 	{
-		// Add FluentValidation auto-documentation transformer (runs first to discover all validators)
-		options.AddDocumentTransformer((document, context, ct) =>
-		{
-			FluentValidationDocumentTransformer transformer = new();
-			return transformer.TransformAsync(document, context, ct);
-		});
-
-		// Add manual WithValidation transformer (runs second to apply manual overrides)
+		// Add unified validation transformer that handles both FluentValidation and WithValidation
 		options.AddDocumentTransformer((document, context, ct) =>
 		{
 			ValidationDocumentTransformer transformer = new();

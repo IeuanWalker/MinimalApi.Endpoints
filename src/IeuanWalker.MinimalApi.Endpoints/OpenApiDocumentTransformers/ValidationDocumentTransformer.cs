@@ -1,5 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using FluentValidation;
+using FluentValidation.Internal;
+using FluentValidation.Validators;
 using IeuanWalker.MinimalApi.Endpoints.Validation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
@@ -10,18 +13,76 @@ using Microsoft.OpenApi;
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 /// <summary>
-/// OpenAPI document transformer that applies validation rules from WithValidation to schemas
+/// OpenAPI document transformer that applies validation rules from both WithValidation and FluentValidation to schemas
 /// </summary>
 [ExcludeFromCodeCoverage]
 internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 {
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
-		// Iterate through all operations to find endpoints with validation metadata
+		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
+		Dictionary<Type, List<Validation.ValidationRule>> allValidationRules = [];
+		
+		// Step 1: Discover FluentValidation rules
+		DiscoverFluentValidationRules(context, allValidationRules);
+		
+		// Step 2: Discover manual WithValidation rules (these override FluentValidation per property)
+		DiscoverManualValidationRules(context, allValidationRules);
+		
+		// Step 3: Apply all collected rules to OpenAPI schemas
+		foreach (var kvp in allValidationRules)
+		{
+			Type requestType = kvp.Key;
+			List<Validation.ValidationRule> rules = kvp.Value;
+			ApplyValidationToSchemas(document, requestType, rules);
+		}
+
+		return Task.CompletedTask;
+	}
+	
+	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules)
+	{
+		// Get all registered FluentValidation validators from DI
+		var validators = context.ApplicationServices.GetServices<IValidator>();
+		
+		Console.WriteLine($"[DEBUG-FV] Found {validators.Count()} FluentValidation validators");
+		
+		foreach (var validator in validators)
+		{
+			Type validatorType = validator.GetType();
+			
+			// Find the validated type (T in IValidator<T>)
+			Type? validatedType = GetValidatedType(validatorType);
+			if (validatedType == null)
+			{
+				continue;
+			}
+			
+			Console.WriteLine($"[DEBUG-FV] Processing validator for type: {validatedType.FullName}");
+			
+			// Extract validation rules from the validator
+			List<Validation.ValidationRule> rules = ExtractFluentValidationRules(validator, validatedType);
+			
+			Console.WriteLine($"[DEBUG-FV] Extracted {rules.Count} rules for {validatedType.Name}");
+			
+			if (rules.Count > 0)
+			{
+				if (!allValidationRules.ContainsKey(validatedType))
+				{
+					allValidationRules[validatedType] = [];
+				}
+				allValidationRules[validatedType].AddRange(rules);
+			}
+		}
+	}
+	
+	static void DiscoverManualValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules)
+	{
+		// Iterate through all endpoints to find WithValidation metadata
 		EndpointDataSource? endpointDataSource = context.ApplicationServices.GetService(typeof(EndpointDataSource)) as EndpointDataSource;
 		if (endpointDataSource == null)
 		{
-			return Task.CompletedTask;
+			return;
 		}
 
 		foreach (var operation in endpointDataSource.Endpoints)
@@ -41,17 +102,267 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 						if (configProp?.GetValue(metadata) is object config)
 						{
 							Type requestType = metadataType.GetGenericArguments()[0];
-							ApplyValidationToSchemas(document, requestType, config);
+							
+							// Extract rules from the configuration object
+							PropertyInfo? rulesProp = config.GetType().GetProperty("Rules");
+							if (rulesProp?.GetValue(config) is IEnumerable<Validation.ValidationRule> manualRules)
+							{
+								// Manual rules override auto-discovered rules per property
+								if (!allValidationRules.ContainsKey(requestType))
+								{
+									allValidationRules[requestType] = [];
+								}
+								
+								// Remove auto-discovered rules for properties that have manual rules
+								var manualPropertyNames = manualRules.Select(r => r.PropertyName).Distinct().ToHashSet();
+								allValidationRules[requestType].RemoveAll(r => manualPropertyNames.Contains(r.PropertyName));
+								
+								// Add manual rules
+								allValidationRules[requestType].AddRange(manualRules);
+							}
 						}
 					}
 				}
 			}
 		}
-
-		return Task.CompletedTask;
+	}
+	
+	static Type? GetValidatedType(Type validatorType)
+	{
+		// Look for IValidator<T> interface
+		Type? validatorInterface = validatorType.GetInterfaces()
+			.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
+		
+		return validatorInterface?.GetGenericArguments().FirstOrDefault();
+	}
+	
+	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator, Type validatedType)
+	{
+		List<Validation.ValidationRule> rules = [];
+		
+		// Get the validator descriptor which contains all rules
+		IValidatorDescriptor descriptor = validator.CreateDescriptor();
+		
+		foreach (var memberValidators in descriptor.GetMembersWithValidators())
+		{
+			string propertyName = memberValidators.Key;
+			
+			// Each member returns a collection of (IPropertyValidator Validator, IRuleComponent Options) tuples
+			foreach (var validatorTuple in memberValidators)
+			{
+				IPropertyValidator propertyValidator = validatorTuple.Validator;
+				
+				// Convert FluentValidation validators to our ValidationRule format
+				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator);
+				if (rule != null)
+				{
+					rules.Add(rule);
+				}
+			}
+		}
+		
+		return rules;
+	}
+	
+	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator)
+	{
+		// Map FluentValidation validators to our internal ValidationRule types
+		return propertyValidator switch
+		{
+			INotNullValidator or INotEmptyValidator => new Validation.RequiredRule
+			{
+				PropertyName = propertyName,
+				ErrorMessage = $"{propertyName} is required"
+			},
+			ILengthValidator lengthValidator => CreateStringLengthRule(propertyName, lengthValidator),
+			IRegularExpressionValidator regexValidator => CreatePatternRule(propertyName, regexValidator),
+			IEmailValidator => new Validation.EmailRule
+			{
+				PropertyName = propertyName,
+				ErrorMessage = $"{propertyName} must be a valid email address"
+			},
+			IComparisonValidator comparisonValidator => CreateComparisonRule(propertyName, comparisonValidator),
+			IBetweenValidator betweenValidator => CreateBetweenRule(propertyName, betweenValidator),
+			_ => null
+		};
+	}
+	
+	static Validation.ValidationRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
+	{
+		// Get the Min and Max properties using reflection
+		PropertyInfo? minProp = lengthValidator.GetType().GetProperty("Min");
+		PropertyInfo? maxProp = lengthValidator.GetType().GetProperty("Max");
+		
+		int? min = minProp?.GetValue(lengthValidator) as int?;
+		int? max = maxProp?.GetValue(lengthValidator) as int?;
+		
+		if (min == null && max == null)
+		{
+			return null;
+		}
+		
+		return new Validation.StringLengthRule
+		{
+			PropertyName = propertyName,
+			MinLength = min > 0 ? min : null,
+			MaxLength = max > 0 ? max : null,
+			ErrorMessage = min.HasValue && max.HasValue
+				? $"{propertyName} must be between {min} and {max} characters"
+				: min.HasValue
+					? $"{propertyName} must be at least {min} characters"
+					: $"{propertyName} must not exceed {max} characters"
+		};
+	}
+	
+	static Validation.ValidationRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)
+	{
+		PropertyInfo? expressionProp = regexValidator.GetType().GetProperty("Expression");
+		string? pattern = expressionProp?.GetValue(regexValidator) as string;
+		
+		if (string.IsNullOrEmpty(pattern))
+		{
+			return null;
+		}
+		
+		return new Validation.PatternRule
+		{
+			PropertyName = propertyName,
+			Pattern = pattern,
+			ErrorMessage = $"{propertyName} does not match required pattern"
+		};
+	}
+	
+	static Validation.ValidationRule? CreateComparisonRule(string propertyName, IComparisonValidator comparisonValidator)
+	{
+		// Get the ValueToCompare and Comparison properties
+		PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty("ValueToCompare");
+		PropertyInfo? comparisonProp = comparisonValidator.GetType().GetProperty("Comparison");
+		
+		object? value = valueProp?.GetValue(comparisonValidator);
+		object? comparison = comparisonProp?.GetValue(comparisonValidator);
+		
+		if (value == null || comparison == null)
+		{
+			return null;
+		}
+		
+		string comparisonName = comparison.ToString() ?? string.Empty;
+		
+		// Create appropriate range rule based on value type
+		return value switch
+		{
+			int intValue => CreateTypedRangeRule<int>(propertyName, intValue, comparisonName),
+			long longValue => CreateTypedRangeRule<long>(propertyName, longValue, comparisonName),
+			decimal decimalValue => CreateTypedRangeRule<decimal>(propertyName, decimalValue, comparisonName),
+			double doubleValue => CreateTypedRangeRule<double>(propertyName, doubleValue, comparisonName),
+			float floatValue => CreateTypedRangeRule<float>(propertyName, floatValue, comparisonName),
+			_ => null
+		};
+	}
+	
+	static Validation.ValidationRule? CreateTypedRangeRule<T>(string propertyName, T value, string comparisonName) where T : struct, IComparable<T>
+	{
+		return comparisonName switch
+		{
+			"GreaterThan" => new Validation.RangeRule<T>
+			{
+				PropertyName = propertyName,
+				Minimum = value,
+				ExclusiveMinimum = true,
+				ErrorMessage = $"{propertyName} must be greater than {value}"
+			},
+			"GreaterThanOrEqual" => new Validation.RangeRule<T>
+			{
+				PropertyName = propertyName,
+				Minimum = value,
+				ExclusiveMinimum = false,
+				ErrorMessage = $"{propertyName} must be greater than or equal to {value}"
+			},
+			"LessThan" => new Validation.RangeRule<T>
+			{
+				PropertyName = propertyName,
+				Maximum = value,
+				ExclusiveMaximum = true,
+				ErrorMessage = $"{propertyName} must be less than {value}"
+			},
+			"LessThanOrEqual" => new Validation.RangeRule<T>
+			{
+				PropertyName = propertyName,
+				Maximum = value,
+				ExclusiveMaximum = false,
+				ErrorMessage = $"{propertyName} must be less than or equal to {value}"
+			},
+			_ => null
+		};
+	}
+	
+	static Validation.ValidationRule? CreateBetweenRule(string propertyName, IBetweenValidator betweenValidator)
+	{
+		// Get the From and To properties
+		PropertyInfo? fromProp = betweenValidator.GetType().GetProperty("From");
+		PropertyInfo? toProp = betweenValidator.GetType().GetProperty("To");
+		
+		object? from = fromProp?.GetValue(betweenValidator);
+		object? to = toProp?.GetValue(betweenValidator);
+		
+		if (from == null || to == null)
+		{
+			return null;
+		}
+		
+		// Create appropriate range rule based on value type
+		return from switch
+		{
+			int intFrom when to is int intTo => new Validation.RangeRule<int>
+			{
+				PropertyName = propertyName,
+				Minimum = intFrom,
+				Maximum = intTo,
+				ExclusiveMinimum = false,
+				ExclusiveMaximum = false,
+				ErrorMessage = $"{propertyName} must be between {intFrom} and {intTo}"
+			},
+			long longFrom when to is long longTo => new Validation.RangeRule<long>
+			{
+				PropertyName = propertyName,
+				Minimum = longFrom,
+				Maximum = longTo,
+				ExclusiveMinimum = false,
+				ExclusiveMaximum = false,
+				ErrorMessage = $"{propertyName} must be between {longFrom} and {longTo}"
+			},
+			decimal decimalFrom when to is decimal decimalTo => new Validation.RangeRule<decimal>
+			{
+				PropertyName = propertyName,
+				Minimum = decimalFrom,
+				Maximum = decimalTo,
+				ExclusiveMinimum = false,
+				ExclusiveMaximum = false,
+				ErrorMessage = $"{propertyName} must be between {decimalFrom} and {decimalTo}"
+			},
+			double doubleFrom when to is double doubleTo => new Validation.RangeRule<double>
+			{
+				PropertyName = propertyName,
+				Minimum = doubleFrom,
+				Maximum = doubleTo,
+				ExclusiveMinimum = false,
+				ExclusiveMaximum = false,
+				ErrorMessage = $"{propertyName} must be between {doubleFrom} and {doubleTo}"
+			},
+			float floatFrom when to is float floatTo => new Validation.RangeRule<float>
+			{
+				PropertyName = propertyName,
+				Minimum = floatFrom,
+				Maximum = floatTo,
+				ExclusiveMinimum = false,
+				ExclusiveMaximum = false,
+				ErrorMessage = $"{propertyName} must be between {floatFrom} and {floatTo}"
+			},
+			_ => null
+		};
 	}
 
-	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, object configurationObj)
+	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules)
 	{
 		// Get the schema name for the request type
 		string schemaName = requestType.FullName ?? requestType.Name;
@@ -64,13 +375,6 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		}
 
 		if (schemaInterface is not OpenApiSchema schema || schema.Properties == null)
-		{
-			return;
-		}
-
-		// Extract rules from the configuration object
-		PropertyInfo? rulesProp = configurationObj.GetType().GetProperty("Rules");
-		if (rulesProp?.GetValue(configurationObj) is not IEnumerable<Validation.ValidationRule> rules)
 		{
 			return;
 		}
