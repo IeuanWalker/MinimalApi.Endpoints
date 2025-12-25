@@ -110,8 +110,10 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	}
 
 	/// <summary>
-	/// Applies a custom validation function
+	/// Applies a custom validation note (not represented in OpenAPI schema - use for documentation only)
 	/// </summary>
+	/// <param name="validator">Validator function (not used - kept for API compatibility)</param>
+	/// <param name="errorMessage">Description of the validation rule</param>
 	public PropertyValidationBuilder<TRequest, TProperty> Custom(
 		Func<TProperty?, bool> validator,
 		string errorMessage)
@@ -119,7 +121,6 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		_rules.Add(new CustomRule<TProperty>
 		{
 			PropertyName = _propertyName,
-			Validator = validator,
 			ErrorMessage = errorMessage
 		});
 		return this;

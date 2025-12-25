@@ -85,12 +85,6 @@ public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable
 }
 
 /// <summary>
-/// Custom validation rule (note: custom rules cannot be represented in OpenAPI schema)
+/// Custom validation rule (note: custom rules cannot be represented in OpenAPI schema and are ignored)
 /// </summary>
-public sealed record CustomRule<TProperty> : ValidationRule
-{
-	/// <summary>
-	/// Custom validator function (not used for OpenAPI, kept for future runtime validation support)
-	/// </summary>
-	public required Func<TProperty?, bool> Validator { get; init; }
-}
+public sealed record CustomRule<TProperty> : ValidationRule;
