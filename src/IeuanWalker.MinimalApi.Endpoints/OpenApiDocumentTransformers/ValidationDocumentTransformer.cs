@@ -112,17 +112,27 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t != null);
 		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f != null);
 
-		// Create inline schema
-		OpenApiSchema inlineSchema = new()
+		// Create inline schema - set properties after creation to avoid initialization issues
+		OpenApiSchema inlineSchema = new();
+		
+		// Set type and format separately
+		if (schemaType.HasValue)
 		{
-			Type = schemaType,
-			Format = format
-		};
+			inlineSchema.Type = schemaType.Value;
+		}
+		if (format != null)
+		{
+			inlineSchema.Format = format;
+		}
+
+		Console.WriteLine($"[DEBUG] Created inline schema: Type={inlineSchema.Type}, Format={inlineSchema.Format}");
 
 		// Apply all rules to this schema
 		foreach (var rule in rules)
 		{
+			Console.WriteLine($"[DEBUG] Applying rule: {rule.GetType().Name} for property {rule.PropertyName}");
 			ApplyRuleToSchema(rule, inlineSchema);
+			Console.WriteLine($"[DEBUG] After applying rule - Minimum='{inlineSchema.Minimum}', Maximum='{inlineSchema.Maximum}'");
 		}
 
 		return inlineSchema;
@@ -164,11 +174,13 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 				{
 					schema.Minimum = intRangeRule.Minimum.Value.ToString();
 					schema.ExclusiveMinimum = intRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					Console.WriteLine($"[DEBUG] Set int Minimum={schema.Minimum}, ExclusiveMinimum={schema.ExclusiveMinimum} from rule values Min={intRangeRule.Minimum.Value}, ExMin={intRangeRule.ExclusiveMinimum}");
 				}
 				if (intRangeRule.Maximum.HasValue)
 				{
 					schema.Maximum = intRangeRule.Maximum.Value.ToString();
 					schema.ExclusiveMaximum = intRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					Console.WriteLine($"[DEBUG] Set int Maximum={schema.Maximum}, ExclusiveMaximum={schema.ExclusiveMaximum} from rule values Max={intRangeRule.Maximum.Value}, ExMax={intRangeRule.ExclusiveMaximum}");
 				}
 				break;
 
