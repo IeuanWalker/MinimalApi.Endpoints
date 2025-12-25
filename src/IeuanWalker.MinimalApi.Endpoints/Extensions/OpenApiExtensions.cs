@@ -14,6 +14,32 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 [ExcludeFromCodeCoverage]
 public static class OpenApiExtensions
 {
+	/// <summary>
+	/// Adds support for documenting validation rules from WithValidation in the OpenAPI spec.
+	/// This should be called when configuring AddOpenApi.
+	/// </summary>
+	/// <param name="options">The OpenAPI options</param>
+	/// <returns>The OpenAPI options for method chaining</returns>
+	/// <example>
+	/// <code>
+	/// builder.Services.AddOpenApi(options =>
+	/// {
+	///     options.AddValidationSupport();
+	/// });
+	/// </code>
+	/// </example>
+	[ExcludeFromCodeCoverage]
+	public static OpenApiOptions AddValidationSupport(this OpenApiOptions options)
+	{
+		options.AddDocumentTransformer((document, context, ct) =>
+		{
+			ValidationDocumentTransformer transformer = new();
+			return transformer.TransformAsync(document, context, ct);
+		});
+
+		return options;
+	}
+
 	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{

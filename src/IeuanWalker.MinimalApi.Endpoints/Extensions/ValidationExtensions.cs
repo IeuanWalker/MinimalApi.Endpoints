@@ -2,6 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 using IeuanWalker.MinimalApi.Endpoints.Validation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
@@ -51,9 +53,19 @@ public static class ValidationExtensions
 		// Add endpoint filter for runtime validation
 		builder.AddEndpointFilter(new ValidationEndpointFilter<TRequest>(configuration));
 
-		// TODO: Add OpenAPI transformer to document validation rules
-		// This will be implemented once we determine the correct way to access OpenAPI schemas
+		// Store validation configuration as endpoint metadata for OpenAPI generation
+		builder.WithMetadata(new ValidationMetadata<TRequest>(configuration));
 
 		return builder;
+	}
+
+	static string ToCamelCase(string value)
+	{
+		if (string.IsNullOrEmpty(value))
+		{
+			return value;
+		}
+
+		return char.ToLowerInvariant(value[0]) + value[1..];
 	}
 }
