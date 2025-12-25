@@ -114,9 +114,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	/// <param name="validator">Validator function (not used - kept for API compatibility)</param>
 	/// <param name="errorMessage">Description of the validation rule</param>
-	public PropertyValidationBuilder<TRequest, TProperty> Custom(
-		Func<TProperty?, bool> validator,
-		string errorMessage)
+	public PropertyValidationBuilder<TRequest, TProperty> Custom(string errorMessage)
 	{
 		_rules.Add(new CustomRule<TProperty>
 		{

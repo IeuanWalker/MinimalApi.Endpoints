@@ -58,27 +58,19 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 
 				// Decimal range validation (optional, so we use Custom)
 				config.Property(x => x.Budget)
-					.Custom(
-						budget => budget == null || budget.Value > 0m,
-						"Budget must be greater than 0");
+					.Custom("Budget must be greater than 0");
 
 				// Double range validation with custom implementation for nullable
 				config.Property(x => x.Rating)
-					.Custom(
-						rating => rating == null || (rating.Value >= 0.0 && rating.Value <= 5.0),
-						"Rating must be between 0 and 5");
+					.Custom("Rating must be between 0 and 5");
 
 				// Date validation with custom rule
 				config.Property(x => x.DueDate)
-					.Custom(
-						dueDate => dueDate == null || dueDate.Value > DateTime.Now,
-						"Due date must be in the future");
+					.Custom("Due date must be in the future");
 
 				// DateTimeOffset validation
 				config.Property(x => x.CreatedAt)
-					.Custom(
-						created => created == null || created.Value <= DateTimeOffset.Now,
-						"Created date cannot be in the future");
+					.Custom("Created date cannot be in the future");
 
 				// Cross-field validation
 				config.CrossField(request =>
