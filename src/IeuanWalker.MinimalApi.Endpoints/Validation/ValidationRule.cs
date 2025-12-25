@@ -1,10 +1,7 @@
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
-
 namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 
 /// <summary>
-/// Base class for validation rules that can be applied to properties
+/// Base class for validation rules that define OpenAPI schema constraints
 /// </summary>
 public abstract record ValidationRule
 {
@@ -17,23 +14,15 @@ public abstract record ValidationRule
 	/// Error message to display when validation fails
 	/// </summary>
 	public required string ErrorMessage { get; init; }
-
-	/// <summary>
-	/// Validates the given value according to the rule
-	/// </summary>
-	public abstract bool IsValid(object? value);
 }
 
 /// <summary>
-/// Validation rule that ensures a property is not null
+/// Validation rule that marks a property as required in OpenAPI schema
 /// </summary>
-public sealed record RequiredRule : ValidationRule
-{
-	public override bool IsValid(object? value) => value is not null;
-}
+public sealed record RequiredRule : ValidationRule;
 
 /// <summary>
-/// Validation rule for string length constraints
+/// Validation rule for string length constraints (minLength/maxLength in OpenAPI)
 /// </summary>
 public sealed record StringLengthRule : ValidationRule
 {
@@ -46,30 +35,10 @@ public sealed record StringLengthRule : ValidationRule
 	/// Maximum allowed length (inclusive)
 	/// </summary>
 	public int? MaxLength { get; init; }
-
-	public override bool IsValid(object? value)
-	{
-		if (value is not string str)
-		{
-			return true; // Not a string, let other validators handle it
-		}
-
-		if (MinLength.HasValue && str.Length < MinLength.Value)
-		{
-			return false;
-		}
-
-		if (MaxLength.HasValue && str.Length > MaxLength.Value)
-		{
-			return false;
-		}
-
-		return true;
-	}
 }
 
 /// <summary>
-/// Validation rule for regex pattern matching
+/// Validation rule for regex pattern matching (pattern in OpenAPI)
 /// </summary>
 public sealed record PatternRule : ValidationRule
 {
@@ -77,59 +46,20 @@ public sealed record PatternRule : ValidationRule
 	/// Regular expression pattern to match
 	/// </summary>
 	public required string Pattern { get; init; }
-
-	Lazy<Regex>? _regex;
-
-	public override bool IsValid(object? value)
-	{
-		if (value is not string str)
-		{
-			return true; // Not a string, let other validators handle it
-		}
-
-		_regex ??= new Lazy<Regex>(() => new Regex(Pattern, RegexOptions.Compiled));
-		return _regex.Value.IsMatch(str);
-	}
 }
 
 /// <summary>
-/// Validation rule for email addresses
+/// Validation rule for email addresses (format: email in OpenAPI)
 /// </summary>
-public sealed record EmailRule : ValidationRule
-{
-	static readonly EmailAddressAttribute _emailValidator = new();
-
-	public override bool IsValid(object? value)
-	{
-		if (value is not string str)
-		{
-			return true; // Not a string, let other validators handle it
-		}
-
-		return _emailValidator.IsValid(str);
-	}
-}
+public sealed record EmailRule : ValidationRule;
 
 /// <summary>
-/// Validation rule for URLs
+/// Validation rule for URLs (format: uri in OpenAPI)
 /// </summary>
-public sealed record UrlRule : ValidationRule
-{
-	static readonly UrlAttribute _urlValidator = new();
-
-	public override bool IsValid(object? value)
-	{
-		if (value is not string str)
-		{
-			return true; // Not a string, let other validators handle it
-		}
-
-		return _urlValidator.IsValid(str);
-	}
-}
+public sealed record UrlRule : ValidationRule;
 
 /// <summary>
-/// Validation rule for numeric range constraints
+/// Validation rule for numeric range constraints (minimum/maximum in OpenAPI)
 /// </summary>
 public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable<T>
 {
@@ -152,63 +82,15 @@ public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable
 	/// Whether the maximum is exclusive (value must be less than maximum)
 	/// </summary>
 	public bool ExclusiveMaximum { get; init; }
-
-	public override bool IsValid(object? value)
-	{
-		if (value is not T comparable)
-		{
-			return true; // Not the expected type, let other validators handle it
-		}
-
-		if (Minimum.HasValue)
-		{
-			int minCompare = comparable.CompareTo(Minimum.Value);
-			if (ExclusiveMinimum && minCompare <= 0)
-			{
-				return false;
-			}
-
-			if (!ExclusiveMinimum && minCompare < 0)
-			{
-				return false;
-			}
-		}
-
-		if (Maximum.HasValue)
-		{
-			int maxCompare = comparable.CompareTo(Maximum.Value);
-			if (ExclusiveMaximum && maxCompare >= 0)
-			{
-				return false;
-			}
-
-			if (!ExclusiveMaximum && maxCompare > 0)
-			{
-				return false;
-			}
-		}
-
-		return true;
-	}
 }
 
 /// <summary>
-/// Custom validation rule with a user-defined validator function
+/// Custom validation rule (note: custom rules cannot be represented in OpenAPI schema)
 /// </summary>
 public sealed record CustomRule<TProperty> : ValidationRule
 {
 	/// <summary>
-	/// Custom validator function
+	/// Custom validator function (not used for OpenAPI, kept for future runtime validation support)
 	/// </summary>
 	public required Func<TProperty?, bool> Validator { get; init; }
-
-	public override bool IsValid(object? value)
-	{
-		if (value is not TProperty typedValue && value is not null)
-		{
-			return true; // Not the expected type
-		}
-
-		return Validator((TProperty?)value);
-	}
 }

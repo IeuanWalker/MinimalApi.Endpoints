@@ -16,8 +16,9 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 public static class ValidationExtensions
 {
 	/// <summary>
-	/// Adds validation rules to the endpoint using a fluent configuration API.
-	/// This enables declarative validation with automatic OpenAPI schema documentation.
+	/// Adds validation rules to the endpoint for OpenAPI schema documentation.
+	/// This enables declarative validation constraints that appear in the generated OpenAPI specification.
+	/// Note: This does NOT perform runtime validation - it only updates the OpenAPI documentation.
 	/// </summary>
 	/// <typeparam name="TRequest">The type of the request model to validate</typeparam>
 	/// <param name="builder">The route handler builder</param>
@@ -49,9 +50,6 @@ public static class ValidationExtensions
 		ValidationConfigurationBuilder<TRequest> configBuilder = new();
 		configure(configBuilder);
 		ValidationConfiguration<TRequest> configuration = configBuilder.Build();
-
-		// Add endpoint filter for runtime validation
-		builder.AddEndpointFilter(new ValidationEndpointFilter<TRequest>(configuration));
 
 		// Store validation configuration as endpoint metadata for OpenAPI generation
 		builder.WithMetadata(new ValidationMetadata<TRequest>(configuration));
