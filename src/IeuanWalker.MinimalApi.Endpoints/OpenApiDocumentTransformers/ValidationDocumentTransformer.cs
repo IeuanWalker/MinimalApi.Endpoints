@@ -127,15 +127,50 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 		Console.WriteLine($"[DEBUG] Created inline schema: Type={inlineSchema.Type}, Format={inlineSchema.Format}");
 
+		// Collect custom rules for description
+		List<string> customRuleMessages = [];
+
 		// Apply all rules to this schema
 		foreach (var rule in rules)
 		{
 			Console.WriteLine($"[DEBUG] Applying rule: {rule.GetType().Name} for property {rule.PropertyName}");
-			ApplyRuleToSchema(rule, inlineSchema);
+			
+			// Check if this is a custom rule
+			if (IsCustomRule(rule))
+			{
+				customRuleMessages.Add(rule.ErrorMessage);
+			}
+			else
+			{
+				ApplyRuleToSchema(rule, inlineSchema);
+			}
+			
 			Console.WriteLine($"[DEBUG] After applying rule - Minimum='{inlineSchema.Minimum}', Maximum='{inlineSchema.Maximum}'");
 		}
 
+		// Add custom rules to description if any exist
+		if (customRuleMessages.Count > 0)
+		{
+			string customRulesSection = "Custom validation rules:\n" + string.Join("\n", customRuleMessages.Select(msg => $"- {msg}"));
+			
+			// Append to existing description if present, otherwise set new description
+			if (!string.IsNullOrEmpty(inlineSchema.Description))
+			{
+				inlineSchema.Description = $"{inlineSchema.Description}\n\n{customRulesSection}";
+			}
+			else
+			{
+				inlineSchema.Description = customRulesSection;
+			}
+		}
+
 		return inlineSchema;
+	}
+
+	static bool IsCustomRule(Validation.ValidationRule rule)
+	{
+		Type ruleType = rule.GetType();
+		return ruleType.IsGenericType && ruleType.GetGenericTypeDefinition() == typeof(Validation.CustomRule<>);
 	}
 
 	static void ApplyRuleToSchema(Validation.ValidationRule rule, OpenApiSchema schema)
