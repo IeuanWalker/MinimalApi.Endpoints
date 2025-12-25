@@ -200,6 +200,8 @@ public class TodoRequestValidator : AbstractValidator<TodoRequest>
 
 ### Supported FluentValidation Rules
 
+The library automatically converts the following FluentValidation rules to OpenAPI constraints:
+
 | FluentValidation Rule | Converts To | OpenAPI Output |
 |----------------------|-------------|----------------|
 | `NotNull()` / `NotEmpty()` | `RequiredRule` | Added to `required` array |
@@ -214,6 +216,9 @@ public class TodoRequestValidator : AbstractValidator<TodoRequest>
 | `LessThanOrEqual(n)` | `RangeRule<T>` | `maximum: n` |
 | `InclusiveBetween(min, max)` | `RangeRule<T>` | `minimum`, `maximum` |
 | `ExclusiveBetween(min, max)` | `RangeRule<T>` | `minimum`, `maximum` (exclusive) |
+| **All other validators** | `CustomRule<T>` | **Appears in description only** |
+
+**Note:** Validators not explicitly listed above (such as `CreditCard()`, `Must()`, custom validators, etc.) are automatically documented as custom rules in the property's description field. The error message from FluentValidation is extracted and displayed in the "Validation rules:" section.
 
 ---
 

@@ -195,9 +195,10 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			foreach (var validatorTuple in memberValidators)
 			{
 				IPropertyValidator propertyValidator = validatorTuple.Validator;
+				IRuleComponent ruleComponent = validatorTuple.Options;
 				
 				// Convert FluentValidation validators to our ValidationRule format
-				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator);
+				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent, validator, validatedType);
 				if (rule != null)
 				{
 					rules.Add(rule);
@@ -208,10 +209,10 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		return rules;
 	}
 	
-	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator)
+	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent, IValidator validator, Type validatedType)
 	{
 		// Map FluentValidation validators to our internal ValidationRule types
-		return propertyValidator switch
+		Validation.ValidationRule? rule = propertyValidator switch
 		{
 			INotNullValidator or INotEmptyValidator => new Validation.RequiredRule
 			{
@@ -229,6 +230,67 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			IBetweenValidator betweenValidator => CreateBetweenRule(propertyName, betweenValidator),
 			_ => null
 		};
+		
+		// If we couldn't map to a specific rule type, create a CustomRule with the error message
+		if (rule == null)
+		{
+			string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, validator, validatedType);
+			if (!string.IsNullOrEmpty(errorMessage))
+			{
+				// Create a CustomRule<object> to hold the unsupported validator's error message
+				rule = new Validation.CustomRule<object>
+				{
+					PropertyName = propertyName,
+					ErrorMessage = errorMessage
+				};
+			}
+		}
+		
+		return rule;
+	}
+	
+	static string GetValidatorErrorMessage(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, string propertyName, IValidator validator, Type validatedType)
+	{
+#pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
+		try
+		{
+			// Try to get the error message template from the rule component
+			PropertyInfo? errorMessageProp = ruleComponent.GetType().GetProperty("ErrorMessageSource");
+			if (errorMessageProp != null)
+			{
+				object? errorMessageSource = errorMessageProp.GetValue(ruleComponent);
+				if (errorMessageSource != null)
+				{
+					// Try to get the message from the error message source
+					PropertyInfo? getMessageProp = errorMessageSource.GetType().GetProperty("Message");
+					if (getMessageProp != null)
+					{
+						string? message = getMessageProp.GetValue(errorMessageSource) as string;
+						if (!string.IsNullOrEmpty(message))
+						{
+							// Replace placeholders with property name if needed
+							return message.Replace("{PropertyName}", propertyName);
+						}
+					}
+				}
+			}
+			
+			// Fallback: try to construct a basic message from the validator type
+			string validatorTypeName = propertyValidator.GetType().Name;
+			// Remove "Validator" suffix if present
+			if (validatorTypeName.EndsWith("Validator"))
+			{
+				validatorTypeName = validatorTypeName[..^9];
+			}
+			
+			return $"{propertyName} {validatorTypeName} validation";
+		}
+		catch
+		{
+			// If all else fails, return a generic message
+			return $"{propertyName} custom validation";
+		}
+#pragma warning restore CA1031
 	}
 	
 	static Validation.ValidationRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
