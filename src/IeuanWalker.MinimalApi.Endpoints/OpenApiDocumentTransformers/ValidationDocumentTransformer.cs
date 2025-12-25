@@ -518,32 +518,91 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules)
 	{
+		// Cast to OpenApiSchema to access properties
+		OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
+		
+		// Check if this is a complex object (has AllOf for schema references or has Properties for inline object definitions)
+		// Complex objects should preserve their structure and only add validation descriptions
+		bool isComplexObject = (originalOpenApiSchema?.AllOf?.Count > 0) || 
+		                       (originalOpenApiSchema?.Properties?.Count > 0 && originalOpenApiSchema.Type == JsonSchemaType.Object);
+
+		// For complex objects (nested types with AllOf or object definitions), preserve the original schema structure
+		if (isComplexObject && originalOpenApiSchema != null)
+		{
+			// For complex objects, we don't want to lose the AllOf or Properties structure
+			// Just return the original schema with an added description for validation rules
+			
+			// Extract custom description from DescriptionRule if present
+			string? customDescription = rules
+				.OfType<Validation.DescriptionRule>()
+				.FirstOrDefault()?.Description;
+
+			// Collect only applicable rule descriptions (RequiredRule for complex objects)
+			List<string> ruleDescriptions = [];
+			foreach (var rule in rules)
+			{
+				if (rule is Validation.RequiredRule)
+				{
+					ruleDescriptions.Add("Required");
+				}
+			}
+			
+			// Build the complete description
+			List<string> descriptionParts = [];
+			
+			if (!string.IsNullOrEmpty(customDescription))
+			{
+				descriptionParts.Add(customDescription);
+			}
+			
+			if (ruleDescriptions.Count > 0)
+			{
+				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Select(msg => $"- {msg}"));
+				descriptionParts.Add(rulesSection);
+			}
+			
+			// Create a new schema that preserves the original structure but adds the description
+			OpenApiSchema complexSchema = new()
+			{
+				AllOf = originalOpenApiSchema.AllOf,
+				Properties = originalOpenApiSchema.Properties,
+				Type = originalOpenApiSchema.Type,
+				Format = originalOpenApiSchema.Format,
+				Items = originalOpenApiSchema.Items,
+				AdditionalProperties = originalOpenApiSchema.AdditionalProperties,
+				Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : originalOpenApiSchema.Description
+			};
+			
+			return complexSchema;
+		}
+		
+		// For simple properties, create a new inline schema with all validation rules
 		// Get the type from the first rule (all rules for same property should have same type)
 		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t != null);
 		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f != null);
 
 		// Create inline schema - set properties after creation to avoid initialization issues
-		OpenApiSchema inlineSchema = new();
+		OpenApiSchema newInlineSchema = new();
 		
 		// Set type and format separately
 		if (schemaType.HasValue)
 		{
-			inlineSchema.Type = schemaType.Value;
+			newInlineSchema.Type = schemaType.Value;
 		}
 		if (format != null)
 		{
-			inlineSchema.Format = format;
+			newInlineSchema.Format = format;
 		}
 
-		Console.WriteLine($"[DEBUG] Created inline schema: Type={inlineSchema.Type}, Format={inlineSchema.Format}");
+		Console.WriteLine($"[DEBUG] Created inline schema: Type={newInlineSchema.Type}, Format={newInlineSchema.Format}");
 
 		// Extract custom description from DescriptionRule if present
-		string? customDescription = rules
+		string? customDescription2 = rules
 			.OfType<Validation.DescriptionRule>()
 			.FirstOrDefault()?.Description;
 
 		// Collect all rule descriptions (excluding DescriptionRule)
-		List<string> ruleDescriptions = [];
+		List<string> ruleDescriptions2 = [];
 
 		// Apply all rules to this schema
 		foreach (var rule in rules)
@@ -560,41 +619,41 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			string? ruleDescription = GetRuleDescription(rule);
 			if (!string.IsNullOrEmpty(ruleDescription))
 			{
-				ruleDescriptions.Add(ruleDescription);
+				ruleDescriptions2.Add(ruleDescription);
 			}
 			
 			// Apply rule to schema (for non-custom and non-description rules)
 			if (!IsCustomRule(rule))
 			{
-				ApplyRuleToSchema(rule, inlineSchema);
+				ApplyRuleToSchema(rule, newInlineSchema);
 			}
 			
-			Console.WriteLine($"[DEBUG] After applying rule - Minimum='{inlineSchema.Minimum}', Maximum='{inlineSchema.Maximum}'");
+			Console.WriteLine($"[DEBUG] After applying rule - Minimum='{newInlineSchema.Minimum}', Maximum='{newInlineSchema.Maximum}'");
 		}
 
 		// Build the complete description: custom description + validation rules
-		List<string> descriptionParts = [];
+		List<string> descriptionParts2 = [];
 		
 		// Add custom description first if present
-		if (!string.IsNullOrEmpty(customDescription))
+		if (!string.IsNullOrEmpty(customDescription2))
 		{
-			descriptionParts.Add(customDescription);
+			descriptionParts2.Add(customDescription2);
 		}
 		
 		// Add validation rules section if any exist
-		if (ruleDescriptions.Count > 0)
+		if (ruleDescriptions2.Count > 0)
 		{
-			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Select(msg => $"- {msg}"));
-			descriptionParts.Add(rulesSection);
+			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions2.Select(msg => $"- {msg}"));
+			descriptionParts2.Add(rulesSection);
 		}
 		
 		// Set the final description
-		if (descriptionParts.Count > 0)
+		if (descriptionParts2.Count > 0)
 		{
-			inlineSchema.Description = string.Join("\n\n", descriptionParts);
+			newInlineSchema.Description = string.Join("\n\n", descriptionParts2);
 		}
 
-		return inlineSchema;
+		return newInlineSchema;
 	}
 
 	static bool IsCustomRule(Validation.ValidationRule rule)
