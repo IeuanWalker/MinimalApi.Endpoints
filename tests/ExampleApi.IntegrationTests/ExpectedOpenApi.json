@@ -704,6 +704,9 @@
         }
       },
       "ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model": {
+        "required": [
+          "note"
+        ],
         "type": "object",
         "properties": {
           "note": {
@@ -713,6 +716,9 @@
         "x-validation-source": "FluentValidation"
       },
       "ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel": {
+        "required": [
+          "name"
+        ],
         "type": "object",
         "properties": {
           "name": {
@@ -725,6 +731,12 @@
         "x-validation-source": "FluentValidation"
       },
       "ExampleApi.Endpoints.Todos.PostFluentValidation.RequestModel": {
+        "required": [
+          "title",
+          "description",
+          "nestedObject",
+          "nestedObject2"
+        ],
         "type": "object",
         "properties": {
           "title": {

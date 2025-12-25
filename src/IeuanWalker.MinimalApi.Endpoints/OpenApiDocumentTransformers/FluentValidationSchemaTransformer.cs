@@ -39,10 +39,14 @@ public class FluentValidationSchemaTransformer : IOpenApiSchemaTransformer
 		// Track which properties are required
 		HashSet<string> requiredProperties = [];
 
-		// Process each validation rule
-		foreach (IValidationRule rule in descriptor.GetRulesForMember(""))
+		// Get all members that have validators and process their rules
+		foreach (var memberGroup in descriptor.GetMembersWithValidators())
 		{
-			ProcessRule(rule, schema, requiredProperties);
+			string memberName = memberGroup.Key;
+			foreach (IValidationRule rule in descriptor.GetRulesForMember(memberName))
+			{
+				ProcessRule(rule, schema, requiredProperties);
+			}
 		}
 
 		// Apply required properties to schema
