@@ -15,7 +15,10 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 public static class OpenApiExtensions
 {
 	/// <summary>
-	/// Adds support for documenting validation rules from WithValidation in the OpenAPI spec.
+	/// Adds support for documenting validation rules in the OpenAPI spec.
+	/// This automatically extracts validation rules from FluentValidation validators registered in DI
+	/// and from manual WithValidation extension method calls.
+	/// Manual WithValidation rules take precedence and can override auto-generated rules.
 	/// This should be called when configuring AddOpenApi.
 	/// </summary>
 	/// <param name="options">The OpenAPI options</param>
@@ -31,6 +34,14 @@ public static class OpenApiExtensions
 	[ExcludeFromCodeCoverage]
 	public static OpenApiOptions AddValidationSupport(this OpenApiOptions options)
 	{
+		// Add FluentValidation auto-documentation transformer (runs first to discover all validators)
+		options.AddDocumentTransformer((document, context, ct) =>
+		{
+			FluentValidationDocumentTransformer transformer = new();
+			return transformer.TransformAsync(document, context, ct);
+		});
+
+		// Add manual WithValidation transformer (runs second to apply manual overrides)
 		options.AddDocumentTransformer((document, context, ct) =>
 		{
 			ValidationDocumentTransformer transformer = new();

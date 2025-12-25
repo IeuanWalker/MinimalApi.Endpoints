@@ -106,7 +106,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		}
 	}
 
-	static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules)
+	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules)
 	{
 		// Get the type from the first rule (all rules for same property should have same type)
 		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t != null);
