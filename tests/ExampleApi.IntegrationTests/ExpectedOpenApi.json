@@ -710,7 +710,9 @@
         "type": "object",
         "properties": {
           "note": {
-            "$ref": "#/components/schemas/System.String"
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
           }
         },
         "x-validation-source": "FluentValidation"
@@ -722,10 +724,16 @@
         "type": "object",
         "properties": {
           "name": {
-            "$ref": "#/components/schemas/System.String"
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
           },
           "age": {
-            "$ref": "#/components/schemas/System.Int32"
+            "maximum": true,
+            "exclusiveMaximum": true,
+            "minimum": true,
+            "exclusiveMinimum": true,
+            "type": "integer"
           }
         },
         "x-validation-source": "FluentValidation"
@@ -740,10 +748,14 @@
         "type": "object",
         "properties": {
           "title": {
-            "$ref": "#/components/schemas/System.String"
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
           },
           "description": {
-            "$ref": "#/components/schemas/System.String"
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
           },
           "nestedObject": {
             "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel"

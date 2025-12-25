@@ -8,10 +8,11 @@ using Microsoft.OpenApi;
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 /// <summary>
-/// Transforms OpenAPI schemas by enriching them with FluentValidation rules.
-/// Extracts validation constraints from FluentValidation validators and applies them to the OpenAPI schema.
+/// Transforms OpenAPI document by enriching schemas with FluentValidation rules.
+/// Extracts validation constraints from FluentValidation validators and applies them to the OpenAPI schemas.
+/// This transformer runs after all schemas are generated and modifies them to inline validation constraints.
 /// </summary>
-public class FluentValidationSchemaTransformer : IOpenApiSchemaTransformer
+public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 {
 	readonly IServiceProvider _serviceProvider;
 
@@ -20,23 +21,74 @@ public class FluentValidationSchemaTransformer : IOpenApiSchemaTransformer
 		_serviceProvider = serviceProvider;
 	}
 
-	public Task TransformAsync(OpenApiSchema schema, OpenApiSchemaTransformerContext context, CancellationToken cancellationToken)
+	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
-		// Get the validator for this type from DI
-		Type validatorType = typeof(IValidator<>).MakeGenericType(context.JsonTypeInfo.Type);
-		object? validator = _serviceProvider.GetService(validatorType);
-
-		if (validator is null)
+		if (document.Components?.Schemas is null)
 		{
-			// No validator registered for this type
 			return Task.CompletedTask;
 		}
 
-		// Get the validator descriptor to access validation rules
-		IValidator typedValidator = (IValidator)validator;
-		IValidatorDescriptor descriptor = typedValidator.CreateDescriptor();
+		// Process each schema in the document
+		foreach (var schemaEntry in document.Components.Schemas.ToList())
+		{
+			string schemaName = schemaEntry.Key;
+			IOpenApiSchema schemaInterface = schemaEntry.Value;
 
-		// Track which properties are required
+			if (schemaInterface is not OpenApiSchema schema)
+			{
+				continue;
+			}
+
+			// Try to find the corresponding .NET type for this schema
+			Type? modelType = FindTypeForSchema(schemaName);
+			if (modelType is null)
+			{
+				continue;
+			}
+
+			// Get the validator for this type from DI
+			Type validatorType = typeof(IValidator<>).MakeGenericType(modelType);
+			object? validator = _serviceProvider.GetService(validatorType);
+
+			if (validator is null)
+			{
+				continue;
+			}
+
+			// Apply validation rules to this schema
+			ApplyValidationRules(schema, (IValidator)validator);
+		}
+
+		return Task.CompletedTask;
+	}
+
+	static Type? FindTypeForSchema(string schemaName)
+	{
+		// Try to find the type by its full name
+		// Schema names are typically the full type name with + replaced by .
+		string typeName = schemaName.Replace('+', '.');
+		
+		// Try to load the type from all loaded assemblies
+		foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			Type? type = assembly.GetType(typeName);
+			if (type is not null)
+			{
+				return type;
+			}
+		}
+
+		return null;
+	}
+
+	static void ApplyValidationRules(OpenApiSchema schema, IValidator validator)
+	{
+		if (schema.Properties is null || schema.Properties.Count == 0)
+		{
+			return;
+		}
+
+		IValidatorDescriptor descriptor = validator.CreateDescriptor();
 		HashSet<string> requiredProperties = [];
 
 		// Get all members that have validators and process their rules
@@ -62,8 +114,6 @@ public class FluentValidationSchemaTransformer : IOpenApiSchemaTransformer
 		// Add extension to indicate schema is enriched with FluentValidation
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
 		schema.Extensions["x-validation-source"] = new JsonNodeExtension(JsonValue.Create("FluentValidation"));
-
-		return Task.CompletedTask;
 	}
 
 	static void ProcessRule(IValidationRule rule, OpenApiSchema schema, HashSet<string> requiredProperties)
@@ -84,9 +134,35 @@ public class FluentValidationSchemaTransformer : IOpenApiSchemaTransformer
 		}
 
 		IOpenApiSchema propertySchemaInterface = schema.Properties[schemaPropertyName];
+		OpenApiSchema propertySchema;
+		bool isComplexTypeReference = false;
 		
-		// Cast to OpenApiSchema to be able to modify properties
-		if (propertySchemaInterface is not OpenApiSchema propertySchema)
+		// If the property is a reference, we need to replace it with an inline schema
+		// so we can add validation constraints (but only for primitive types)
+		if (propertySchemaInterface is OpenApiSchemaReference schemaRef)
+		{
+			// Check if this is a primitive type that we can inline
+			string? refId = schemaRef.Reference?.Id;
+			if (refId is not null && IsPrimitiveType(refId))
+			{
+				// Create an inline schema based on the reference
+				propertySchema = CreateInlineSchemaFromReference(schemaRef);
+				// Replace the reference with the inline schema
+				schema.Properties[schemaPropertyName] = propertySchema;
+			}
+			else
+			{
+				// For complex types, keep the reference but still process NotNull/NotEmpty validators
+				// to add the property to the required array
+				isComplexTypeReference = true;
+				propertySchema = new OpenApiSchema(); // Dummy schema, won't be used
+			}
+		}
+		else if (propertySchemaInterface is OpenApiSchema existingSchema)
+		{
+			propertySchema = existingSchema;
+		}
+		else
 		{
 			return;
 		}
@@ -94,8 +170,74 @@ public class FluentValidationSchemaTransformer : IOpenApiSchemaTransformer
 		// Process each component validator for this property
 		foreach (IPropertyValidator validator in rule.Components.Select(c => c.Validator))
 		{
-			ApplyValidatorConstraints(validator, propertySchema, requiredProperties, schemaPropertyName);
+			// For complex type references, only process NotNull/NotEmpty to add to required
+			if (isComplexTypeReference)
+			{
+				if (validator is INotNullValidator or INotEmptyValidator)
+				{
+					requiredProperties.Add(schemaPropertyName);
+				}
+			}
+			else
+			{
+				ApplyValidatorConstraints(validator, propertySchema, requiredProperties, schemaPropertyName);
+			}
 		}
+	}
+
+	static bool IsPrimitiveType(string refId)
+	{
+		return refId.Contains("System.String") ||
+		       refId.Contains("System.Int32") ||
+		       refId.Contains("System.Int64") ||
+		       refId.Contains("System.Decimal") ||
+		       refId.Contains("System.Double") ||
+		       refId.Contains("System.Single") ||
+		       refId.Contains("System.Boolean") ||
+		       refId.Contains("System.DateTime") ||
+		       refId.Contains("System.DateTimeOffset") ||
+		       refId.Contains("System.Guid");
+	}
+
+	static OpenApiSchema CreateInlineSchemaFromReference(OpenApiSchemaReference schemaRef)
+	{
+		// Map common system types to their OpenAPI equivalents
+		string? refId = schemaRef.Reference?.Id;
+		
+		if (refId is null)
+		{
+			return new OpenApiSchema();
+		}
+
+		// Handle common .NET types
+		if (refId.Contains("System.String"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.String };
+		}
+		if (refId.Contains("System.Int32") || refId.Contains("System.Int64"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.Integer };
+		}
+		if (refId.Contains("System.Decimal") || refId.Contains("System.Double") || refId.Contains("System.Single"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.Number };
+		}
+		if (refId.Contains("System.Boolean"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.Boolean };
+		}
+		if (refId.Contains("System.DateTime") || refId.Contains("System.DateTimeOffset"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.String, Format = "date-time" };
+		}
+		if (refId.Contains("System.Guid"))
+		{
+			return new OpenApiSchema { Type = JsonSchemaType.String, Format = "uuid" };
+		}
+
+		// For complex types (non-primitives), we can't easily inline them
+		// Return a basic schema - the validation won't apply to these
+		return new OpenApiSchema();
 	}
 
 	static void ApplyValidatorConstraints(

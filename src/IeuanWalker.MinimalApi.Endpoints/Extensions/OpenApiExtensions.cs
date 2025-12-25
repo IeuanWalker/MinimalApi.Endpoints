@@ -169,7 +169,7 @@ public static class OpenApiExtensions
 	[ExcludeFromCodeCoverage]
 	public static OpenApiOptions AddFluentValidationSchemas(this OpenApiOptions options)
 	{
-		options.AddSchemaTransformer<OpenApiDocumentTransformers.FluentValidationSchemaTransformer>();
+		options.AddDocumentTransformer<OpenApiDocumentTransformers.FluentValidationSchemaTransformer>();
 		return options;
 	}
 }
