@@ -40,12 +40,9 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 			// Use reflection to call Build() on each property builder
 			System.Reflection.MethodInfo? buildMethod = builder.GetType().GetMethod("Build", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
-			if (buildMethod is not null)
+			if (buildMethod is not null && buildMethod.Invoke(builder, null) is IEnumerable<ValidationRule> rules)
 			{
-				if (buildMethod.Invoke(builder, null) is IEnumerable<ValidationRule> rules)
-				{
-					allRules.AddRange(rules);
-				}
+				allRules.AddRange(rules);
 			}
 		}
 
