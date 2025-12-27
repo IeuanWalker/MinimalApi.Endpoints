@@ -206,10 +206,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		(string fileName, string content)[] readOnlyList2Files,
 		(string fileName, string content)[] fileCollectionFiles)
 	{
-		MultipartFormDataContent content = new();
-
-		// Add SomeData field
-		content.Add(new StringContent(someData), "SomeData");
+		MultipartFormDataContent content = new()
+		{
+			// Add SomeData field
+			{ new StringContent(someData), "SomeData" }
+		};
 
 		// Add SingleFile
 		MemoryStream singleStream = new(System.Text.Encoding.UTF8.GetBytes(singleFileContent));

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
 
@@ -12,7 +13,11 @@ static class ScalarConfiguration
 	internal static IHostApplicationBuilder AddScalar(this IHostApplicationBuilder builder)
 	{
 		builder.Services.AddEndpointsApiExplorer();
-		builder.Services.AddOpenApi(config => config.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.'));
+		builder.Services.AddOpenApi(config =>
+		{
+			config.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
+			config.AddValidationSupport(); // Enable auto-discovery of FluentValidation validators (optional - WithValidation still works without this)
+		});
 
 		List<ApiVersion> versions =
 		[
@@ -27,6 +32,7 @@ static class ScalarConfiguration
 			{
 				options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
 				options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
+				options.AddValidationSupport(); // Enable auto-discovery of FluentValidation validators (optional - WithValidation still works without this)
 				options.AddDocumentTransformer((document, context, _) =>
 				{
 					IApiVersionDescriptionProvider provider = context.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();

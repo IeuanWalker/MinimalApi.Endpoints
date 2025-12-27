@@ -1,9 +1,9 @@
 using ExampleApi.Data;
-using ExampleApi.Endpoints.Todos.PostFluentValidation;
+using ExampleApi.Endpoints.Todos.Post;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
-public class PostFluentValidationTodoEndpointTests
+public class PostTodoEndpointTests
 {
 	[Fact]
 	public async Task Handle_ReturnsConflict_WhenTitleExists()

@@ -14,6 +14,43 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 [ExcludeFromCodeCoverage]
 public static class OpenApiExtensions
 {
+	/// <summary>
+	/// Explicitly adds support for documenting validation rules in the OpenAPI spec.
+	/// This is OPTIONAL - validation documentation automatically works when you use WithValidation extension method.
+	/// However, calling this method ensures FluentValidation validators are also auto-discovered and documented.
+	/// </summary>
+	/// <param name="options">The OpenAPI options</param>
+	/// <returns>The OpenAPI options for method chaining</returns>
+	/// <remarks>
+	/// When you call this method:
+	/// - FluentValidation validators registered in DI are automatically discovered and their rules documented in OpenAPI
+	/// - Manual WithValidation rules take precedence over auto-discovered FluentValidation rules
+	/// 
+	/// If you don't call this method:
+	/// - WithValidation extension method still works and documents validation rules
+	/// - FluentValidation validators are NOT auto-discovered (you would need to manually duplicate rules with WithValidation)
+	/// </remarks>
+	/// <example>
+	/// <code>
+	/// builder.Services.AddOpenApi(options =>
+	/// {
+	///     options.AddValidationSupport(); // Optional but recommended if using FluentValidation
+	/// });
+	/// </code>
+	/// </example>
+	[ExcludeFromCodeCoverage]
+	public static OpenApiOptions AddValidationSupport(this OpenApiOptions options)
+	{
+		// Add unified validation transformer that handles both FluentValidation and WithValidation
+		options.AddDocumentTransformer((document, context, ct) =>
+		{
+			ValidationDocumentTransformer transformer = new();
+			return transformer.TransformAsync(document, context, ct);
+		});
+
+		return options;
+	}
+
 	[ExcludeFromCodeCoverage]
 	public static RouteHandlerBuilder WithResponse(this RouteHandlerBuilder builder, int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 	{

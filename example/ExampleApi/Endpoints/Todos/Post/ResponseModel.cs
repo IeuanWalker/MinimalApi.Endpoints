@@ -1,6 +1,6 @@
 using ExampleApi.Data;
 
-namespace ExampleApi.Endpoints.Todos.PostFluentValidation;
+namespace ExampleApi.Endpoints.Todos.Post;
 
 public class ResponseModel
 {
