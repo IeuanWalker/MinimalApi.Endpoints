@@ -286,11 +286,66 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				object? errorMessageSource = errorMessageProp.GetValue(ruleComponent);
 				if (errorMessageSource != null)
 				{
-					// Try to get the message from the error message source
-					PropertyInfo? getMessageProp = errorMessageSource.GetType().GetProperty("Message");
-					if (getMessageProp != null)
+					// ErrorMessageSource has a GetString method that takes a MessageBuilderContext
+					// Try to invoke it to get the actual error message
+					MethodInfo? getStringMethod = errorMessageSource.GetType().GetMethod("GetString");
+					if (getStringMethod != null)
 					{
-						string? message = getMessageProp.GetValue(errorMessageSource) as string;
+						try
+						{
+							// Create a dummy context to get the message
+							Type? messageBuilderContextType = typeof(IValidator).Assembly.GetType("FluentValidation.MessageBuilderContext");
+							if (messageBuilderContextType != null)
+							{
+								// Create an instance using the constructor that takes ValidationContext, object, and string
+								ConstructorInfo? constructor = messageBuilderContextType.GetConstructors()
+									.FirstOrDefault(c => c.GetParameters().Length == 3);
+								
+								if (constructor != null)
+								{
+									// We need a ValidationContext - try to create one
+									Type validationContextType = typeof(ValidationContext<>).MakeGenericType(validatedType);
+									object? validationContext = Activator.CreateInstance(validationContextType, [null!]);
+									
+									if (validationContext != null)
+									{
+										object? messageBuilderContext = constructor.Invoke([validationContext, null!, propertyName]);
+										if (messageBuilderContext != null)
+										{
+											string? message = getStringMethod.Invoke(errorMessageSource, [messageBuilderContext]) as string;
+											if (!string.IsNullOrEmpty(message))
+											{
+												return message;
+											}
+										}
+									}
+								}
+							}
+						}
+						catch
+						{
+							// Fall through to next attempt
+						}
+					}
+
+					// Simpler approach: try to get the Message property or field directly
+					// FluentValidation's StaticStringSource stores the message in a "Message" property
+					PropertyInfo? messageProp = errorMessageSource.GetType().GetProperty("Message");
+					if (messageProp != null)
+					{
+						string? message = messageProp.GetValue(errorMessageSource) as string;
+						if (!string.IsNullOrEmpty(message))
+						{
+							// Replace placeholders with property name if needed
+							return message.Replace("{PropertyName}", propertyName);
+						}
+					}
+					
+					// Try getting from field instead
+					FieldInfo? messageField = errorMessageSource.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance);
+					if (messageField != null)
+					{
+						string? message = messageField.GetValue(errorMessageSource) as string;
 						if (!string.IsNullOrEmpty(message))
 						{
 							// Replace placeholders with property name if needed
@@ -306,6 +361,12 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			if (validatorTypeName.EndsWith("Validator"))
 			{
 				validatorTypeName = validatorTypeName[..^9];
+			}
+			// Remove generic type parameters like `2
+			int backtickIndex = validatorTypeName.IndexOf('`');
+			if (backtickIndex > 0)
+			{
+				validatorTypeName = validatorTypeName[..backtickIndex];
 			}
 
 			return $"{propertyName} {validatorTypeName} validation";
