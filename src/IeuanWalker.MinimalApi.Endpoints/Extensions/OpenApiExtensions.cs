@@ -40,12 +40,16 @@ public static class OpenApiExtensions
 	/// </code>
 	/// </example>
 	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions AddAutoFluentValidationDocumentation(this OpenApiOptions options)
+	public static OpenApiOptions AddWithValidatation(this OpenApiOptions options, bool autoDocumentFluentValdation = true, bool appendRulesToPropertyDescription = true)
 	{
 		// Add unified validation transformer that handles both FluentValidation and WithValidation
 		options.AddDocumentTransformer((document, context, ct) =>
 		{
-			ValidationDocumentTransformer transformer = new();
+			ValidationDocumentTransformer transformer = new()
+			{
+				AutoDocumentFluentValdation = autoDocumentFluentValdation,
+				AppendRulesToPropertyDescription = appendRulesToPropertyDescription
+			};
 			return transformer.TransformAsync(document, context, ct);
 		});
 

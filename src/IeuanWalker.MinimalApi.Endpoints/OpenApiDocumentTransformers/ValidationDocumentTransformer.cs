@@ -11,6 +11,8 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 [ExcludeFromCodeCoverage]
 sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 {
+	public bool AutoDocumentFluentValdation { get; set; } = true;
+	public bool AppendRulesToPropertyDescription { get; set; } = true;
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
@@ -20,7 +22,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		Dictionary<Type, bool> listRulesInDescription = [];
 
 		// Step 1: Discover FluentValidation rules
-		DiscoverFluentValidationRules(context, allValidationRules, listRulesInDescription);
+		if (AutoDocumentFluentValdation)
+		{
+			DiscoverFluentValidationRules(context, allValidationRules, listRulesInDescription);
+		}
 
 		// Step 2: Discover manual WithValidation rules (these override FluentValidation per property)
 		DiscoverManualValidationRules(context, allValidationRules, listRulesInDescription);
@@ -31,13 +36,13 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Type requestType = kvp.Key;
 			List<Validation.ValidationRule> rules = kvp.Value;
 			bool listInDescription = listRulesInDescription.GetValueOrDefault(requestType, true);
-			ApplyValidationToSchemas(document, requestType, rules, listInDescription);
+			ApplyValidationToSchemas(document, requestType, rules, listInDescription, AppendRulesToPropertyDescription);
 		}
 
 		return Task.CompletedTask;
 	}
 
-	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool listRulesInDescription)
+	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool listRulesInDescription, bool appendRulesToPropertyDescription)
 	{
 		// Get the schema name for the request type
 		string schemaName = requestType.FullName ?? requestType.Name;
@@ -83,7 +88,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				if (hasOtherRules)
 				{
 					// Create inline schema with all validation constraints for this property
-					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], listRulesInDescription);
+					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], listRulesInDescription, appendRulesToPropertyDescription);
 				}
 			}
 		}
@@ -95,7 +100,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool listRulesInDescription)
+	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool listRulesInDescription, bool appendRulesToPropertyDescription)
 	{
 		// Check for per-property ListRulesInDescription setting (takes precedence over global setting)
 		bool? perPropertySetting = rules.FirstOrDefault(r => r.ListRulesInDescription.HasValue)?.ListRulesInDescription;
@@ -138,7 +143,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				descriptionParts.Add(customDescription);
 			}
 
-			if (ruleDescriptions.Count > 0 && effectiveListRulesInDescription)
+			if (appendRulesToPropertyDescription && ruleDescriptions.Count > 0 && effectiveListRulesInDescription)
 			{
 				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Distinct().Select(msg => $"- {msg}"));
 				descriptionParts.Add(rulesSection);
@@ -227,7 +232,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Add validation rules section if any exist (and if effectiveListRulesInDescription is true)
-		if (ruleDescriptions2.Count > 0 && effectiveListRulesInDescription)
+		if (appendRulesToPropertyDescription && ruleDescriptions2.Count > 0 && effectiveListRulesInDescription)
 		{
 			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions2.Distinct().Select(msg => $"- {msg}"));
 			descriptionParts2.Add(rulesSection);
