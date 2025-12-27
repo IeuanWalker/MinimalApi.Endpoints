@@ -13,7 +13,7 @@ public abstract record ValidationRule
 	/// <summary>
 	/// Error message to display when validation fails
 	/// </summary>
-	public required string ErrorMessage { get; init; }
+	public required string ErrorMessage { get; set; }
 
 	/// <summary>
 	/// Whether to list validation rules in the property description field in OpenAPI documentation.

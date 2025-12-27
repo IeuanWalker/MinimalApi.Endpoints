@@ -135,6 +135,7 @@ partial class ValidationDocumentTransformer
 		// Skip ChildValidatorAdaptor (SetValidator) - nested object validators
 		// These cannot be represented in OpenAPI schema constraints
 		// The nested object's properties will have their own validators that will be processed separately
+		// TODO: Use type rather than string
 		string validatorTypeName = propertyValidator.GetType().Name;
 		if (validatorTypeName.Contains("ChildValidatorAdaptor") || validatorTypeName.Contains("SetValidator"))
 		{
@@ -173,6 +174,8 @@ partial class ValidationDocumentTransformer
 					PropertyName = propertyName,
 					ErrorMessage = errorMessage
 				};
+
+				rule.ErrorMessage = rule.ErrorMessage.Replace($"'{propertyName}' m", "M");
 			}
 		}
 
