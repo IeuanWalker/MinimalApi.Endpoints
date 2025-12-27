@@ -214,7 +214,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				IRuleComponent ruleComponent = validatorTuple.Options;
 
 				// Convert FluentValidation validators to our ValidationRule format
-				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent, validator, validatedType);
+				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent);
 				if (rule != null)
 				{
 					rules.Add(rule);
@@ -225,7 +225,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		return rules;
 	}
 
-	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent, IValidator validator, Type validatedType)
+	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent)
 	{
 		// Skip ChildValidatorAdaptor (SetValidator) - nested object validators
 		// These cannot be represented in OpenAPI schema constraints
