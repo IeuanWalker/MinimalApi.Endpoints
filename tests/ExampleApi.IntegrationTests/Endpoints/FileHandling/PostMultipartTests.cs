@@ -86,8 +86,9 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		byte[] largeContent = new byte[1024 * 50]; // 50KB
 		Random.Shared.NextBytes(largeContent);
 
+		using StringContent someDataContent = new("Large File Test");
 		using MultipartFormDataContent content = new();
-		content.Add(new StringContent("Large File Test"), "SomeData");
+		content.Add(someDataContent, "SomeData");
 
 		using MemoryStream singleStream = new(largeContent);
 		using StreamContent singleContent = new(singleStream);
@@ -206,10 +207,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		(string fileName, string content)[] readOnlyList2Files,
 		(string fileName, string content)[] fileCollectionFiles)
 	{
+		StringContent someDataContent = new(someData);
 		MultipartFormDataContent content = new()
 		{
 			// Add SomeData field
-			{ new StringContent(someData), "SomeData" }
+			{ someDataContent, "SomeData" }
 		};
 
 		// Add SingleFile
