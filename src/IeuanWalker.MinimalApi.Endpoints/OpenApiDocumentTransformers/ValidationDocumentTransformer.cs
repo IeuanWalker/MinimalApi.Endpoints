@@ -536,6 +536,10 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool listRulesInDescription)
 	{
+		// Check for per-property ListRulesInDescription setting (takes precedence over global setting)
+		bool? perPropertySetting = rules.FirstOrDefault(r => r.ListRulesInDescription.HasValue)?.ListRulesInDescription;
+		bool effectiveListRulesInDescription = perPropertySetting ?? listRulesInDescription;
+		
 		// Cast to OpenApiSchema to access properties
 		OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
 		
@@ -557,7 +561,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 			// Collect only applicable rule descriptions (RequiredRule for complex objects)
 			List<string> ruleDescriptions = [];
-			if (listRulesInDescription)
+			if (effectiveListRulesInDescription)
 			{
 				foreach (var rule in rules)
 				{
@@ -576,7 +580,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 				descriptionParts.Add(customDescription);
 			}
 			
-			if (ruleDescriptions.Count > 0 && listRulesInDescription)
+			if (ruleDescriptions.Count > 0 && effectiveListRulesInDescription)
 			{
 				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Select(msg => $"- {msg}"));
 				descriptionParts.Add(rulesSection);
@@ -636,8 +640,8 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 				continue;
 			}
 			
-			// Get human-readable description for this rule (only if listRulesInDescription is true)
-			if (listRulesInDescription)
+			// Get human-readable description for this rule (only if effectiveListRulesInDescription is true)
+			if (effectiveListRulesInDescription)
 			{
 				string? ruleDescription = GetRuleDescription(rule);
 				if (!string.IsNullOrEmpty(ruleDescription))
@@ -664,8 +668,8 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			descriptionParts2.Add(customDescription2);
 		}
 		
-		// Add validation rules section if any exist (and if listRulesInDescription is true)
-		if (ruleDescriptions2.Count > 0 && listRulesInDescription)
+		// Add validation rules section if any exist (and if effectiveListRulesInDescription is true)
+		if (ruleDescriptions2.Count > 0 && effectiveListRulesInDescription)
 		{
 			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions2.Select(msg => $"- {msg}"));
 			descriptionParts2.Add(rulesSection);

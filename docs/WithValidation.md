@@ -159,6 +159,99 @@ app.MapPost("/products", async (ProductRequest request) =>
 - Only the "Validation rules:" section is omitted from the description field
 - Default value is `true` (validation rules are listed by default)
 
+#### Per-Property Control
+
+You can also control this setting on a per-property basis, which is useful when you want to hide validation rules for some properties but not others:
+
+```csharp
+app.MapPost("/products", async (ProductRequest request) => 
+{
+    // Your endpoint implementation
+})
+.WithValidation<ProductRequest>(config =>
+{
+    // This property will show validation rules in description (default behavior)
+    config.Property(x => x.Name)
+        .Description("The product name")
+        .Required()
+        .MinLength(1)
+        .MaxLength(200);
+    
+    // This property will NOT show validation rules in description
+    config.Property(x => x.Price)
+        .Description("The product price in USD")
+        .ListRulesInDescription(false)  // Per-property override
+        .GreaterThan(0);
+    
+    // This property will also NOT show validation rules
+    config.Property(x => x.Sku)
+        .ListRulesInDescription(false)
+        .Required()
+        .Pattern(@"^[A-Z0-9-]+$");
+});
+```
+
+**Generated OpenAPI:**
+```json
+{
+  "name": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string",
+    "description": "The product name\n\nValidation rules:\n- Required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
+  },
+  "price": {
+    "type": "number",
+    "format": "decimal",
+    "exclusiveMinimum": "0",
+    "description": "The product price in USD"
+  },
+  "sku": {
+    "type": "string",
+    "pattern": "^[A-Z0-9-]+$"
+  }
+}
+```
+
+**Priority:** Per-property settings take precedence over global configuration settings.
+
+#### Controlling FluentValidation Auto-Discovered Rules
+
+The per-property `ListRulesInDescription()` also works with FluentValidation auto-discovered rules. You can use `WithValidation` to control the display of auto-discovered rules without overriding the validation logic:
+
+```csharp
+// FluentValidation validator (auto-discovered)
+public class ProductRequestValidator : AbstractValidator<ProductRequest>
+{
+    public ProductRequestValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Price).GreaterThan(0);
+        RuleFor(x => x.Sku).NotEmpty().Matches(@"^[A-Z0-9-]+$");
+    }
+}
+
+// In your endpoint - control how auto-discovered rules are displayed
+app.MapPost("/products", async (ProductRequest request) => { ... })
+   .WithValidation<ProductRequest>(config =>
+   {
+       // Show FluentValidation rules for Name (uses auto-discovered rules)
+       config.Property(x => x.Name)
+           .Description("The product name");
+       
+       // Hide FluentValidation rules for Price
+       config.Property(x => x.Price)
+           .Description("The product price in USD")
+           .ListRulesInDescription(false);
+       
+       // Hide FluentValidation rules for Sku
+       config.Property(x => x.Sku)
+           .ListRulesInDescription(false);
+   });
+```
+
+This allows you to keep your FluentValidation logic intact while controlling the OpenAPI documentation presentation on a per-property basis.
+
 ### String Validation
 
 ```csharp
