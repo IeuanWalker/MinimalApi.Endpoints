@@ -199,6 +199,7 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 	/// <summary>
 	/// Helper method to create multipart form content with files
 	/// </summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "MultipartFormDataContent takes ownership of added HttpContent and will dispose them when the returned content is disposed by the caller.")]
 	static MultipartFormDataContent CreateMultipartContent(
 		string someData,
 		string singleFileName,
