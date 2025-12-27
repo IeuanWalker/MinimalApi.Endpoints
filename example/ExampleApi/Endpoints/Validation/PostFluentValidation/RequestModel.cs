@@ -92,12 +92,12 @@ sealed class RequestModelValidator : Validator<RequestModel>
 		// List count validation (string lists)
 		RuleFor(x => x.ListStringMinCount).Must(list => list.Count >= 1).WithMessage("Must contain at least 1 item.");
 		RuleFor(x => x.ListStringMaxCount).Must(list => list.Count <= 10).WithMessage("Must contain at most 10 items.");
-		RuleFor(x => x.ListStringRangeCount).Must(list => list.Count >= 1 && list.Count <= 10).WithMessage("Must contain between 1 and 10 items.");
+		RuleFor(x => x.ListStringRangeCount).Must(list => list.Count is >= 1 and <= 10).WithMessage("Must contain between 1 and 10 items.");
 
 		// List count validation (int lists)
 		RuleFor(x => x.ListIntMinCount).Must(list => list.Count >= 1).WithMessage("Must contain at least 1 item.");
 		RuleFor(x => x.ListIntMaxCount).Must(list => list.Count <= 10).WithMessage("Must contain at most 10 items.");
-		RuleFor(x => x.ListIntRangeCount).Must(list => list.Count >= 1 && list.Count <= 10).WithMessage("Must contain between 1 and 10 items.");
+		RuleFor(x => x.ListIntRangeCount).Must(list => list.Count is >= 1 and <= 10).WithMessage("Must contain between 1 and 10 items.");
 
 		// Nested object validation
 		RuleFor(x => x.NestedObject).NotNull().SetValidator(new NestedObjectModelValidator());
@@ -166,11 +166,11 @@ sealed class NestedObjectModelValidator : Validator<NestedObjectModel>
 		// List count validation (string lists)
 		RuleFor(x => x.ListStringMinCount).Must(list => list.Count >= 1).WithMessage("Must contain at least 1 item.");
 		RuleFor(x => x.ListStringMaxCount).Must(list => list.Count <= 10).WithMessage("Must contain at most 10 items.");
-		RuleFor(x => x.ListStringRangeCount).Must(list => list.Count >= 1 && list.Count <= 10).WithMessage("Must contain between 1 and 10 items.");
+		RuleFor(x => x.ListStringRangeCount).Must(list => list.Count is >= 1 and <= 10).WithMessage("Must contain between 1 and 10 items.");
 
 		// List count validation (int lists)
 		RuleFor(x => x.ListIntMinCount).Must(list => list.Count >= 1).WithMessage("Must contain at least 1 item.");
 		RuleFor(x => x.ListIntMaxCount).Must(list => list.Count <= 10).WithMessage("Must contain at most 10 items.");
-		RuleFor(x => x.ListIntRangeCount).Must(list => list.Count >= 1 && list.Count <= 10).WithMessage("Must contain between 1 and 10 items.");
+		RuleFor(x => x.ListIntRangeCount).Must(list => list.Count is >= 1 and <= 10).WithMessage("Must contain between 1 and 10 items.");
 	}
 }

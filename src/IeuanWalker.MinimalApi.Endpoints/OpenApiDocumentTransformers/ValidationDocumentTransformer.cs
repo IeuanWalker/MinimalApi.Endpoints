@@ -107,15 +107,16 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Console.WriteLine($"[DEBUG-FV] Processing validator for type: {validatedType.FullName}");
 
 			// Extract validation rules from the validator
-			List<Validation.ValidationRule> rules = ExtractFluentValidationRules(validator, validatedType);
+			List<Validation.ValidationRule> rules = ExtractFluentValidationRules(validator);
 
 			Console.WriteLine($"[DEBUG-FV] Extracted {rules.Count} rules for {validatedType.Name}");
 
 			if (rules.Count > 0)
 			{
-				if (!allValidationRules.ContainsKey(validatedType))
+				if (!allValidationRules.TryGetValue(validatedType, out List<Validation.ValidationRule>? value))
 				{
-					allValidationRules[validatedType] = [];
+					value = [];
+					allValidationRules[validatedType] = value;
 				}
 
 				// FluentValidation rules default to listing in description (true)
@@ -124,7 +125,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					listRulesInDescription[validatedType] = true;
 				}
 
-				allValidationRules[validatedType].AddRange(rules);
+				value.AddRange(rules);
 			}
 		}
 	}
@@ -132,8 +133,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	static void DiscoverManualValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules, Dictionary<Type, bool> listRulesInDescription)
 	{
 		// Iterate through all endpoints to find WithValidation metadata
-		EndpointDataSource? endpointDataSource = context.ApplicationServices.GetService(typeof(EndpointDataSource)) as EndpointDataSource;
-		if (endpointDataSource == null)
+		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
 		{
 			return;
 		}
@@ -168,17 +168,16 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 							if (rulesProp?.GetValue(config) is IEnumerable<Validation.ValidationRule> manualRules)
 							{
 								// Manual rules override auto-discovered rules per property
-								if (!allValidationRules.ContainsKey(requestType))
+								if (!allValidationRules.TryGetValue(requestType, out List<Validation.ValidationRule>? value))
 								{
-									allValidationRules[requestType] = [];
+									value = [];
+									allValidationRules[requestType] = value;
 								}
 
 								// Remove auto-discovered rules for properties that have manual rules
-								HashSet<string> manualPropertyNames = manualRules.Select(r => r.PropertyName).Distinct().ToHashSet();
-								allValidationRules[requestType].RemoveAll(r => manualPropertyNames.Contains(r.PropertyName));
-
-								// Add manual rules
-								allValidationRules[requestType].AddRange(manualRules);
+								HashSet<string> manualPropertyNames = [.. manualRules.Select(r => r.PropertyName).Distinct()];
+								value.RemoveAll(r => manualPropertyNames.Contains(r.PropertyName));
+								value.AddRange(manualRules);
 							}
 						}
 					}
@@ -196,7 +195,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		return validatorInterface?.GetGenericArguments().FirstOrDefault();
 	}
 
-	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator, Type validatedType)
+	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator)
 	{
 		List<Validation.ValidationRule> rules = [];
 
@@ -471,12 +470,12 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			if (validatorType.Name.Contains("EnumValidator") || validatorType.Name.Contains("IsEnum"))
 			{
 				// Remove single quotes around property name at the beginning of the message
-				if (message.StartsWith("'") && message.Contains("'", StringComparison.Ordinal))
+				if (message.StartsWith('\'') && message.Contains('\'', StringComparison.Ordinal))
 				{
-					int secondQuoteIndex = message.IndexOf("'", 1, StringComparison.Ordinal);
+					int secondQuoteIndex = message.IndexOf('\'', 1);
 					if (secondQuoteIndex > 0)
 					{
-						message = message.Substring(1, secondQuoteIndex - 1) + message.Substring(secondQuoteIndex + 1);
+						message = string.Concat(message.AsSpan(1, secondQuoteIndex - 1), message.AsSpan(secondQuoteIndex + 1));
 					}
 				}
 			}
@@ -533,7 +532,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		return null;
 	}
 
-	static Validation.ValidationRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
+	static Validation.StringLengthRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
 	{
 		// Get the Min and Max properties using reflection
 		PropertyInfo? minProp = lengthValidator.GetType().GetProperty("Min");
@@ -560,7 +559,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		};
 	}
 
-	static Validation.ValidationRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)
+	static Validation.PatternRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)
 	{
 		PropertyInfo? expressionProp = regexValidator.GetType().GetProperty("Expression");
 		string? pattern = expressionProp?.GetValue(regexValidator) as string;
@@ -606,7 +605,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		};
 	}
 
-	static Validation.ValidationRule? CreateTypedRangeRule<T>(string propertyName, T value, string comparisonName) where T : struct, IComparable<T>
+	static Validation.RangeRule<T>? CreateTypedRangeRule<T>(string propertyName, T value, string comparisonName) where T : struct, IComparable<T>
 	{
 		return comparisonName switch
 		{
@@ -746,7 +745,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// Check if there are any rules other than RequiredRule and DescriptionRule
 			// If only RequiredRule/DescriptionRule exist, we don't need to modify the schema inline
 			// (RequiredRule is handled by adding to required array, DescriptionRule doesn't apply to nested objects)
-			bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule && r is not Validation.DescriptionRule);
+			bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
 
 			if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 			{
