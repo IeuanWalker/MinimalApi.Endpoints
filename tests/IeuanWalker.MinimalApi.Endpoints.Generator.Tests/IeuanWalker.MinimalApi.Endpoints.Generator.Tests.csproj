@@ -5,7 +5,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
-		<RunSettingsFilePath>C:\Users\c773975\source\repos\GHMine\MAE\tests\IeuanWalker.MinimalApi.Endpoints.Generator.Tests\bin\Debug\net10.0\fine-code-coverage\coverage-tool-output\IeuanWalker.MinimalApi.Endpoints.Generator.Tests-fcc-mscodecoverage-generated.runsettings</RunSettingsFilePath>
 	</PropertyGroup>
 
 	<ItemGroup>
