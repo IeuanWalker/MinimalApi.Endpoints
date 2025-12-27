@@ -8,13 +8,12 @@ namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 public sealed class ValidationConfigurationBuilder<TRequest>
 {
 	readonly List<object> _propertyBuilders = [];
-	bool _listRulesInDescription = true; // Default to true
+	bool _listRulesInDescription = true;
 
 	/// <summary>
 	/// Configures validation rules for a property
 	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> Property<TProperty>(
-		Expression<Func<TRequest, TProperty>> propertySelector)
+	public PropertyValidationBuilder<TRequest, TProperty> Property<TProperty>(Expression<Func<TRequest, TProperty>> propertySelector)
 	{
 		string propertyName = GetPropertyName(propertySelector);
 		PropertyValidationBuilder<TRequest, TProperty> builder = new(propertyName);
@@ -39,10 +38,9 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 		foreach (object builder in _propertyBuilders)
 		{
 			// Use reflection to call Build() on each property builder
-			System.Reflection.MethodInfo? buildMethod = builder.GetType().GetMethod("Build",
-				System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+			System.Reflection.MethodInfo? buildMethod = builder.GetType().GetMethod("Build", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
-			if (buildMethod != null)
+			if (buildMethod is not null)
 			{
 				if (buildMethod.Invoke(builder, null) is IEnumerable<ValidationRule> rules)
 				{

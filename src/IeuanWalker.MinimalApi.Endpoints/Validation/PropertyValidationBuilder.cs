@@ -79,7 +79,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		{
 			PropertyName = _propertyName,
 			Pattern = regex,
-			ErrorMessage = errorMessage ?? $"Must match patter - {regex}"
+			ErrorMessage = errorMessage ?? $"Must match pattern - {regex}"
 		});
 		return this;
 	}

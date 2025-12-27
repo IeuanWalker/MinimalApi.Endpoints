@@ -15,9 +15,7 @@ public sealed class ValidationConfiguration<TRequest>
 	/// </summary>
 	public bool ListRulesInDescription { get; }
 
-	internal ValidationConfiguration(
-		IReadOnlyList<ValidationRule> rules,
-		bool listRulesInDescription)
+	internal ValidationConfiguration(IReadOnlyList<ValidationRule> rules, bool listRulesInDescription)
 	{
 		Rules = rules;
 		ListRulesInDescription = listRulesInDescription;

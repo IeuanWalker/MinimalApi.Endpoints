@@ -35,7 +35,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			Type requestType = kvp.Key;
 			List<Validation.ValidationRule> rules = kvp.Value;
-			bool listInDescription = listRulesInDescription.GetValueOrDefault(requestType, true); // Default to true
+			bool listInDescription = listRulesInDescription.GetValueOrDefault(requestType, true);
 			ApplyValidationToSchemas(document, requestType, rules, listInDescription);
 		}
 
@@ -72,7 +72,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					Type? validatorInterface = type.GetInterfaces()
 						.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
 
-					if (validatorInterface != null && !type.IsAbstract && !type.IsInterface)
+					if (validatorInterface is not null && !type.IsAbstract && !type.IsInterface)
 					{
 						// Try to get this validator from DI
 						object? validatorInstance = context.ApplicationServices.GetService(validatorInterface);
@@ -99,7 +99,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Find the validated type (T in IValidator<T>)
 			Type? validatedType = GetValidatedType(validatorType);
-			if (validatedType == null)
+			if (validatedType is null)
 			{
 				continue;
 			}
@@ -256,7 +256,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		};
 
 		// If we couldn't map to a specific rule type, create a CustomRule with the error message
-		if (rule == null)
+		if (rule is null)
 		{
 			string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName);
 			if (!string.IsNullOrEmpty(errorMessage))
@@ -281,7 +281,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// Strategy 1: Try GetUnformattedErrorMessage() method on RuleComponent
 			// This is the most reliable way to get the custom message set via .WithMessage()
 			MethodInfo? getUnformattedMethod = ruleComponent.GetType().GetMethod("GetUnformattedErrorMessage", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-			if (getUnformattedMethod != null)
+			if (getUnformattedMethod is not null)
 			{
 				try
 				{
@@ -300,14 +300,14 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Strategy 2: Try to get the error message template from the rule component's ErrorMessageSource
 			PropertyInfo? errorMessageProp = ruleComponent.GetType().GetProperty("ErrorMessageSource");
-			if (errorMessageProp != null)
+			if (errorMessageProp is not null)
 			{
 				object? errorMessageSource = errorMessageProp.GetValue(ruleComponent);
-				if (errorMessageSource != null)
+				if (errorMessageSource is not null)
 				{
 					// Try to get the Message property directly (StaticStringSource)
 					PropertyInfo? messageProp = errorMessageSource.GetType().GetProperty("Message", BindingFlags.Public | BindingFlags.Instance);
-					if (messageProp != null)
+					if (messageProp is not null)
 					{
 						string? message = messageProp.GetValue(errorMessageSource) as string;
 						if (!string.IsNullOrEmpty(message))
@@ -319,7 +319,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 					// Try private message field
 					FieldInfo? messageField = errorMessageSource.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance);
-					if (messageField != null)
+					if (messageField is not null)
 					{
 						string? message = messageField.GetValue(errorMessageSource) as string;
 						if (!string.IsNullOrEmpty(message))
@@ -370,7 +370,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty("ValueToCompare");
 				object? value = valueProp?.GetValue(comparisonValidator);
-				if (value != null)
+				if (value is not null)
 				{
 					message = message.Replace("{ComparisonValue}", value.ToString());
 				}
@@ -378,7 +378,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				// Also check for MemberToCompare for property comparisons
 				PropertyInfo? memberProp = comparisonValidator.GetType().GetProperty("MemberToCompare");
 				object? memberValue = memberProp?.GetValue(comparisonValidator);
-				if (memberValue != null)
+				if (memberValue is not null)
 				{
 					message = message.Replace("{ComparisonProperty}", memberValue.ToString() ?? string.Empty);
 				}
@@ -393,11 +393,11 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				object? from = fromProp?.GetValue(betweenValidator);
 				object? to = toProp?.GetValue(betweenValidator);
 
-				if (from != null)
+				if (from is not null)
 				{
 					message = message.Replace("{From}", from.ToString());
 				}
-				if (to != null)
+				if (to is not null)
 				{
 					message = message.Replace("{To}", to.ToString());
 				}
@@ -412,13 +412,13 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				object? min = minProp?.GetValue(lengthValidator);
 				object? max = maxProp?.GetValue(lengthValidator);
 
-				if (min != null)
+				if (min is not null)
 				{
 					message = message
 						.Replace("{MinLength}", min.ToString())
 						.Replace("{min}", min.ToString());
 				}
-				if (max != null)
+				if (max is not null)
 				{
 					message = message
 						.Replace("{MaxLength}", max.ToString())
@@ -436,15 +436,15 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				object? scale = TryGetPropertyOrFieldValue(propertyValidator, "Scale", "ExpectedScale", "scale");
 				object? ignoreTrailing = TryGetPropertyOrFieldValue(propertyValidator, "IgnoreTrailingZeros", "ignoreTrailingZeros");
 
-				if (precision != null)
+				if (precision is not null)
 				{
 					message = message.Replace("{ExpectedPrecision}", precision.ToString());
 				}
-				if (scale != null)
+				if (scale is not null)
 				{
 					message = message.Replace("{ExpectedScale}", scale.ToString());
 				}
-				if (ignoreTrailing != null)
+				if (ignoreTrailing is not null)
 				{
 					message = message.Replace("{IgnoreTrailingZeros}", ignoreTrailing.ToString());
 				}
@@ -460,7 +460,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				PropertyInfo? expressionProp = regexValidator.GetType().GetProperty("Expression");
 				object? expression = expressionProp?.GetValue(regexValidator);
-				if (expression != null)
+				if (expression is not null)
 				{
 					message = message.Replace("{RegularExpression}", expression.ToString());
 				}
@@ -498,7 +498,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		foreach (string name in names)
 		{
 			PropertyInfo? prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-			if (prop != null)
+			if (prop is not null)
 			{
 				try
 				{
@@ -515,7 +515,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		foreach (string name in names)
 		{
 			FieldInfo? field = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-			if (field != null)
+			if (field is not null)
 			{
 				try
 				{
@@ -541,7 +541,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		int? min = minProp?.GetValue(lengthValidator) as int?;
 		int? max = maxProp?.GetValue(lengthValidator) as int?;
 
-		if (min == null && max == null)
+		if (min is null && max is null)
 		{
 			return null;
 		}
@@ -586,7 +586,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		object? value = valueProp?.GetValue(comparisonValidator);
 		object? comparison = comparisonProp?.GetValue(comparisonValidator);
 
-		if (value == null || comparison == null)
+		if (value is null || comparison is null)
 		{
 			return null;
 		}
@@ -650,7 +650,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		object? from = fromProp?.GetValue(betweenValidator);
 		object? to = toProp?.GetValue(betweenValidator);
 
-		if (from == null || to == null)
+		if (from is null || to is null)
 		{
 			return null;
 		}
@@ -665,7 +665,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				Maximum = intTo,
 				ExclusiveMinimum = false,
 				ExclusiveMaximum = false,
-				ErrorMessage = $"{propertyName} must be between {intFrom} and {intTo}"
+				ErrorMessage = $"Must be between {intFrom} and {intTo}"
 			},
 			long longFrom when to is long longTo => new Validation.RangeRule<long>
 			{
@@ -674,7 +674,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				Maximum = longTo,
 				ExclusiveMinimum = false,
 				ExclusiveMaximum = false,
-				ErrorMessage = $"{propertyName} must be between {longFrom} and {longTo}"
+				ErrorMessage = $"Must be between {longFrom} and {longTo}"
 			},
 			decimal decimalFrom when to is decimal decimalTo => new Validation.RangeRule<decimal>
 			{
@@ -683,7 +683,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				Maximum = decimalTo,
 				ExclusiveMinimum = false,
 				ExclusiveMaximum = false,
-				ErrorMessage = $"{propertyName} must be between {decimalFrom} and {decimalTo}"
+				ErrorMessage = $"Must be between {decimalFrom} and {decimalTo}"
 			},
 			double doubleFrom when to is double doubleTo => new Validation.RangeRule<double>
 			{
@@ -692,7 +692,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				Maximum = doubleTo,
 				ExclusiveMinimum = false,
 				ExclusiveMaximum = false,
-				ErrorMessage = $"{propertyName} must be between {doubleFrom} and {doubleTo}"
+				ErrorMessage = $"Must be between {doubleFrom} and {doubleTo}"
 			},
 			float floatFrom when to is float floatTo => new Validation.RangeRule<float>
 			{
@@ -701,7 +701,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				Maximum = floatTo,
 				ExclusiveMinimum = false,
 				ExclusiveMaximum = false,
-				ErrorMessage = $"{propertyName} must be between {floatFrom} and {floatTo}"
+				ErrorMessage = $"Must be between {floatFrom} and {floatTo}"
 			},
 			_ => null
 		};
@@ -713,13 +713,12 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		string schemaName = requestType.FullName ?? requestType.Name;
 
 		// Find the schema in components
-		if (document.Components?.Schemas == null ||
-			!document.Components.Schemas.TryGetValue(schemaName, out IOpenApiSchema? schemaInterface))
+		if (document.Components?.Schemas is null || !document.Components.Schemas.TryGetValue(schemaName, out IOpenApiSchema? schemaInterface))
 		{
 			return;
 		}
 
-		if (schemaInterface is not OpenApiSchema schema || schema.Properties == null)
+		if (schemaInterface is not OpenApiSchema schema || schema.Properties is null)
 		{
 			return;
 		}
@@ -781,7 +780,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 							   (originalOpenApiSchema?.Properties?.Count > 0 && originalOpenApiSchema.Type == JsonSchemaType.Object);
 
 		// For complex objects (nested types with AllOf or object definitions), preserve the original schema structure
-		if (isComplexObject && originalOpenApiSchema != null)
+		if (isComplexObject && originalOpenApiSchema is not null)
 		{
 			// For complex objects, we don't want to lose the AllOf or Properties structure
 			// Just return the original schema with an added description for validation rules
@@ -846,7 +845,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			newInlineSchema.Type = schemaType.Value;
 		}
-		if (format != null)
+		if (format is not null)
 		{
 			newInlineSchema.Format = format;
 		}
