@@ -28,6 +28,13 @@ public class RequestModel
 
 	public required NestedObjectModel NestedObject { get; set; }
 	public List<NestedObjectModel>? ListNestedObject { get; set; }
+
+	// Built in fleunt validators
+	public string? AllBuiltInStringValidators { get; set; }
+	public decimal? AllBuiltInNumberValidators { get; set; }
+	public int MaxNumberTest { get; set; }
+	public int MinNumberTest { get; set; }
+	public required string EnumStringValidator { get; set; }
 }
 
 public class NestedObjectModel
@@ -52,6 +59,12 @@ public class NestedObjectModel
 	public List<int> ListIntMinCount { get; set; } = [];
 	public List<int> ListIntMaxCount { get; set; } = [];
 	public List<int> ListIntRangeCount { get; set; } = [];
+}
+
+public enum StatusEnum
+{
+	Success,
+	Failure
 }
 
 sealed class RequestModelValidator : Validator<RequestModel>
@@ -89,6 +102,40 @@ sealed class RequestModelValidator : Validator<RequestModel>
 
 		// List of nested objects validation
 		RuleForEach(x => x.ListNestedObject).SetValidator(new NestedObjectModelValidator());
+
+		RuleFor(x => x.AllBuiltInStringValidators)
+			.NotEmpty()
+			.NotEqual("TestNotEqual")
+			.Equal("TestEqual")
+			.Length(2, 250)
+			.MaximumLength(250)
+			.MinimumLength(2)
+			.Must(x => x == "TestEqual")
+			.Matches(@"^[a-zA-Z0-9]+$")
+			.EmailAddress()
+			.CreditCard()
+			.Empty()
+			.Null();
+
+		RuleFor(x => x.AllBuiltInNumberValidators)
+			.NotEmpty()
+			.NotEqual(10)
+			.Equal(10)
+			.LessThan(100)
+			.LessThan(x => x.MaxNumberTest)
+			.LessThanOrEqualTo(100)
+			.LessThanOrEqualTo(x => x.MaxNumberTest)
+			.GreaterThan(0)
+			.GreaterThan(x => x.MinNumberTest)
+			.GreaterThanOrEqualTo(1)
+			.GreaterThanOrEqualTo(x => x.MinNumberTest)
+			.Empty()
+			.Null()
+			.ExclusiveBetween(1, 10)
+			.InclusiveBetween(1, 10)
+			.PrecisionScale(4, 2, false);
+
+		RuleFor(x => x.EnumStringValidator).IsEnumName(typeof(StatusEnum), caseSensitive: false);
 	}
 }
 
