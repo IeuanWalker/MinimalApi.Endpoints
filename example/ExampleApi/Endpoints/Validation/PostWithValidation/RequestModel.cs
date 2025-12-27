@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace ExampleApi.Endpoints.Validation.PostWithValidation;
 
+[ExcludeFromCodeCoverage]
 public class RequestModel
 {
 	public string StringMin { get; set; } = string.Empty;
@@ -27,6 +30,7 @@ public class RequestModel
 	public List<NestedObjectModel>? ListNestedObject { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class NestedObjectModel
 {
 	public string StringMin { get; set; } = string.Empty;

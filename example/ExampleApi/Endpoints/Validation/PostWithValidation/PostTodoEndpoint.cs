@@ -4,9 +4,9 @@ using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Validation.PostWithValidation;
 
+[ExcludeFromCodeCoverage]
 public class PostTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 {
-	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
