@@ -286,36 +286,111 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				object? errorMessageSource = errorMessageProp.GetValue(ruleComponent);
 				if (errorMessageSource != null)
 				{
-					// ErrorMessageSource has a GetString method that takes a MessageBuilderContext
-					// Try to invoke it to get the actual error message
-					MethodInfo? getStringMethod = errorMessageSource.GetType().GetMethod("GetString");
+					// Strategy 1: Try to get the Message property directly (StaticStringSource)
+					// This is the most reliable way for .WithMessage() calls
+					PropertyInfo? messageProp = errorMessageSource.GetType().GetProperty("Message", BindingFlags.Public | BindingFlags.Instance);
+					if (messageProp != null)
+					{
+						string? message = messageProp.GetValue(errorMessageSource) as string;
+						if (!string.IsNullOrEmpty(message))
+						{
+							// Replace common placeholders
+							return message
+								.Replace("{PropertyName}", propertyName)
+								.Replace("{PropertyValue}", "{value}");
+						}
+					}
+					
+					// Strategy 2: Try private message field
+					FieldInfo? messageField = errorMessageSource.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance);
+					if (messageField != null)
+					{
+						string? message = messageField.GetValue(errorMessageSource) as string;
+						if (!string.IsNullOrEmpty(message))
+						{
+							return message
+								.Replace("{PropertyName}", propertyName)
+								.Replace("{PropertyValue}", "{value}");
+						}
+					}
+
+					// Strategy 3: Try GetString method with a properly constructed MessageBuilderContext
+					// This is more complex but handles dynamic messages
+					MethodInfo? getStringMethod = errorMessageSource.GetType().GetMethod("GetString", BindingFlags.Public | BindingFlags.Instance);
 					if (getStringMethod != null)
 					{
 						try
 						{
-							// Create a dummy context to get the message
-							Type? messageBuilderContextType = typeof(IValidator).Assembly.GetType("FluentValidation.MessageBuilderContext");
-							if (messageBuilderContextType != null)
+							// Create a default instance of the validated type for the context
+							object? instanceToValidate = null;
+							try
 							{
-								// Create an instance using the constructor that takes ValidationContext, object, and string
-								ConstructorInfo? constructor = messageBuilderContextType.GetConstructors()
-									.FirstOrDefault(c => c.GetParameters().Length == 3);
-								
-								if (constructor != null)
+								if (validatedType.GetConstructor(Type.EmptyTypes) != null)
 								{
-									// We need a ValidationContext - try to create one
-									Type validationContextType = typeof(ValidationContext<>).MakeGenericType(validatedType);
-									object? validationContext = Activator.CreateInstance(validationContextType, [null!]);
+									instanceToValidate = Activator.CreateInstance(validatedType);
+								}
+							}
+							catch
+							{
+								// If we can't create an instance, use null
+							}
+
+							// Create ValidationContext<T>
+							Type validationContextType = typeof(ValidationContext<>).MakeGenericType(validatedType);
+							ConstructorInfo? contextConstructor = validationContextType.GetConstructor([validatedType]);
+							
+							if (contextConstructor != null)
+							{
+								object? validationContext = contextConstructor.Invoke([instanceToValidate]);
+								
+								if (validationContext != null)
+								{
+									// Try to find MessageBuilderContext type
+									Type? messageBuilderContextType = typeof(IValidator).Assembly.GetType("FluentValidation.MessageBuilderContext");
 									
-									if (validationContext != null)
+									if (messageBuilderContextType != null)
 									{
-										object? messageBuilderContext = constructor.Invoke([validationContext, null!, propertyName]);
-										if (messageBuilderContext != null)
+										// Try to create MessageBuilderContext
+										// It typically has constructors with varying parameter counts
+										ConstructorInfo? contextCtor = messageBuilderContextType.GetConstructors()
+											.OrderByDescending(c => c.GetParameters().Length)
+											.FirstOrDefault();
+										
+										if (contextCtor != null)
 										{
-											string? message = getStringMethod.Invoke(errorMessageSource, [messageBuilderContext]) as string;
-											if (!string.IsNullOrEmpty(message))
+											ParameterInfo[] parameters = contextCtor.GetParameters();
+											object?[] args = new object?[parameters.Length];
+											
+											// Fill in the parameters with best guesses
+											for (int i = 0; i < parameters.Length; i++)
 											{
-												return message;
+												Type paramType = parameters[i].ParameterType;
+												if (paramType.Name.Contains("ValidationContext"))
+												{
+													args[i] = validationContext;
+												}
+												else if (paramType == typeof(string))
+												{
+													args[i] = propertyName;
+												}
+												else if (paramType == typeof(object) || !paramType.IsValueType)
+												{
+													args[i] = instanceToValidate;
+												}
+												else
+												{
+													args[i] = paramType.IsValueType ? Activator.CreateInstance(paramType) : null;
+												}
+											}
+											
+											object? messageBuilderContext = contextCtor.Invoke(args);
+											if (messageBuilderContext != null)
+											{
+												string? message = getStringMethod.Invoke(errorMessageSource, [messageBuilderContext]) as string;
+												if (!string.IsNullOrEmpty(message))
+												{
+													return message;
+												}
 											}
 										}
 									}
@@ -324,32 +399,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						}
 						catch
 						{
-							// Fall through to next attempt
-						}
-					}
-
-					// Simpler approach: try to get the Message property or field directly
-					// FluentValidation's StaticStringSource stores the message in a "Message" property
-					PropertyInfo? messageProp = errorMessageSource.GetType().GetProperty("Message");
-					if (messageProp != null)
-					{
-						string? message = messageProp.GetValue(errorMessageSource) as string;
-						if (!string.IsNullOrEmpty(message))
-						{
-							// Replace placeholders with property name if needed
-							return message.Replace("{PropertyName}", propertyName);
-						}
-					}
-					
-					// Try getting from field instead
-					FieldInfo? messageField = errorMessageSource.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance);
-					if (messageField != null)
-					{
-						string? message = messageField.GetValue(errorMessageSource) as string;
-						if (!string.IsNullOrEmpty(message))
-						{
-							// Replace placeholders with property name if needed
-							return message.Replace("{PropertyName}", propertyName);
+							// Fall through to fallback
 						}
 					}
 				}
