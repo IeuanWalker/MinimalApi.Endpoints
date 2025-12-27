@@ -6,6 +6,7 @@
 		<Nullable>enable</Nullable>
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
+		<RunSettingsFilePath>C:\Users\c773975\source\repos\GHMine\MAE\tests\ExampleApi.IntegrationTests\bin\Debug\net10.0\fine-code-coverage\coverage-tool-output\ExampleApi.IntegrationTests-fcc-mscodecoverage-generated.runsettings</RunSettingsFilePath>
 	</PropertyGroup>
 
 	<ItemGroup>

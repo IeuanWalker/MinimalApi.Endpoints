@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using ExampleApi.Endpoints.Validation.PostFluentValidation;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Validation;
 
@@ -17,7 +18,7 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 	[Fact]
 	public async Task PostFluentValidation_WithValidData_ReturnsOk()
 	{
-		var request = new ExampleApi.Endpoints.Validation.PostFluentValidation.RequestModel
+		RequestModel request = new()
 		{
 			StringMin = "abc",
 			StringMax = "ok",
@@ -72,7 +73,7 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 	[Fact]
 	public async Task PostFluentValidation_WithShortStringMin_ReturnsBadRequest()
 	{
-		var request = new ExampleApi.Endpoints.Validation.PostFluentValidation.RequestModel
+		RequestModel request = new()
 		{
 			StringMin = "ab", // too short (min length 3)
 			NestedObject = new ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel

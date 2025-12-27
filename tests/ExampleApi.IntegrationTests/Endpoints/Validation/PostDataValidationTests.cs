@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
+using ExampleApi.Endpoints.Validation.PostDataValidation;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Validation;
 
@@ -17,7 +18,7 @@ public class PostDataValidationTests : IClassFixture<ExampleApiWebApplicationFac
 	[Fact]
 	public async Task PostDataValidation_WithValidData_ReturnsOk()
 	{
-		var request = new ExampleApi.Endpoints.Validation.PostDataValidation.RequestModel
+		RequestModel request = new()
 		{
 			StringMin = "abc",
 			StringMax = "ok",
@@ -64,7 +65,7 @@ public class PostDataValidationTests : IClassFixture<ExampleApiWebApplicationFac
 	[Fact]
 	public async Task PostDataValidation_WithMissingNestedObject_ReturnsBadRequest()
 	{
-		var request = new ExampleApi.Endpoints.Validation.PostDataValidation.RequestModel
+		RequestModel request = new()
 		{
 			StringMin = "abc",
 			NestedObject = null! // missing required nested object
