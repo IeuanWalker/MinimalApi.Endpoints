@@ -9,6 +9,7 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 {
 	readonly List<object> _propertyBuilders = [];
 	readonly List<Func<TRequest, Dictionary<string, string[]>>> _crossFieldValidators = [];
+	bool _listRulesInDescription = true; // Default to true
 
 	/// <summary>
 	/// Configures validation rules for a property
@@ -32,6 +33,16 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 		return this;
 	}
 
+	/// <summary>
+	/// Configures whether validation rules should be listed in the property description field in OpenAPI documentation
+	/// </summary>
+	/// <param name="listInDescription">True to list validation rules in description (default), false to omit them</param>
+	public ValidationConfigurationBuilder<TRequest> ListRulesInDescription(bool listInDescription)
+	{
+		_listRulesInDescription = listInDescription;
+		return this;
+	}
+
 	internal ValidationConfiguration<TRequest> Build()
 	{
 		List<ValidationRule> allRules = [];
@@ -51,7 +62,7 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 			}
 		}
 
-		return new ValidationConfiguration<TRequest>(allRules, _crossFieldValidators);
+		return new ValidationConfiguration<TRequest>(allRules, _crossFieldValidators, _listRulesInDescription);
 	}
 
 	static string GetPropertyName<TProperty>(Expression<Func<TRequest, TProperty>> expression)

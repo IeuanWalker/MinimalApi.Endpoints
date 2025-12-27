@@ -15,11 +15,18 @@ public sealed class ValidationConfiguration<TRequest>
 	/// </summary>
 	public IReadOnlyList<Func<TRequest, Dictionary<string, string[]>>> CrossFieldValidators { get; }
 
+	/// <summary>
+	/// Whether to list validation rules in the property description field in OpenAPI documentation
+	/// </summary>
+	public bool ListRulesInDescription { get; }
+
 	internal ValidationConfiguration(
 		IReadOnlyList<ValidationRule> rules,
-		IReadOnlyList<Func<TRequest, Dictionary<string, string[]>>> crossFieldValidators)
+		IReadOnlyList<Func<TRequest, Dictionary<string, string[]>>> crossFieldValidators,
+		bool listRulesInDescription)
 	{
 		Rules = rules;
 		CrossFieldValidators = crossFieldValidators;
+		ListRulesInDescription = listRulesInDescription;
 	}
 }

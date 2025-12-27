@@ -111,6 +111,54 @@ config.Property(x => x.Email)
 
 **Note:** The custom description appears first, followed by a blank line, then the validation rules section.
 
+### Hiding Validation Rules from Description
+
+By default, all validation rules are listed in the property's description field in the OpenAPI documentation. If you prefer to only include the OpenAPI constraint fields (like `minLength`, `maxLength`, `required`) without listing the rules in the description, you can disable it:
+
+```csharp
+app.MapPost("/products", async (ProductRequest request) => 
+{
+    // Your endpoint implementation
+})
+.WithValidation<ProductRequest>(config =>
+{
+    // Disable listing validation rules in descriptions
+    config.ListRulesInDescription(false);
+    
+    config.Property(x => x.Name)
+        .Description("The product name")  // Custom description is still shown
+        .Required()
+        .MinLength(1)
+        .MaxLength(200);
+    
+    config.Property(x => x.Price)
+        .GreaterThan(0);
+});
+```
+
+**Generated OpenAPI (with `ListRulesInDescription(false)`):**
+```json
+{
+  "name": {
+    "maxLength": 200,
+    "minLength": 1,
+    "type": "string",
+    "description": "The product name"
+  },
+  "price": {
+    "type": "number",
+    "format": "decimal",
+    "exclusiveMinimum": "0"
+  }
+}
+```
+
+**Note:** 
+- The validation constraints (`minLength`, `maxLength`, `required`, etc.) are still applied to the OpenAPI schema
+- Custom descriptions added via `.Description()` are still included
+- Only the "Validation rules:" section is omitted from the description field
+- Default value is `true` (validation rules are listed by default)
+
 ### String Validation
 
 ```csharp

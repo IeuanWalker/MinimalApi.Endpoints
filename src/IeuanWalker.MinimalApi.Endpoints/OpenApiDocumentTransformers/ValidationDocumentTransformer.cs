@@ -23,24 +23,28 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
 		Dictionary<Type, List<Validation.ValidationRule>> allValidationRules = [];
 		
+		// Dictionary to track whether to list rules in description for each request type
+		Dictionary<Type, bool> listRulesInDescription = [];
+		
 		// Step 1: Discover FluentValidation rules
-		DiscoverFluentValidationRules(context, allValidationRules);
+		DiscoverFluentValidationRules(context, allValidationRules, listRulesInDescription);
 		
 		// Step 2: Discover manual WithValidation rules (these override FluentValidation per property)
-		DiscoverManualValidationRules(context, allValidationRules);
+		DiscoverManualValidationRules(context, allValidationRules, listRulesInDescription);
 		
 		// Step 3: Apply all collected rules to OpenAPI schemas
 		foreach (var kvp in allValidationRules)
 		{
 			Type requestType = kvp.Key;
 			List<Validation.ValidationRule> rules = kvp.Value;
-			ApplyValidationToSchemas(document, requestType, rules);
+			bool listInDescription = listRulesInDescription.GetValueOrDefault(requestType, true); // Default to true
+			ApplyValidationToSchemas(document, requestType, rules, listInDescription);
 		}
 
 		return Task.CompletedTask;
 	}
 	
-	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules)
+	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules, Dictionary<Type, bool> listRulesInDescription)
 	{
 		// FluentValidation validators are registered as IValidator<T>, not IValidator
 		// We need to scan assemblies to find all types that implement IValidator<T>
@@ -115,12 +119,19 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 				{
 					allValidationRules[validatedType] = [];
 				}
+				
+				// FluentValidation rules default to listing in description (true)
+				if (!listRulesInDescription.ContainsKey(validatedType))
+				{
+					listRulesInDescription[validatedType] = true;
+				}
+				
 				allValidationRules[validatedType].AddRange(rules);
 			}
 		}
 	}
 	
-	static void DiscoverManualValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules)
+	static void DiscoverManualValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules, Dictionary<Type, bool> listRulesInDescription)
 	{
 		// Iterate through all endpoints to find WithValidation metadata
 		EndpointDataSource? endpointDataSource = context.ApplicationServices.GetService(typeof(EndpointDataSource)) as EndpointDataSource;
@@ -146,6 +157,13 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 						if (configProp?.GetValue(metadata) is object config)
 						{
 							Type requestType = metadataType.GetGenericArguments()[0];
+							
+							// Extract ListRulesInDescription setting from the configuration object
+							PropertyInfo? listRulesInDescriptionProp = config.GetType().GetProperty("ListRulesInDescription");
+							if (listRulesInDescriptionProp?.GetValue(config) is bool listInDesc)
+							{
+								listRulesInDescription[requestType] = listInDesc;
+							}
 							
 							// Extract rules from the configuration object
 							PropertyInfo? rulesProp = config.GetType().GetProperty("Rules");
@@ -468,7 +486,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		};
 	}
 
-	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules)
+	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool listRulesInDescription)
 	{
 		// Get the schema name for the request type
 		string schemaName = requestType.FullName ?? requestType.Name;
@@ -505,7 +523,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 			{
 				// Create inline schema with all validation constraints for this property
-				schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, propertyRules.ToList());
+				schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, propertyRules.ToList(), listRulesInDescription);
 			}
 		}
 
@@ -516,7 +534,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 		}
 	}
 
-	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules)
+	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool listRulesInDescription)
 	{
 		// Cast to OpenApiSchema to access properties
 		OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
@@ -539,11 +557,14 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 
 			// Collect only applicable rule descriptions (RequiredRule for complex objects)
 			List<string> ruleDescriptions = [];
-			foreach (var rule in rules)
+			if (listRulesInDescription)
 			{
-				if (rule is Validation.RequiredRule)
+				foreach (var rule in rules)
 				{
-					ruleDescriptions.Add("Required");
+					if (rule is Validation.RequiredRule)
+					{
+						ruleDescriptions.Add("Required");
+					}
 				}
 			}
 			
@@ -555,7 +576,7 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 				descriptionParts.Add(customDescription);
 			}
 			
-			if (ruleDescriptions.Count > 0)
+			if (ruleDescriptions.Count > 0 && listRulesInDescription)
 			{
 				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Select(msg => $"- {msg}"));
 				descriptionParts.Add(rulesSection);
@@ -615,11 +636,14 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 				continue;
 			}
 			
-			// Get human-readable description for this rule
-			string? ruleDescription = GetRuleDescription(rule);
-			if (!string.IsNullOrEmpty(ruleDescription))
+			// Get human-readable description for this rule (only if listRulesInDescription is true)
+			if (listRulesInDescription)
 			{
-				ruleDescriptions2.Add(ruleDescription);
+				string? ruleDescription = GetRuleDescription(rule);
+				if (!string.IsNullOrEmpty(ruleDescription))
+				{
+					ruleDescriptions2.Add(ruleDescription);
+				}
 			}
 			
 			// Apply rule to schema (for non-custom and non-description rules)
@@ -640,8 +664,8 @@ internal sealed class ValidationDocumentTransformer : IOpenApiDocumentTransforme
 			descriptionParts2.Add(customDescription2);
 		}
 		
-		// Add validation rules section if any exist
-		if (ruleDescriptions2.Count > 0)
+		// Add validation rules section if any exist (and if listRulesInDescription is true)
+		if (ruleDescriptions2.Count > 0 && listRulesInDescription)
 		{
 			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions2.Select(msg => $"- {msg}"));
 			descriptionParts2.Add(rulesSection);
