@@ -140,7 +140,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			if (ruleDescriptions.Count > 0 && effectiveListRulesInDescription)
 			{
-				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Select(msg => $"- {msg}"));
+				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Distinct().Select(msg => $"- {msg}"));
 				descriptionParts.Add(rulesSection);
 			}
 
@@ -229,7 +229,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Add validation rules section if any exist (and if effectiveListRulesInDescription is true)
 		if (ruleDescriptions2.Count > 0 && effectiveListRulesInDescription)
 		{
-			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions2.Select(msg => $"- {msg}"));
+			string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions2.Distinct().Select(msg => $"- {msg}"));
 			descriptionParts2.Add(rulesSection);
 		}
 
