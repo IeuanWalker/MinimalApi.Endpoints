@@ -39,6 +39,111 @@
 				}
 			}
 		},
+		"/api/v1/FileHandling/ListOfFiles": {
+			"post": {
+				"tags": [
+					"FileHandling"
+				],
+				"operationId": "post_FileHandlingListOfFiles_2",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"request": {
+										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/FileHandling/Multipart": {
+			"post": {
+				"tags": [
+					"FileHandling"
+				],
+				"operationId": "post_FileHandlingMultipart_3",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/FileHandling/SingleFile": {
+			"post": {
+				"tags": [
+					"FileHandling"
+				],
+				"operationId": "post_FileHandlingSingleFile_4",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"type": "object",
+								"properties": {
+									"request": {
+										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+									}
+								}
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/todos": {
 			"get": {
 				"tags": [
@@ -269,6 +374,28 @@
 				}
 			}
 		},
+		"/api/v1/validation/DataValidation": {
+			"post": {
+				"tags": [
+					"Validation"
+				],
+				"operationId": "post_ValidationDataValidation_12",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataValidation.RequestModel"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK"
+					}
+				}
+			}
+		},
 		"/api/v1/validation/FluentValidation": {
 			"post": {
 				"tags": [
@@ -298,134 +425,7 @@
 				}
 			}
 		},
-		"/api/v{version}/FileHandling/ListOfFiles": {
-			"post": {
-				"tags": [
-					"FileHandling"
-				],
-				"operationId": "post_FileHandlingListOfFiles_2",
-				"requestBody": {
-					"content": {
-						"multipart/form-data": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"request": {
-										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v{version}/FileHandling/Multipart": {
-			"post": {
-				"tags": [
-					"FileHandling"
-				],
-				"operationId": "post_FileHandlingMultipart_3",
-				"requestBody": {
-					"content": {
-						"multipart/form-data": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
-							}
-						},
-						"application/x-www-form-urlencoded": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v{version}/FileHandling/SingleFile": {
-			"post": {
-				"tags": [
-					"FileHandling"
-				],
-				"operationId": "post_FileHandlingSingleFile_4",
-				"requestBody": {
-					"content": {
-						"multipart/form-data": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"request": {
-										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v{version}/validation/DataValidation": {
-			"post": {
-				"tags": [
-					"Validation"
-				],
-				"operationId": "post_ValidationDataValidation_12",
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataValidation.RequestModel"
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "OK"
-					}
-				}
-			}
-		},
-		"/api/v{version}/validation/WithValidation": {
+		"/api/v1/validation/WithValidation": {
 			"post": {
 				"tags": [
 					"Validation"
@@ -1534,13 +1534,13 @@
 			"name": "Weatherforecast"
 		},
 		{
+			"name": "FileHandling"
+		},
+		{
 			"name": "Todos"
 		},
 		{
 			"name": "Validation"
-		},
-		{
-			"name": "FileHandling"
 		}
 	]
 }
