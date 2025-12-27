@@ -795,10 +795,10 @@
                         "description": "Validation rules:\n- Required\n- Maximum length: 1000 characters"
                     },
                     "nestedObject": {
-                        "description": "Validation rules:\n- Required"
+                        "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel"
                     },
                     "nestedObject2": {
-                        "description": "Validation rules:\n- Required"
+                        "$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
                     },
                     "isCompleted": {
                         "$ref": "#/components/schemas/System.Boolean"

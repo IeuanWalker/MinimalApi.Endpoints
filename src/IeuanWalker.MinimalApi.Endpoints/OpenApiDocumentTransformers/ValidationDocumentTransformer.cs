@@ -522,15 +522,26 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			string propertyKey = ToCamelCase(propertyRules.Key);
 
 			// Check if any rule for this property is RequiredRule
-			if (propertyRules.Any(r => r is Validation.RequiredRule))
+			bool hasRequiredRule = propertyRules.Any(r => r is Validation.RequiredRule);
+			if (hasRequiredRule)
 			{
 				requiredProperties.Add(propertyKey);
 			}
 
+			// Check if there are any rules other than RequiredRule and DescriptionRule
+			// If only RequiredRule/DescriptionRule exist, we don't need to modify the schema inline
+			// (RequiredRule is handled by adding to required array, DescriptionRule doesn't apply to nested objects)
+			bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule && r is not Validation.DescriptionRule);
+
 			if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 			{
-				// Create inline schema with all validation constraints for this property
-				schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], listRulesInDescription);
+				// Only create inline schema if there are validation rules other than just Required
+				// This preserves $ref for nested objects that only have Required validation
+				if (hasOtherRules)
+				{
+					// Create inline schema with all validation constraints for this property
+					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], listRulesInDescription);
+				}
 			}
 		}
 
