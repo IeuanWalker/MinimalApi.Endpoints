@@ -8,7 +8,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 public sealed class ValidationConfigurationBuilder<TRequest>
 {
 	readonly List<object> _propertyBuilders = [];
-	readonly List<Func<TRequest, Dictionary<string, string[]>>> _crossFieldValidators = [];
 	bool _listRulesInDescription = true; // Default to true
 
 	/// <summary>
@@ -21,16 +20,6 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 		PropertyValidationBuilder<TRequest, TProperty> builder = new(propertyName);
 		_propertyBuilders.Add(builder);
 		return builder;
-	}
-
-	/// <summary>
-	/// Adds a cross-field validator that validates relationships between properties
-	/// </summary>
-	public ValidationConfigurationBuilder<TRequest> CrossField(
-		Func<TRequest, Dictionary<string, string[]>> validator)
-	{
-		_crossFieldValidators.Add(validator);
-		return this;
 	}
 
 	/// <summary>
@@ -62,7 +51,7 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 			}
 		}
 
-		return new ValidationConfiguration<TRequest>(allRules, _crossFieldValidators, _listRulesInDescription);
+		return new ValidationConfiguration<TRequest>(allRules, _listRulesInDescription);
 	}
 
 	static string GetPropertyName<TProperty>(Expression<Func<TRequest, TProperty>> expression)

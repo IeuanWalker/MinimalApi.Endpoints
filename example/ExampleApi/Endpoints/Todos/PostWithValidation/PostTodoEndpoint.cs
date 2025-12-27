@@ -74,26 +74,6 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 				// DateTimeOffset validation
 				config.Property(x => x.CreatedAt)
 					.Custom("Created date cannot be in the future");
-
-				// Cross-field validation
-				config.CrossField(request =>
-				{
-					Dictionary<string, string[]> errors = [];
-
-					// Validate that high priority items have a due date
-					if (request.Priority >= 8 && request.DueDate == null)
-					{
-						errors["DueDate"] = ["High priority items (8+) must have a due date"];
-					}
-
-					// Validate that completed items have a completion date
-					if (request.IsCompleted && request.Status != TodoStatus.Completed)
-					{
-						errors["Status"] = ["Completed items must have Status set to Completed"];
-					}
-
-					return errors;
-				});
 			});
 	}
 
