@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Validation.PostWithValidation;
@@ -11,6 +12,7 @@ public class PostTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 		builder
 			.Group<ValidationEndpointGroup>()
 			.Post("/WithValidation")
+			.Version(1)
 			.RequestFromBody()
 			.WithValidation<RequestModel>(config =>
 			{

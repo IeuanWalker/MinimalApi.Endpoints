@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Validation.PostDataValidation;
@@ -11,6 +12,7 @@ public class PostTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 		builder
 			.Group<ValidationEndpointGroup>()
 			.Post("/DataValidation")
+			.Version(1)
 			.RequestFromBody();
 	}
 

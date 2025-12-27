@@ -12,8 +12,8 @@ public class PostTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 		builder
 			.Group<ValidationEndpointGroup>()
 			.Post("/FluentValidation")
-			.RequestFromBody()
-			.Version(1.0);
+			.Version(1)
+			.RequestFromBody();
 	}
 
 	public async Task Handle(RequestModel request, CancellationToken ct)

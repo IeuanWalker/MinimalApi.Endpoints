@@ -1,4 +1,5 @@
-﻿using IeuanWalker.MinimalApi.Endpoints;
+﻿using ExampleApi.Infrastructure;
+using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.FileHandling.PostMultipart;
 
@@ -13,6 +14,7 @@ public class PostFileHandlingMultipartEndpoint : IEndpoint<RequestModel, Respons
 	{
 		builder
 			.Post("api/v{version:apiVersion}/FileHandling/Multipart")
+			.Version(1)
 			.RequestFromForm()
 			.DisableAntiforgery();
 	}
