@@ -431,13 +431,10 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Type validatorType = propertyValidator.GetType();
 			if (validatorType.Name.Contains("PrecisionScale"))
 			{
-				PropertyInfo? precisionProp = validatorType.GetProperty("ExpectedPrecision");
-				PropertyInfo? scaleProp = validatorType.GetProperty("ExpectedScale");
-				PropertyInfo? ignoreTrailingProp = validatorType.GetProperty("IgnoreTrailingZeros");
-				
-				object? precision = precisionProp?.GetValue(propertyValidator);
-				object? scale = scaleProp?.GetValue(propertyValidator);
-				object? ignoreTrailing = ignoreTrailingProp?.GetValue(propertyValidator);
+				// Try multiple property access strategies (public/non-public)
+				object? precision = TryGetPropertyOrFieldValue(propertyValidator, "ExpectedPrecision", "Precision", "precision");
+				object? scale = TryGetPropertyOrFieldValue(propertyValidator, "ExpectedScale", "Scale", "scale");
+				object? ignoreTrailing = TryGetPropertyOrFieldValue(propertyValidator, "IgnoreTrailingZeros", "ignoreTrailingZeros");
 				
 				if (precision != null)
 				{
@@ -449,7 +446,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 				if (ignoreTrailing != null)
 				{
-					message = message.Replace("{IgnoreTrailingZeros}", ignoreTrailing.ToString() ?? "false");
+					message = message.Replace("{IgnoreTrailingZeros}", ignoreTrailing.ToString());
 				}
 
 				// These are dynamic values that can't be determined at design time
@@ -469,12 +466,18 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 
-			// For enum validators
-			if (validatorType.Name.Contains("EnumValidator"))
+			// For enum validators - clean up quotes around property names
+			if (validatorType.Name.Contains("EnumValidator") || validatorType.Name.Contains("IsEnum"))
 			{
-				// {value} is a runtime placeholder that we can't replace at design time
-				// but we can clean up the message
-				message = message.Replace("'", "");
+				// Remove single quotes around property name at the beginning of the message
+				if (message.StartsWith("'") && message.Contains("'", StringComparison.Ordinal))
+				{
+					int secondQuoteIndex = message.IndexOf("'", 1, StringComparison.Ordinal);
+					if (secondQuoteIndex > 0)
+					{
+						message = message.Substring(1, secondQuoteIndex - 1) + message.Substring(secondQuoteIndex + 1);
+					}
+				}
 			}
 		}
 		catch
@@ -484,6 +487,49 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 #pragma warning restore CA1031
 
 		return message;
+	}
+
+	static object? TryGetPropertyOrFieldValue(object obj, params string[] names)
+	{
+		Type type = obj.GetType();
+		
+#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
+		// Try properties first (public and non-public)
+		foreach (string name in names)
+		{
+			PropertyInfo? prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			if (prop != null)
+			{
+				try
+				{
+					return prop.GetValue(obj);
+				}
+				catch
+				{
+					// Continue to next property name
+				}
+			}
+		}
+		
+		// Try fields (public and non-public)
+		foreach (string name in names)
+		{
+			FieldInfo? field = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			if (field != null)
+			{
+				try
+				{
+					return field.GetValue(obj);
+				}
+				catch
+				{
+					// Continue to next field name
+				}
+			}
+		}
+#pragma warning restore CA1031
+		
+		return null;
 	}
 
 	static Validation.ValidationRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
