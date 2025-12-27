@@ -241,14 +241,14 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			INotNullValidator or INotEmptyValidator => new Validation.RequiredRule
 			{
 				PropertyName = propertyName,
-				ErrorMessage = $"{propertyName} is required"
+				ErrorMessage = "Is required"
 			},
 			ILengthValidator lengthValidator => CreateStringLengthRule(propertyName, lengthValidator),
 			IRegularExpressionValidator regexValidator => CreatePatternRule(propertyName, regexValidator),
 			IEmailValidator => new Validation.EmailRule
 			{
 				PropertyName = propertyName,
-				ErrorMessage = $"{propertyName} must be a valid email address"
+				ErrorMessage = "Must be a valid email address"
 			},
 			IComparisonValidator comparisonValidator => CreateComparisonRule(propertyName, comparisonValidator),
 			IBetweenValidator betweenValidator => CreateBetweenRule(propertyName, betweenValidator),
@@ -552,10 +552,10 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			MinLength = min > 0 ? min : null,
 			MaxLength = max > 0 ? max : null,
 			ErrorMessage = min.HasValue && max.HasValue
-				? $"{propertyName} must be between {min} and {max} characters"
+				? $"Must be between {min} and {max} characters"
 				: min.HasValue
-					? $"{propertyName} must be at least {min} characters"
-					: $"{propertyName} must not exceed {max} characters"
+					? $"Must be at least {min} characters"
+					: $"Must not exceed {max} characters"
 		};
 	}
 
@@ -573,7 +573,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			PropertyName = propertyName,
 			Pattern = pattern,
-			ErrorMessage = $"{propertyName} does not match required pattern"
+			ErrorMessage = $"Must match the pattern - {pattern}"
 		};
 	}
 
@@ -614,28 +614,28 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				PropertyName = propertyName,
 				Minimum = value,
 				ExclusiveMinimum = true,
-				ErrorMessage = $"{propertyName} must be greater than {value}"
+				ErrorMessage = $"Must be greater than {value}"
 			},
 			"GreaterThanOrEqual" => new Validation.RangeRule<T>
 			{
 				PropertyName = propertyName,
 				Minimum = value,
 				ExclusiveMinimum = false,
-				ErrorMessage = $"{propertyName} must be greater than or equal to {value}"
+				ErrorMessage = $"Must be greater than or equal to {value}"
 			},
 			"LessThan" => new Validation.RangeRule<T>
 			{
 				PropertyName = propertyName,
 				Maximum = value,
 				ExclusiveMaximum = true,
-				ErrorMessage = $"{propertyName} must be less than {value}"
+				ErrorMessage = $"Must be less than {value}"
 			},
 			"LessThanOrEqual" => new Validation.RangeRule<T>
 			{
 				PropertyName = propertyName,
 				Maximum = value,
 				ExclusiveMaximum = false,
-				ErrorMessage = $"{propertyName} must be less than or equal to {value}"
+				ErrorMessage = $"Must be less than or equal to {value}"
 			},
 			_ => null
 		};
