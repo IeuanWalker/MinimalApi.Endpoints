@@ -6,7 +6,7 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 /// Metadata that stores validation configuration for an endpoint
 /// Used by OpenAPI document transformers to apply validation rules to schemas
 /// </summary>
-internal sealed class ValidationMetadata<TRequest>
+sealed class ValidationMetadata<TRequest>
 {
 	public ValidationConfiguration<TRequest> Configuration { get; }
 

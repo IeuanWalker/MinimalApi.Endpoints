@@ -24,9 +24,9 @@ public class PostFileHandlingMultipartEndpoint : IEndpoint<RequestModel, Respons
 			SomeData = request.SomeData,
 			TotalFileCount = _context.HttpContext!.Request.Form.Files.Count,
 			SingleFile = MapFile(request.SingleFile),
-			ReadOnlyList1 = request.ReadOnlyList1.Select(MapFile).ToList(),
+			ReadOnlyList1 = [.. request.ReadOnlyList1.Select(MapFile)],
 			ReadOnlyList2 = request.ReadOnlyList2?.Select(MapFile).ToList() ?? [],
-			FileCollectionList = request.FileCollectionList.Select(MapFile).ToList(),
+			FileCollectionList = [.. request.FileCollectionList.Select(MapFile)],
 		};
 
 		return Task.FromResult(response);
