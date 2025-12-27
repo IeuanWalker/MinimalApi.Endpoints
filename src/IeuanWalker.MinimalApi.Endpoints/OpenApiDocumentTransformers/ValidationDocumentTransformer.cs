@@ -259,7 +259,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// If we couldn't map to a specific rule type, create a CustomRule with the error message
 		if (rule == null)
 		{
-			string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, validator, validatedType);
+			string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName);
 			if (!string.IsNullOrEmpty(errorMessage))
 			{
 				// Create a CustomRule<object> to hold the unsupported validator's error message
@@ -274,7 +274,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		return rule;
 	}
 
-	static string GetValidatorErrorMessage(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, string propertyName, IValidator validator, Type validatedType)
+	static string GetValidatorErrorMessage(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, string propertyName)
 	{
 #pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
 		try
@@ -298,7 +298,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					// Fall through to next strategy
 				}
 			}
-			
+
 			// Strategy 2: Try to get the error message template from the rule component's ErrorMessageSource
 			PropertyInfo? errorMessageProp = ruleComponent.GetType().GetProperty("ErrorMessageSource");
 			if (errorMessageProp != null)
@@ -317,7 +317,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 							return ReplacePlaceholders(message, propertyName, propertyValidator);
 						}
 					}
-					
+
 					// Try private message field
 					FieldInfo? messageField = errorMessageSource.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance);
 					if (messageField != null)
@@ -331,7 +331,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 
-				// Fallback: try to construct a basic message from the validator type
+			// Fallback: try to construct a basic message from the validator type
 			string validatorTypeName = propertyValidator.GetType().Name;
 			// Remove "Validator" suffix if present
 			if (validatorTypeName.EndsWith("Validator"))
@@ -390,10 +390,10 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				PropertyInfo? fromProp = betweenValidator.GetType().GetProperty("From");
 				PropertyInfo? toProp = betweenValidator.GetType().GetProperty("To");
-				
+
 				object? from = fromProp?.GetValue(betweenValidator);
 				object? to = toProp?.GetValue(betweenValidator);
-				
+
 				if (from != null)
 				{
 					message = message.Replace("{From}", from.ToString());
@@ -409,10 +409,10 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				PropertyInfo? minProp = lengthValidator.GetType().GetProperty("Min");
 				PropertyInfo? maxProp = lengthValidator.GetType().GetProperty("Max");
-				
+
 				object? min = minProp?.GetValue(lengthValidator);
 				object? max = maxProp?.GetValue(lengthValidator);
-				
+
 				if (min != null)
 				{
 					message = message
@@ -436,7 +436,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				object? precision = TryGetPropertyOrFieldValue(propertyValidator, "Precision", "ExpectedPrecision", "precision");
 				object? scale = TryGetPropertyOrFieldValue(propertyValidator, "Scale", "ExpectedScale", "scale");
 				object? ignoreTrailing = TryGetPropertyOrFieldValue(propertyValidator, "IgnoreTrailingZeros", "ignoreTrailingZeros");
-				
+
 				if (precision != null)
 				{
 					message = message.Replace("{ExpectedPrecision}", precision.ToString());
@@ -493,7 +493,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	static object? TryGetPropertyOrFieldValue(object obj, params string[] names)
 	{
 		Type type = obj.GetType();
-		
+
 #pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
 		// Try properties first (public and non-public)
 		foreach (string name in names)
@@ -511,7 +511,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 		}
-		
+
 		// Try fields (public and non-public)
 		foreach (string name in names)
 		{
@@ -529,7 +529,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			}
 		}
 #pragma warning restore CA1031
-		
+
 		return null;
 	}
 
