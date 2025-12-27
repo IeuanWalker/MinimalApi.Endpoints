@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+using IeuanWalker.MinimalApi.Endpoints.Validation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -25,7 +26,7 @@ public static class OpenApiExtensions
 	/// When you call this method:
 	/// - FluentValidation validators registered in DI are automatically discovered and their rules documented in OpenAPI
 	/// - Manual WithValidation rules take precedence over auto-discovered FluentValidation rules
-	/// 
+	///
 	/// If you don't call this method:
 	/// - WithValidation extension method still works and documents validation rules
 	/// - FluentValidation validators are NOT auto-discovered (you would need to manually duplicate rules with WithValidation)
@@ -186,5 +187,47 @@ public static class OpenApiExtensions
 	{
 		options.AddOperationTransformer<AuthorizationPoliciesAndRequirementsOperationTransformer>();
 		return options;
+	}
+
+	/// <summary>
+	/// Adds validation rules to the endpoint for OpenAPI schema documentation.
+	/// This enables declarative validation constraints that appear in the generated OpenAPI specification.
+	/// Note: This does NOT perform runtime validation - it only updates the OpenAPI documentation.
+	/// </summary>
+	/// <typeparam name="TRequest">The type of the request model to validate</typeparam>
+	/// <param name="builder">The route handler builder</param>
+	/// <param name="configure">Action to configure validation rules</param>
+	/// <returns>The route handler builder for method chaining</returns>
+	/// <example>
+	/// <code>
+	/// app.MapPost("/todos", async (TodoRequest request) => { ... })
+	///    .WithValidation&lt;TodoRequest&gt;(config =>
+	///    {
+	///        config.Property(x => x.Title)
+	///            .Required()
+	///            .MinLength(1)
+	///            .MaxLength(200);
+	///
+	///        config.Property(x => x.Email)
+	///            .Email();
+	///    });
+	/// </code>
+	/// </example>
+	[ExcludeFromCodeCoverage]
+	public static RouteHandlerBuilder WithValidationRules<TRequest>(
+		this RouteHandlerBuilder builder,
+		Action<ValidationConfigurationBuilder<TRequest>> configure)
+	{
+		ArgumentNullException.ThrowIfNull(builder);
+		ArgumentNullException.ThrowIfNull(configure);
+
+		ValidationConfigurationBuilder<TRequest> configBuilder = new();
+		configure(configBuilder);
+		ValidationConfiguration<TRequest> configuration = configBuilder.Build();
+
+		// Store validation configuration as endpoint metadata for OpenAPI generation
+		builder.WithMetadata(new ValidationMetadata<TRequest>(configuration));
+
+		return builder;
 	}
 }
