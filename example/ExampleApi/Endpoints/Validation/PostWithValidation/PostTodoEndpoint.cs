@@ -14,7 +14,7 @@ public class PostTodoEndpoint : IEndpointWithoutResponse<RequestModel>
 			.Post("/WithValidation")
 			.Version(1)
 			.RequestFromBody()
-			.WithValidation<RequestModel>(config =>
+			.WithValidationRules<RequestModel>(config =>
 			{
 				// String validation
 				config.Property(x => x.StringMin).MinLength(3);

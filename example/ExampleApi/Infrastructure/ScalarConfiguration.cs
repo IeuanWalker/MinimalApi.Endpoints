@@ -16,7 +16,7 @@ static class ScalarConfiguration
 		builder.Services.AddOpenApi(config =>
 		{
 			config.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
-			config.AddValidationSupport(); // Enable auto-discovery of FluentValidation validators (optional - WithValidation still works without this)
+			config.AddAutoFluentValidationDocumentation(); // Enable auto-discovery of FluentValidation validators (optional - WithValidation still works without this)
 		});
 
 		List<ApiVersion> versions =
@@ -32,7 +32,7 @@ static class ScalarConfiguration
 			{
 				options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
 				options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
-				options.AddValidationSupport(); // Enable auto-discovery of FluentValidation validators (optional - WithValidation still works without this)
+				options.AddAutoFluentValidationDocumentation(); // Enable auto-discovery of FluentValidation validators (optional - WithValidation still works without this)
 				options.AddDocumentTransformer((document, context, _) =>
 				{
 					IApiVersionDescriptionProvider provider = context.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();

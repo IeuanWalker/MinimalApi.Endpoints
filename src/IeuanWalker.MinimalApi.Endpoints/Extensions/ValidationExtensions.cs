@@ -37,7 +37,7 @@ public static class ValidationExtensions
 	/// </code>
 	/// </example>
 	[ExcludeFromCodeCoverage]
-	public static RouteHandlerBuilder WithValidation<TRequest>(
+	public static RouteHandlerBuilder WithValidationRules<TRequest>(
 		this RouteHandlerBuilder builder,
 		Action<ValidationConfigurationBuilder<TRequest>> configure)
 	{

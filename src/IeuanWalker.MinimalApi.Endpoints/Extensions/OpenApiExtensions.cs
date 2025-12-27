@@ -39,7 +39,7 @@ public static class OpenApiExtensions
 	/// </code>
 	/// </example>
 	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions AddValidationSupport(this OpenApiOptions options)
+	public static OpenApiOptions AddAutoFluentValidationDocumentation(this OpenApiOptions options)
 	{
 		// Add unified validation transformer that handles both FluentValidation and WithValidation
 		options.AddDocumentTransformer((document, context, ct) =>
