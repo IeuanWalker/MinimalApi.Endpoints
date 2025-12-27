@@ -9,12 +9,12 @@ namespace ExampleApi.IntegrationTests.Endpoints.Todos;
 /// <summary>
 /// Integration tests for PostTodo endpoint with FluentValidation
 /// </summary>
-public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicationFactory>
+public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 {
 	readonly ExampleApiWebApplicationFactory _factory;
 	readonly HttpClient _client;
 
-	public PostTodoFluentValidationTests(ExampleApiWebApplicationFactory factory)
+	public PostTodoTests(ExampleApiWebApplicationFactory factory)
 	{
 		_factory = factory;
 		_client = _factory.CreateClient();
@@ -40,7 +40,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -66,7 +66,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -92,7 +92,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -118,7 +118,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -147,7 +147,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -176,7 +176,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -209,7 +209,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -238,7 +238,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -274,7 +274,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -305,7 +305,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -330,7 +330,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -364,7 +364,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
