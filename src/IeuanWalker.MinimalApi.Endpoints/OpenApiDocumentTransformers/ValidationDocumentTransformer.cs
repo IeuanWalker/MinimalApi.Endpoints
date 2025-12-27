@@ -279,15 +279,36 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 #pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
 		try
 		{
-			// Try to get the error message template from the rule component
+			// Strategy 1: Try GetUnformattedErrorMessage() method on RuleComponent
+			// This is the most reliable way to get the custom message set via .WithMessage()
+			MethodInfo? getUnformattedMethod = ruleComponent.GetType().GetMethod("GetUnformattedErrorMessage", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			if (getUnformattedMethod != null)
+			{
+				try
+				{
+					object? result = getUnformattedMethod.Invoke(ruleComponent, null);
+					if (result is string message && !string.IsNullOrEmpty(message))
+					{
+						// Replace common placeholders
+						return message
+							.Replace("{PropertyName}", propertyName)
+							.Replace("{PropertyValue}", "{value}");
+					}
+				}
+				catch
+				{
+					// Fall through to next strategy
+				}
+			}
+			
+			// Strategy 2: Try to get the error message template from the rule component's ErrorMessageSource
 			PropertyInfo? errorMessageProp = ruleComponent.GetType().GetProperty("ErrorMessageSource");
 			if (errorMessageProp != null)
 			{
 				object? errorMessageSource = errorMessageProp.GetValue(ruleComponent);
 				if (errorMessageSource != null)
 				{
-					// Strategy 1: Try to get the Message property directly (StaticStringSource)
-					// This is the most reliable way for .WithMessage() calls
+					// Try to get the Message property directly (StaticStringSource)
 					PropertyInfo? messageProp = errorMessageSource.GetType().GetProperty("Message", BindingFlags.Public | BindingFlags.Instance);
 					if (messageProp != null)
 					{
@@ -301,7 +322,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						}
 					}
 					
-					// Strategy 2: Try private message field
+					// Try private message field
 					FieldInfo? messageField = errorMessageSource.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance);
 					if (messageField != null)
 					{
@@ -311,95 +332,6 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 							return message
 								.Replace("{PropertyName}", propertyName)
 								.Replace("{PropertyValue}", "{value}");
-						}
-					}
-
-					// Strategy 3: Try GetString method with a properly constructed MessageBuilderContext
-					// This is more complex but handles dynamic messages
-					MethodInfo? getStringMethod = errorMessageSource.GetType().GetMethod("GetString", BindingFlags.Public | BindingFlags.Instance);
-					if (getStringMethod != null)
-					{
-						try
-						{
-							// Create a default instance of the validated type for the context
-							object? instanceToValidate = null;
-							try
-							{
-								if (validatedType.GetConstructor(Type.EmptyTypes) != null)
-								{
-									instanceToValidate = Activator.CreateInstance(validatedType);
-								}
-							}
-							catch
-							{
-								// If we can't create an instance, use null
-							}
-
-							// Create ValidationContext<T>
-							Type validationContextType = typeof(ValidationContext<>).MakeGenericType(validatedType);
-							ConstructorInfo? contextConstructor = validationContextType.GetConstructor([validatedType]);
-							
-							if (contextConstructor != null)
-							{
-								object? validationContext = contextConstructor.Invoke([instanceToValidate]);
-								
-								if (validationContext != null)
-								{
-									// Try to find MessageBuilderContext type
-									Type? messageBuilderContextType = typeof(IValidator).Assembly.GetType("FluentValidation.MessageBuilderContext");
-									
-									if (messageBuilderContextType != null)
-									{
-										// Try to create MessageBuilderContext
-										// It typically has constructors with varying parameter counts
-										ConstructorInfo? contextCtor = messageBuilderContextType.GetConstructors()
-											.OrderByDescending(c => c.GetParameters().Length)
-											.FirstOrDefault();
-										
-										if (contextCtor != null)
-										{
-											ParameterInfo[] parameters = contextCtor.GetParameters();
-											object?[] args = new object?[parameters.Length];
-											
-											// Fill in the parameters with best guesses
-											for (int i = 0; i < parameters.Length; i++)
-											{
-												Type paramType = parameters[i].ParameterType;
-												if (paramType.Name.Contains("ValidationContext"))
-												{
-													args[i] = validationContext;
-												}
-												else if (paramType == typeof(string))
-												{
-													args[i] = propertyName;
-												}
-												else if (paramType == typeof(object) || !paramType.IsValueType)
-												{
-													args[i] = instanceToValidate;
-												}
-												else
-												{
-													args[i] = paramType.IsValueType ? Activator.CreateInstance(paramType) : null;
-												}
-											}
-											
-											object? messageBuilderContext = contextCtor.Invoke(args);
-											if (messageBuilderContext != null)
-											{
-												string? message = getStringMethod.Invoke(errorMessageSource, [messageBuilderContext]) as string;
-												if (!string.IsNullOrEmpty(message))
-												{
-													return message;
-												}
-											}
-										}
-									}
-								}
-							}
-						}
-						catch
-						{
-							// Fall through to fallback
 						}
 					}
 				}
