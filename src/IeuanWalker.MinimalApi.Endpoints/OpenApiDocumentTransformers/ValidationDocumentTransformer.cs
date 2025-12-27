@@ -3,6 +3,7 @@ using System.Reflection;
 using FluentValidation;
 using FluentValidation.Internal;
 using FluentValidation.Validators;
+using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Routing;
@@ -98,7 +99,12 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Type validatorType = validator.GetType();
 
 			// Find the validated type (T in IValidator<T>)
-			Type? validatedType = GetValidatedType(validatorType);
+			Type? validatedType = validatorType
+				.GetInterfaces()
+				.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>))
+				?.GetGenericArguments()
+				.FirstOrDefault();
+
 			if (validatedType is null)
 			{
 				continue;
@@ -184,15 +190,6 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 		}
-	}
-
-	static Type? GetValidatedType(Type validatorType)
-	{
-		// Look for IValidator<T> interface
-		Type? validatorInterface = validatorType.GetInterfaces()
-			.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
-
-		return validatorInterface?.GetGenericArguments().FirstOrDefault();
 	}
 
 	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator)
@@ -732,7 +729,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Apply validation rules to properties
 		foreach (IGrouping<string, Validation.ValidationRule> propertyRules in rulesByProperty)
 		{
-			string propertyKey = ToCamelCase(propertyRules.Key);
+			string propertyKey = propertyRules.Key.ToCamelCase();
 
 			// Check if any rule for this property is RequiredRule
 			bool hasRequiredRule = propertyRules.Any(r => r is Validation.RequiredRule);
@@ -1116,15 +1113,5 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Validation.RangeRule<double> => "double",
 			_ => null
 		};
-	}
-
-	static string ToCamelCase(string value)
-	{
-		if (string.IsNullOrEmpty(value))
-		{
-			return value;
-		}
-
-		return char.ToLowerInvariant(value[0]) + value[1..];
 	}
 }
