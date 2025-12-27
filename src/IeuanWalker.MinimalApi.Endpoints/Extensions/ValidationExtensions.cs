@@ -1,9 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using IeuanWalker.MinimalApi.Endpoints.Validation;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
@@ -33,7 +30,7 @@ public static class ValidationExtensions
 	///            .Required()
 	///            .MinLength(1)
 	///            .MaxLength(200);
-	///        
+	///
 	///        config.Property(x => x.Email)
 	///            .Email();
 	///    });
@@ -55,15 +52,5 @@ public static class ValidationExtensions
 		builder.WithMetadata(new ValidationMetadata<TRequest>(configuration));
 
 		return builder;
-	}
-
-	static string ToCamelCase(string value)
-	{
-		if (string.IsNullOrEmpty(value))
-		{
-			return value;
-		}
-
-		return char.ToLowerInvariant(value[0]) + value[1..];
 	}
 }
