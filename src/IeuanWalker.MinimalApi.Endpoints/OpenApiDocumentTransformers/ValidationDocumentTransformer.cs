@@ -289,10 +289,8 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					object? result = getUnformattedMethod.Invoke(ruleComponent, null);
 					if (result is string message && !string.IsNullOrEmpty(message))
 					{
-						// Replace common placeholders
-						return message
-							.Replace("{PropertyName}", propertyName)
-							.Replace("{PropertyValue}", "{value}");
+						// Replace placeholders with actual values from the validator
+						return ReplacePlaceholders(message, propertyName, propertyValidator);
 					}
 				}
 				catch
@@ -315,10 +313,8 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						string? message = messageProp.GetValue(errorMessageSource) as string;
 						if (!string.IsNullOrEmpty(message))
 						{
-							// Replace common placeholders
-							return message
-								.Replace("{PropertyName}", propertyName)
-								.Replace("{PropertyValue}", "{value}");
+							// Replace placeholders with actual values
+							return ReplacePlaceholders(message, propertyName, propertyValidator);
 						}
 					}
 					
@@ -329,15 +325,13 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						string? message = messageField.GetValue(errorMessageSource) as string;
 						if (!string.IsNullOrEmpty(message))
 						{
-							return message
-								.Replace("{PropertyName}", propertyName)
-								.Replace("{PropertyValue}", "{value}");
+							return ReplacePlaceholders(message, propertyName, propertyValidator);
 						}
 					}
 				}
 			}
 
-			// Fallback: try to construct a basic message from the validator type
+				// Fallback: try to construct a basic message from the validator type
 			string validatorTypeName = propertyValidator.GetType().Name;
 			// Remove "Validator" suffix if present
 			if (validatorTypeName.EndsWith("Validator"))
@@ -359,6 +353,137 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			return $"{propertyName} custom validation";
 		}
 #pragma warning restore CA1031
+	}
+
+	static string ReplacePlaceholders(string message, string propertyName, IPropertyValidator propertyValidator)
+	{
+		// Replace common placeholders
+		message = message
+			.Replace("{PropertyName}", propertyName)
+			.Replace("{PropertyValue}", "{value}");
+
+		// Extract and replace validator-specific placeholders
+#pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
+		try
+		{
+			// For ComparisonValidator (Equal, NotEqual, GreaterThan, LessThan, etc.)
+			if (propertyValidator is IComparisonValidator comparisonValidator)
+			{
+				PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty("ValueToCompare");
+				object? value = valueProp?.GetValue(comparisonValidator);
+				if (value != null)
+				{
+					message = message.Replace("{ComparisonValue}", value.ToString());
+				}
+
+				// Also check for MemberToCompare for property comparisons
+				PropertyInfo? memberProp = comparisonValidator.GetType().GetProperty("MemberToCompare");
+				object? memberValue = memberProp?.GetValue(comparisonValidator);
+				if (memberValue != null)
+				{
+					message = message.Replace("{ComparisonProperty}", memberValue.ToString() ?? string.Empty);
+				}
+			}
+
+			// For BetweenValidator
+			if (propertyValidator is IBetweenValidator betweenValidator)
+			{
+				PropertyInfo? fromProp = betweenValidator.GetType().GetProperty("From");
+				PropertyInfo? toProp = betweenValidator.GetType().GetProperty("To");
+				
+				object? from = fromProp?.GetValue(betweenValidator);
+				object? to = toProp?.GetValue(betweenValidator);
+				
+				if (from != null)
+				{
+					message = message.Replace("{From}", from.ToString());
+				}
+				if (to != null)
+				{
+					message = message.Replace("{To}", to.ToString());
+				}
+			}
+
+			// For LengthValidator
+			if (propertyValidator is ILengthValidator lengthValidator)
+			{
+				PropertyInfo? minProp = lengthValidator.GetType().GetProperty("Min");
+				PropertyInfo? maxProp = lengthValidator.GetType().GetProperty("Max");
+				
+				object? min = minProp?.GetValue(lengthValidator);
+				object? max = maxProp?.GetValue(lengthValidator);
+				
+				if (min != null)
+				{
+					message = message
+						.Replace("{MinLength}", min.ToString())
+						.Replace("{min}", min.ToString());
+				}
+				if (max != null)
+				{
+					message = message
+						.Replace("{MaxLength}", max.ToString())
+						.Replace("{max}", max.ToString());
+				}
+			}
+
+			// For PrecisionScaleValidator
+			Type validatorType = propertyValidator.GetType();
+			if (validatorType.Name.Contains("PrecisionScale"))
+			{
+				PropertyInfo? precisionProp = validatorType.GetProperty("ExpectedPrecision");
+				PropertyInfo? scaleProp = validatorType.GetProperty("ExpectedScale");
+				PropertyInfo? ignoreTrailingProp = validatorType.GetProperty("IgnoreTrailingZeros");
+				
+				object? precision = precisionProp?.GetValue(propertyValidator);
+				object? scale = scaleProp?.GetValue(propertyValidator);
+				object? ignoreTrailing = ignoreTrailingProp?.GetValue(propertyValidator);
+				
+				if (precision != null)
+				{
+					message = message.Replace("{ExpectedPrecision}", precision.ToString());
+				}
+				if (scale != null)
+				{
+					message = message.Replace("{ExpectedScale}", scale.ToString());
+				}
+				if (ignoreTrailing != null)
+				{
+					message = message.Replace("{IgnoreTrailingZeros}", ignoreTrailing.ToString() ?? "false");
+				}
+
+				// These are dynamic values that can't be determined at design time
+				message = message
+					.Replace("{Digits}", "X")
+					.Replace("{ActualScale}", "Y");
+			}
+
+			// For regex/pattern validators
+			if (propertyValidator is IRegularExpressionValidator regexValidator)
+			{
+				PropertyInfo? expressionProp = regexValidator.GetType().GetProperty("Expression");
+				object? expression = expressionProp?.GetValue(regexValidator);
+				if (expression != null)
+				{
+					message = message.Replace("{RegularExpression}", expression.ToString());
+				}
+			}
+
+			// For enum validators
+			if (validatorType.Name.Contains("EnumValidator"))
+			{
+				// {value} is a runtime placeholder that we can't replace at design time
+				// but we can clean up the message
+				message = message.Replace("'", "");
+			}
+		}
+		catch
+		{
+			// If any reflection fails, just return the message as-is with basic replacements
+		}
+#pragma warning restore CA1031
+
+		return message;
 	}
 
 	static Validation.ValidationRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
