@@ -35,7 +35,8 @@ partial class ValidationDocumentTransformer
 				foreach (Type type in types)
 				{
 					// Check if this type implements IValidator<T>
-					Type? validatorInterface = type.GetInterfaces()
+					Type? validatorInterface = type
+						.GetInterfaces()
 						.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
 
 					if (validatorInterface is not null && !type.IsAbstract && !type.IsInterface)
@@ -61,10 +62,9 @@ partial class ValidationDocumentTransformer
 
 		foreach (IValidator validator in validators)
 		{
-			Type validatorType = validator.GetType();
-
 			// Find the validated type (T in IValidator<T>)
-			Type? validatedType = validatorType
+			Type? validatedType = validator
+				.GetType()
 				.GetInterfaces()
 				.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>))
 				?.GetGenericArguments()
@@ -82,22 +82,24 @@ partial class ValidationDocumentTransformer
 
 			Console.WriteLine($"[DEBUG-FV] Extracted {rules.Count} rules for {validatedType.Name}");
 
-			if (rules.Count > 0)
+			if (rules.Count <= 0)
 			{
-				if (!allValidationRules.TryGetValue(validatedType, out List<Validation.ValidationRule>? value))
-				{
-					value = [];
-					allValidationRules[validatedType] = value;
-				}
-
-				// FluentValidation rules default to listing in description (true)
-				if (!listRulesInDescription.ContainsKey(validatedType))
-				{
-					listRulesInDescription[validatedType] = true;
-				}
-
-				value.AddRange(rules);
+				continue;
 			}
+
+			if (!allValidationRules.TryGetValue(validatedType, out List<Validation.ValidationRule>? value))
+			{
+				value = [];
+				allValidationRules[validatedType] = value;
+			}
+
+			// FluentValidation rules default to listing in description (true)
+			if (!listRulesInDescription.ContainsKey(validatedType))
+			{
+				listRulesInDescription[validatedType] = true;
+			}
+
+			value.AddRange(rules);
 		}
 	}
 
@@ -162,29 +164,32 @@ partial class ValidationDocumentTransformer
 			_ => null
 		};
 
-		// If we couldn't map to a specific rule type, create a CustomRule with the error message
-		if (rule is null)
+		if (rule is not null)
 		{
-			string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName);
-			if (!string.IsNullOrEmpty(errorMessage))
-			{
-				// Create a CustomRule<object> to hold the unsupported validator's error message
-				rule = new Validation.CustomRule<object>
-				{
-					PropertyName = propertyName,
-					ErrorMessage = errorMessage
-				};
-
-				rule.ErrorMessage = rule.ErrorMessage.Replace($"'{propertyName}' m", "M");
-			}
+			return rule;
 		}
 
-		return rule;
+		// If we couldn't map to a specific rule type, create a CustomRule with the error message
+		string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName);
+		if (!string.IsNullOrEmpty(errorMessage))
+		{
+			// Create a CustomRule<object> to hold the unsupported validator's error message
+			rule = new Validation.CustomRule<object>
+			{
+				PropertyName = propertyName,
+				ErrorMessage = errorMessage
+			};
+
+			rule.ErrorMessage = rule.ErrorMessage.Replace($"'{propertyName}' m", "M");
+
+			return rule;
+		}
+
+		return null;
 	}
 
 	static string GetValidatorErrorMessage(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, string propertyName)
 	{
-#pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
 		try
 		{
 			// Strategy 1: Try GetUnformattedErrorMessage() method on RuleComponent
@@ -201,10 +206,12 @@ partial class ValidationDocumentTransformer
 						return ReplacePlaceholders(message, propertyName, propertyValidator);
 					}
 				}
+#pragma warning disable CA1031 // Do not catch general exception types
 				catch
 				{
 					// Fall through to next strategy
 				}
+#pragma warning restore CA1031 // Do not catch general exception types
 			}
 
 			// Strategy 2: Try to get the error message template from the rule component's ErrorMessageSource
@@ -255,12 +262,13 @@ partial class ValidationDocumentTransformer
 
 			return $"{propertyName} {validatorTypeName} validation";
 		}
+#pragma warning disable CA1031 // Do not catch general exception types
 		catch
 		{
 			// If all else fails, return a generic message
 			return $"{propertyName} custom validation";
 		}
-#pragma warning restore CA1031
+#pragma warning restore CA1031 // Do not catch general exception types
 	}
 
 	static string ReplacePlaceholders(string message, string propertyName, IPropertyValidator propertyValidator)
@@ -271,7 +279,6 @@ partial class ValidationDocumentTransformer
 			.Replace("{PropertyValue}", "{value}");
 
 		// Extract and replace validator-specific placeholders
-#pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
 		try
 		{
 			// For ComparisonValidator (Equal, NotEqual, GreaterThan, LessThan, etc.)
@@ -389,6 +396,7 @@ partial class ValidationDocumentTransformer
 				}
 			}
 		}
+#pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
 		catch
 		{
 			// If any reflection fails, just return the message as-is with basic replacements
@@ -402,41 +410,49 @@ partial class ValidationDocumentTransformer
 	{
 		Type type = obj.GetType();
 
-#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
 		// Try properties first (public and non-public)
 		foreach (string name in names)
 		{
 			PropertyInfo? prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-			if (prop is not null)
+
+			if (prop is null)
 			{
-				try
-				{
-					return prop.GetValue(obj);
-				}
-				catch
-				{
-					// Continue to next property name
-				}
+				continue;
 			}
+
+			try
+			{
+				return prop.GetValue(obj);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
+			catch
+			{
+				// Continue to next property name
+			}
+#pragma warning restore CA1031
 		}
 
 		// Try fields (public and non-public)
 		foreach (string name in names)
 		{
 			FieldInfo? field = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-			if (field is not null)
+
+			if (field is null)
 			{
-				try
-				{
-					return field.GetValue(obj);
-				}
-				catch
-				{
-					// Continue to next field name
-				}
+				continue;
 			}
-		}
+
+			try
+			{
+				return field.GetValue(obj);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
+			catch
+			{
+				// Continue to next field name
+			}
 #pragma warning restore CA1031
+		}
 
 		return null;
 	}
@@ -505,11 +521,11 @@ partial class ValidationDocumentTransformer
 		// Create appropriate range rule based on value type
 		return value switch
 		{
-			int intValue => CreateTypedRangeRule<int>(propertyName, intValue, comparisonName),
-			long longValue => CreateTypedRangeRule<long>(propertyName, longValue, comparisonName),
-			decimal decimalValue => CreateTypedRangeRule<decimal>(propertyName, decimalValue, comparisonName),
-			double doubleValue => CreateTypedRangeRule<double>(propertyName, doubleValue, comparisonName),
-			float floatValue => CreateTypedRangeRule<float>(propertyName, floatValue, comparisonName),
+			int intValue => CreateTypedRangeRule(propertyName, intValue, comparisonName),
+			long longValue => CreateTypedRangeRule(propertyName, longValue, comparisonName),
+			decimal decimalValue => CreateTypedRangeRule(propertyName, decimalValue, comparisonName),
+			double doubleValue => CreateTypedRangeRule(propertyName, doubleValue, comparisonName),
+			float floatValue => CreateTypedRangeRule(propertyName, floatValue, comparisonName),
 			_ => null
 		};
 	}
