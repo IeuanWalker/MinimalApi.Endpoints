@@ -1,6 +1,4 @@
-using IeuanWalker.MinimalApi.Endpoints.Validation;
-
-namespace IeuanWalker.MinimalApi.Endpoints;
+namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 
 /// <summary>
 /// Metadata that stores validation configuration for an endpoint
