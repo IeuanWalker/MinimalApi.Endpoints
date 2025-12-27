@@ -794,12 +794,9 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			List<string> ruleDescriptions = [];
 			if (effectiveListRulesInDescription)
 			{
-				foreach (Validation.ValidationRule rule in rules)
+				foreach (Validation.RequiredRule _ in rules.OfType<Validation.RequiredRule>())
 				{
-					if (rule is Validation.RequiredRule)
-					{
-						ruleDescriptions.Add("Required");
-					}
+					ruleDescriptions.Add("Required");
 				}
 			}
 
