@@ -427,13 +427,14 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 
-			// For PrecisionScaleValidator
+			// For PrecisionScale/ScalePrecision Validator
 			Type validatorType = propertyValidator.GetType();
-			if (validatorType.Name.Contains("PrecisionScale"))
+			if (validatorType.Name.Contains("PrecisionScale") || validatorType.Name.Contains("ScalePrecision"))
 			{
 				// Try multiple property access strategies (public/non-public)
-				object? precision = TryGetPropertyOrFieldValue(propertyValidator, "ExpectedPrecision", "Precision", "precision");
-				object? scale = TryGetPropertyOrFieldValue(propertyValidator, "ExpectedScale", "Scale", "scale");
+				// Note: FluentValidation uses "Precision" and "Scale" as property names
+				object? precision = TryGetPropertyOrFieldValue(propertyValidator, "Precision", "ExpectedPrecision", "precision");
+				object? scale = TryGetPropertyOrFieldValue(propertyValidator, "Scale", "ExpectedScale", "scale");
 				object? ignoreTrailing = TryGetPropertyOrFieldValue(propertyValidator, "IgnoreTrailingZeros", "ignoreTrailingZeros");
 				
 				if (precision != null)
