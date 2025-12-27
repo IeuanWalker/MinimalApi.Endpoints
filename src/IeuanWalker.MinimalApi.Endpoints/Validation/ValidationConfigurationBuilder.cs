@@ -8,7 +8,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 public sealed class ValidationConfigurationBuilder<TRequest>
 {
 	readonly List<object> _propertyBuilders = [];
-	bool _listRulesInDescription = true;
+	bool _appendRulesToPropertyDescription = true;
 
 	/// <summary>
 	/// Configures validation rules for a property
@@ -24,10 +24,10 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 	/// <summary>
 	/// Configures whether validation rules should be listed in the property description field in OpenAPI documentation
 	/// </summary>
-	/// <param name="listInDescription">True to list validation rules in description (default), false to omit them</param>
-	public ValidationConfigurationBuilder<TRequest> ListRulesInDescription(bool listInDescription)
+	/// <param name="appendRules">True to list validation rules in description (default), false to omit them</param>
+	public ValidationConfigurationBuilder<TRequest> AppendRulesToPropertyDescription(bool appendRules)
 	{
-		_listRulesInDescription = listInDescription;
+		_appendRulesToPropertyDescription = appendRules;
 		return this;
 	}
 
@@ -46,7 +46,7 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 			}
 		}
 
-		return new ValidationConfiguration<TRequest>(allRules, _listRulesInDescription);
+		return new ValidationConfiguration<TRequest>(allRules, _appendRulesToPropertyDescription);
 	}
 
 	static string GetPropertyName<TProperty>(Expression<Func<TRequest, TProperty>> expression)

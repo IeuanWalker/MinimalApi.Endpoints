@@ -16,33 +16,31 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
-		Dictionary<Type, List<Validation.ValidationRule>> allValidationRules = [];
-
-		// Dictionary to track whether to list rules in description for each request type
-		Dictionary<Type, bool> listRulesInDescription = [];
+		Dictionary<Type, (List<Validation.ValidationRule>, bool appendRulesToPropertyDescription)> allValidationRules = [];
 
 		// Step 1: Discover FluentValidation rules
 		if (AutoDocumentFluentValdation)
 		{
-			DiscoverFluentValidationRules(context, allValidationRules, listRulesInDescription);
+			DiscoverFluentValidationRules(context, allValidationRules);
 		}
 
 		// Step 2: Discover manual WithValidation rules (these override FluentValidation per property)
-		DiscoverManualValidationRules(context, allValidationRules, listRulesInDescription);
+		DiscoverManualValidationRules(context, allValidationRules);
 
 		// Step 3: Apply all collected rules to OpenAPI schemas
-		foreach (KeyValuePair<Type, List<Validation.ValidationRule>> kvp in allValidationRules)
+		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
 			Type requestType = kvp.Key;
-			List<Validation.ValidationRule> rules = kvp.Value;
-			bool listInDescription = listRulesInDescription.GetValueOrDefault(requestType, true);
-			ApplyValidationToSchemas(document, requestType, rules, listInDescription, AppendRulesToPropertyDescription);
+			List<Validation.ValidationRule> rules = kvp.Value.rules;
+			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
+
+			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
 		return Task.CompletedTask;
 	}
 
-	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool listRulesInDescription, bool appendRulesToPropertyDescription)
+	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
 		// Get the schema name for the request type
 		string schemaName = requestType.FullName ?? requestType.Name;
@@ -88,7 +86,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				if (hasOtherRules)
 				{
 					// Create inline schema with all validation constraints for this property
-					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], listRulesInDescription, appendRulesToPropertyDescription);
+					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
 				}
 			}
 		}
@@ -100,11 +98,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool listRulesInDescription, bool appendRulesToPropertyDescription)
+	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
-		// Check for per-property ListRulesInDescription setting (takes precedence over global setting)
-		bool? perPropertySetting = rules.FirstOrDefault(r => r.ListRulesInDescription.HasValue)?.ListRulesInDescription;
-		bool effectiveListRulesInDescription = perPropertySetting ?? listRulesInDescription;
+		// Check for per-property AppendRulesToPropertyDescription setting (takes precedence over global setting)
+		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRulesToPropertyDescription.HasValue)?.AppendRulesToPropertyDescription;
+		bool effectiveListRulesInDescription = perPropertySetting ?? typeAppendRulesToPropertyDescription;
 
 		// Cast to OpenApiSchema to access properties
 		OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;

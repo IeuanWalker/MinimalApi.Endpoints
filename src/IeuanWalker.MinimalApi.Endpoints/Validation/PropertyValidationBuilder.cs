@@ -7,7 +7,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 {
 	readonly string _propertyName;
 	readonly List<ValidationRule> _rules = [];
-	bool? _listRulesInDescription;
+	bool? _appendRulesToPropertyDescription;
 
 	internal PropertyValidationBuilder(string propertyName)
 	{
@@ -145,19 +145,19 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// Controls whether validation rules should be listed in the property description field in OpenAPI documentation.
 	/// If not called, uses the global configuration setting (default: true).
 	/// </summary>
-	/// <param name="listRules">True to list validation rules in description, false to hide them</param>
-	public PropertyValidationBuilder<TRequest, TProperty> ListRulesInDescription(bool listRules)
+	/// <param name="appendRules">True to list validation rules in description, false to hide them</param>
+	public PropertyValidationBuilder<TRequest, TProperty> AppendRulesToPropertyDescription(bool appendRules)
 	{
-		_listRulesInDescription = listRules;
+		_appendRulesToPropertyDescription = appendRules;
 		return this;
 	}
 
 	internal IEnumerable<ValidationRule> Build()
 	{
-		// Apply the per-property ListRulesInDescription setting to all rules
-		if (_listRulesInDescription.HasValue)
+		// Apply the per-property AppendRulesToPropertyDescription setting to all rules
+		if (_appendRulesToPropertyDescription.HasValue)
 		{
-			return _rules.Select(rule => rule with { ListRulesInDescription = _listRulesInDescription.Value });
+			return _rules.Select(rule => rule with { AppendRulesToPropertyDescription = _appendRulesToPropertyDescription.Value });
 		}
 		return _rules;
 	}

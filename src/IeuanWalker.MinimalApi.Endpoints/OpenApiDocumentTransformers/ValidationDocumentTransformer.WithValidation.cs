@@ -6,7 +6,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 partial class ValidationDocumentTransformer
 {
-	static void DiscoverManualValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules, Dictionary<Type, bool> listRulesInDescription)
+	static void DiscoverManualValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
 		// Iterate through all endpoints to find WithValidation metadata
 		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
@@ -34,13 +34,22 @@ partial class ValidationDocumentTransformer
 				}
 
 				Type requestType = metadataType.GetGenericArguments()[0];
-
-				// Extract ListRulesInDescription setting from the configuration object
-				PropertyInfo? listRulesInDescriptionProp = config.GetType().GetProperty("ListRulesInDescription");
-				if (listRulesInDescriptionProp?.GetValue(config) is bool listInDesc)
+				if (!allValidationRules.TryGetValue(requestType, out (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) value))
 				{
-					listRulesInDescription[requestType] = listInDesc;
+					allValidationRules.Add(requestType, ([], true));
 				}
+
+				(List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) = allValidationRules[requestType];
+
+				// Extract AppendRulesToPropertyDescription setting from the configuration object
+				// TODO: Avoid strings
+				PropertyInfo? appendRulesToPropertyDescriptionProperty = config.GetType().GetProperty("AppendRulesToPropertyDescription");
+				if (appendRulesToPropertyDescriptionProperty?.GetValue(config) is bool listInDesc)
+				{
+					appendRulesToPropertyDescription = listInDesc;
+				}
+
+				allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
 
 				// Extract rules from the configuration object
 				PropertyInfo? rulesProp = config.GetType().GetProperty("Rules");
@@ -49,17 +58,12 @@ partial class ValidationDocumentTransformer
 					continue;
 				}
 
-				// Manual rules override auto-discovered rules per property
-				if (!allValidationRules.TryGetValue(requestType, out List<Validation.ValidationRule>? value))
-				{
-					value = [];
-					allValidationRules[requestType] = value;
-				}
-
 				// Remove auto-discovered rules for properties that have manual rules
 				HashSet<string> manualPropertyNames = [.. manualRules.Select(r => r.PropertyName).Distinct()];
-				value.RemoveAll(r => manualPropertyNames.Contains(r.PropertyName));
-				value.AddRange(manualRules);
+				rules.RemoveAll(r => manualPropertyNames.Contains(r.PropertyName));
+				rules.AddRange(manualRules);
+
+				allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
 			}
 		}
 	}

@@ -8,7 +8,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 partial class ValidationDocumentTransformer
 {
-	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, List<Validation.ValidationRule>> allValidationRules, Dictionary<Type, bool> listRulesInDescription)
+	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
 		// FluentValidation validators are registered as IValidator<T>, not IValidator
 		// We need to scan assemblies to find all types that implement IValidator<T>
@@ -87,19 +87,14 @@ partial class ValidationDocumentTransformer
 				continue;
 			}
 
-			if (!allValidationRules.TryGetValue(validatedType, out List<Validation.ValidationRule>? value))
+			if (!allValidationRules.TryGetValue(validatedType, out (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) value))
 			{
-				value = [];
+				value.rules = [];
+				value.appendRulesToPropertyDescription = true;
 				allValidationRules[validatedType] = value;
 			}
 
-			// FluentValidation rules default to listing in description (true)
-			if (!listRulesInDescription.ContainsKey(validatedType))
-			{
-				listRulesInDescription[validatedType] = true;
-			}
-
-			value.AddRange(rules);
+			value.rules.AddRange(rules);
 		}
 	}
 

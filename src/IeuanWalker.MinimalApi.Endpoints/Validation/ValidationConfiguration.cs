@@ -13,11 +13,11 @@ public sealed class ValidationConfiguration<TRequest>
 	/// <summary>
 	/// Whether to list validation rules in the property description field in OpenAPI documentation
 	/// </summary>
-	public bool ListRulesInDescription { get; }
+	public bool AppendRulesToPropertyDescription { get; }
 
-	internal ValidationConfiguration(IReadOnlyList<ValidationRule> rules, bool listRulesInDescription)
+	internal ValidationConfiguration(IReadOnlyList<ValidationRule> rules, bool appendRulesToPropertyDescription)
 	{
 		Rules = rules;
-		ListRulesInDescription = listRulesInDescription;
+		AppendRulesToPropertyDescription = appendRulesToPropertyDescription;
 	}
 }
