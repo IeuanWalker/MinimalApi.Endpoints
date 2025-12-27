@@ -35,6 +35,8 @@ public class RequestModel
 	public int MaxNumberTest { get; set; }
 	public int MinNumberTest { get; set; }
 	public required string EnumStringValidator { get; set; }
+	public required int EnumIntValidator { get; set; }
+	public required StatusEnum EnumTest { get; set; }
 }
 
 public class NestedObjectModel
@@ -136,6 +138,8 @@ sealed class RequestModelValidator : Validator<RequestModel>
 			.PrecisionScale(4, 2, false);
 
 		RuleFor(x => x.EnumStringValidator).IsEnumName(typeof(StatusEnum), caseSensitive: false);
+		RuleFor(x => x.EnumIntValidator).IsInEnum();
+		RuleFor(x => x.EnumTest).IsInEnum();
 	}
 }
 
