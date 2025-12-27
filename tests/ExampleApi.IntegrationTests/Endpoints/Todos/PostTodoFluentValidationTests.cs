@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
-using PostTodoFluentValidation = ExampleApi.Endpoints.Todos.PostFluentValidation;
+using PostTodoFluentValidation = ExampleApi.Endpoints.Todos.Post;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Todos;
 
@@ -228,7 +228,7 @@ public class PostTodoFluentValidationTests : IClassFixture<ExampleApiWebApplicat
 		PostTodoFluentValidation.RequestModel request = new()
 		{
 			Title = "", // Invalid - empty title
-			Description = "", // Invalid - empty description  
+			Description = "", // Invalid - empty description
 			NestedObject = new PostTodoFluentValidation.NestedObjectModel
 			{
 				Name = "", // Invalid - empty name

@@ -4,7 +4,7 @@ using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Http.HttpResults;
 
-namespace ExampleApi.Endpoints.Todos.PostDataAnnotation;
+namespace ExampleApi.Endpoints.Todos.Post;
 
 public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel>, Conflict>>
 {
@@ -20,7 +20,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 	{
 		builder
 			.Group<TodoEndpointGroup>()
-			.Post("/DataAnnotation")
+			.Post("")
 			.RequestFromBody()
 			.WithSummary("Create a new todo")
 			.WithDescription("Creates a new todo item")
