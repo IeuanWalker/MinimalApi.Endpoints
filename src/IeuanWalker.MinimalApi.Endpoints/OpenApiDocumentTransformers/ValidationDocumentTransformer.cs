@@ -214,7 +214,7 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 				// Convert FluentValidation validators to our ValidationRule format
 				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent);
-				if (rule != null)
+				if (rule is not null)
 				{
 					rules.Add(rule);
 				}
@@ -831,8 +831,8 @@ sealed class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// For simple properties, create a new inline schema with all validation rules
 		// Get the type from the first rule (all rules for same property should have same type)
-		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t != null);
-		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f != null);
+		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
 
 		// Create inline schema - set properties after creation to avoid initialization issues
 		OpenApiSchema newInlineSchema = new();

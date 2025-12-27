@@ -64,7 +64,7 @@ static class ValidationHelpers
 	{
 		// Walk up the inheritance chain to find the Validator<T> base class
 		INamedTypeSymbol? current = validatorTypeSymbol.BaseType;
-		while (current != null)
+		while (current is not null)
 		{
 			// Check if this is the Validator<T> base class
 			if (current.IsGenericType && SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseSymbol))
