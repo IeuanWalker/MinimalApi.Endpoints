@@ -22,7 +22,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		_rules.Add(new RequiredRule
 		{
 			PropertyName = _propertyName,
-			ErrorMessage = errorMessage ?? $"{_propertyName} is required"
+			ErrorMessage = errorMessage ?? "Is required"
 		});
 		return this;
 	}
@@ -36,7 +36,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		{
 			PropertyName = _propertyName,
 			MinLength = min,
-			ErrorMessage = errorMessage ?? $"{_propertyName} must be at least {min} characters"
+			ErrorMessage = errorMessage ?? "Must be at least {min} characters"
 		});
 		return this;
 	}
@@ -50,7 +50,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		{
 			PropertyName = _propertyName,
 			MaxLength = max,
-			ErrorMessage = errorMessage ?? $"{_propertyName} must not exceed {max} characters"
+			ErrorMessage = errorMessage ?? $"Must not exceed {max} characters"
 		});
 		return this;
 	}
@@ -65,7 +65,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 			PropertyName = _propertyName,
 			MinLength = min,
 			MaxLength = max,
-			ErrorMessage = errorMessage ?? $"{_propertyName} must be between {min} and {max} characters"
+			ErrorMessage = errorMessage ?? $"Must be between {min} and {max} characters"
 		});
 		return this;
 	}
@@ -79,7 +79,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		{
 			PropertyName = _propertyName,
 			Pattern = regex,
-			ErrorMessage = errorMessage ?? $"{_propertyName} does not match required pattern"
+			ErrorMessage = errorMessage ?? $"Must match patter - {regex}"
 		});
 		return this;
 	}
@@ -92,7 +92,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		_rules.Add(new EmailRule
 		{
 			PropertyName = _propertyName,
-			ErrorMessage = errorMessage ?? $"{_propertyName} must be a valid email address"
+			ErrorMessage = errorMessage ?? "Must be a valid email address"
 		});
 		return this;
 	}
@@ -105,7 +105,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		_rules.Add(new UrlRule
 		{
 			PropertyName = _propertyName,
-			ErrorMessage = errorMessage ?? $"{_propertyName} must be a valid URL"
+			ErrorMessage = errorMessage ?? "Must be a valid URL"
 		});
 		return this;
 	}
@@ -186,7 +186,7 @@ public static class PropertyValidationBuilderExtensions
 			PropertyName = propertyName,
 			Minimum = value,
 			ExclusiveMinimum = true,
-			ErrorMessage = errorMessage ?? $"{propertyName} must be greater than {value}"
+			ErrorMessage = errorMessage ?? $"Must be greater than {value}"
 		});
 		return builder;
 	}
@@ -208,7 +208,7 @@ public static class PropertyValidationBuilderExtensions
 			PropertyName = propertyName,
 			Minimum = value,
 			ExclusiveMinimum = false,
-			ErrorMessage = errorMessage ?? $"{propertyName} must be greater than or equal to {value}"
+			ErrorMessage = errorMessage ?? $"Must be greater than or equal to {value}"
 		});
 		return builder;
 	}
@@ -230,7 +230,7 @@ public static class PropertyValidationBuilderExtensions
 			PropertyName = propertyName,
 			Maximum = value,
 			ExclusiveMaximum = true,
-			ErrorMessage = errorMessage ?? $"{propertyName} must be less than {value}"
+			ErrorMessage = errorMessage ?? $"Must be less than {value}"
 		});
 		return builder;
 	}
@@ -252,7 +252,7 @@ public static class PropertyValidationBuilderExtensions
 			PropertyName = propertyName,
 			Maximum = value,
 			ExclusiveMaximum = false,
-			ErrorMessage = errorMessage ?? $"{propertyName} must be less than or equal to {value}"
+			ErrorMessage = errorMessage ?? $"Must be less than or equal to {value}"
 		});
 		return builder;
 	}
@@ -277,7 +277,7 @@ public static class PropertyValidationBuilderExtensions
 			Maximum = max,
 			ExclusiveMinimum = false,
 			ExclusiveMaximum = false,
-			ErrorMessage = errorMessage ?? $"{propertyName} must be between {min} and {max}"
+			ErrorMessage = errorMessage ?? $"Must be between {min} and {max}"
 		});
 		return builder;
 	}
