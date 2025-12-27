@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
+using ExampleApi.Endpoints.Todos.Post;
 using Microsoft.Extensions.DependencyInjection;
-using PostTodoFluentValidation = ExampleApi.Endpoints.Todos.Post;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Todos;
 
@@ -27,11 +27,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Todo Title",
 			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
@@ -44,7 +44,7 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		PostTodoFluentValidation.ResponseModel? createdTodo = await response.Content.ReadFromJsonAsync<PostTodoFluentValidation.ResponseModel>();
+		ResponseModel? createdTodo = await response.Content.ReadFromJsonAsync<ResponseModel>();
 		createdTodo.ShouldNotBeNull();
 		createdTodo.Title.ShouldBe("Valid Todo Title");
 	}
@@ -53,11 +53,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 	public async Task PostTodoFluentValidation_WithEmptyTitle_ReturnsBadRequest()
 	{
 		// Arrange
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "", // ? Invalid - empty title
 			Description = "Test Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
@@ -79,11 +79,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 	public async Task PostTodoFluentValidation_WithNullTitle_ReturnsBadRequest()
 	{
 		// Arrange
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = null!, // ? Invalid - null title
 			Description = "Test Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
@@ -105,11 +105,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Title",
 			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "", // Invalid - empty name
 				Age = 25
@@ -134,11 +134,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Title",
 			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = -5 // Invalid - negative age
@@ -163,11 +163,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Title",
 			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 85 // Invalid - over limit (should be less than 80)
@@ -192,19 +192,19 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Title",
 			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
 			},
 			NestedObject2 =
 			[
-				new PostTodoFluentValidation.NestedObject2Model { Note = "Valid note" },
-				new PostTodoFluentValidation.NestedObject2Model { Note = "" } // Invalid - empty note
+				new NestedObject2Model { Note = "Valid note" },
+				new NestedObject2Model { Note = "" } // Invalid - empty note
 			]
 		};
 
@@ -225,11 +225,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "", // Invalid - empty title
 			Description = "", // Invalid - empty description
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "", // Invalid - empty name
 				Age = -1 // Invalid - negative age
@@ -261,11 +261,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 
 		string tooLongTitle = new('X', 201); // Over the 200 character limit
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = tooLongTitle,
 			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
@@ -292,11 +292,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 
 		string tooLongDescription = new('X', 1001); // Over the 1000 character limit
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Title",
 			Description = tooLongDescription,
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
@@ -321,7 +321,7 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Title",
 			Description = "Valid Description",
@@ -346,20 +346,20 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		TestTodoStore? todoStore = _factory.Services.GetRequiredService<ITodoStore>() as TestTodoStore;
 		todoStore!.Clear();
 
-		PostTodoFluentValidation.RequestModel request = new()
+		RequestModel request = new()
 		{
 			Title = "Valid Todo Title",
 			Description = "Valid Description",
-			NestedObject = new PostTodoFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				Name = "Valid Name",
 				Age = 25
 			},
 			NestedObject2 =
 			[
-				new PostTodoFluentValidation.NestedObject2Model { Note = "First note" },
-				new PostTodoFluentValidation.NestedObject2Model { Note = "Second note" },
-				new PostTodoFluentValidation.NestedObject2Model { Note = "Third note" }
+				new NestedObject2Model { Note = "First note" },
+				new NestedObject2Model { Note = "Second note" },
+				new NestedObject2Model { Note = "Third note" }
 			]
 		};
 
@@ -368,7 +368,7 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		PostTodoFluentValidation.ResponseModel? createdTodo = await response.Content.ReadFromJsonAsync<PostTodoFluentValidation.ResponseModel>();
+		ResponseModel? createdTodo = await response.Content.ReadFromJsonAsync<ResponseModel>();
 		createdTodo.ShouldNotBeNull();
 		createdTodo.Title.ShouldBe("Valid Todo Title");
 	}
