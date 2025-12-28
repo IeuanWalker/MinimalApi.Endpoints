@@ -312,8 +312,11 @@ public class EndpointGenerator : IIncrementalGenerator
 
 		builder.AppendEmptyLine();
 		builder.AppendLine($"namespace {assemblyName};");
-		builder.AppendEmptyLine();
 
+		builder.AppendEmptyLine();
+		builder.AppendLine("#pragma warning disable ASP0018 // Disable specific ASP.NET analyzer that warns about unused route parameters in generated handlers");
+
+		builder.AppendEmptyLine();
 		builder.AppendLine("public static class EndpointExtensions");
 		using (builder.AppendBlock())
 		{
@@ -421,6 +424,9 @@ public class EndpointGenerator : IIncrementalGenerator
 				builder.AppendLine("return app;");
 			}
 		}
+
+		builder.AppendEmptyLine();
+		builder.AppendLine("#pragma warning restore ASP0018");
 
 		return builder.ToString();
 	}
