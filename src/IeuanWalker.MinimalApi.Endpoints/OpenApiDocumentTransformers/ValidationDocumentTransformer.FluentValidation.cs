@@ -3,6 +3,8 @@ using FluentValidation;
 using FluentValidation.Internal;
 using FluentValidation.Validators;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
@@ -13,6 +15,9 @@ partial class ValidationDocumentTransformer
 		// FluentValidation validators are registered as IValidator<T>, not IValidator
 		// We need to scan assemblies to find all types that implement IValidator<T>
 		List<IValidator> validators = [];
+
+		// Get logger from DI if available
+		ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
 
 		// Get all loaded assemblies
 		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -72,7 +77,7 @@ partial class ValidationDocumentTransformer
 			}
 
 			// Extract validation rules from the validator
-			List<Validation.ValidationRule> rules = ExtractFluentValidationRules(validator);
+			List<Validation.ValidationRule> rules = ExtractFluentValidationRules(validator, logger);
 
 			if (rules.Count <= 0)
 			{
@@ -90,7 +95,7 @@ partial class ValidationDocumentTransformer
 		}
 	}
 
-	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator)
+	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator, ILogger logger)
 	{
 		List<Validation.ValidationRule> rules = [];
 
@@ -108,7 +113,7 @@ partial class ValidationDocumentTransformer
 				IRuleComponent ruleComponent = validatorTuple.Options;
 
 				// Convert FluentValidation validators to our ValidationRule format
-				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent);
+				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent, logger);
 				if (rule is not null)
 				{
 					rules.Add(rule);
@@ -119,7 +124,7 @@ partial class ValidationDocumentTransformer
 		return rules;
 	}
 
-	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent)
+	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent, ILogger logger)
 	{
 		// Skip ChildValidatorAdaptor (SetValidator) - nested object validators
 		// These cannot be represented in OpenAPI schema constraints
@@ -149,7 +154,7 @@ partial class ValidationDocumentTransformer
 		}
 
 		// If we couldn't map to a specific rule type, create a CustomRule with the error message
-		string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName);
+		string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, logger);
 		if (!string.IsNullOrEmpty(errorMessage))
 		{
 			// Create a CustomRule<object> to hold the unsupported validator's error message
@@ -163,7 +168,7 @@ partial class ValidationDocumentTransformer
 		return null;
 	}
 
-	static string GetValidatorErrorMessage(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, string propertyName)
+	static string GetValidatorErrorMessage(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, string propertyName, ILogger logger)
 	{
 		try
 		{
@@ -178,6 +183,11 @@ partial class ValidationDocumentTransformer
 					if (result is string message && !string.IsNullOrEmpty(message))
 					{
 						// Replace placeholders with actual values from the validator
+						if (message.Equals("The specified condition was not met for '{PropertyName}'."))
+						{
+							LogVagueErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+						}
+
 						return ReplacePlaceholders(message, propertyName, propertyValidator);
 					}
 				}
@@ -235,14 +245,16 @@ partial class ValidationDocumentTransformer
 				validatorTypeName = validatorTypeName[..backtickIndex];
 			}
 
-			// TODO: Add warning message
+			// Log a warning when we have to fall back to a generic message
+			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
 
 			return $"{propertyName} {validatorTypeName} validation";
 		}
 #pragma warning disable CA1031 // Do not catch general exception types
-		catch
+		catch (Exception ex)
 		{
-			// TODO: Add warning message
+			// Log the exception and fall back to a generic message
+			LogExceptionWhileObtainingValidatorErrorMessage(logger, propertyName, propertyValidator.GetType().FullName ?? string.Empty, ex);
 
 			// If all else fails, return a generic message
 			return $"{propertyName} custom validation";
@@ -531,4 +543,14 @@ partial class ValidationDocumentTransformer
 			_ => null
 		};
 	}
+
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Unable to determine custom error message for validator '{ValidatorType}' on property '{PropertyName}'.Falling back to generic message.")]
+	static partial void LogUnableToDetermineCustomErrorMessage(ILogger logger, string validatorType, string propertyName);
+
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Exception while obtaining validator error message for property '{PropertyName}' using validator '{ValidatorType}'. Using generic message.")]
+	static partial void LogExceptionWhileObtainingValidatorErrorMessage(ILogger logger, string propertyName, string validatorType, Exception exception);
+
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to propery {PropertyName} from the object {ValidatorType}. Consider using .WithMessage().")]
+	static partial void LogVagueErrorMessage(ILogger logger, string validatorType, string propertyName);
+
 }
