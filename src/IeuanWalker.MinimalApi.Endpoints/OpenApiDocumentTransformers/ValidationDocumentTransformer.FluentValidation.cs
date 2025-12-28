@@ -142,18 +142,10 @@ partial class ValidationDocumentTransformer
 		// Map FluentValidation validators to our internal ValidationRule types
 		Validation.ValidationRule? rule = propertyValidator switch
 		{
-			INotNullValidator or INotEmptyValidator => new Validation.RequiredRule
-			{
-				PropertyName = propertyName,
-				ErrorMessage = "Is required"
-			},
+			INotNullValidator or INotEmptyValidator => new Validation.RequiredRule(propertyName),
 			ILengthValidator lengthValidator => CreateStringLengthRule(propertyName, lengthValidator),
 			IRegularExpressionValidator regexValidator => CreatePatternRule(propertyName, regexValidator),
-			IEmailValidator => new Validation.EmailRule
-			{
-				PropertyName = propertyName,
-				ErrorMessage = "Must be a valid email address"
-			},
+			IEmailValidator => new Validation.EmailRule(propertyName),
 			IComparisonValidator comparisonValidator => CreateComparisonRule(propertyName, comparisonValidator),
 			IBetweenValidator betweenValidator => CreateBetweenRule(propertyName, betweenValidator),
 			_ => null
@@ -169,11 +161,7 @@ partial class ValidationDocumentTransformer
 		if (!string.IsNullOrEmpty(errorMessage))
 		{
 			// Create a CustomRule<object> to hold the unsupported validator's error message
-			rule = new Validation.CustomRule<object>
-			{
-				PropertyName = propertyName,
-				ErrorMessage = errorMessage
-			};
+			rule = new Validation.CustomRule<object>(propertyName, errorMessage);
 
 			rule.ErrorMessage = rule.ErrorMessage.Replace($"'{propertyName}' m", "M");
 
@@ -466,17 +454,7 @@ partial class ValidationDocumentTransformer
 			return null;
 		}
 
-		return new Validation.StringLengthRule
-		{
-			PropertyName = propertyName,
-			MinLength = min > 0 ? min : null,
-			MaxLength = max > 0 ? max : null,
-			ErrorMessage = min.HasValue && max.HasValue
-				? $"Must be between {min} and {max} characters"
-				: min.HasValue
-					? $"Must be at least {min} characters"
-					: $"Must not exceed {max} characters"
-		};
+		return new Validation.StringLengthRule(propertyName, minLength: min > 0 ? min : null, maxLength: max > 0 ? max : null);
 	}
 
 	static Validation.PatternRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)
@@ -489,12 +467,7 @@ partial class ValidationDocumentTransformer
 			return null;
 		}
 
-		return new Validation.PatternRule
-		{
-			PropertyName = propertyName,
-			Pattern = pattern,
-			ErrorMessage = $"Must match the pattern - {pattern}"
-		};
+		return new Validation.PatternRule(propertyName, pattern);
 	}
 
 	static Validation.ValidationRule? CreateComparisonRule(string propertyName, IComparisonValidator comparisonValidator)
@@ -529,34 +502,10 @@ partial class ValidationDocumentTransformer
 	{
 		return comparisonName switch
 		{
-			"GreaterThan" => new Validation.RangeRule<T>
-			{
-				PropertyName = propertyName,
-				Minimum = value,
-				ExclusiveMinimum = true,
-				ErrorMessage = $"Must be greater than {value}"
-			},
-			"GreaterThanOrEqual" => new Validation.RangeRule<T>
-			{
-				PropertyName = propertyName,
-				Minimum = value,
-				ExclusiveMinimum = false,
-				ErrorMessage = $"Must be greater than or equal to {value}"
-			},
-			"LessThan" => new Validation.RangeRule<T>
-			{
-				PropertyName = propertyName,
-				Maximum = value,
-				ExclusiveMaximum = true,
-				ErrorMessage = $"Must be less than {value}"
-			},
-			"LessThanOrEqual" => new Validation.RangeRule<T>
-			{
-				PropertyName = propertyName,
-				Maximum = value,
-				ExclusiveMaximum = false,
-				ErrorMessage = $"Must be less than or equal to {value}"
-			},
+			"GreaterThan" => new Validation.RangeRule<T>(propertyName, minimum: value, exclusiveMinimum: true),
+			"GreaterThanOrEqual" => new Validation.RangeRule<T>(propertyName, minimum: value, exclusiveMinimum: false),
+			"LessThan" => new Validation.RangeRule<T>(propertyName, maximum: value, exclusiveMaximum: true),
+			"LessThanOrEqual" => new Validation.RangeRule<T>(propertyName, maximum: value, exclusiveMaximum: false),
 			_ => null
 		};
 	}
@@ -578,51 +527,11 @@ partial class ValidationDocumentTransformer
 		// Create appropriate range rule based on value type
 		return from switch
 		{
-			int intFrom when to is int intTo => new Validation.RangeRule<int>
-			{
-				PropertyName = propertyName,
-				Minimum = intFrom,
-				Maximum = intTo,
-				ExclusiveMinimum = false,
-				ExclusiveMaximum = false,
-				ErrorMessage = $"Must be between {intFrom} and {intTo}"
-			},
-			long longFrom when to is long longTo => new Validation.RangeRule<long>
-			{
-				PropertyName = propertyName,
-				Minimum = longFrom,
-				Maximum = longTo,
-				ExclusiveMinimum = false,
-				ExclusiveMaximum = false,
-				ErrorMessage = $"Must be between {longFrom} and {longTo}"
-			},
-			decimal decimalFrom when to is decimal decimalTo => new Validation.RangeRule<decimal>
-			{
-				PropertyName = propertyName,
-				Minimum = decimalFrom,
-				Maximum = decimalTo,
-				ExclusiveMinimum = false,
-				ExclusiveMaximum = false,
-				ErrorMessage = $"Must be between {decimalFrom} and {decimalTo}"
-			},
-			double doubleFrom when to is double doubleTo => new Validation.RangeRule<double>
-			{
-				PropertyName = propertyName,
-				Minimum = doubleFrom,
-				Maximum = doubleTo,
-				ExclusiveMinimum = false,
-				ExclusiveMaximum = false,
-				ErrorMessage = $"Must be between {doubleFrom} and {doubleTo}"
-			},
-			float floatFrom when to is float floatTo => new Validation.RangeRule<float>
-			{
-				PropertyName = propertyName,
-				Minimum = floatFrom,
-				Maximum = floatTo,
-				ExclusiveMinimum = false,
-				ExclusiveMaximum = false,
-				ErrorMessage = $"Must be between {floatFrom} and {floatTo}"
-			},
+			int intFrom when to is int intTo => new Validation.RangeRule<int>(propertyName, minimum: intFrom, maximum: intTo),
+			long longFrom when to is long longTo => new Validation.RangeRule<long>(propertyName, minimum: longFrom, maximum: longTo),
+			decimal decimalFrom when to is decimal decimalTo => new Validation.RangeRule<decimal>(propertyName, minimum: decimalFrom, maximum: decimalTo),
+			double doubleFrom when to is double doubleTo => new Validation.RangeRule<double>(propertyName, minimum: doubleFrom, maximum: doubleTo),
+			float floatFrom when to is float floatTo => new Validation.RangeRule<float>(propertyName, minimum: floatFrom, maximum: floatTo),
 			_ => null
 		};
 	}

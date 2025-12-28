@@ -19,11 +19,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> Required(string? errorMessage = null)
 	{
-		_rules.Add(new RequiredRule
-		{
-			PropertyName = _propertyName,
-			ErrorMessage = errorMessage ?? "Is required"
-		});
+		_rules.Add(new RequiredRule(_propertyName, errorMessage));
 		return this;
 	}
 
@@ -32,12 +28,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> MinLength(int min, string? errorMessage = null)
 	{
-		_rules.Add(new StringLengthRule
-		{
-			PropertyName = _propertyName,
-			MinLength = min,
-			ErrorMessage = errorMessage ?? "Must be at least {min} characters"
-		});
+		_rules.Add(new StringLengthRule(_propertyName, minLength: min, maxLength: null, errorMessage));
 		return this;
 	}
 
@@ -46,12 +37,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> MaxLength(int max, string? errorMessage = null)
 	{
-		_rules.Add(new StringLengthRule
-		{
-			PropertyName = _propertyName,
-			MaxLength = max,
-			ErrorMessage = errorMessage ?? $"Must not exceed {max} characters"
-		});
+		_rules.Add(new StringLengthRule(_propertyName, minLength: null, maxLength: max, errorMessage));
 		return this;
 	}
 
@@ -60,12 +46,10 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> Length(int min, int max, string? errorMessage = null)
 	{
-		_rules.Add(new StringLengthRule
+		_rules.Add(new StringLengthRule(_propertyName, minLength: min, maxLength: max, errorMessage)
 		{
-			PropertyName = _propertyName,
 			MinLength = min,
-			MaxLength = max,
-			ErrorMessage = errorMessage ?? $"Must be between {min} and {max} characters"
+			MaxLength = max
 		});
 		return this;
 	}
@@ -75,12 +59,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> Pattern(string regex, string? errorMessage = null)
 	{
-		_rules.Add(new PatternRule
-		{
-			PropertyName = _propertyName,
-			Pattern = regex,
-			ErrorMessage = errorMessage ?? $"Must match the pattern - {regex}"
-		});
+		_rules.Add(new PatternRule(_propertyName, regex, errorMessage));
 		return this;
 	}
 
@@ -89,11 +68,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> Email(string? errorMessage = null)
 	{
-		_rules.Add(new EmailRule
-		{
-			PropertyName = _propertyName,
-			ErrorMessage = errorMessage ?? "Must be a valid email address"
-		});
+		_rules.Add(new EmailRule(_propertyName, errorMessage));
 		return this;
 	}
 
@@ -102,11 +77,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	public PropertyValidationBuilder<TRequest, TProperty> Url(string? errorMessage = null)
 	{
-		_rules.Add(new UrlRule
-		{
-			PropertyName = _propertyName,
-			ErrorMessage = errorMessage ?? "Must be a valid URL"
-		});
+		_rules.Add(new UrlRule(_propertyName, errorMessage));
 		return this;
 	}
 
@@ -117,11 +88,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// <param name="errorMessage">Description of the validation rule</param>
 	public PropertyValidationBuilder<TRequest, TProperty> Custom(string errorMessage)
 	{
-		_rules.Add(new CustomRule<TProperty>
-		{
-			PropertyName = _propertyName,
-			ErrorMessage = errorMessage
-		});
+		_rules.Add(new CustomRule<TProperty>(_propertyName, errorMessage));
 		return this;
 	}
 
@@ -132,12 +99,7 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 	/// <param name="description">Custom description for the property</param>
 	public PropertyValidationBuilder<TRequest, TProperty> Description(string description)
 	{
-		_rules.Add(new DescriptionRule
-		{
-			PropertyName = _propertyName,
-			Description = description,
-			ErrorMessage = string.Empty // Not used for description rules
-		});
+		_rules.Add(new DescriptionRule(_propertyName, description));
 		return this;
 	}
 
@@ -181,13 +143,7 @@ public static class PropertyValidationBuilderExtensions
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
 
-		rules.Add(new RangeRule<TProperty>
-		{
-			PropertyName = propertyName,
-			Minimum = value,
-			ExclusiveMinimum = true,
-			ErrorMessage = errorMessage ?? $"Must be greater than {value}"
-		});
+		rules.Add(new RangeRule<TProperty>(propertyName, minimum: value, exclusiveMinimum: true, errorMessage: errorMessage));
 		return builder;
 	}
 
@@ -203,13 +159,7 @@ public static class PropertyValidationBuilderExtensions
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
 
-		rules.Add(new RangeRule<TProperty>
-		{
-			PropertyName = propertyName,
-			Minimum = value,
-			ExclusiveMinimum = false,
-			ErrorMessage = errorMessage ?? $"Must be greater than or equal to {value}"
-		});
+		rules.Add(new RangeRule<TProperty>(propertyName, minimum: value, exclusiveMinimum: false, errorMessage: errorMessage));
 		return builder;
 	}
 
@@ -225,13 +175,7 @@ public static class PropertyValidationBuilderExtensions
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
 
-		rules.Add(new RangeRule<TProperty>
-		{
-			PropertyName = propertyName,
-			Maximum = value,
-			ExclusiveMaximum = true,
-			ErrorMessage = errorMessage ?? $"Must be less than {value}"
-		});
+		rules.Add(new RangeRule<TProperty>(propertyName, maximum: value, exclusiveMaximum: true, errorMessage: errorMessage));
 		return builder;
 	}
 
@@ -247,13 +191,7 @@ public static class PropertyValidationBuilderExtensions
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
 
-		rules.Add(new RangeRule<TProperty>
-		{
-			PropertyName = propertyName,
-			Maximum = value,
-			ExclusiveMaximum = false,
-			ErrorMessage = errorMessage ?? $"Must be less than or equal to {value}"
-		});
+		rules.Add(new RangeRule<TProperty>(propertyName, maximum: value, exclusiveMaximum: false, errorMessage: errorMessage));
 		return builder;
 	}
 
@@ -270,14 +208,12 @@ public static class PropertyValidationBuilderExtensions
 		string propertyName = GetPropertyName(builder);
 		List<ValidationRule> rules = GetRules(builder);
 
-		rules.Add(new RangeRule<TProperty>
+		rules.Add(new RangeRule<TProperty>(propertyName, minimum: min, maximum: max, errorMessage: errorMessage)
 		{
-			PropertyName = propertyName,
 			Minimum = min,
 			Maximum = max,
 			ExclusiveMinimum = false,
-			ExclusiveMaximum = false,
-			ErrorMessage = errorMessage ?? $"Must be between {min} and {max}"
+			ExclusiveMaximum = false
 		});
 		return builder;
 	}

@@ -702,7 +702,7 @@
 						"maxLength": 200,
 						"minLength": 1,
 						"type": "string",
-						"description": "Validation rules:\n- Required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
+						"description": "Validation rules:\n- Is required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
 					}
 				}
 			},
@@ -716,7 +716,7 @@
 						"maxLength": 200,
 						"minLength": 1,
 						"type": "string",
-						"description": "Validation rules:\n- Required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
+						"description": "Validation rules:\n- Is required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
 					},
 					"age": {
 						"maximum": true,
@@ -742,12 +742,12 @@
 						"maxLength": 200,
 						"minLength": 1,
 						"type": "string",
-						"description": "Validation rules:\n- Required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
+						"description": "Validation rules:\n- Is required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
 					},
 					"description": {
 						"maxLength": 1000,
 						"type": "string",
-						"description": "Validation rules:\n- Required\n- Maximum length: 1000 characters"
+						"description": "Validation rules:\n- Is required\n- Maximum length: 1000 characters"
 					},
 					"nestedObject": {
 						"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Post.NestedObjectModel"
@@ -1163,7 +1163,7 @@
 						"minLength": 2,
 						"pattern": "^[a-zA-Z0-9]+$",
 						"type": "string",
-						"description": "Validation rules:\n- Required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Length must be between 2 and 250 characters\n- Maximum length: 250 characters\n- Minimum length: 2 characters\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- 'AllBuiltInStringValidators' is not a valid credit card number.\n- Must be empty.",
+						"description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Length must be between 2 and 250 characters\n- Maximum length: 250 characters\n- Minimum length: 2 characters\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- 'AllBuiltInStringValidators' is not a valid credit card number.\n- Must be empty.",
 						"format": "email"
 					},
 					"allBuiltInNumberValidators": {
@@ -1172,7 +1172,7 @@
 						"minimum": false,
 						"exclusiveMinimum": true,
 						"type": "number",
-						"description": "Validation rules:\n- Required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be < 0\n- Must be <= 100\n- Must be <= 0\n- Must be > 0\n- Must be >= 1\n- Must be >= 0\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+						"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be < 0\n- Must be <= 100\n- Must be <= 0\n- Must be > 0\n- Must be >= 1\n- Must be >= 0\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
 					},
 					"maxNumberTest": {
 						"$ref": "#/components/schemas/System.Int32"
