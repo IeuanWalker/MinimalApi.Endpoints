@@ -207,7 +207,6 @@ public sealed record CustomRule<TProperty> : ValidationRule
 /// <summary>
 /// Description rule for adding custom descriptions to properties in OpenAPI documentation
 /// </summary>
-//TODO: Update not to derive from validation rule
 public sealed record DescriptionRule : ValidationRule
 {
 	public DescriptionRule(string propertyName, string description) : base(propertyName)
