@@ -101,7 +101,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
 		// Check for per-property AppendRulesToPropertyDescription setting (takes precedence over global setting)
-		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRulesToPropertyDescription.HasValue)?.AppendRulesToPropertyDescription;
+		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRuleToPropertyDescription.HasValue)?.AppendRuleToPropertyDescription;
 		bool effectiveListRulesInDescription = perPropertySetting ?? typeAppendRulesToPropertyDescription;
 
 		// Cast to OpenApiSchema to access properties

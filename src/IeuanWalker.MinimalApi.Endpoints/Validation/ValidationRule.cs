@@ -19,7 +19,7 @@ public abstract record ValidationRule
 	/// Whether to list validation rules in the property description field in OpenAPI documentation.
 	/// Null means use the global configuration setting.
 	/// </summary>
-	public bool? AppendRulesToPropertyDescription { get; init; }
+	public bool? AppendRuleToPropertyDescription { get; init; }
 }
 
 /// <summary>

@@ -119,7 +119,10 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		// Apply the per-property AppendRulesToPropertyDescription setting to all rules
 		if (_appendRulesToPropertyDescription.HasValue)
 		{
-			return _rules.Select(rule => rule with { AppendRulesToPropertyDescription = _appendRulesToPropertyDescription.Value });
+			return _rules.Select(rule => rule with
+			{
+				AppendRuleToPropertyDescription = _appendRulesToPropertyDescription.Value
+			});
 		}
 		return _rules;
 	}
