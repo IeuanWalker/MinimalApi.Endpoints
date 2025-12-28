@@ -285,13 +285,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					schema.Minimum = intRangeRule.Minimum.Value.ToString();
 					schema.ExclusiveMinimum = intRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
-					Console.WriteLine($"[DEBUG] Set int Minimum={schema.Minimum}, ExclusiveMinimum={schema.ExclusiveMinimum} from rule values Min={intRangeRule.Minimum.Value}, ExMin={intRangeRule.ExclusiveMinimum}");
 				}
 				if (intRangeRule.Maximum.HasValue)
 				{
 					schema.Maximum = intRangeRule.Maximum.Value.ToString();
 					schema.ExclusiveMaximum = intRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
-					Console.WriteLine($"[DEBUG] Set int Maximum={schema.Maximum}, ExclusiveMaximum={schema.ExclusiveMaximum} from rule values Max={intRangeRule.Maximum.Value}, ExMax={intRangeRule.ExclusiveMaximum}");
 				}
 				break;
 
