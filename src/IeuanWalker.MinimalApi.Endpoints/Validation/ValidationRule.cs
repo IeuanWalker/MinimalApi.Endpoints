@@ -5,6 +5,12 @@ namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 /// </summary>
 public abstract record ValidationRule
 {
+	protected ValidationRule(string propertyName)
+	{
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
+
+		PropertyName = propertyName;
+	}
 	/// <summary>
 	/// Name of the property this rule applies to
 	/// </summary>
@@ -27,11 +33,8 @@ public abstract record ValidationRule
 /// </summary>
 public sealed record RequiredRule : ValidationRule
 {
-	public RequiredRule(string propertyName, string? errorMessage = null)
+	public RequiredRule(string propertyName, string? errorMessage = null) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
-
-		PropertyName = propertyName;
 		ErrorMessage = string.IsNullOrWhiteSpace(errorMessage) ? "Is required" : errorMessage;
 	}
 }
@@ -41,16 +44,13 @@ public sealed record RequiredRule : ValidationRule
 /// </summary>
 public sealed record StringLengthRule : ValidationRule
 {
-	public StringLengthRule(string propertyName, int? minLength, int? maxLength, string? errorMessage = null)
+	public StringLengthRule(string propertyName, int? minLength, int? maxLength, string? errorMessage = null) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
-
 		if (minLength is null && maxLength is null)
 		{
 			throw new ArgumentException("Minimum or Maximum must be set");
 		}
 
-		PropertyName = propertyName;
 		MinLength = minLength;
 		MaxLength = maxLength;
 
@@ -89,12 +89,10 @@ public sealed record StringLengthRule : ValidationRule
 /// </summary>
 public sealed record PatternRule : ValidationRule
 {
-	public PatternRule(string propertyName, string pattern, string? errorMessage = null)
+	public PatternRule(string propertyName, string pattern, string? errorMessage = null) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
 		ArgumentNullException.ThrowIfNullOrWhiteSpace(pattern);
 
-		PropertyName = propertyName;
 		Pattern = pattern;
 		ErrorMessage = string.IsNullOrWhiteSpace(errorMessage) ? $"Must match pattern: {Pattern}" : errorMessage;
 	}
@@ -109,11 +107,8 @@ public sealed record PatternRule : ValidationRule
 /// </summary>
 public sealed record EmailRule : ValidationRule
 {
-	public EmailRule(string propertyName, string? errorMessage = null)
+	public EmailRule(string propertyName, string? errorMessage = null) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
-
-		PropertyName = propertyName;
 		ErrorMessage = string.IsNullOrWhiteSpace(errorMessage) ? "Must be a valid email address" : errorMessage;
 	}
 }
@@ -123,11 +118,8 @@ public sealed record EmailRule : ValidationRule
 /// </summary>
 public sealed record UrlRule : ValidationRule
 {
-	public UrlRule(string propertyName, string? errorMessage = null)
+	public UrlRule(string propertyName, string? errorMessage = null) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
-
-		PropertyName = propertyName;
 		ErrorMessage = string.IsNullOrWhiteSpace(errorMessage) ? "Must be a valid URL" : errorMessage;
 	}
 }
@@ -143,16 +135,13 @@ public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable
 		T? maximum = null,
 		bool exclusiveMinimum = false,
 		bool exclusiveMaximum = false,
-		string? errorMessage = null)
+		string? errorMessage = null) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
-
 		if (minimum is null && maximum is null)
 		{
 			throw new ArgumentException("Minimum or Maximum must be set");
 		}
 
-		PropertyName = propertyName;
 		Minimum = minimum;
 		Maximum = maximum;
 		ExclusiveMinimum = exclusiveMinimum;
@@ -207,12 +196,10 @@ public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable
 /// </summary>
 public sealed record CustomRule<TProperty> : ValidationRule
 {
-	public CustomRule(string propertyName, string errorMessage)
+	public CustomRule(string propertyName, string errorMessage) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
 		ArgumentNullException.ThrowIfNullOrWhiteSpace(errorMessage);
 
-		PropertyName = propertyName;
 		ErrorMessage = errorMessage;
 	}
 }
@@ -220,13 +207,13 @@ public sealed record CustomRule<TProperty> : ValidationRule
 /// <summary>
 /// Description rule for adding custom descriptions to properties in OpenAPI documentation
 /// </summary>
+//TODO: Update not to derive from validation rule
 public sealed record DescriptionRule : ValidationRule
 {
-	public DescriptionRule(string propertyName, string description)
+	public DescriptionRule(string propertyName, string description) : base(propertyName)
 	{
-		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName);
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(description);
 
-		PropertyName = propertyName;
 		Description = description;
 	}
 	/// <summary>
