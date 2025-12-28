@@ -4,7 +4,7 @@ using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Validation.PostFluentValidation;
 
-public class PostTodoEndpoint : IEndpointWithoutResponse<RequestModel>
+public class PostFluentValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 {
 	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)

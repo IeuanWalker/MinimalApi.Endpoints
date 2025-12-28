@@ -2,18 +2,18 @@ using System.Diagnostics.CodeAnalysis;
 using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 
-namespace ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom;
+namespace ExampleApi.Endpoints.Validation.PostDataValidation;
 
-public class PostTodoEndpoint : IEndpointWithoutResponse<RequestModel>
+public class PostDataValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 {
 	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
 			.Group<ValidationEndpointGroup>()
-			.Post("/FluentValidation/FromForm")
+			.Post("/DataValidation")
 			.Version(1)
-			.RequestFromForm();
+			.RequestFromBody();
 	}
 
 	public async Task Handle(RequestModel request, CancellationToken ct)
