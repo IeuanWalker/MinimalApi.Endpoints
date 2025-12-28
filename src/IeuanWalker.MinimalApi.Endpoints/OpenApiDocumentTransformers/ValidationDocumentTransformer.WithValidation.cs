@@ -20,13 +20,13 @@ partial class ValidationDocumentTransformer
 		{
 			// Use reflection to check if this is a ValidationMetadata<T>
 			Type metadataType = metadata.GetType();
-			if (!metadataType.IsGenericType || !metadataType.GetGenericTypeDefinition().Name.Contains("ValidationMetadata"))
+			if (!metadataType.IsGenericType || !metadataType.GetGenericTypeDefinition().Name.Contains(nameof(Validation.ValidationMetadata<>)))
 			{
 				continue;
 			}
 
 			// Extract the configuration and request type
-			PropertyInfo? configProp = metadataType.GetProperty("Configuration");
+			PropertyInfo? configProp = metadataType.GetProperty(nameof(Validation.ValidationMetadata<>.Configuration));
 			if (configProp?.GetValue(metadata) is not object config)
 			{
 				continue;
@@ -41,8 +41,7 @@ partial class ValidationDocumentTransformer
 			(List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) = allValidationRules[requestType];
 
 			// Extract AppendRulesToPropertyDescription setting from the configuration object
-			// TODO: Avoid strings
-			PropertyInfo? appendRulesToPropertyDescriptionProperty = config.GetType().GetProperty("AppendRulesToPropertyDescription");
+			PropertyInfo? appendRulesToPropertyDescriptionProperty = config.GetType().GetProperty(nameof(Validation.ValidationConfiguration<>.AppendRulesToPropertyDescription));
 			if (appendRulesToPropertyDescriptionProperty?.GetValue(config) is bool listInDesc)
 			{
 				appendRulesToPropertyDescription = listInDesc;
@@ -51,7 +50,7 @@ partial class ValidationDocumentTransformer
 			allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
 
 			// Extract rules from the configuration object
-			PropertyInfo? rulesProp = config.GetType().GetProperty("Rules");
+			PropertyInfo? rulesProp = config.GetType().GetProperty(nameof(Validation.ValidationConfiguration<>.Rules));
 			if (rulesProp?.GetValue(config) is not IEnumerable<Validation.ValidationRule> manualRules)
 			{
 				continue;

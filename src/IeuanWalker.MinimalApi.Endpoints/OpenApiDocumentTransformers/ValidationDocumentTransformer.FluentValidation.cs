@@ -133,7 +133,7 @@ partial class ValidationDocumentTransformer
 		// The nested object's properties will have their own validators that will be processed separately
 		// TODO: Use type rather than string
 		string validatorTypeName = propertyValidator.GetType().Name;
-		if (validatorTypeName.Contains("ChildValidatorAdaptor") || validatorTypeName.Contains("SetValidator"))
+		if (validatorTypeName.Contains(nameof(ChildValidatorAdaptor<,>)) || validatorTypeName.Contains("SetValidator"))
 		{
 			return null;
 		}
@@ -176,7 +176,7 @@ partial class ValidationDocumentTransformer
 		{
 			// Strategy 1: Try GetUnformattedErrorMessage() method on RuleComponent
 			// This is the most reliable way to get the custom message set via .WithMessage()
-			MethodInfo? getUnformattedMethod = ruleComponent.GetType().GetMethod("GetUnformattedErrorMessage", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+			MethodInfo? getUnformattedMethod = ruleComponent.GetType().GetMethod(nameof(IRuleComponent.GetUnformattedErrorMessage), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			if (getUnformattedMethod is not null)
 			{
 				try
@@ -266,7 +266,7 @@ partial class ValidationDocumentTransformer
 			// For ComparisonValidator (Equal, NotEqual, GreaterThan, LessThan, etc.)
 			if (propertyValidator is IComparisonValidator comparisonValidator)
 			{
-				PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty("ValueToCompare");
+				PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.ValueToCompare));
 				object? value = valueProp?.GetValue(comparisonValidator);
 				if (value is not null)
 				{
@@ -274,7 +274,7 @@ partial class ValidationDocumentTransformer
 				}
 
 				// Also check for MemberToCompare for property comparisons
-				PropertyInfo? memberProp = comparisonValidator.GetType().GetProperty("MemberToCompare");
+				PropertyInfo? memberProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.MemberToCompare));
 				object? memberValue = memberProp?.GetValue(comparisonValidator);
 				if (memberValue is not null)
 				{
@@ -285,8 +285,8 @@ partial class ValidationDocumentTransformer
 			// For BetweenValidator
 			if (propertyValidator is IBetweenValidator betweenValidator)
 			{
-				PropertyInfo? fromProp = betweenValidator.GetType().GetProperty("From");
-				PropertyInfo? toProp = betweenValidator.GetType().GetProperty("To");
+				PropertyInfo? fromProp = betweenValidator.GetType().GetProperty(nameof(IBetweenValidator.From));
+				PropertyInfo? toProp = betweenValidator.GetType().GetProperty(nameof(IBetweenValidator.To));
 
 				object? from = fromProp?.GetValue(betweenValidator);
 				object? to = toProp?.GetValue(betweenValidator);
@@ -304,8 +304,8 @@ partial class ValidationDocumentTransformer
 			// For LengthValidator
 			if (propertyValidator is ILengthValidator lengthValidator)
 			{
-				PropertyInfo? minProp = lengthValidator.GetType().GetProperty("Min");
-				PropertyInfo? maxProp = lengthValidator.GetType().GetProperty("Max");
+				PropertyInfo? minProp = lengthValidator.GetType().GetProperty(nameof(ILengthValidator.Min));
+				PropertyInfo? maxProp = lengthValidator.GetType().GetProperty(nameof(ILengthValidator.Max));
 
 				object? min = minProp?.GetValue(lengthValidator);
 				object? max = maxProp?.GetValue(lengthValidator);
@@ -356,7 +356,7 @@ partial class ValidationDocumentTransformer
 			// For regex/pattern validators
 			if (propertyValidator is IRegularExpressionValidator regexValidator)
 			{
-				PropertyInfo? expressionProp = regexValidator.GetType().GetProperty("Expression");
+				PropertyInfo? expressionProp = regexValidator.GetType().GetProperty(nameof(IRegularExpressionValidator.Expression));
 				object? expression = expressionProp?.GetValue(regexValidator);
 				if (expression is not null)
 				{
@@ -442,8 +442,8 @@ partial class ValidationDocumentTransformer
 	static Validation.StringLengthRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
 	{
 		// Get the Min and Max properties using reflection
-		PropertyInfo? minProp = lengthValidator.GetType().GetProperty("Min");
-		PropertyInfo? maxProp = lengthValidator.GetType().GetProperty("Max");
+		PropertyInfo? minProp = lengthValidator.GetType().GetProperty(nameof(ILengthValidator.Min));
+		PropertyInfo? maxProp = lengthValidator.GetType().GetProperty(nameof(ILengthValidator.Max));
 
 		int? min = minProp?.GetValue(lengthValidator) as int?;
 		int? max = maxProp?.GetValue(lengthValidator) as int?;
@@ -458,7 +458,7 @@ partial class ValidationDocumentTransformer
 
 	static Validation.PatternRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)
 	{
-		PropertyInfo? expressionProp = regexValidator.GetType().GetProperty("Expression");
+		PropertyInfo? expressionProp = regexValidator.GetType().GetProperty(nameof(IRegularExpressionValidator.Expression));
 		string? pattern = expressionProp?.GetValue(regexValidator) as string;
 
 		if (string.IsNullOrEmpty(pattern))
@@ -472,8 +472,8 @@ partial class ValidationDocumentTransformer
 	static Validation.ValidationRule? CreateComparisonRule(string propertyName, IComparisonValidator comparisonValidator)
 	{
 		// Get the ValueToCompare and Comparison properties
-		PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty("ValueToCompare");
-		PropertyInfo? comparisonProp = comparisonValidator.GetType().GetProperty("Comparison");
+		PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.ValueToCompare));
+		PropertyInfo? comparisonProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.Comparison));
 
 		object? value = valueProp?.GetValue(comparisonValidator);
 		object? comparison = comparisonProp?.GetValue(comparisonValidator);
@@ -512,8 +512,8 @@ partial class ValidationDocumentTransformer
 	static Validation.ValidationRule? CreateBetweenRule(string propertyName, IBetweenValidator betweenValidator)
 	{
 		// Get the From and To properties
-		PropertyInfo? fromProp = betweenValidator.GetType().GetProperty("From");
-		PropertyInfo? toProp = betweenValidator.GetType().GetProperty("To");
+		PropertyInfo? fromProp = betweenValidator.GetType().GetProperty(nameof(IBetweenValidator.From));
+		PropertyInfo? toProp = betweenValidator.GetType().GetProperty(nameof(IBetweenValidator.To));
 
 		object? from = fromProp?.GetValue(betweenValidator);
 		object? to = toProp?.GetValue(betweenValidator);
