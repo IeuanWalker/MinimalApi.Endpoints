@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -8,7 +7,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 /// <summary>
 /// OpenAPI document transformer that applies validation rules from both WithValidation and FluentValidation to schemas
 /// </summary>
-[ExcludeFromCodeCoverage]
 sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 {
 	public bool AutoDocumentFluentValdation { get; set; } = true;
