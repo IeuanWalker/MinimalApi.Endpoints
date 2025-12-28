@@ -12,7 +12,6 @@ partial class ValidationDocumentTransformer
 	{
 		// FluentValidation validators are registered as IValidator<T>, not IValidator
 		// We need to scan assemblies to find all types that implement IValidator<T>
-
 		List<IValidator> validators = [];
 
 		// Get all loaded assemblies
