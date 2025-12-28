@@ -179,8 +179,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			newInlineSchema.Format = format;
 		}
 
-		Console.WriteLine($"[DEBUG] Created inline schema: Type={newInlineSchema.Type}, Format={newInlineSchema.Format}");
-
 		// Extract custom description from DescriptionRule if present
 		string? customDescription2 = rules
 			.OfType<Validation.DescriptionRule>()
@@ -192,8 +190,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Apply all rules to this schema
 		foreach (Validation.ValidationRule rule in rules)
 		{
-			Console.WriteLine($"[DEBUG] Applying rule: {rule.GetType().Name} for property {rule.PropertyName}");
-
 			// Skip DescriptionRule - it's handled separately
 			if (rule is Validation.DescriptionRule)
 			{
@@ -215,8 +211,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				ApplyRuleToSchema(rule, newInlineSchema);
 			}
-
-			Console.WriteLine($"[DEBUG] After applying rule - Minimum='{newInlineSchema.Minimum}', Maximum='{newInlineSchema.Maximum}'");
 		}
 
 		// Build the complete description: custom description + validation rules

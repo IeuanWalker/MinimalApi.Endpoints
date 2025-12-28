@@ -45,7 +45,6 @@ partial class ValidationDocumentTransformer
 						if (validatorInstance is IValidator validator)
 						{
 							validators.Add(validator);
-							Console.WriteLine($"[DEBUG-FV] Found validator: {type.Name} for {validatorInterface.GetGenericArguments()[0].Name}");
 						}
 					}
 				}
@@ -56,8 +55,6 @@ partial class ValidationDocumentTransformer
 				continue;
 			}
 		}
-
-		Console.WriteLine($"[DEBUG-FV] Found {validators.Count} FluentValidation validators");
 
 		foreach (IValidator validator in validators)
 		{
@@ -74,12 +71,8 @@ partial class ValidationDocumentTransformer
 				continue;
 			}
 
-			Console.WriteLine($"[DEBUG-FV] Processing validator for type: {validatedType.FullName}");
-
 			// Extract validation rules from the validator
 			List<Validation.ValidationRule> rules = ExtractFluentValidationRules(validator);
-
-			Console.WriteLine($"[DEBUG-FV] Extracted {rules.Count} rules for {validatedType.Name}");
 
 			if (rules.Count <= 0)
 			{
@@ -242,11 +235,15 @@ partial class ValidationDocumentTransformer
 				validatorTypeName = validatorTypeName[..backtickIndex];
 			}
 
+			// TODO: Add warning message
+
 			return $"{propertyName} {validatorTypeName} validation";
 		}
 #pragma warning disable CA1031 // Do not catch general exception types
 		catch
 		{
+			// TODO: Add warning message
+
 			// If all else fails, return a generic message
 			return $"{propertyName} custom validation";
 		}
