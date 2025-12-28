@@ -188,6 +188,11 @@ partial class ValidationDocumentTransformer
 							LogVagueErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
 						}
 
+						if (message.Equals("'{PropertyName}' is not a valid credit card number."))
+						{
+							message = "Must be a valid credit card number";
+						}
+
 						return ReplacePlaceholders(message, propertyName, propertyValidator);
 					}
 				}

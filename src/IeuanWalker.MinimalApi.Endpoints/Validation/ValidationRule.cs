@@ -62,15 +62,15 @@ public sealed record StringLengthRule : ValidationRule
 
 		if (MinLength.HasValue && MaxLength.HasValue)
 		{
-			ErrorMessage = $"Length must be between {MinLength.Value} and {MaxLength.Value} characters";
+			ErrorMessage = $"Must be at least {MinLength.Value} characters and less than {MaxLength.Value} characters";
 		}
 		else if (MinLength.HasValue)
 		{
-			ErrorMessage = $"Minimum length: {MinLength.Value} characters";
+			ErrorMessage = $"Must be {MinLength.Value} characters or more";
 		}
 		else if (MaxLength.HasValue)
 		{
-			ErrorMessage = $"Maximum length: {MaxLength.Value} characters";
+			ErrorMessage = $"Must be {MaxLength.Value} characters or fewer";
 		}
 	}
 	/// <summary>
