@@ -185,7 +185,12 @@ partial class ValidationDocumentTransformer
 						// Replace placeholders with actual values from the validator
 						if (message.Equals("The specified condition was not met for '{PropertyName}'."))
 						{
-							LogVagueErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+							if (logger.IsEnabled(LogLevel.Warning))
+							{
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+								LogVagueErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
+							}
 						}
 
 						if (message.Equals("'{PropertyName}' is not a valid credit card number."))
@@ -251,7 +256,9 @@ partial class ValidationDocumentTransformer
 			}
 
 			// Log a warning when we have to fall back to a generic message
+#pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
 			return $"{propertyName} {validatorTypeName} validation";
 		}
@@ -259,7 +266,9 @@ partial class ValidationDocumentTransformer
 		catch (Exception ex)
 		{
 			// Log the exception and fall back to a generic message
+#pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogExceptionWhileObtainingValidatorErrorMessage(logger, propertyName, propertyValidator.GetType().FullName ?? string.Empty, ex);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
 			// If all else fails, return a generic message
 			return $"{propertyName} custom validation";
