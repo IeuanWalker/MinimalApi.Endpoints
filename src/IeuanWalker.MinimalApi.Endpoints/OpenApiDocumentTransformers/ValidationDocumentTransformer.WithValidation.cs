@@ -16,7 +16,6 @@ partial class ValidationDocumentTransformer
 
 		foreach (object metadata in endpointDataSource.Endpoints
 			.Where(x => x is RouteEndpoint)
-			.Select(x => (RouteEndpoint)x)
 			.SelectMany(x => x.Metadata.GetOrderedMetadata<object>()))
 		{
 			// Use reflection to check if this is a ValidationMetadata<T>
