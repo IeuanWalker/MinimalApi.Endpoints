@@ -15,6 +15,8 @@ using FluentValidation;
 
 namespace TestAssembly;
 
+#pragma warning disable ASP0018 // Disable specific ASP.NET analyzer that warns about unused route parameters in generated handlers
+
 public static class EndpointExtensions
 {
 	public static IHostApplicationBuilder AddEndpoints(this IHostApplicationBuilder builder) => builder.AddEndpointsFromTestAssembly();
@@ -45,3 +47,5 @@ public static class EndpointExtensions
 		return app;
 	}
 }
+
+#pragma warning restore ASP0018
