@@ -19,7 +19,7 @@ public class GetAllTodosEndpoint : IEndpointWithoutRequest<ResponseModel[]>
 	{
 		builder
 			.Group<TodoEndpointGroup>()
-			.Get("/")
+			.Get()
 			.WithSummary("Get all todos")
 			.WithDescription("Retrieves all todos from the store")
 			.Version(1.0);
