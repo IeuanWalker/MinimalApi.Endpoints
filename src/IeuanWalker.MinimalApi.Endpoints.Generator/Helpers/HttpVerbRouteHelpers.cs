@@ -80,14 +80,49 @@ static class HttpVerbRouteHelpers
 		{
 			HttpVerb? verb = ConvertToHttpVerb(verbMemberAccess.Name.Identifier.ValueText);
 
+			if (verb is null)
+			{
+				return null;
+			}
+
+			if (firstHttpVerbCall.ArgumentList.Arguments.Count == 0)
+			{
+				return (verb.Value, string.Empty);
+			}
+
 			// Try to extract the route pattern argument
-			if (verb is not null && firstHttpVerbCall.ArgumentList.Arguments.Count > 0)
+			if (firstHttpVerbCall.ArgumentList.Arguments.Count > 0)
 			{
 				ArgumentSyntax argument = firstHttpVerbCall.ArgumentList.Arguments[0];
 
-				if (argument.Expression is LiteralExpressionSyntax literal && literal.Token.IsKind(SyntaxKind.StringLiteralToken))
+				if (argument.Expression is LiteralExpressionSyntax literal)
 				{
-					return (verb.Value, literal.Token.ValueText);
+					if (literal.Token.IsKind(SyntaxKind.NullKeyword))
+					{
+						return (verb.Value, string.Empty);
+					}
+
+					if (literal.Token.IsKind(SyntaxKind.StringLiteralToken))
+					{
+						return (verb.Value, literal.Token.ValueText);
+					}
+				}
+				else if (argument.Expression is MemberAccessExpressionSyntax memberAccess)
+				{
+					// Check for string.Empty and String.Empty
+					if (memberAccess.Expression is PredefinedTypeSyntax predefinedType
+						&& predefinedType.Keyword.IsKind(SyntaxKind.StringKeyword)
+						&& memberAccess.Name.Identifier.ValueText == "Empty")
+					{
+						return (verb.Value, string.Empty);
+					}
+
+					if (memberAccess.Expression is IdentifierNameSyntax identifierName
+						&& identifierName.Identifier.ValueText == "String"
+						&& memberAccess.Name.Identifier.ValueText == "Empty")
+					{
+						return (verb.Value, string.Empty);
+					}
 				}
 			}
 		}
