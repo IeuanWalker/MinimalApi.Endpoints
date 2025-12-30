@@ -156,7 +156,7 @@ public class HttpVerbRouteHelpersTests
 	}
 
 	[Fact]
-	public void GetVerbAndPattern_WithHttpVerbButNoRoutePattern_ReturnsNull()
+	public void GetVerbAndPattern_WithHttpVerbButNoRoutePattern_DefaultToEmptyString()
 	{
 		// Arrange
 		const string sourceCode = """
@@ -176,7 +176,63 @@ public class HttpVerbRouteHelpersTests
 		(HttpVerb verb, string pattern)? result = typeDeclaration.GetVerbAndPattern("TestEndpoint", diagnostics);
 
 		// Assert
-		result.ShouldBeNull();
+		result.ShouldNotBeNull();
+		result.Value.verb.ShouldBe(HttpVerb.Get);
+		result.Value.pattern.ShouldBe(string.Empty);
+		diagnostics.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void GetVerbAndPattern_WithHttpVerbButStringEmptyPattern_DefaultToEmptyString()
+	{
+		// Arrange
+		const string sourceCode = """
+			public class TestEndpoint
+			{
+				public static void Configure(RouteHandlerBuilder builder)
+				{
+					builder.Get(string.Empty);
+				}
+			}
+			""";
+
+		TypeDeclarationSyntax typeDeclaration = ParseTypeDeclaration(sourceCode);
+		List<DiagnosticInfo> diagnostics = [];
+
+		// Act
+		(HttpVerb verb, string pattern)? result = typeDeclaration.GetVerbAndPattern("TestEndpoint", diagnostics);
+
+		// Assert
+		result.ShouldNotBeNull();
+		result.Value.verb.ShouldBe(HttpVerb.Get);
+		result.Value.pattern.ShouldBe(string.Empty);
+		diagnostics.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void GetVerbAndPattern_WithHttpVerbButStringEmptyV2Pattern_DefaultToEmptyString()
+	{
+		// Arrange
+		const string sourceCode = """
+			public class TestEndpoint
+			{
+				public static void Configure(RouteHandlerBuilder builder)
+				{
+					builder.Get(String.Empty);
+				}
+			}
+			""";
+
+		TypeDeclarationSyntax typeDeclaration = ParseTypeDeclaration(sourceCode);
+		List<DiagnosticInfo> diagnostics = [];
+
+		// Act
+		(HttpVerb verb, string pattern)? result = typeDeclaration.GetVerbAndPattern("TestEndpoint", diagnostics);
+
+		// Assert
+		result.ShouldNotBeNull();
+		result.Value.verb.ShouldBe(HttpVerb.Get);
+		result.Value.pattern.ShouldBe(string.Empty);
 		diagnostics.ShouldBeEmpty();
 	}
 
@@ -378,7 +434,7 @@ public class HttpVerbRouteHelpersTests
 					var configuredBuilder = builder
 						.WithName("Test")
 						.WithSummary("Test endpoint");
-					
+
 					configuredBuilder.Post("/test");
 				}
 			}
