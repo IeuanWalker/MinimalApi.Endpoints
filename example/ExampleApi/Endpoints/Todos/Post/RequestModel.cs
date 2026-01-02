@@ -53,22 +53,28 @@ sealed class RequestModelValidator : Validator<RequestModel>
 			.NotEmpty()
 			.MaximumLength(1000);
 
+		// Optional fields - only validate if provided
 		RuleFor(x => x.Email)
-			.EmailAddress();
+			.EmailAddress()
+			.When(x => !string.IsNullOrWhiteSpace(x.Email));
 
 		RuleFor(x => x.Pattern)
 			.Matches(@"^[A-Z][a-z]+$")
-			.WithMessage("Must start with uppercase letter followed by lowercase letters");
+			.WithMessage("Must start with uppercase letter followed by lowercase letters")
+			.When(x => !string.IsNullOrWhiteSpace(x.Pattern));
 
 		RuleFor(x => x.LengthRange)
-			.Length(5, 15);
+			.Length(5, 15)
+			.When(x => !string.IsNullOrWhiteSpace(x.LengthRange));
 
 		RuleFor(x => x.CreditCard)
-			.CreditCard();
+			.CreditCard()
+			.When(x => !string.IsNullOrWhiteSpace(x.CreditCard));
 
 		RuleFor(x => x.Url)
 			.Must(uri => Uri.TryCreate(uri, UriKind.Absolute, out _))
-			.WithMessage("Must be a valid URL");
+			.WithMessage("Must be a valid URL")
+			.When(x => !string.IsNullOrWhiteSpace(x.Url));
 
 		// Complex type validation
 		RuleFor(x => x.NestedObject)
@@ -77,14 +83,8 @@ sealed class RequestModelValidator : Validator<RequestModel>
 
 		RuleForEach(x => x.NestedObject2)
 			.NotEmpty()
-			.SetValidator(new NestedObject2ModelValidator());
-
-		// Null/empty validation
-		RuleFor(x => x.NullableString)
-			.NotNull();
-
-		RuleFor(x => x.NonEmptyString)
-			.NotEmpty();
+			.SetValidator(new NestedObject2ModelValidator())
+			.When(x => x.NestedObject2 != null && x.NestedObject2.Count > 0);
 	}
 }
 
@@ -96,6 +96,10 @@ sealed class NestedObjectModelValidator : Validator<NestedObjectModel>
 			.NotEmpty()
 			.MinimumLength(1)
 			.MaximumLength(200);
+
+		RuleFor(x => x.Age)
+			.GreaterThan(0)
+			.LessThan(80);
 	}
 }
 
