@@ -71,13 +71,16 @@ public enum TodoPriority
 
 ### 1. Enable Enum Schema Enrichment
 
-Add the transformer to your OpenAPI configuration:
+The enum schema enrichment is automatically enabled when you add FluentValidation schemas to your OpenAPI configuration:
 
 ```csharp
 builder.Services.AddOpenApi(options =>
 {
-    options.AddEnumSchemas();
+    options.AddFluentValidationSchemas(); // This includes enum enrichment
 });
+```
+
+**Note:** The `AddFluentValidationSchemas()` method automatically includes the `EnumSchemaTransformer`, so you don't need a separate call to enable enum enrichment.
 ```
 
 ### 2. (Optional) Add Descriptions to Enum Members
@@ -156,30 +159,30 @@ A custom extension that provides detailed descriptions for each enum member. Gen
 
 ### Multiple OpenAPI Documents
 
-If you have multiple OpenAPI documents (e.g., for different API versions), enable enum enrichment for each:
+If you have multiple OpenAPI documents (e.g., for different API versions), the enum enrichment is automatically included with FluentValidation schemas:
 
 ```csharp
 builder.Services.AddOpenApi("v1", options =>
 {
-    options.AddEnumSchemas();
+    options.AddFluentValidationSchemas(); // Includes enum enrichment
 });
 
 builder.Services.AddOpenApi("v2", options =>
 {
-    options.AddEnumSchemas();
+    options.AddFluentValidationSchemas(); // Includes enum enrichment
 });
 ```
 
 ### Combining with Other Transformers
 
-Enum enrichment works alongside other transformers:
+Enum enrichment is automatically included with FluentValidation and works alongside other transformers:
 
 ```csharp
 builder.Services.AddOpenApi(options =>
 {
-    options.AddFluentValidationSchemas();  // Add FluentValidation constraints
-    options.AddEnumSchemas();               // Add enum metadata
-    options.AddAuthenticationSchemes();     // Add security schemes
+    options.AddFluentValidationSchemas();    // Includes enum enrichment + FluentValidation constraints
+    options.AddAuthenticationSchemes();      // Add security schemes
+    options.AddAuthorizationPoliciesAndRequirements(); // Add authorization policies
 });
 ```
 

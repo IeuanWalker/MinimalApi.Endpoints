@@ -152,10 +152,16 @@ public static class OpenApiExtensions
 	}
 
 	/// <summary>
-	/// Enriches OpenAPI schemas with FluentValidation rules.
+	/// Enriches OpenAPI schemas with FluentValidation rules and enum metadata.
 	/// Extracts validation constraints from FluentValidation validators and applies them to the OpenAPI schema.
 	/// This will add constraints like minLength, maxLength, minimum, maximum, pattern, format, and required fields
 	/// based on the FluentValidation rules defined for your DTOs.
+	/// 
+	/// Additionally enriches enum schemas with value information and member names:
+	/// - Adds 'enum' array with valid values
+	/// - Adds 'x-enum-varnames' extension with member names
+	/// - Adds 'x-enum-descriptions' with descriptions from [Description] attributes
+	/// - Enriches string/int properties with IsEnumName validators
 	/// </summary>
 	/// <example>
 	/// Usage with OpenAPI options:
@@ -169,29 +175,8 @@ public static class OpenApiExtensions
 	[ExcludeFromCodeCoverage]
 	public static OpenApiOptions AddFluentValidationSchemas(this OpenApiOptions options)
 	{
-		options.AddDocumentTransformer<OpenApiDocumentTransformers.FluentValidationSchemaTransformer>();
-		return options;
-	}
-
-	/// <summary>
-	/// Enriches OpenAPI schemas for enums with value information and member names.
-	/// This will add the 'enum' array with valid values, 'x-enum-varnames' extension with member names,
-	/// and optionally 'x-enum-descriptions' with descriptions from [Description] attributes.
-	/// This provides better API documentation by showing developers the available enum values and their meanings.
-	/// </summary>
-	/// <example>
-	/// Usage with OpenAPI options:
-	/// <code>
-	/// builder.Services.AddOpenApi(options =>
-	/// {
-	///     options.AddEnumSchemas();
-	/// });
-	/// </code>
-	/// </example>
-	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions AddEnumSchemas(this OpenApiOptions options)
-	{
 		options.AddDocumentTransformer<EnumSchemaTransformer>();
+		options.AddDocumentTransformer<OpenApiDocumentTransformers.FluentValidationSchemaTransformer>();
 		return options;
 	}
 }
