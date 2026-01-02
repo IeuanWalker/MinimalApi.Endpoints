@@ -172,4 +172,26 @@ public static class OpenApiExtensions
 		options.AddDocumentTransformer<OpenApiDocumentTransformers.FluentValidationSchemaTransformer>();
 		return options;
 	}
+
+	/// <summary>
+	/// Enriches OpenAPI schemas for enums with value information and member names.
+	/// This will add the 'enum' array with valid values, 'x-enum-varnames' extension with member names,
+	/// and optionally 'x-enum-descriptions' with descriptions from [Description] attributes.
+	/// This provides better API documentation by showing developers the available enum values and their meanings.
+	/// </summary>
+	/// <example>
+	/// Usage with OpenAPI options:
+	/// <code>
+	/// builder.Services.AddOpenApi(options =>
+	/// {
+	///     options.AddEnumSchemas();
+	/// });
+	/// </code>
+	/// </example>
+	[ExcludeFromCodeCoverage]
+	public static OpenApiOptions AddEnumSchemas(this OpenApiOptions options)
+	{
+		options.AddDocumentTransformer<EnumSchemaTransformer>();
+		return options;
+	}
 }

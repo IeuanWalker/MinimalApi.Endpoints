@@ -29,6 +29,7 @@ static class ScalarConfiguration
 				options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
 				options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
 				options.AddFluentValidationSchemas();
+				options.AddEnumSchemas();
 				options.AddDocumentTransformer((document, context, _) =>
 				{
 					IApiVersionDescriptionProvider provider = context.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
