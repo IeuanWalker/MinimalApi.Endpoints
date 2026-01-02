@@ -308,6 +308,12 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 					propertySchema.Format = "email";
 				}
 				break;
+
+			default:
+				// Check for enum validators (IsEnumName, IsInEnum) using reflection
+				// These validators have an EnumType property we can extract
+				ApplyEnumValidatorConstraints(validator, propertySchema);
+				break;
 		}
 	}
 
@@ -445,6 +451,158 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 				{
 					return null;
 				}
+		}
+	}
+
+	static void ApplyEnumValidatorConstraints(IPropertyValidator validator, OpenApiSchema propertySchema)
+	{
+		// Check if this is a StringEnumValidator or similar enum validator
+		// StringEnumValidator has a _enumNames field we can use
+		var validatorType = validator.GetType();
+		
+		// Check for _enumNames field (present in StringEnumValidator)
+		var enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		if (enumNamesField is not null)
+		{
+			string[]? enumNames = enumNamesField.GetValue(validator) as string[];
+			if (enumNames is not null && enumNames.Length > 0)
+			{
+				// Find the enum type by matching the names
+				Type? enumType = FindEnumTypeByNames(enumNames);
+				if (enumType is not null)
+				{
+					EnrichSchemaWithEnumValues(propertySchema, enumType);
+					return;
+				}
+			}
+		}
+		
+		// Fallback: Try to extract enum type from generic arguments
+		// Some enum validators might store the enum type as a generic parameter
+		if (validatorType.IsGenericType)
+		{
+			var genericArgs = validatorType.GetGenericArguments();
+			foreach (var arg in genericArgs)
+			{
+				if (arg.IsEnum)
+				{
+					EnrichSchemaWithEnumValues(propertySchema, arg);
+					return;
+				}
+			}
+			
+			// Check base type generic arguments as well
+			var baseType = validatorType.BaseType;
+			while (baseType is not null && baseType.IsGenericType)
+			{
+				foreach (var arg in baseType.GetGenericArguments())
+				{
+					if (arg.IsEnum)
+					{
+						EnrichSchemaWithEnumValues(propertySchema, arg);
+						return;
+					}
+				}
+				baseType = baseType.BaseType;
+			}
+		}
+	}
+
+	static Type? FindEnumTypeByNames(string[] names)
+	{
+		// Search for an enum type that has exactly these member names
+		foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			try
+			{
+				foreach (var type in assembly.GetTypes())
+				{
+					if (!type.IsEnum)
+					{
+						continue;
+					}
+
+					string[] typeEnumNames = Enum.GetNames(type);
+					if (typeEnumNames.Length == names.Length && 
+					    typeEnumNames.OrderBy(n => n).SequenceEqual(names.OrderBy(n => n)))
+					{
+						return type;
+					}
+				}
+			}
+			catch
+			{
+				// Skip assemblies that can't be inspected
+				continue;
+			}
+		}
+
+		return null;
+	}
+
+	static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType)
+	{
+		// Get all enum values and names
+		Array enumValues = Enum.GetValues(enumType);
+		string[] enumNames = Enum.GetNames(enumType);
+
+		List<JsonNode> values = [];
+		List<string> varNames = [];
+		Dictionary<string, string> descriptions = [];
+
+		for (int i = 0; i < enumValues.Length; i++)
+		{
+			object enumValue = enumValues.GetValue(i)!;
+			string enumName = enumNames[i];
+			
+			// For string schemas, add the enum names as valid values
+			// For integer schemas, add the numeric values
+			if (schema.Type == JsonSchemaType.String)
+			{
+				values.Add(JsonValue.Create(enumName)!);
+			}
+			else
+			{
+				long numericValue = Convert.ToInt64(enumValue);
+				values.Add(JsonValue.Create(numericValue)!);
+			}
+			
+			varNames.Add(enumName);
+
+			// Check for Description attribute
+			var field = enumType.GetField(enumName);
+			var descriptionAttr = field?.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+				.OfType<System.ComponentModel.DescriptionAttribute>()
+				.FirstOrDefault();
+
+			if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
+			{
+				descriptions[enumName] = descriptionAttr.Description;
+			}
+		}
+
+		// Add the enum values
+		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+		schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
+		
+		// Add x-enum-varnames extension for member names
+		schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
+
+		// Add x-enum-descriptions extension if any descriptions are present
+		if (descriptions.Count > 0)
+		{
+			JsonObject descObj = [];
+			foreach (var kvp in descriptions)
+			{
+				descObj[kvp.Key] = kvp.Value;
+			}
+			schema.Extensions["x-enum-descriptions"] = new JsonNodeExtension(descObj);
+		}
+
+		// Add a description to the schema if it doesn't have one
+		if (string.IsNullOrWhiteSpace(schema.Description))
+		{
+			schema.Description = $"Enum: {string.Join(", ", varNames)}";
 		}
 	}
 
