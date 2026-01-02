@@ -146,8 +146,8 @@ public class EnumSchemaTransformerTests
 		schema.ShouldNotBeNull();
 		
 		// Should not have enum extensions
-		schema.Extensions?.ContainsKey("enum").ShouldNotBe(true);
-		schema.Extensions?.ContainsKey("x-enum-varnames").ShouldNotBe(true);
+		(schema.Extensions?.ContainsKey("enum") ?? false).ShouldBe(false);
+		(schema.Extensions?.ContainsKey("x-enum-varnames") ?? false).ShouldBe(false);
 	}
 
 	[Fact]
