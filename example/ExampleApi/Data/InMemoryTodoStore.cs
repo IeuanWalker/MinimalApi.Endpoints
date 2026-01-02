@@ -22,9 +22,9 @@ public class InMemoryTodoStore : ITodoStore
 		// Seed with some initial data
 		Todo[] initialTodos =
 		[
-			new Todo { Id = _nextId++, Title = "Learn ASP.NET Core", Description = "Study minimal APIs", IsCompleted = false, CreatedAt = DateTime.UtcNow },
-			new Todo { Id = _nextId++, Title = "Build a Todo API", Description = "Create CRUD endpoints", IsCompleted = true, CreatedAt = DateTime.UtcNow.AddDays(-1) },
-			new Todo { Id = _nextId++, Title = "Write tests", Description = "Add unit tests for the API", IsCompleted = false, CreatedAt = DateTime.UtcNow.AddHours(-2) }
+			new Todo { Id = _nextId++, Title = "Learn ASP.NET Core", Description = "Study minimal APIs", IsCompleted = false, Priority = TodoPriority.High, Status = TodoStatus.InProgress, CreatedAt = DateTime.UtcNow },
+			new Todo { Id = _nextId++, Title = "Build a Todo API", Description = "Create CRUD endpoints", IsCompleted = true, Priority = TodoPriority.Medium, Status = TodoStatus.Completed, CreatedAt = DateTime.UtcNow.AddDays(-1) },
+			new Todo { Id = _nextId++, Title = "Write tests", Description = "Add unit tests for the API", IsCompleted = false, Priority = TodoPriority.Low, Status = TodoStatus.NotStarted, CreatedAt = DateTime.UtcNow.AddHours(-2) }
 		];
 
 		foreach (Todo? todo in initialTodos)
@@ -81,6 +81,8 @@ public class InMemoryTodoStore : ITodoStore
 			Title = existingTodo.Title,
 			Description = existingTodo.Description,
 			IsCompleted = existingTodo.IsCompleted,
+			Priority = existingTodo.Priority,
+			Status = existingTodo.Status,
 			CreatedAt = existingTodo.CreatedAt,
 			UpdatedAt = DateTime.UtcNow
 		};

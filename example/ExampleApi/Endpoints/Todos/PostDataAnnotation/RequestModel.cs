@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ExampleApi.Data;
 using Microsoft.Extensions.Validation;
 
 namespace ExampleApi.Endpoints.Todos.PostDataAnnotation;
@@ -17,4 +18,8 @@ public class RequestModel
 	public string Description { get; set; } = string.Empty;
 
 	public bool IsCompleted { get; set; }
+	
+	public TodoPriority Priority { get; set; } = TodoPriority.Low;
+	
+	public TodoStatus Status { get; set; } = TodoStatus.NotStarted;
 }
