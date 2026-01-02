@@ -1,18 +1,28 @@
+using System.ComponentModel;
+
 namespace ExampleApi.Data;
 
 public enum TodoPriority
 {
+	[Description("Low priority task")]
 	Low = 0,
+	[Description("Medium priority task")]
 	Medium = 1,
+	[Description("High priority task")]
 	High = 2,
+	[Description("Critical priority task requiring immediate attention")]
 	Critical = 3
 }
 
 public enum TodoStatus
 {
+	[Description("Task not yet started")]
 	NotStarted,
+	[Description("Task is currently being worked on")]
 	InProgress,
+	[Description("Task has been completed")]
 	Completed,
+	[Description("Task has been cancelled")]
 	Cancelled
 }
 

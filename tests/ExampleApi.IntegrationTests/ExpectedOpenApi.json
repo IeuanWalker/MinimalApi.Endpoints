@@ -1,1060 +1,1128 @@
 {
-	"openapi": "3.0.4",
-	"info": {
-		"title": "Test API",
-		"version": "1"
-	},
-	"servers": [
-		{
-			"url": "http://localhost/"
-		}
-	],
-	"paths": {
-		"/weatherforecast": {
-			"get": {
-				"tags": [
-					"Weatherforecast"
-				],
-				"operationId": "get_Weatherforecast_0",
-				"parameters": [
-					{
-						"name": "api-version",
-						"in": "query",
-						"schema": {
-							"$ref": "#/components/schemas/System.String"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/todos": {
-			"get": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Get all todos",
-				"description": "Retrieves all todos from the store",
-				"operationId": "get_Todos_5",
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/todos/{id}": {
-			"get": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Get todo by ID",
-				"description": "Retrieves a specific todo by its ID",
-				"operationId": "get_Todos_6",
-				"parameters": [
-					{
-						"name": "id",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/System.Int32"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetById.ResponseModel"
-								}
-							}
-						}
-					},
-					"204": {
-						"description": "No Content"
-					}
-				}
-			},
-			"put": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Update a todo",
-				"description": "Updates an existing todo item completely",
-				"operationId": "put_Todos_10",
-				"parameters": [
-					{
-						"name": "id",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/System.Int32"
-						}
-					}
-				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Put.RequestBodyModel"
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Put.ResponseModel"
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Conflict"
-					}
-				}
-			},
-			"patch": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Partially update a todo",
-				"description": "Updates specific fields of an existing todo item",
-				"operationId": "patch_Todos_11",
-				"parameters": [
-					{
-						"name": "id",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/System.Int32"
-						}
-					}
-				],
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Patch.RequestBodyModel"
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Patch.ResponseModel"
-								}
-							}
-						}
-					}
-				}
-			},
-			"delete": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Delete a todo",
-				"description": "Deletes an existing todo item",
-				"operationId": "delete_Todos_12",
-				"parameters": [
-					{
-						"name": "id",
-						"in": "path",
-						"required": true,
-						"schema": {
-							"$ref": "#/components/schemas/System.Int32"
-						}
-					}
-				],
-				"responses": {
-					"200": {
-						"description": "OK"
-					}
-				}
-			}
-		},
-		"/api/v1/todos/export": {
-			"get": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Export todos",
-				"description": "Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.",
-				"operationId": "get_TodosExport_7",
-				"responses": {
-					"204": {
-						"description": "No Content"
-					},
-					"200": {
-						"description": "Downloadable HTML file containing all todos in a formatted table",
-						"content": {
-							"text/html": {
-								"schema": {
-									"$ref": "#/components/schemas/System.String"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v1/todos/DataAnnotation": {
-			"post": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Create a new todo",
-				"description": "Creates a new todo item",
-				"operationId": "post_TodosDataAnnotation_8",
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostDataAnnotation.RequestModel"
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostDataAnnotation.ResponseModel"
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Conflict"
-					}
-				}
-			}
-		},
-		"/api/v1/todos/FluentValidation": {
-			"post": {
-				"tags": [
-					"Todos"
-				],
-				"summary": "Create a new todo",
-				"description": "Creates a new todo item",
-				"operationId": "post_TodosFluentValidation_9",
-				"requestBody": {
-					"content": {
-						"application/json": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.RequestModel"
-							}
-						}
-					}
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.ResponseModel"
-								}
-							}
-						}
-					},
-					"409": {
-						"description": "Conflict"
-					},
-					"400": {
-						"description": "Bad Request",
-						"content": {
-							"application/problem+json": {
-								"schema": {
-									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v{version}/FileHandling/ListOfFiles": {
-			"post": {
-				"tags": [
-					"FileHandling"
-				],
-				"operationId": "post_FileHandlingListOfFiles_2",
-				"requestBody": {
-					"content": {
-						"multipart/form-data": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"request": {
-										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v{version}/FileHandling/Multipart": {
-			"post": {
-				"tags": [
-					"FileHandling"
-				],
-				"operationId": "post_FileHandlingMultipart_3",
-				"requestBody": {
-					"content": {
-						"multipart/form-data": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
-							}
-						},
-						"application/x-www-form-urlencoded": {
-							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel"
-								}
-							}
-						}
-					}
-				}
-			}
-		},
-		"/api/v{version}/FileHandling/SingleFile": {
-			"post": {
-				"tags": [
-					"FileHandling"
-				],
-				"operationId": "post_FileHandlingSingleFile_4",
-				"requestBody": {
-					"content": {
-						"multipart/form-data": {
-							"schema": {
-								"type": "object",
-								"properties": {
-									"request": {
-										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
-									}
-								}
-							}
-						}
-					},
-					"required": true
-				},
-				"responses": {
-					"200": {
-						"description": "OK",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel"
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	},
-	"components": {
-		"schemas": {
-			"ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel": {
-				"required": [
-					"fileName",
-					"propertyName"
-				],
-				"type": "object",
-				"properties": {
-					"fileName": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"propertyName": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"size": {
-						"$ref": "#/components/schemas/System.Int32"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo": {
-				"required": [
-					"fileName",
-					"propertyName"
-				],
-				"type": "object",
-				"properties": {
-					"fileName": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"propertyName": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"size": {
-						"$ref": "#/components/schemas/System.Int32"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel": {
-				"required": [
-					"someData",
-					"readOnlyList1",
-					"readOnlyList2",
-					"fileCollectionList"
-				],
-				"type": "object",
-				"properties": {
-					"someData": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"singleFile": {
-						"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
-					},
-					"readOnlyList1": {
-						"$ref": "#/components/schemas/System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]"
-					},
-					"readOnlyList2": {
-						"$ref": "#/components/schemas/System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]"
-					},
-					"fileCollectionList": {
-						"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel": {
-				"required": [
-					"someData",
-					"singleFile",
-					"totalFileCount",
-					"readOnlyList1",
-					"readOnlyList2",
-					"fileCollectionList"
-				],
-				"type": "object",
-				"properties": {
-					"someData": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"singleFile": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
-					},
-					"totalFileCount": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"readOnlyList1": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-					},
-					"readOnlyList2": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-					},
-					"fileCollectionList": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel": {
-				"required": [
-					"fileName",
-					"propertyName"
-				],
-				"type": "object",
-				"properties": {
-					"fileName": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"propertyName": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"size": {
-						"$ref": "#/components/schemas/System.Int32"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.GetAll.ResponseModel": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"createdAt": {
-						"$ref": "#/components/schemas/System.DateTime"
-					},
-					"updatedAt": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetAll.ResponseModel"
-				}
-			},
-			"ExampleApi.Endpoints.Todos.GetById.ResponseModel": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"createdAt": {
-						"$ref": "#/components/schemas/System.DateTime"
-					},
-					"updatedAt": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.Patch.RequestBodyModel": {
-				"type": "object",
-				"properties": {
-					"title": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"description": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"isCompleted": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.Patch.ResponseModel": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"createdAt": {
-						"$ref": "#/components/schemas/System.DateTime"
-					},
-					"updatedAt": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.PostDataAnnotation.RequestModel": {
-				"required": [
-					"title",
-					"description"
-				],
-				"type": "object",
-				"properties": {
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.PostDataAnnotation.ResponseModel": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"createdAt": {
-						"$ref": "#/components/schemas/System.DateTime"
-					},
-					"updatedAt": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model": {
-				"required": [
-					"note"
-				],
-				"type": "object",
-				"properties": {
-					"note": {
-						"maxLength": 200,
-						"minLength": 1,
-						"type": "string"
-					}
-				},
-				"x-validation-source": "FluentValidation"
-			},
-			"ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel": {
-				"required": [
-					"name"
-				],
-				"type": "object",
-				"properties": {
-					"name": {
-						"maxLength": 200,
-						"minLength": 1,
-						"type": "string"
-					},
-					"age": {
-						"$ref": "#/components/schemas/System.Int32"
-					}
-				},
-				"x-validation-source": "FluentValidation"
-			},
-			"ExampleApi.Endpoints.Todos.PostFluentValidation.RequestModel": {
-				"required": [
-					"title",
-					"description",
-					"nestedObject",
-					"nestedObject2",
-					"nullableString",
-					"nonEmptyString"
-				],
-				"type": "object",
-				"properties": {
-					"title": {
-						"maxLength": 200,
-						"minLength": 1,
-						"type": "string"
-					},
-					"description": {
-						"maxLength": 1000,
-						"minLength": 1,
-						"type": "string"
-					},
-					"email": {
-						"type": "string",
-						"format": "email"
-					},
-					"pattern": {
-						"pattern": "^[A-Z][a-z]+$",
-						"type": "string"
-					},
-					"lengthRange": {
-						"maxLength": 15,
-						"minLength": 5,
-						"type": "string"
-					},
-					"creditCard": {
-						"type": "string"
-					},
-					"url": {
-						"type": "string"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"isTest": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel"
-					},
-					"nestedObject2": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-					},
-					"nullableString": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"nonEmptyString": {
-						"minLength": 1,
-						"type": "string"
-					}
-				},
-				"x-validation-source": "FluentValidation"
-			},
-			"ExampleApi.Endpoints.Todos.PostFluentValidation.ResponseModel": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"createdAt": {
-						"$ref": "#/components/schemas/System.DateTime"
-					},
-					"updatedAt": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.Put.RequestBodyModel": {
-				"required": [
-					"title"
-				],
-				"type": "object",
-				"properties": {
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.Put.ResponseModel": {
-				"type": "object",
-				"properties": {
-					"id": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"title": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"description": {
-						"$ref": "#/components/schemas/System.String"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"createdAt": {
-						"$ref": "#/components/schemas/System.DateTime"
-					},
-					"updatedAt": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel": {
-				"type": "object",
-				"properties": {
-					"date": {
-						"$ref": "#/components/schemas/System.DateOnly"
-					},
-					"temperatureC": {
-						"$ref": "#/components/schemas/System.Int32"
-					},
-					"summary": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					}
-				}
-			},
-			"ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel"
-				}
-			},
-			"IFormFile": {
-				"type": "string",
-				"format": "binary"
-			},
-			"Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
-				"type": "object",
-				"properties": {
-					"type": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"title": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"status": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-							}
-						]
-					},
-					"detail": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"instance": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"errors": {
-						"$ref": "#/components/schemas/System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
-					}
-				}
-			},
-			"Microsoft.AspNetCore.Http.IFormFile": {
-				"type": "string",
-				"format": "binary"
-			},
-			"Microsoft.AspNetCore.Http.IFormFileCollection": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/IFormFile"
-				}
-			},
-			"System.Boolean": {
-				"type": "boolean"
-			},
-			"System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
-				"type": "object",
-				"additionalProperties": {
-					"$ref": "#/components/schemas/System.String[]"
-				}
-			},
-			"System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel"
-				}
-			},
-			"System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
-				}
-			},
-			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
-				}
-			},
-			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model"
-				}
-			},
-			"System.DateOnly": {
-				"type": "string",
-				"format": "date"
-			},
-			"System.DateTime": {
-				"type": "string",
-				"format": "date-time"
-			},
-			"System.Int32": {
-				"pattern": "^-?(?:0|[1-9]\\d*)$",
-				"format": "int32"
-			},
-			"System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
-				"type": "boolean"
-			},
-			"System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
-				"type": "string",
-				"format": "date-time"
-			},
-			"System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
-				"pattern": "^-?(?:0|[1-9]\\d*)$",
-				"format": "int32"
-			},
-			"System.String": {
-				"type": "string"
-			},
-			"System.String[]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/System.String"
-				}
-			}
-		}
-	},
-	"tags": [
-		{
-			"name": "Weatherforecast"
-		},
-		{
-			"name": "Todos"
-		},
-		{
-			"name": "FileHandling"
-		}
-	]
+  "openapi": "3.0.4",
+  "info": {
+    "title": "Test API",
+    "version": "1"
+  },
+  "servers": [
+    {
+      "url": "http://127.0.0.1:6000/"
+    }
+  ],
+  "paths": {
+    "/weatherforecast": {
+      "get": {
+        "tags": [
+          "Weatherforecast"
+        ],
+        "operationId": "get_Weatherforecast_0",
+        "parameters": [
+          {
+            "name": "api-version",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/System.String"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/todos": {
+      "get": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Get all todos",
+        "description": "Retrieves all todos from the store",
+        "operationId": "get_Todos_5",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/todos/{id}": {
+      "get": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Get todo by ID",
+        "description": "Retrieves a specific todo by its ID",
+        "operationId": "get_Todos_6",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetById.ResponseModel"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Update a todo",
+        "description": "Updates an existing todo item completely",
+        "operationId": "put_Todos_10",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Put.RequestBodyModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Put.ResponseModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Partially update a todo",
+        "description": "Updates specific fields of an existing todo item",
+        "operationId": "patch_Todos_11",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Patch.RequestBodyModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Patch.ResponseModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Delete a todo",
+        "description": "Deletes an existing todo item",
+        "operationId": "delete_Todos_12",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/System.Int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/todos/export": {
+      "get": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Export todos",
+        "description": "Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.",
+        "operationId": "get_TodosExport_7",
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "200": {
+            "description": "Downloadable HTML file containing all todos in a formatted table",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/System.String"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/todos/DataAnnotation": {
+      "post": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Create a new todo",
+        "description": "Creates a new todo item",
+        "operationId": "post_TodosDataAnnotation_8",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostDataAnnotation.RequestModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostDataAnnotation.ResponseModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict"
+          }
+        }
+      }
+    },
+    "/api/v1/todos/FluentValidation": {
+      "post": {
+        "tags": [
+          "Todos"
+        ],
+        "summary": "Create a new todo",
+        "description": "Creates a new todo item",
+        "operationId": "post_TodosFluentValidation_9",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.RequestModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.ResponseModel"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v{version}/FileHandling/ListOfFiles": {
+      "post": {
+        "tags": [
+          "FileHandling"
+        ],
+        "operationId": "post_FileHandlingListOfFiles_2",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v{version}/FileHandling/Multipart": {
+      "post": {
+        "tags": [
+          "FileHandling"
+        ],
+        "operationId": "post_FileHandlingMultipart_3",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v{version}/FileHandling/SingleFile": {
+      "post": {
+        "tags": [
+          "FileHandling"
+        ],
+        "operationId": "post_FileHandlingSingleFile_4",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "request": {
+                    "$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ExampleApi.Data.TodoPriority": {
+        "type": "integer",
+        "description": "Enum: Low, Medium, High, Critical",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "x-enum-varnames": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "x-enum-descriptions": {
+          "Low": "Low priority task",
+          "Medium": "Medium priority task",
+          "High": "High priority task",
+          "Critical": "Critical priority task requiring immediate attention"
+        }
+      },
+      "ExampleApi.Data.TodoStatus": {
+        "type": "integer",
+        "description": "Enum: NotStarted, InProgress, Completed, Cancelled",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "x-enum-varnames": [
+          "NotStarted",
+          "InProgress",
+          "Completed",
+          "Cancelled"
+        ],
+        "x-enum-descriptions": {
+          "NotStarted": "Task not yet started",
+          "InProgress": "Task is currently being worked on",
+          "Completed": "Task has been completed",
+          "Cancelled": "Task has been cancelled"
+        }
+      },
+      "ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel": {
+        "required": [
+          "fileName",
+          "propertyName"
+        ],
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "propertyName": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "size": {
+            "$ref": "#/components/schemas/System.Int32"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo": {
+        "required": [
+          "fileName",
+          "propertyName"
+        ],
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "propertyName": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "size": {
+            "$ref": "#/components/schemas/System.Int32"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel": {
+        "required": [
+          "someData",
+          "readOnlyList1",
+          "readOnlyList2",
+          "fileCollectionList"
+        ],
+        "type": "object",
+        "properties": {
+          "someData": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "singleFile": {
+            "$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+          },
+          "readOnlyList1": {
+            "$ref": "#/components/schemas/System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]"
+          },
+          "readOnlyList2": {
+            "$ref": "#/components/schemas/System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]"
+          },
+          "fileCollectionList": {
+            "$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.FileHandling.PostMultipart.ResponseModel": {
+        "required": [
+          "someData",
+          "singleFile",
+          "totalFileCount",
+          "readOnlyList1",
+          "readOnlyList2",
+          "fileCollectionList"
+        ],
+        "type": "object",
+        "properties": {
+          "someData": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "singleFile": {
+            "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
+          },
+          "totalFileCount": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "readOnlyList1": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          },
+          "readOnlyList2": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          },
+          "fileCollectionList": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.FileHandling.PostSingleFile.ResponseModel": {
+        "required": [
+          "fileName",
+          "propertyName"
+        ],
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "propertyName": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "size": {
+            "$ref": "#/components/schemas/System.Int32"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.GetAll.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoStatus"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/System.DateTime"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.GetAll.ResponseModel"
+        }
+      },
+      "ExampleApi.Endpoints.Todos.GetById.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoStatus"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/System.DateTime"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.Patch.RequestBodyModel": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          },
+          "description": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          },
+          "isCompleted": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.Patch.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/System.DateTime"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.PostDataAnnotation.RequestModel": {
+        "required": [
+          "title",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoStatus"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.PostDataAnnotation.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "priority": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoStatus"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/System.DateTime"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model": {
+        "required": [
+          "note"
+        ],
+        "type": "object",
+        "properties": {
+          "note": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "x-validation-source": "FluentValidation"
+      },
+      "ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel": {
+        "required": [
+          "name"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "age": {
+            "$ref": "#/components/schemas/System.Int32"
+          }
+        },
+        "x-validation-source": "FluentValidation"
+      },
+      "ExampleApi.Endpoints.Todos.PostFluentValidation.RequestModel": {
+        "required": [
+          "title",
+          "description",
+          "nestedObject",
+          "nestedObject2",
+          "nullableString",
+          "nonEmptyString"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "description": {
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "pattern": {
+            "pattern": "^[A-Z][a-z]+$",
+            "type": "string"
+          },
+          "lengthRange": {
+            "maxLength": 15,
+            "minLength": 5,
+            "type": "string"
+          },
+          "creditCard": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "isTest": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "nestedObject": {
+            "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObjectModel"
+          },
+          "nestedObject2": {
+            "$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+          },
+          "nullableString": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          },
+          "nonEmptyString": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "x-validation-source": "FluentValidation"
+      },
+      "ExampleApi.Endpoints.Todos.PostFluentValidation.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/System.DateTime"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.Put.RequestBodyModel": {
+        "required": [
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.Todos.Put.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "title": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "description": {
+            "$ref": "#/components/schemas/System.String"
+          },
+          "isCompleted": {
+            "$ref": "#/components/schemas/System.Boolean"
+          },
+          "createdAt": {
+            "$ref": "#/components/schemas/System.DateTime"
+          },
+          "updatedAt": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "$ref": "#/components/schemas/System.DateOnly"
+          },
+          "temperatureC": {
+            "$ref": "#/components/schemas/System.Int32"
+          },
+          "summary": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          }
+        }
+      },
+      "ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel"
+        }
+      },
+      "IFormFile": {
+        "type": "string",
+        "format": "binary"
+      },
+      "Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          },
+          "title": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          },
+          "status": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+              }
+            ]
+          },
+          "detail": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          },
+          "instance": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.String"
+              }
+            ]
+          },
+          "errors": {
+            "$ref": "#/components/schemas/System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Http.IFormFile": {
+        "type": "string",
+        "format": "binary"
+      },
+      "Microsoft.AspNetCore.Http.IFormFileCollection": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/IFormFile"
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/System.String[]"
+        }
+      },
+      "System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel"
+        }
+      },
+      "System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Http.IFormFile, Microsoft.AspNetCore.Http.Features, Version=10.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+        }
+      },
+      "System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
+        }
+      },
+      "System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.PostFluentValidation.NestedObject2Model"
+        }
+      },
+      "System.DateOnly": {
+        "type": "string",
+        "format": "date"
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "boolean"
+      },
+      "System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.String": {
+        "type": "string"
+      },
+      "System.String[]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/System.String"
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Weatherforecast"
+    },
+    {
+      "name": "Todos"
+    },
+    {
+      "name": "FileHandling"
+    }
+  ]
 }
