@@ -86,8 +86,9 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		byte[] largeContent = new byte[1024 * 50]; // 50KB
 		Random.Shared.NextBytes(largeContent);
 
+		using StringContent someDataContent = new("Large File Test");
 		using MultipartFormDataContent content = new();
-		content.Add(new StringContent("Large File Test"), "SomeData");
+		content.Add(someDataContent, "SomeData");
 
 		using MemoryStream singleStream = new(largeContent);
 		using StreamContent singleContent = new(singleStream);
@@ -198,6 +199,7 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 	/// <summary>
 	/// Helper method to create multipart form content with files
 	/// </summary>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "MultipartFormDataContent takes ownership of added HttpContent and will dispose them when the returned content is disposed by the caller.")]
 	static MultipartFormDataContent CreateMultipartContent(
 		string someData,
 		string singleFileName,
@@ -206,10 +208,12 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		(string fileName, string content)[] readOnlyList2Files,
 		(string fileName, string content)[] fileCollectionFiles)
 	{
-		MultipartFormDataContent content = new();
-
-		// Add SomeData field
-		content.Add(new StringContent(someData), "SomeData");
+		StringContent someDataContent = new(someData);
+		MultipartFormDataContent content = new()
+		{
+			// Add SomeData field
+			{ someDataContent, "SomeData" }
+		};
 
 		// Add SingleFile
 		MemoryStream singleStream = new(System.Text.Encoding.UTF8.GetBytes(singleFileContent));

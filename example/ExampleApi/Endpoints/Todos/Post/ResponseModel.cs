@@ -1,6 +1,6 @@
 using ExampleApi.Data;
 
-namespace ExampleApi.Endpoints.Todos.PostDataAnnotation;
+namespace ExampleApi.Endpoints.Todos.Post;
 
 public class ResponseModel
 {

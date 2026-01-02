@@ -10,31 +10,31 @@ public static class MapEndpointExtensions
 {
 	[ExcludeFromCodeCoverage]
 	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
 	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Post(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	public static RouteHandlerBuilder Post(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
 	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Put(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	public static RouteHandlerBuilder Put(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
 	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Patch(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	public static RouteHandlerBuilder Patch(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
 	{
 		return builder;
 	}
 	[ExcludeFromCodeCoverage]
 	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Delete(this RouteHandlerBuilder builder, [StringSyntax("Route")] string pattern)
+	public static RouteHandlerBuilder Delete(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
 	{
 		return builder;
 	}

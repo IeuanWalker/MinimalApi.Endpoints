@@ -1,4 +1,5 @@
-﻿using IeuanWalker.MinimalApi.Endpoints;
+﻿using ExampleApi.Infrastructure;
+using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.FileHandling.PostListOfFiles;
 
@@ -8,6 +9,7 @@ public class PostFileHandlingListOfFilesEndpoint : IEndpoint<IFormFileCollection
 	{
 		builder
 			.Post("api/v{version:apiVersion}/FileHandling/ListOfFiles")
+			.Version(1)
 			.RequestFromForm()
 			.DisableAntiforgery();
 	}

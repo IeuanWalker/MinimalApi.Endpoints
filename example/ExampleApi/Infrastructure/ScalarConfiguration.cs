@@ -13,7 +13,11 @@ static class ScalarConfiguration
 	internal static IHostApplicationBuilder AddScalar(this IHostApplicationBuilder builder)
 	{
 		builder.Services.AddEndpointsApiExplorer();
-		builder.Services.AddOpenApi(config => config.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.'));
+		builder.Services.AddOpenApi(config =>
+		{
+			config.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
+			config.AddWithValidatation();
+		});
 
 		List<ApiVersion> versions =
 		[
@@ -28,7 +32,7 @@ static class ScalarConfiguration
 			{
 				options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
 				options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
-				options.AddFluentValidationSchemas();
+				options.AddWithValidatation();
 				options.AddDocumentTransformer((document, context, _) =>
 				{
 					IApiVersionDescriptionProvider provider = context.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();

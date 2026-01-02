@@ -57,9 +57,9 @@ public class EndpointGenerator : IIncrementalGenerator
 		// Extract type information during syntax analysis
 		IncrementalValuesProvider<TypeInfo?> typeInfos = context.SyntaxProvider
 			.CreateSyntaxProvider(
-				predicate: static (s, _) => s is TypeDeclarationSyntax tds && tds.BaseList != null,
+				predicate: static (s, _) => s is TypeDeclarationSyntax tds && tds.BaseList is not null,
 				transform: static (ctx, ct) => ExtractTypeInfo(ctx, ct))
-			.Where(static typeInfo => typeInfo != null);
+			.Where(static typeInfo => typeInfo is not null);
 
 		// Collect all type information
 		IncrementalValueProvider<ImmutableArray<TypeInfo?>> collectedTypeInfos = typeInfos.Collect();
@@ -105,7 +105,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		{
 			ITypeSymbol? validatedType = typeSymbol.GetValidatedTypeFromValidator(validatorSymbol);
 			string? validatedTypeName = validatedType?.ToDisplayString();
-			if (validatedTypeName != null)
+			if (validatedTypeName is not null)
 			{
 				return new ValidatorInfo(typeName, validatedTypeName, location, [.. diagnostics]);
 			}
@@ -118,7 +118,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		{
 			ITypeSymbol? validatedType = typeSymbol.GetValidatedTypeFromValidator(abstractValidatorSymbol);
 			string? validatedTypeName = validatedType?.ToDisplayString();
-			if (validatedTypeName != null)
+			if (validatedTypeName is not null)
 			{
 				return new AbstractValidatorInfo(typeName, validatedTypeName, location, [.. diagnostics]);
 			}
@@ -265,7 +265,7 @@ public class EndpointGenerator : IIncrementalGenerator
 		// Check if abstract validators match a request type
 		foreach (AbstractValidatorInfo abstractValidator in allAbstractValidators)
 		{
-			bool matchesRequestType = allEndpoints.Any(e => e.RequestType != null && e.RequestType.Equals(abstractValidator.ValidatedTypeName));
+			bool matchesRequestType = allEndpoints.Any(e => e.RequestType is not null && e.RequestType.Equals(abstractValidator.ValidatedTypeName));
 			if (matchesRequestType)
 			{
 				context.ReportDiagnostic(Diagnostic.Create(
@@ -312,8 +312,11 @@ public class EndpointGenerator : IIncrementalGenerator
 
 		builder.AppendEmptyLine();
 		builder.AppendLine($"namespace {assemblyName};");
-		builder.AppendEmptyLine();
 
+		builder.AppendEmptyLine();
+		builder.AppendLine("#pragma warning disable ASP0018 // Disable specific ASP.NET analyzer that warns about unused route parameters in generated handlers");
+
+		builder.AppendEmptyLine();
 		builder.AppendLine("public static class EndpointExtensions");
 		using (builder.AppendBlock())
 		{
@@ -421,6 +424,9 @@ public class EndpointGenerator : IIncrementalGenerator
 				builder.AppendLine("return app;");
 			}
 		}
+
+		builder.AppendEmptyLine();
+		builder.AppendLine("#pragma warning restore ASP0018");
 
 		return builder.ToString();
 	}
