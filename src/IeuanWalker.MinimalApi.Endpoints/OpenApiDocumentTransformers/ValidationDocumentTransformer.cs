@@ -103,8 +103,48 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRuleToPropertyDescription.HasValue)?.AppendRuleToPropertyDescription;
 		bool effectiveListRulesInDescription = perPropertySetting ?? typeAppendRulesToPropertyDescription;
 
-		// Cast to OpenApiSchema to access properties
-		OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
+// Cast to OpenApiSchema to access properties
+OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
+
+// If original schema is a reference, we need to get the type from the reference ID
+JsonSchemaType? referenceType = null;
+string? referenceFormat = null;
+if (originalSchema is OpenApiSchemaReference schemaRef)
+{
+string? refId = schemaRef.Reference?.Id;
+if (refId is not null)
+{
+if (refId.Contains("System.String"))
+{
+referenceType = JsonSchemaType.String;
+}
+else if (refId.Contains("System.Int32") || refId.Contains("System.Int64"))
+{
+referenceType = JsonSchemaType.Integer;
+referenceFormat = refId.Contains("Int64") ? "int64" : "int32";
+}
+else if (refId.Contains("System.Decimal") || refId.Contains("System.Double") || refId.Contains("System.Single"))
+{
+referenceType = JsonSchemaType.Number;
+referenceFormat = refId.Contains("Double") ? "double" : refId.Contains("Single") ? "float" : null;
+}
+else if (refId.Contains("System.Boolean"))
+{
+referenceType = JsonSchemaType.Boolean;
+}
+else if (refId.Contains("System.DateTime") || refId.Contains("System.DateTimeOffset"))
+{
+referenceType = JsonSchemaType.String;
+referenceFormat = "date-time";
+}
+else if (refId.Contains("System.Guid"))
+{
+referenceType = JsonSchemaType.String;
+referenceFormat = "uuid";
+}
+}
+}
+
 
 		// Check if this is a complex object (has AllOf for schema references or has Properties for inline object definitions)
 		// Complex objects should preserve their structure and only add validation descriptions
@@ -155,6 +195,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				Format = originalOpenApiSchema.Format,
 				Items = originalOpenApiSchema.Items,
 				AdditionalProperties = originalOpenApiSchema.AdditionalProperties,
+			Extensions = originalOpenApiSchema.Extensions, // Preserve extensions (e.g., enum info)
 				Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : originalOpenApiSchema.Description
 			};
 
@@ -162,9 +203,26 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// For simple properties, create a new inline schema with all validation rules
-		// Get the type from the first rule (all rules for same property should have same type)
-		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
-		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+// Get the type from the first rule (all rules for same property should have same type)
+JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+
+// If no type was determined from rules, try to get it from the original schema or reference
+if (!schemaType.HasValue)
+{
+if (originalOpenApiSchema is not null)
+{
+schemaType = originalOpenApiSchema.Type;
+format ??= originalOpenApiSchema.Format;
+}
+else if (referenceType.HasValue)
+{
+schemaType = referenceType;
+format ??= referenceFormat;
+}
+}
+
+
 
 		// Create inline schema - set properties after creation to avoid initialization issues
 		OpenApiSchema newInlineSchema = new();
@@ -233,6 +291,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (descriptionParts2.Count > 0)
 		{
 			newInlineSchema.Description = string.Join("\n\n", descriptionParts2);
+		}
+
+
+		// Preserve any Extensions from the original schema (e.g., enum info from EnumSchemaTransformer)
+		if (originalOpenApiSchema?.Extensions is not null && originalOpenApiSchema.Extensions.Count > 0)
+		{
+			newInlineSchema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+			foreach (var extension in originalOpenApiSchema.Extensions)
+			{
+				newInlineSchema.Extensions[extension.Key] = extension.Value;
+			}
 		}
 
 		return newInlineSchema;

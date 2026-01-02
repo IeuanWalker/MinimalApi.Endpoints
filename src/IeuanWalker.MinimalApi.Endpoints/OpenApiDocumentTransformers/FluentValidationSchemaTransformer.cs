@@ -550,6 +550,16 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		List<string> varNames = [];
 		Dictionary<string, string> descriptions = [];
 
+		// Determine if this is a string schema or integer schema
+		// If Type is not set, default to string for enum name validators
+		bool isStringSchema = !schema.Type.HasValue || schema.Type.Value == JsonSchemaType.String;
+		
+		// Ensure the schema has a type set
+		if (!schema.Type.HasValue)
+		{
+			schema.Type = JsonSchemaType.String;
+		}
+
 		for (int i = 0; i < enumValues.Length; i++)
 		{
 			object enumValue = enumValues.GetValue(i)!;
@@ -557,7 +567,7 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 			
 			// For string schemas, add the enum names as valid values
 			// For integer schemas, add the numeric values
-			if (schema.Type == JsonSchemaType.String)
+			if (isStringSchema)
 			{
 				values.Add(JsonValue.Create(enumName)!);
 			}
