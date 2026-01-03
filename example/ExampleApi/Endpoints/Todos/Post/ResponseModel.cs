@@ -8,8 +8,6 @@ public class ResponseModel
 	public string Title { get; set; } = string.Empty;
 	public string Description { get; set; } = string.Empty;
 	public bool IsCompleted { get; set; }
-	public TodoPriority Priority { get; set; }
-	public TodoStatus Status { get; set; }
 	public DateTime CreatedAt { get; set; }
 	public DateTime? UpdatedAt { get; set; }
 
@@ -21,8 +19,6 @@ public class ResponseModel
 			Title = todo.Title,
 			Description = todo.Description,
 			IsCompleted = todo.IsCompleted,
-			Priority = todo.Priority,
-			Status = todo.Status,
 			CreatedAt = todo.CreatedAt,
 			UpdatedAt = todo.UpdatedAt
 		};

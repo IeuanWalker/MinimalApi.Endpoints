@@ -718,50 +718,6 @@
 	},
 	"components": {
 		"schemas": {
-			"ExampleApi.Data.TodoPriority": {
-				"type": "integer",
-				"description": "Enum: Low, Medium, High, Critical",
-				"enum": [
-					0,
-					1,
-					2,
-					3
-				],
-				"x-enum-varnames": [
-					"Low",
-					"Medium",
-					"High",
-					"Critical"
-				],
-				"x-enum-descriptions": {
-					"Low": "Low priority task",
-					"Medium": "Medium priority task",
-					"High": "High priority task",
-					"Critical": "Critical priority task requiring immediate attention"
-				}
-			},
-			"ExampleApi.Data.TodoStatus": {
-				"type": "integer",
-				"description": "Enum: NotStarted, InProgress, Completed, Cancelled",
-				"enum": [
-					0,
-					1,
-					2,
-					3
-				],
-				"x-enum-varnames": [
-					"NotStarted",
-					"InProgress",
-					"Completed",
-					"Cancelled"
-				],
-				"x-enum-descriptions": {
-					"NotStarted": "Task not yet started",
-					"InProgress": "Task is currently being worked on",
-					"Completed": "Task has been completed",
-					"Cancelled": "Task has been cancelled"
-				}
-			},
 			"ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum": {
 				"type": "integer",
 				"description": "Enum: Low, Medium, High, Critical",
@@ -1027,12 +983,6 @@
 					"isCompleted": {
 						"$ref": "#/components/schemas/System.Boolean"
 					},
-					"priority": {
-						"$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
-					},
-					"status": {
-						"$ref": "#/components/schemas/ExampleApi.Data.TodoStatus"
-					},
 					"createdAt": {
 						"$ref": "#/components/schemas/System.DateTime"
 					},
@@ -1068,12 +1018,6 @@
 					},
 					"isCompleted": {
 						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"priority": {
-						"$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
-					},
-					"status": {
-						"$ref": "#/components/schemas/ExampleApi.Data.TodoStatus"
 					},
 					"createdAt": {
 						"$ref": "#/components/schemas/System.DateTime"
@@ -1275,12 +1219,6 @@
 					},
 					"isCompleted": {
 						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"priority": {
-						"$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
-					},
-					"status": {
-						"$ref": "#/components/schemas/ExampleApi.Data.TodoStatus"
 					},
 					"createdAt": {
 						"$ref": "#/components/schemas/System.DateTime"
