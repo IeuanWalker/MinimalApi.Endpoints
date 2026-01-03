@@ -41,11 +41,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 4: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
 		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
-			Type requestType = kvp.Key;
 			List<Validation.ValidationRule> rules = kvp.Value.rules;
 			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
 
-			ApplyValidationToParameters(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
+			ApplyValidationToParameters(document, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
 		return Task.CompletedTask;
@@ -119,7 +118,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	static void ApplyValidationToParameters(OpenApiDocument document, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
 		if (document.Paths is null || rules.Count == 0)
 		{
@@ -134,7 +133,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations)
+			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
 			{
 				if (operation.Value.Parameters is null || operation.Value.Parameters.Count == 0)
 				{
@@ -147,7 +146,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					.ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
 				// Process each parameter
-				foreach (OpenApiParameter parameter in operation.Value.Parameters)
+				foreach (OpenApiParameter parameter in operation.Value.Parameters.Cast<OpenApiParameter>())
 				{
 					if (string.IsNullOrEmpty(parameter.Name))
 					{
@@ -457,12 +456,14 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// Wrap the inline schema in a oneOf with a nullable option
 			// The nullable option is represented as an empty schema with the "nullable" extension set to true
 			// This matches ASP.NET Core's built-in behavior for nullable types
-			OpenApiSchema nullableSchema = new();
-			nullableSchema.Extensions = new Dictionary<string, IOpenApiExtension>
+			OpenApiSchema nullableSchema = new()
 			{
-				["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
+				Extensions = new Dictionary<string, IOpenApiExtension>
+				{
+					["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
+				}
 			};
-			
+
 			return new OpenApiSchema
 			{
 				OneOf =
