@@ -579,21 +579,27 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			return false;
 		}
 
+		// System.String, System.Int32, etc. are NOT enum schemas - they should be inlined
+		// Only preserve $ref for actual enum type schemas
+		if (refId.StartsWith("System."))
+		{
+			return false;
+		}
+
 		// Look up the referenced schema in the document
 		if (document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? referencedSchema) != true)
 		{
 			return false;
 		}
 
-		// Check if the referenced schema is an enum schema
-		// Enum schemas have the "enum" or "x-enum-varnames" extensions set by EnumSchemaTransformer
+		// Check if the referenced schema is an actual enum type schema
+		// Enum type schemas have the Enum property with values (set by EnumSchemaTransformer)
 		if (referencedSchema is OpenApiSchema enumSchema)
 		{
-			// Check if Extensions dictionary exists and contains enum markers
-			if (enumSchema.Extensions is not null)
+			// Check if this is an enum schema by looking for the Enum property with values
+			if (enumSchema.Enum is not null && enumSchema.Enum.Count > 0)
 			{
-				return enumSchema.Extensions.ContainsKey("enum") ||
-				       enumSchema.Extensions.ContainsKey("x-enum-varnames");
+				return true;
 			}
 		}
 
