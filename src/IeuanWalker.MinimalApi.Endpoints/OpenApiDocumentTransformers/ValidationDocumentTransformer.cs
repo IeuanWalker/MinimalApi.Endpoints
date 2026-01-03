@@ -752,14 +752,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (propertySchema is OpenApiSchema schema && schema.OneOf is not null && schema.OneOf.Count > 0)
 		{
 			// Check if any of the oneOf schemas is an enum reference
-			foreach (IOpenApiSchema oneOfSchema in schema.OneOf)
-			{
-				if (IsEnumSchemaReference(oneOfSchema, document))
-				{
-					return true;
-				}
-			}
-			return false;
+			return schema.OneOf.Any(oneOfSchema => IsEnumSchemaReference(oneOfSchema, document));
 		}
 
 		// Check if this is a schema reference
