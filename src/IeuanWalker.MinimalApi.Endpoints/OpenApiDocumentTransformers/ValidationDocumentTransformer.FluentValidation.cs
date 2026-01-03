@@ -579,6 +579,35 @@ static Type? ExtractEnumTypeFromValidator(IPropertyValidator propertyValidator)
 {
 Type validatorType = propertyValidator.GetType();
 
+// For built-in FluentValidation EnumValidator (used with .IsInEnum() on enum properties)
+// This validator is used when calling .IsInEnum() on TEnum or TEnum? properties
+if (validatorType.Name.Contains("EnumValidator"))
+{
+	// Try to get the enum type from the generic type argument
+	// EnumValidator<T> where T is the enum type
+	if (validatorType.IsGenericType)
+	{
+		Type[] genericArgs = validatorType.GetGenericArguments();
+		if (genericArgs.Length > 0 && genericArgs[0].IsEnum)
+		{
+			return genericArgs[0];
+		}
+	}
+	
+	// Fallback: Try to infer from property type by checking the validator's context
+	// The EnumValidator has access to the property type through its context
+	// Try to get it from any "_enumType" or similar field
+	var enumTypeField = validatorType.GetField("_enumType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+	if (enumTypeField is not null)
+	{
+		Type? enumType = enumTypeField.GetValue(propertyValidator) as Type;
+		if (enumType is not null && enumType.IsEnum)
+		{
+			return enumType;
+		}
+	}
+}
+
 // For IsEnumName validators (StringEnumValidator)
 // Try to get enum names from the _enumNames field
 var enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
