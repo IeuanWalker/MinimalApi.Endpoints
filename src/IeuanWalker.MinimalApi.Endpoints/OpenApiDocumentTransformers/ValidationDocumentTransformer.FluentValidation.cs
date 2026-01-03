@@ -297,19 +297,34 @@ partial class ValidationDocumentTransformer
 			// For ComparisonValidator (Equal, NotEqual, GreaterThan, LessThan, etc.)
 			if (propertyValidator is IComparisonValidator comparisonValidator)
 			{
-				PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.ValueToCompare));
-				object? value = valueProp?.GetValue(comparisonValidator);
-				if (value is not null)
-				{
-					message = message.Replace("{ComparisonValue}", value.ToString());
-				}
-
-				// Also check for MemberToCompare for property comparisons
+				// Check for MemberToCompare first (property comparisons like x => x.MaxValue)
 				PropertyInfo? memberProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.MemberToCompare));
 				object? memberValue = memberProp?.GetValue(comparisonValidator);
+				
 				if (memberValue is not null)
 				{
-					message = message.Replace("{ComparisonProperty}", memberValue.ToString() ?? string.Empty);
+					// MemberToCompare is a MemberInfo (typically PropertyInfo or FieldInfo)
+					// Extract just the member name from the MemberInfo object
+					string memberName = memberValue switch
+					{
+						PropertyInfo propInfo => propInfo.Name,
+						FieldInfo fieldInfo => fieldInfo.Name,
+						MemberInfo memberInfo => memberInfo.Name,
+						_ => memberValue.ToString() ?? string.Empty
+					};
+					
+					// For property comparisons, replace {ComparisonValue} with the property name
+					message = message.Replace("{ComparisonValue}", memberName);
+				}
+				else
+				{
+					// For constant value comparisons, use ValueToCompare
+					PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.ValueToCompare));
+					object? value = valueProp?.GetValue(comparisonValidator);
+					if (value is not null)
+					{
+						message = message.Replace("{ComparisonValue}", value.ToString());
+					}
 				}
 			}
 
@@ -502,14 +517,29 @@ partial class ValidationDocumentTransformer
 
 	static Validation.ValidationRule? CreateComparisonRule(string propertyName, IComparisonValidator comparisonValidator)
 	{
-		// Get the ValueToCompare and Comparison properties
+		// Get the ValueToCompare, MemberToCompare, and Comparison properties
 		PropertyInfo? valueProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.ValueToCompare));
+		PropertyInfo? memberProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.MemberToCompare));
 		PropertyInfo? comparisonProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.Comparison));
 
 		object? value = valueProp?.GetValue(comparisonValidator);
+		object? memberToCompare = memberProp?.GetValue(comparisonValidator);
 		object? comparison = comparisonProp?.GetValue(comparisonValidator);
 
-		if (value is null || comparison is null)
+		if (comparison is null)
+		{
+			return null;
+		}
+
+		// If MemberToCompare is set (property comparison), we cannot create a RangeRule
+		// because we don't have a compile-time constant value. Return null to let the
+		// error message be handled as a custom rule with proper property name substitution.
+		if (memberToCompare is not null)
+		{
+			return null;
+		}
+
+		if (value is null)
 		{
 			return null;
 		}
