@@ -593,10 +593,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Check if the referenced schema is an actual enum type schema
-		// Enum type schemas have the Enum property with values (set by EnumSchemaTransformer)
+		// Enum type schemas have the Extensions["enum"] property with values (set by EnumSchemaTransformer)
 		if (referencedSchema is OpenApiSchema enumSchema)
 		{
-			// Check if this is an enum schema by looking for the Enum property with values
+			// Check if this is an enum schema by looking for the Extensions["enum"] property
+			if (enumSchema.Extensions?.TryGetValue("enum", out IOpenApiExtension? enumExtension) == true)
+			{
+				return true;
+			}
+			
+			// Also check the standard Enum property as a fallback
 			if (enumSchema.Enum is not null && enumSchema.Enum.Count > 0)
 			{
 				return true;
