@@ -841,6 +841,65 @@ partial class ValidationDocumentTransformer
 		return null;
 	}
 
+	static readonly object _enumTypeCacheLock = new();
+	static Dictionary<string, Type>? _enumTypesByName;
+	static bool _enumTypeCacheInitialized;
+
+	static Type? FindEnumTypeBySimpleName(string enumTypeName)
+	{
+		if (string.IsNullOrWhiteSpace(enumTypeName))
+		{
+			return null;
+		}
+
+		if (!_enumTypeCacheInitialized)
+		{
+			lock (_enumTypeCacheLock)
+			{
+				if (!_enumTypeCacheInitialized)
+				{
+					_enumTypesByName = new(StringComparer.Ordinal);
+
+					foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+					{
+						try
+						{
+							foreach (Type type in assembly.GetTypes())
+							{
+								if (!type.IsEnum)
+								{
+									continue;
+								}
+
+								// Use simple name as key; keep first occurrence to avoid exceptions on duplicates.
+								if (!_enumTypesByName.ContainsKey(type.Name))
+								{
+									_enumTypesByName[type.Name] = type;
+								}
+							}
+						}
+#pragma warning disable CA1031 // Do not catch general exception types
+						catch
+						{
+							// Skip assemblies that can't be inspected
+							continue;
+						}
+#pragma warning restore CA1031 // Do not catch general exception types
+					}
+
+					_enumTypeCacheInitialized = true;
+				}
+			}
+		}
+
+		if (_enumTypesByName is null)
+		{
+			return null;
+		}
+
+		return _enumTypesByName.TryGetValue(enumTypeName, out Type? enumType) ? enumType : null;
+	}
+
 	static Type? ExtractEnumTypeFromMessage(string message)
 	{
 		// Extract enum type name from error message like "'{PropertyName}' must be a valid value of enum TodoPriority."
@@ -855,31 +914,9 @@ partial class ValidationDocumentTransformer
 		int dotIndex = afterEnum.IndexOf('.');
 		string enumTypeName = dotIndex > 0 ? afterEnum[..dotIndex].Trim() : afterEnum.Trim();
 
-		// Search for enum type by name
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-		{
-			try
-			{
-				foreach (Type type in assembly.GetTypes())
-				{
-					if (type.IsEnum && type.Name == enumTypeName)
-					{
-						return type;
-					}
-				}
-			}
-#pragma warning disable CA1031 // Do not catch general exception types
-			catch
-			{
-				// Skip assemblies that can't be inspected
-				continue;
-			}
-#pragma warning restore CA1031 // Do not catch general exception types
-		}
-
-		return null;
+		// Use cached lookup instead of scanning all assemblies on every call.
+		return FindEnumTypeBySimpleName(enumTypeName);
 	}
-
 	static Type? FindEnumTypeInClosure(object? target, int maxDepth = 5)
 	{
 		if (target is null || maxDepth <= 0)
