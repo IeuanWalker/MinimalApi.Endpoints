@@ -38,6 +38,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
+		// Step 4: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
+		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
+		{
+			Type requestType = kvp.Key;
+			List<Validation.ValidationRule> rules = kvp.Value.rules;
+			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
+
+			ApplyValidationToParameters(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
+		}
+
 		return Task.CompletedTask;
 	}
 
@@ -106,6 +116,78 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (requiredProperties.Count > 0)
 		{
 			schema.Required = new HashSet<string>(requiredProperties);
+		}
+	}
+
+	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	{
+		if (document.Paths is null || rules.Count == 0)
+		{
+			return;
+		}
+
+		// Iterate through all paths and operations
+		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
+		{
+			if (pathItem.Value is not OpenApiPathItem pathItemValue)
+			{
+				continue;
+			}
+
+			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations)
+			{
+				if (operation.Value.Parameters is null || operation.Value.Parameters.Count == 0)
+				{
+					continue;
+				}
+
+				// Group rules by property name for easier lookup
+				Dictionary<string, List<Validation.ValidationRule>> rulesByProperty = rules
+					.GroupBy(r => r.PropertyName, StringComparer.OrdinalIgnoreCase)
+					.ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
+
+				// Process each parameter
+				foreach (OpenApiParameter parameter in operation.Value.Parameters)
+				{
+					if (string.IsNullOrEmpty(parameter.Name))
+					{
+						continue;
+					}
+
+					// Match parameter name to property rules (case-insensitive)
+					if (!rulesByProperty.TryGetValue(parameter.Name, out List<Validation.ValidationRule>? propertyRules))
+					{
+						continue;
+					}
+
+					// Check if any rule for this property is RequiredRule
+					bool hasRequiredRule = propertyRules.Any(r => r is Validation.RequiredRule);
+					if (hasRequiredRule)
+					{
+						parameter.Required = true;
+					}
+
+					// Check if there are any rules other than RequiredRule and DescriptionRule
+					bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
+
+					// Only modify the parameter schema if there are validation rules other than just Required
+					// ALSO preserve $ref for enum types - enum properties should reference the enum schema, not inline it
+					if (hasOtherRules && parameter.Schema is not null)
+					{
+						// Check if this parameter is a reference to an enum schema
+						// Enum schemas should NOT be inlined - we preserve the $ref to maintain clean schema structure
+						if (IsEnumSchemaReference(parameter.Schema, document))
+						{
+							// Don't inline enum properties - preserve the $ref
+							// EnumRule validation is redundant since the enum schema itself defines valid values
+							continue;
+						}
+
+						// Create inline schema with all validation constraints for this parameter
+						parameter.Schema = CreateInlineSchemaWithAllValidation(parameter.Schema, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
+					}
+				}
+			}
 		}
 	}
 
