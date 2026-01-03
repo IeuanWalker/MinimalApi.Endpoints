@@ -8,8 +8,10 @@ public class RequestModel
 {
 	public PriorityEnum PlainEnum { get; set; }
 	public PriorityEnum? NullableEnum { get; set; }
+	public PriorityEnum PlainEnumWithoutFluentValidation { get; set; }
+	public PriorityEnum? NullableEnumWithoutFluentValidation { get; set; }
 	public string EnumAsString { get; set; } = string.Empty;
-	public string NullableEnumAsString { get; set; } = string.Empty;
+	public string? NullableEnumAsString { get; set; }
 	public int EnumAsInt { get; set; }
 	public int? NullableEnumAsInt { get; set; }
 }

@@ -7,25 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="Endpoints\FileHandling\**" />
-		<Compile Remove="Endpoints\Todos\**" />
-		<Compile Remove="Endpoints\Validation\**" />
-		<Compile Remove="Endpoints\WeatherForecast\**" />
-		<Content Remove="Endpoints\FileHandling\**" />
-		<Content Remove="Endpoints\Todos\**" />
-		<Content Remove="Endpoints\Validation\**" />
-		<Content Remove="Endpoints\WeatherForecast\**" />
-		<EmbeddedResource Remove="Endpoints\FileHandling\**" />
-		<EmbeddedResource Remove="Endpoints\Todos\**" />
-		<EmbeddedResource Remove="Endpoints\Validation\**" />
-		<EmbeddedResource Remove="Endpoints\WeatherForecast\**" />
-		<None Remove="Endpoints\FileHandling\**" />
-		<None Remove="Endpoints\Todos\**" />
-		<None Remove="Endpoints\Validation\**" />
-		<None Remove="Endpoints\WeatherForecast\**" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Include="Asp.Versioning.Http" Version="8.1.1" />
 		<PackageReference Include="Asp.Versioning.Mvc" Version="8.1.1" />
 		<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.1" />
