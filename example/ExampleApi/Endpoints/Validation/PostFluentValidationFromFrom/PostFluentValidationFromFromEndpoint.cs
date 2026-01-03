@@ -13,7 +13,8 @@ public class PostFluentValidationFromFromEndpoint : IEndpointWithoutResponse<Req
 			.Group<ValidationEndpointGroup>()
 			.Post("/FluentValidation/FromForm")
 			.Version(1)
-			.RequestFromForm();
+			.RequestFromForm()
+			.WithSummary("FluentValidationFromForm");
 	}
 
 	public async Task Handle(RequestModel request, CancellationToken ct)

@@ -14,6 +14,7 @@ public class PostWithValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 			.Post("/WithValidation")
 			.Version(1)
 			.RequestFromBody()
+			.WithSummary("ManualWithValidation")
 			.WithValidationRules<RequestModel>(config =>
 			{
 				// String validation
