@@ -584,25 +584,27 @@ Type validatorType = propertyValidator.GetType();
 if (validatorType.Name.Contains("EnumValidator"))
 {
 	// Try to get the enum type from the generic type argument
-	// EnumValidator<T> where T is the enum type or Nullable<TEnum>
+	// EnumValidator<TModel, TProperty> where TProperty is the enum type or Nullable<TEnum>
 	if (validatorType.IsGenericType)
 	{
 		Type[] genericArgs = validatorType.GetGenericArguments();
-		if (genericArgs.Length > 0)
+		// EnumValidator has 2 generic arguments: TModel and TProperty
+		// We need the second one (TProperty)
+		if (genericArgs.Length >= 2)
 		{
-			Type argType = genericArgs[0];
+			Type propertyType = genericArgs[1];
 			
 			// Check if it's directly an enum
-			if (argType.IsEnum)
+			if (propertyType.IsEnum)
 			{
-				return argType;
+				return propertyType;
 			}
 			
 			// Check if it's a nullable enum (Nullable<TEnum>)
-			if (argType.IsGenericType && argType.GetGenericTypeDefinition() == typeof(Nullable<>))
+			if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
 			{
-				Type underlyingType = Nullable.GetUnderlyingType(argType)!;
-				if (underlyingType.IsEnum)
+				Type? underlyingType = Nullable.GetUnderlyingType(propertyType);
+				if (underlyingType is not null && underlyingType.IsEnum)
 				{
 					return underlyingType;
 				}
