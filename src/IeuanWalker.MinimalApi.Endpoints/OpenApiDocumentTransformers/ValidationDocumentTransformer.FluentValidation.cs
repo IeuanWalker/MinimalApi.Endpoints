@@ -577,9 +577,10 @@ partial class ValidationDocumentTransformer
 
 static Type? ExtractEnumTypeFromValidator(IPropertyValidator propertyValidator)
 {
+Type validatorType = propertyValidator.GetType();
+
 // For IsEnumName validators (StringEnumValidator)
 // Try to get enum names from the _enumNames field
-Type validatorType = propertyValidator.GetType();
 var enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 if (enumNamesField is not null)
 {
@@ -588,6 +589,51 @@ if (enumNames is not null && enumNames.Length > 0)
 {
 // Find the enum type by matching the names
 return FindEnumTypeByNames(enumNames);
+}
+}
+
+// For IsInEnum validators (PredicateValidator created by Must())
+// IsInEnum creates a Must validator with a predicate that captures the enum type
+if (validatorType.Name.StartsWith("PredicateValidator"))
+{
+// First, try to extract from error message
+var errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+if (errorMessageSource is not null)
+{
+object? messageSource = errorMessageSource.GetValue(propertyValidator);
+if (messageSource is not null)
+{
+var messageProperty = messageSource.GetType().GetProperty("Message", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+if (messageProperty is not null)
+{
+string? message = messageProperty.GetValue(messageSource) as string;
+if (message is not null && (message.Contains("must be a valid value of enum") || message.Contains("must be empty or a valid value of enum")))
+{
+Type? enumType = ExtractEnumTypeFromMessage(message);
+if (enumType is not null)
+{
+return enumType;
+}
+}
+}
+}
+}
+
+// Fallback: Try to extract from predicate closure
+// The IsInEnum extension captures the enumType in a nested closure structure
+var predicateField = validatorType.GetField("_predicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+if (predicateField is not null)
+{
+object? predicate = predicateField.GetValue(propertyValidator);
+if (predicate is Delegate predicateDelegate)
+{
+// Recursively search through nested closures
+Type? enumType = FindEnumTypeInClosure(predicateDelegate.Target);
+if (enumType is not null)
+{
+return enumType;
+}
+}
 }
 }
 
@@ -620,6 +666,75 @@ catch
 {
 // Skip assemblies that can't be inspected
 continue;
+}
+}
+
+return null;
+}
+
+static Type? ExtractEnumTypeFromMessage(string message)
+{
+// Extract enum type name from error message like "'{PropertyName}' must be a valid value of enum TodoPriority."
+// or "'{PropertyName}' must be empty or a valid value of enum TodoPriority."
+int enumIndex = message.IndexOf("enum ");
+if (enumIndex < 0)
+{
+return null;
+}
+
+string afterEnum = message.Substring(enumIndex + 5); // Skip "enum "
+int dotIndex = afterEnum.IndexOf('.');
+string enumTypeName = dotIndex > 0 ? afterEnum.Substring(0, dotIndex).Trim() : afterEnum.Trim();
+
+// Search for enum type by name
+foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+{
+try
+{
+foreach (var type in assembly.GetTypes())
+{
+if (type.IsEnum && type.Name == enumTypeName)
+{
+return type;
+}
+}
+}
+catch
+{
+// Skip assemblies that can't be inspected
+continue;
+}
+}
+
+return null;
+}
+
+static Type? FindEnumTypeInClosure(object? target, int maxDepth = 5)
+{
+if (target is null || maxDepth <= 0)
+{
+return null;
+}
+
+var fields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+foreach (var field in fields)
+{
+object? fieldValue = field.GetValue(target);
+
+// Check if this field is directly an enum type
+if (fieldValue is Type enumType && enumType.IsEnum)
+{
+return enumType;
+}
+
+// If it's a delegate, recurse into its closure
+if (fieldValue is Delegate del && del.Target is not null)
+{
+Type? found = FindEnumTypeInClosure(del.Target, maxDepth - 1);
+if (found is not null)
+{
+return found;
+}
 }
 }
 
