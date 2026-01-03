@@ -138,12 +138,13 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		bool isComplexTypeReference = false;
 		
 		// If the property is a reference, we need to replace it with an inline schema
-		// so we can add validation constraints (but only for primitive types and enums)
+		// so we can add validation constraints (but only for primitive types)
+		// For enums and complex types, we preserve the $ref to avoid duplication
 		if (propertySchemaInterface is OpenApiSchemaReference schemaRef)
 		{
-			// Check if this is a primitive type or enum that we can inline
+			// Check if this is a primitive type that we can inline
 			string? refId = schemaRef.Reference?.Id;
-			if (refId is not null && (IsPrimitiveType(refId) || IsEnumType(refId, document)))
+			if (refId is not null && IsPrimitiveType(refId))
 			{
 				// Create an inline schema based on the reference
 				propertySchema = CreateInlineSchemaFromReference(schemaRef, document);
@@ -152,8 +153,9 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 			}
 			else
 			{
-				// For complex types, keep the reference but still process NotNull/NotEmpty validators
+				// For enums and complex types, keep the reference but still process NotNull/NotEmpty validators
 				// to add the property to the required array
+				// This preserves the $ref and avoids duplicating enum metadata
 				isComplexTypeReference = true;
 				propertySchema = new OpenApiSchema(); // Dummy schema, won't be used
 			}
