@@ -129,14 +129,54 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Cast to OpenApiSchema to access properties
 		OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
 
+		// Check if original schema has oneOf (indicates nullable type)
+		// We need to preserve this structure when creating the inline schema
+		bool isNullableWrapper = originalOpenApiSchema?.OneOf is not null && originalOpenApiSchema.OneOf.Count > 0;
+		IOpenApiSchema? actualSchema = originalOpenApiSchema;
+		
+		if (isNullableWrapper)
+		{
+			// Find the non-null schema in the oneOf array 
+			// The nullable marker is typically an empty or minimal schema
+			actualSchema = originalOpenApiSchema!.OneOf.FirstOrDefault(s => 
+			{
+				if (s is OpenApiSchemaReference)
+				{
+					return true; // References are the actual type
+				}
+				if (s is OpenApiSchema schema)
+				{
+					// Skip minimal schemas that just mark nullability
+					// These typically have no Type set and few/no other properties
+					return schema.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0;
+				}
+				return false;
+			});
+			
+			// If we found a better schema to work with, update our reference
+			if (actualSchema is not null && actualSchema != originalOpenApiSchema)
+			{
+				originalOpenApiSchema = actualSchema as OpenApiSchema;
+			}
+		}
+
 		// If original schema is a reference, we need to get the type from the reference ID
 		JsonSchemaType? referenceType = null;
 		string? referenceFormat = null;
-		if (originalSchema is OpenApiSchemaReference schemaRef)
+		bool isNullableReference = false;
+		
+		if (actualSchema is OpenApiSchemaReference schemaRef)
 		{
 			string? refId = schemaRef.Reference?.Id;
 			if (refId is not null)
 			{
+				// Check if this is a nullable reference (System.Nullable`1[[...]])
+				if (refId.Contains("System.Nullable`1"))
+				{
+					isNullableWrapper = true;
+					isNullableReference = true;
+				}
+				
 				if (refId.Contains("System.String"))
 				{
 					referenceType = JsonSchemaType.String;
@@ -340,6 +380,21 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
+		// If the original schema was nullable (oneOf wrapper), recreate that structure
+		if (isNullableWrapper && !isNullableReference)
+		{
+			// Wrap the inline schema in a oneOf with a nullable option
+			// The nullable option is represented as an empty schema
+			return new OpenApiSchema
+			{
+				OneOf = new List<IOpenApiSchema>
+				{
+					new OpenApiSchema(), // Empty schema represents the nullable option
+					newInlineSchema
+				}
+			};
+		}
+
 		return newInlineSchema;
 	}
 
@@ -459,7 +514,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Validation.PatternRule => JsonSchemaType.String,
 			Validation.EmailRule => JsonSchemaType.String,
 			Validation.UrlRule => JsonSchemaType.String,
-			Validation.EnumRule => JsonSchemaType.String,
+			Validation.EnumRule enumRule => GetEnumSchemaType(enumRule.EnumType),
 			Validation.RangeRule<int> => JsonSchemaType.Integer,
 			Validation.RangeRule<long> => JsonSchemaType.Integer,
 			Validation.RangeRule<decimal> => JsonSchemaType.Number,
@@ -467,6 +522,24 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Validation.RangeRule<float> => JsonSchemaType.Number,
 			_ => null
 		};
+	}
+
+	static JsonSchemaType GetEnumSchemaType(Type enumType)
+	{
+		// Get the underlying type of the enum (byte, short, int, long, etc.)
+		Type underlyingType = Enum.GetUnderlyingType(enumType);
+		
+		// Map to appropriate JSON schema type
+		if (underlyingType == typeof(byte) || underlyingType == typeof(sbyte) ||
+			underlyingType == typeof(short) || underlyingType == typeof(ushort) ||
+			underlyingType == typeof(int) || underlyingType == typeof(uint) ||
+			underlyingType == typeof(long) || underlyingType == typeof(ulong))
+		{
+			return JsonSchemaType.Integer;
+		}
+		
+		// Default to string (shouldn't happen with normal enums, but just in case)
+		return JsonSchemaType.String;
 	}
 
 	static string? GetSchemaFormat(Validation.ValidationRule rule)
@@ -566,6 +639,20 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	/// </summary>
 	static bool IsEnumSchemaReference(IOpenApiSchema propertySchema, OpenApiDocument document)
 	{
+		// Handle oneOf patterns for nullable types
+		if (propertySchema is OpenApiSchema schema && schema.OneOf is not null && schema.OneOf.Count > 0)
+		{
+			// Check if any of the oneOf schemas is an enum reference
+			foreach (IOpenApiSchema oneOfSchema in schema.OneOf)
+			{
+				if (IsEnumSchemaReference(oneOfSchema, document))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		// Check if this is a schema reference
 		if (propertySchema is not OpenApiSchemaReference schemaRef)
 		{
@@ -581,7 +668,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// System.String, System.Int32, etc. are NOT enum schemas - they should be inlined
 		// Only preserve $ref for actual enum type schemas
-		if (refId.StartsWith("System."))
+		// BUT System.Nullable`1[[EnumType...]] IS an enum schema if it wraps an enum
+		if (refId.StartsWith("System.") && !refId.StartsWith("System.Nullable`1"))
 		{
 			return false;
 		}
