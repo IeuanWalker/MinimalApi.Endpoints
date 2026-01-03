@@ -697,42 +697,84 @@ partial class ValidationDocumentTransformer
 
 	static Type? FindEnumTypeByNames(string[] names)
 	{
-		// Search for an enum type that has exactly these member names
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		if (names is null || names.Length == 0)
 		{
-			try
-			{
-				foreach (Type type in assembly.GetTypes())
-				{
-					if (!type.IsEnum)
-					{
-						continue;
-					}
-
-					string[] typeEnumNames = Enum.GetNames(type);
-					if (typeEnumNames.Length == names.Length &&
-					typeEnumNames.OrderBy(n => n).SequenceEqual(names.OrderBy(n => n)))
-					{
-						return type;
-					}
-				}
-			}
-#pragma warning disable CA1031 // Do not catch general exception types
-			catch
-			{
-				// Skip assemblies that can't be inspected
-				continue;
-			}
-#pragma warning restore CA1031 // Do not catch general exception types
+			return null;
 		}
 
-		return null;
+		if (!enumTypeByNamesCacheInitialized)
+		{
+			lock (enumTypeByNamesCacheLock)
+			{
+				if (!enumTypeByNamesCacheInitialized)
+				{
+					enumTypesByNames = new(StringComparer.Ordinal);
+
+					// Build cache: key is the sorted list of enum member names
+					foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+					{
+						try
+						{
+							foreach (Type type in assembly.GetTypes())
+							{
+								if (!type.IsEnum)
+								{
+									continue;
+								}
+
+								string[] typeEnumNames = Enum.GetNames(type);
+								if (typeEnumNames.Length == 0)
+								{
+									continue;
+								}
+
+								string enumKey = CreateKey(typeEnumNames);
+
+								// Keep first occurrence to avoid exceptions on duplicates.
+								if (!enumTypesByNames.ContainsKey(enumKey))
+								{
+									enumTypesByNames[enumKey] = type;
+								}
+							}
+						}
+#pragma warning disable CA1031 // Do not catch general exception types
+						catch
+						{
+							// Skip assemblies that can't be inspected
+							continue;
+						}
+#pragma warning restore CA1031 // Do not catch general exception types
+					}
+
+					enumTypeByNamesCacheInitialized = true;
+				}
+			}
+		}
+
+		if (enumTypesByNames is null)
+		{
+			return null;
+		}
+
+		string key = CreateKey(names);
+		return enumTypesByNames.TryGetValue(key, out Type? matchingType) ? matchingType : null;
+
+		static string CreateKey(string[] values)
+		{
+			// Work on a copy so the original order is not modified.
+			string[] copy = (string[])values.Clone();
+			Array.Sort(copy, StringComparer.Ordinal);
+			return string.Join("|", copy);
+		}
 	}
 
 	static readonly Lock enumTypeCacheLock = new();
 	static Dictionary<string, Type>? enumTypesByName;
 	static volatile bool enumTypeCacheInitialized;
 
+	static readonly Lock enumTypeByNamesCacheLock = new();
+	static Dictionary<string, Type>? enumTypesByNames;
+	static volatile bool enumTypeByNamesCacheInitialized;
 	static Type? FindEnumTypeBySimpleName(string enumTypeName)
 	{
 		if (string.IsNullOrWhiteSpace(enumTypeName))
