@@ -458,7 +458,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// The nullable option is represented as an empty schema with the "nullable" extension set to true
 			// This matches ASP.NET Core's built-in behavior for nullable types
 			OpenApiSchema nullableSchema = new();
-			nullableSchema.Extensions["nullable"] = new Microsoft.OpenApi.Any.OpenApiBoolean(true);
+			nullableSchema.Extensions = new Dictionary<string, IOpenApiExtension>
+			{
+				["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
+			};
 			
 			return new OpenApiSchema
 			{
