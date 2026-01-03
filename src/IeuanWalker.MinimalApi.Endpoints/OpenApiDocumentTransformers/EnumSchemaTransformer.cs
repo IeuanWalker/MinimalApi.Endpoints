@@ -14,8 +14,8 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 {
 	// Cache for type lookups to avoid repeatedly scanning all assemblies
-	static readonly Dictionary<string, Type?> _typeCache = new();
-	static readonly object _typeCacheLock = new();
+	static readonly Dictionary<string, Type?> typeCache = [];
+	static readonly Lock typeCacheLock = new();
 
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
@@ -68,9 +68,9 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 	static Type? FindTypeForSchema(string schemaName)
 	{
 		// Check cache first
-		lock (_typeCacheLock)
+		lock (typeCacheLock)
 		{
-			if (_typeCache.TryGetValue(schemaName, out Type? cachedType))
+			if (typeCache.TryGetValue(schemaName, out Type? cachedType))
 			{
 				return cachedType;
 			}
@@ -86,9 +86,9 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			.FirstOrDefault(type => type is not null);
 
 		// Cache the result (including null to avoid repeated lookups)
-		lock (_typeCacheLock)
+		lock (typeCacheLock)
 		{
-			_typeCache[schemaName] = foundType;
+			typeCache[schemaName] = foundType;
 		}
 
 		return foundType;

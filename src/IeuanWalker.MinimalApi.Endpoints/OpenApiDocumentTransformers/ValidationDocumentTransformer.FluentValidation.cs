@@ -729,7 +729,7 @@ partial class ValidationDocumentTransformer
 		return null;
 	}
 
-	static readonly object enumTypeCacheLock = new();
+	static readonly Lock enumTypeCacheLock = new();
 	static Dictionary<string, Type>? enumTypesByName;
 	static volatile bool enumTypeCacheInitialized;
 
@@ -813,7 +813,7 @@ partial class ValidationDocumentTransformer
 		}
 
 		FieldInfo[] fields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-		
+
 		// Check if any field is directly an enum type
 		Type? directEnumType = fields
 			.Select(field => field.GetValue(target))
