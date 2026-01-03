@@ -509,8 +509,12 @@ descriptions[enumName] = descriptionAttr.Description;
 schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
 schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
 
-// Add x-enum-varnames extension for member names
-schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
+// Add x-enum-varnames extension for member names (only if different from enum values)
+// For string schemas, the names are the same as the values, so no need to duplicate
+if (!isStringSchema)
+{
+	schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
+}
 
 // Add x-enum-descriptions extension if any descriptions are present
 if (descriptions.Count > 0)

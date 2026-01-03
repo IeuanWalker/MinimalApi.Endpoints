@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:6010/"
+      "url": "http://127.0.0.1:6022/"
     }
   ],
   "paths": {
@@ -1197,12 +1197,6 @@
               "High",
               "Critical"
             ],
-            "x-enum-varnames": [
-              "Low",
-              "Medium",
-              "High",
-              "Critical"
-            ],
             "x-enum-descriptions": {
               "Low": "Low priority task",
               "Medium": "Medium priority task",
@@ -1214,12 +1208,6 @@
             "type": "string",
             "description": "Enum: NotStarted, InProgress, Completed, Cancelled\n\nValidation rules:\n- Is required",
             "enum": [
-              "NotStarted",
-              "InProgress",
-              "Completed",
-              "Cancelled"
-            ],
-            "x-enum-varnames": [
               "NotStarted",
               "InProgress",
               "Completed",
@@ -1677,10 +1665,6 @@
             "enum": [
               "Success",
               "Failure"
-            ],
-            "x-enum-varnames": [
-              "Success",
-              "Failure"
             ]
           },
           "enumIntValidator": {
@@ -1945,10 +1929,6 @@
             "type": "string",
             "description": "Enum: Success, Failure",
             "enum": [
-              "Success",
-              "Failure"
-            ],
-            "x-enum-varnames": [
               "Success",
               "Failure"
             ]
