@@ -1,4 +1,5 @@
 using FluentValidation;
+using IeuanWalker.MinimalApi.Endpoints;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,6 +31,20 @@ public class StringEnumModelValidator : AbstractValidator<StringEnumModel>
 	}
 }
 
+public class IntEnumModel
+{
+	public int EnumAsInt { get; set; }
+}
+
+public class IntEnumModelValidator : AbstractValidator<IntEnumModel>
+{
+	public IntEnumModelValidator()
+	{
+		RuleFor(x => x.EnumAsInt)
+			.IsInEnum(typeof(TestEnumForValidator));
+	}
+}
+
 public class FluentValidationEnumValidatorTests
 {
 	[Fact]
@@ -53,14 +68,46 @@ public class FluentValidationEnumValidatorTests
 		var enumStringProperty = GetPropertySchema(schema, "enumAsString");
 		enumStringProperty.ShouldNotBeNull();
 		
-		// Should have enum extensions
+		// Should have enum values but NOT x-enum-varnames (redundant for string schemas)
 		enumStringProperty.Extensions.ShouldContainKey("enum");
-		enumStringProperty.Extensions.ShouldContainKey("x-enum-varnames");
+		enumStringProperty.Extensions.ShouldNotContainKey("x-enum-varnames");
 		
 		// Description should mention the enum values
 		enumStringProperty.Description.ShouldContain("Value1");
 		enumStringProperty.Description.ShouldContain("Value2");
 		enumStringProperty.Description.ShouldContain("Value3");
+	}
+
+	[Fact]
+	public async Task TransformAsync_IsInEnum_AddsEnumValuesToIntProperty()
+	{
+		// Arrange
+		var services = new ServiceCollection();
+		services.AddSingleton<IValidator<IntEnumModel>, IntEnumModelValidator>();
+		var serviceProvider = services.BuildServiceProvider();
+
+		var transformer = new FluentValidationSchemaTransformer(serviceProvider);
+		var document = CreateTestDocument<IntEnumModel>();
+
+		// Act
+		await transformer.TransformAsync(document, CreateContext(serviceProvider), CancellationToken.None);
+
+		// Assert
+		OpenApiSchema schema = GetSchema<IntEnumModel>(document);
+		schema.ShouldNotBeNull();
+		
+		var enumIntProperty = GetPropertySchema(schema, "enumAsInt");
+		enumIntProperty.ShouldNotBeNull();
+		
+		// Should have enum values and x-enum-varnames (needed for integer schemas)
+		enumIntProperty.Extensions.ShouldNotBeNull();
+		enumIntProperty.Extensions.ShouldContainKey("enum");
+		enumIntProperty.Extensions.ShouldContainKey("x-enum-varnames");
+		
+		// Description should mention the enum values
+		enumIntProperty.Description.ShouldContain("Value1");
+		enumIntProperty.Description.ShouldContain("Value2");
+		enumIntProperty.Description.ShouldContain("Value3");
 	}
 
 	static OpenApiDocument CreateTestDocument<T>()

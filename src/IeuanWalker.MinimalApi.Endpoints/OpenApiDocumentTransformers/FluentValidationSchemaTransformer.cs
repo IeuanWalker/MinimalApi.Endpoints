@@ -460,7 +460,7 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		// StringEnumValidator has a _enumNames field we can use
 		var validatorType = validator.GetType();
 		
-		// Check for _enumNames field (present in StringEnumValidator)
+		// Check for _enumNames field (present in StringEnumValidator from IsEnumName)
 		var enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 		if (enumNamesField is not null)
 		{
@@ -473,6 +473,62 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 				{
 					EnrichSchemaWithEnumValues(propertySchema, enumType);
 					return;
+				}
+			}
+		}
+		
+		// Check if this is a PredicateValidator from IsInEnum extension method
+		// IsInEnum creates a Must validator with a predicate that captures the enum type
+		if (validatorType.Name == "PredicateValidator")
+		{
+			// First, try to extract from error message
+			var errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+			if (errorMessageSource is not null)
+			{
+				object? messageSource = errorMessageSource.GetValue(validator);
+				if (messageSource is not null)
+				{
+					var messageProperty = messageSource.GetType().GetProperty("Message", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+					if (messageProperty is not null)
+					{
+						string? message = messageProperty.GetValue(messageSource) as string;
+						if (message is not null && (message.Contains("must be a valid value of enum") || message.Contains("must be empty or a valid value of enum")))
+						{
+							Type? enumType = ExtractEnumTypeFromMessage(message);
+							if (enumType is not null)
+							{
+								EnrichSchemaWithEnumValues(propertySchema, enumType);
+								return;
+							}
+						}
+					}
+				}
+			}
+			
+			// Fallback: Try to extract from predicate closure
+			// The IsInEnum extension captures the enumType in a closure
+			var predicateProperty = validatorType.GetProperty("Predicate", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (predicateProperty is not null)
+			{
+				object? predicate = predicateProperty.GetValue(validator);
+				if (predicate is Delegate predicateDelegate)
+				{
+					// Check the closure/target for captured variables
+					var target = predicateDelegate.Target;
+					if (target is not null)
+					{
+						// Look for fields in the closure that contain a Type that is an enum
+						var closureFields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+						foreach (var field in closureFields)
+						{
+							object? fieldValue = field.GetValue(target);
+							if (fieldValue is Type enumType && enumType.IsEnum)
+							{
+								EnrichSchemaWithEnumValues(propertySchema, enumType);
+								return;
+							}
+						}
+					}
 				}
 			}
 		}
@@ -506,6 +562,49 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 				baseType = baseType.BaseType;
 			}
 		}
+	}
+	
+	static Type? ExtractEnumTypeFromMessage(string message)
+	{
+		// Message format: "{PropertyName} must be a valid value of enum EnumName." or
+		// "{PropertyName} must be empty or a valid value of enum EnumName."
+		// Extract the enum name between "enum " and "."
+		int enumIndex = message.IndexOf("enum ", StringComparison.Ordinal);
+		if (enumIndex == -1)
+		{
+			return null;
+		}
+		
+		int startIndex = enumIndex + 5; // Length of "enum "
+		int endIndex = message.IndexOf('.', startIndex);
+		if (endIndex == -1)
+		{
+			endIndex = message.Length;
+		}
+		
+		string enumName = message.Substring(startIndex, endIndex - startIndex).Trim();
+		
+		// Search for the enum type by name across all loaded assemblies
+		foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			try
+			{
+				foreach (var type in assembly.GetTypes())
+				{
+					if (type.IsEnum && type.Name == enumName)
+					{
+						return type;
+					}
+				}
+			}
+			catch
+			{
+				// Skip assemblies that can't be inspected
+				continue;
+			}
+		}
+		
+		return null;
 	}
 
 	static Type? FindEnumTypeByNames(string[] names)
@@ -595,8 +694,12 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
 		schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
 		
-		// Add x-enum-varnames extension for member names
-		schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
+		// Add x-enum-varnames extension for member names (only for integer schemas, not string schemas)
+		// For string schemas, the enum values already contain the names, so x-enum-varnames would be redundant
+		if (!isStringSchema)
+		{
+			schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
+		}
 
 		// Add x-enum-descriptions extension if any descriptions are present
 		if (descriptions.Count > 0)
