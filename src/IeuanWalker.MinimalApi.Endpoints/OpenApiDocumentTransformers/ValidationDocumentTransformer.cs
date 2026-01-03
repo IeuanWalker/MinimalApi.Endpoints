@@ -455,12 +455,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (isNullableWrapper && !isNullableReference)
 		{
 			// Wrap the inline schema in a oneOf with a nullable option
-			// The nullable option is represented as a schema with Nullable = true (matching ASP.NET Core's built-in behavior)
+			// The nullable option is represented as an empty schema with the "nullable" extension set to true
+			// This matches ASP.NET Core's built-in behavior for nullable types
+			OpenApiSchema nullableSchema = new();
+			nullableSchema.Extensions["nullable"] = new Microsoft.OpenApi.Any.OpenApiBoolean(true);
+			
 			return new OpenApiSchema
 			{
 				OneOf =
 				[
-					new OpenApiSchema { Nullable = true }, // Schema with Nullable = true represents the nullable option
+					nullableSchema,
 					newInlineSchema
 				]
 			};
