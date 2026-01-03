@@ -26,7 +26,7 @@ public class PostTodoEnumStringEndpoint : IEndpoint<RequestModel, Results<Ok<Res
 	public async Task<Results<Ok<ResponseModel>, Conflict>> Handle(RequestModel request, CancellationToken cancellationToken)
 	{
 		// Parse the priority name to enum
-		if (!Enum.TryParse<TodoPriority>(request.PriorityName, ignoreCase: true, out TodoPriority priority))
+		if (!Enum.TryParse<TodoPriority>(request.PriorityNameAsString, ignoreCase: true, out TodoPriority priority))
 		{
 			return TypedResults.Conflict();
 		}

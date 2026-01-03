@@ -7,7 +7,10 @@ namespace ExampleApi.Endpoints.Todos.PostEnumString;
 public class RequestModel
 {
 	public string Title { get; set; } = string.Empty;
-	public string PriorityName { get; set; } = string.Empty;
+	public string PriorityNameAsString { get; set; } = string.Empty;
+	public TodoPriority PriorityNameAsEnum { get; set; }
+	public string? PriorityNameAsStringNullable { get; set; } = string.Empty;
+	public TodoPriority? PriorityNameAsEnumNullable { get; set; }
 	public string StatusName { get; set; } = string.Empty;
 }
 
@@ -19,8 +22,11 @@ public class RequestModelValidator : Validator<RequestModel>
 			.NotEmpty()
 			.MaximumLength(200);
 
-		RuleFor(x => x.PriorityName)
+		RuleFor(x => x.PriorityNameAsString)
 			.NotEmpty()
+			.IsEnumName(typeof(TodoPriority), caseSensitive: false);
+
+		RuleFor(x => x.PriorityNameAsStringNullable)
 			.IsEnumName(typeof(TodoPriority), caseSensitive: false);
 
 		RuleFor(x => x.StatusName)
