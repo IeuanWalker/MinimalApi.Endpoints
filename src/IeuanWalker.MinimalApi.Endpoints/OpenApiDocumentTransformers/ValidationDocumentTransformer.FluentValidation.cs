@@ -729,9 +729,9 @@ partial class ValidationDocumentTransformer
 		return null;
 	}
 
-	static readonly object _enumTypeCacheLock = new();
-	static Dictionary<string, Type>? _enumTypesByName;
-	static bool _enumTypeCacheInitialized;
+	static readonly object enumTypeCacheLock = new();
+	static Dictionary<string, Type>? enumTypesByName;
+	static bool enumTypeCacheInitialized;
 
 	static Type? FindEnumTypeBySimpleName(string enumTypeName)
 	{
@@ -740,13 +740,13 @@ partial class ValidationDocumentTransformer
 			return null;
 		}
 
-		if (!_enumTypeCacheInitialized)
+		if (!enumTypeCacheInitialized)
 		{
-			lock (_enumTypeCacheLock)
+			lock (enumTypeCacheLock)
 			{
-				if (!_enumTypeCacheInitialized)
+				if (!enumTypeCacheInitialized)
 				{
-					_enumTypesByName = new(StringComparer.Ordinal);
+					enumTypesByName = new(StringComparer.Ordinal);
 
 					foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 					{
@@ -760,9 +760,9 @@ partial class ValidationDocumentTransformer
 								}
 
 								// Use simple name as key; keep first occurrence to avoid exceptions on duplicates.
-								if (!_enumTypesByName.ContainsKey(type.Name))
+								if (!enumTypesByName.ContainsKey(type.Name))
 								{
-									_enumTypesByName[type.Name] = type;
+									enumTypesByName[type.Name] = type;
 								}
 							}
 						}
@@ -775,17 +775,17 @@ partial class ValidationDocumentTransformer
 #pragma warning restore CA1031 // Do not catch general exception types
 					}
 
-					_enumTypeCacheInitialized = true;
+					enumTypeCacheInitialized = true;
 				}
 			}
 		}
 
-		if (_enumTypesByName is null)
+		if (enumTypesByName is null)
 		{
 			return null;
 		}
 
-		return _enumTypesByName.TryGetValue(enumTypeName, out Type? enumType) ? enumType : null;
+		return enumTypesByName.TryGetValue(enumTypeName, out Type? enumType) ? enumType : null;
 	}
 
 	static Type? ExtractEnumTypeFromMessage(string message)
@@ -836,5 +836,4 @@ partial class ValidationDocumentTransformer
 
 		return null;
 	}
-
 }
