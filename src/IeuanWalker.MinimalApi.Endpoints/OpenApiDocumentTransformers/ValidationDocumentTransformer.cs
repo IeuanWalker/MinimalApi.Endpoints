@@ -589,8 +589,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Enum schemas have the "enum" or "x-enum-varnames" extensions set by EnumSchemaTransformer
 		if (referencedSchema is OpenApiSchema enumSchema)
 		{
-			return enumSchema.Extensions?.ContainsKey("enum") == true ||
-			       enumSchema.Extensions?.ContainsKey("x-enum-varnames") == true;
+			// Check if Extensions dictionary exists and contains enum markers
+			if (enumSchema.Extensions is not null)
+			{
+				return enumSchema.Extensions.ContainsKey("enum") ||
+				       enumSchema.Extensions.ContainsKey("x-enum-varnames");
+			}
 		}
 
 		return false;
