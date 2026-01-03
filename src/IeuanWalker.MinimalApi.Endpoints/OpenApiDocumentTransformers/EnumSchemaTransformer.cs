@@ -38,17 +38,10 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			// Check if it's a direct enum type
-			Type? enumType;
-			if (foundType.IsEnum)
-			{
-				enumType = foundType;
-			}
-			else
-			{
-				// Check if it's a nullable enum
-				enumType = GetEnumTypeFromNullable(foundType);
-			}
+			// Check if it's a direct or nullable enum type
+			Type? enumType = foundType.IsEnum
+				? foundType
+				: GetEnumTypeFromNullable(foundType);
 
 			if (enumType is null)
 			{
@@ -69,16 +62,9 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		string typeName = schemaName.Replace('+', '.');
 
 		// Try to load the type from all loaded assemblies
-		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-		{
-			Type? type = assembly.GetType(typeName);
-			if (type is not null)
-			{
-				return type;
-			}
-		}
-
-		return null;
+		return AppDomain.CurrentDomain.GetAssemblies()
+			.Select(assembly => assembly.GetType(typeName))
+			.FirstOrDefault(type => type is not null);
 	}
 
 	static Type? GetEnumTypeFromNullable(Type type)
