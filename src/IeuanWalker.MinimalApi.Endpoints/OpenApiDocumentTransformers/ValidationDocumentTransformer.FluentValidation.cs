@@ -813,27 +813,24 @@ partial class ValidationDocumentTransformer
 		}
 
 		FieldInfo[] fields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-		foreach (FieldInfo field in fields)
+		
+		// Check if any field is directly an enum type
+		Type? directEnumType = fields
+			.Select(field => field.GetValue(target))
+			.OfType<Type>()
+			.FirstOrDefault(type => type.IsEnum);
+
+		if (directEnumType is not null)
 		{
-			object? fieldValue = field.GetValue(target);
-
-			// Check if this field is directly an enum type
-			if (fieldValue is Type enumType && enumType.IsEnum)
-			{
-				return enumType;
-			}
-
-			// If it's a delegate, recurse into its closure
-			if (fieldValue is Delegate del && del.Target is not null)
-			{
-				Type? found = FindEnumTypeInClosure(del.Target, maxDepth - 1);
-				if (found is not null)
-				{
-					return found;
-				}
-			}
+			return directEnumType;
 		}
 
-		return null;
+		// Recursively check delegate closures
+		return fields
+			.Select(field => field.GetValue(target))
+			.OfType<Delegate>()
+			.Where(del => del.Target is not null)
+			.Select(del => FindEnumTypeInClosure(del.Target, maxDepth - 1))
+			.FirstOrDefault(found => found is not null);
 	}
 }
