@@ -220,3 +220,28 @@ public sealed record DescriptionRule : ValidationRule
 	/// </summary>
 	public string Description { get; init; }
 }
+
+/// <summary>
+/// Enum validation rule for string/int properties validated against enum values
+/// </summary>
+public sealed record EnumRule : ValidationRule
+{
+	public EnumRule(string propertyName, Type enumType, string? errorMessage = null) : base(propertyName)
+	{
+		ArgumentNullException.ThrowIfNull(enumType);
+		if (!enumType.IsEnum)
+		{
+			throw new ArgumentException("Type must be an enum type", nameof(enumType));
+		}
+
+		EnumType = enumType;
+		ErrorMessage = string.IsNullOrWhiteSpace(errorMessage) 
+			? $"{propertyName} has a range of values which does not include '{{value}}'." 
+			: errorMessage;
+	}
+
+	/// <summary>
+	/// The enum type that defines valid values
+	/// </summary>
+	public Type EnumType { get; init; }
+}

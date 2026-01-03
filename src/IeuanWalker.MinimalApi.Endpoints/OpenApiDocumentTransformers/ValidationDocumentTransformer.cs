@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -242,7 +243,7 @@ format ??= referenceFormat;
 			.OfType<Validation.DescriptionRule>()
 			.FirstOrDefault()?.Description;
 
-		// Collect all rule descriptions (excluding DescriptionRule)
+		// Collect all rule descriptions (excluding DescriptionRule and EnumRule)
 		List<string> ruleDescriptions2 = [];
 
 		// Apply all rules to this schema
@@ -255,7 +256,8 @@ format ??= referenceFormat;
 			}
 
 			// Get human-readable description for this rule (only if effectiveListRulesInDescription is true)
-			if (effectiveListRulesInDescription)
+			// Skip EnumRule error messages as enum info is added differently
+			if (effectiveListRulesInDescription && rule is not Validation.EnumRule)
 			{
 				string? ruleDescription = rule.ErrorMessage;
 				if (!string.IsNullOrEmpty(ruleDescription))
@@ -271,11 +273,23 @@ format ??= referenceFormat;
 			}
 		}
 
-		// Build the complete description: custom description + validation rules
+		// Build the complete description: custom description + validation rules + enum info
 		List<string> descriptionParts2 = [];
 
-		// Add custom description first if present
-		if (!string.IsNullOrEmpty(customDescription2))
+		// If the schema already has an enum description from EnumSchemaTransformer, preserve it
+		string? enumDescription = null;
+		if (!string.IsNullOrEmpty(newInlineSchema.Description) && newInlineSchema.Description.StartsWith("Enum:"))
+		{
+			enumDescription = newInlineSchema.Description;
+		}
+
+		// Add enum description first if present
+		if (!string.IsNullOrEmpty(enumDescription))
+		{
+			descriptionParts2.Add(enumDescription);
+		}
+		// Add custom description if present
+		else if (!string.IsNullOrEmpty(customDescription2))
 		{
 			descriptionParts2.Add(customDescription2);
 		}
@@ -408,6 +422,10 @@ format ??= referenceFormat;
 					schema.ExclusiveMaximum = longRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
 				}
 				break;
+
+			case Validation.EnumRule enumRule:
+				EnrichSchemaWithEnumValues(schema, enumRule.EnumType);
+				break;
 		}
 	}
 
@@ -419,6 +437,7 @@ format ??= referenceFormat;
 			Validation.PatternRule => JsonSchemaType.String,
 			Validation.EmailRule => JsonSchemaType.String,
 			Validation.UrlRule => JsonSchemaType.String,
+			Validation.EnumRule => JsonSchemaType.String,
 			Validation.RangeRule<int> => JsonSchemaType.Integer,
 			Validation.RangeRule<long> => JsonSchemaType.Integer,
 			Validation.RangeRule<decimal> => JsonSchemaType.Number,
@@ -441,4 +460,78 @@ format ??= referenceFormat;
 			_ => null
 		};
 	}
+
+static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType)
+{
+// Get all enum values and names
+Array enumValues = Enum.GetValues(enumType);
+string[] enumNames = Enum.GetNames(enumType);
+
+List<JsonNode> values = [];
+List<string> varNames = [];
+Dictionary<string, string> descriptions = [];
+
+// Determine if this is a string schema or integer schema
+bool isStringSchema = schema.Type == JsonSchemaType.String;
+
+for (int i = 0; i < enumValues.Length; i++)
+{
+object enumValue = enumValues.GetValue(i)!;
+string enumName = enumNames[i];
+
+// For string schemas, add the enum names as valid values
+// For integer schemas, add the numeric values
+if (isStringSchema)
+{
+values.Add(JsonValue.Create(enumName)!);
+}
+else
+{
+long numericValue = Convert.ToInt64(enumValue);
+values.Add(JsonValue.Create(numericValue)!);
+}
+
+varNames.Add(enumName);
+
+// Check for Description attribute
+var field = enumType.GetField(enumName);
+var descriptionAttr = field?.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+.OfType<System.ComponentModel.DescriptionAttribute>()
+.FirstOrDefault();
+
+if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
+{
+descriptions[enumName] = descriptionAttr.Description;
+}
+}
+
+// Add the enum values
+schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
+
+// Add x-enum-varnames extension for member names
+schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
+
+// Add x-enum-descriptions extension if any descriptions are present
+if (descriptions.Count > 0)
+{
+JsonObject descObj = [];
+foreach (var kvp in descriptions)
+{
+descObj[kvp.Key] = kvp.Value;
+}
+schema.Extensions["x-enum-descriptions"] = new JsonNodeExtension(descObj);
+}
+
+// Update the description to mention enum values if not already set with better context
+if (string.IsNullOrWhiteSpace(schema.Description) || schema.Description.Contains("has a range of values"))
+{
+schema.Description = $"Enum: {string.Join(", ", varNames)}";
+}
+else if (!schema.Description.Contains("Enum:"))
+{
+// Prepend enum info to existing description
+schema.Description = $"Enum: {string.Join(", ", varNames)}\n\n{schema.Description}";
+}
+}
 }

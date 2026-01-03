@@ -153,12 +153,20 @@ partial class ValidationDocumentTransformer
 			return rule;
 		}
 
+		// Check if this is an IsEnumName validator (StringEnumValidator)
+		Type? enumType = ExtractEnumTypeFromValidator(propertyValidator);
+		if (enumType is not null)
+		{
+			string enumErrorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, logger);
+			return new Validation.EnumRule(propertyName, enumType, enumErrorMessage);
+		}
+
 		// If we couldn't map to a specific rule type, create a CustomRule with the error message
-		string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, logger);
-		if (!string.IsNullOrEmpty(errorMessage))
+		string customErrorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, logger);
+		if (!string.IsNullOrEmpty(customErrorMessage))
 		{
 			// Create a CustomRule<object> to hold the unsupported validator's error message
-			rule = new Validation.CustomRule<object>(propertyName, errorMessage);
+			rule = new Validation.CustomRule<object>(propertyName, customErrorMessage);
 
 			rule.ErrorMessage = rule.ErrorMessage.Replace($"'{propertyName}' m", "M");
 
@@ -566,5 +574,56 @@ partial class ValidationDocumentTransformer
 
 	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to propery {PropertyName} from the object {ValidatorType}. Consider using .WithMessage().")]
 	static partial void LogVagueErrorMessage(ILogger logger, string validatorType, string propertyName);
+
+static Type? ExtractEnumTypeFromValidator(IPropertyValidator propertyValidator)
+{
+// For IsEnumName validators (StringEnumValidator)
+// Try to get enum names from the _enumNames field
+Type validatorType = propertyValidator.GetType();
+var enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+if (enumNamesField is not null)
+{
+string[]? enumNames = enumNamesField.GetValue(propertyValidator) as string[];
+if (enumNames is not null && enumNames.Length > 0)
+{
+// Find the enum type by matching the names
+return FindEnumTypeByNames(enumNames);
+}
+}
+
+return null;
+}
+
+static Type? FindEnumTypeByNames(string[] names)
+{
+// Search for an enum type that has exactly these member names
+foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+{
+try
+{
+foreach (var type in assembly.GetTypes())
+{
+if (!type.IsEnum)
+{
+continue;
+}
+
+string[] typeEnumNames = Enum.GetNames(type);
+if (typeEnumNames.Length == names.Length && 
+typeEnumNames.OrderBy(n => n).SequenceEqual(names.OrderBy(n => n)))
+{
+return type;
+}
+}
+}
+catch
+{
+// Skip assemblies that can't be inspected
+continue;
+}
+}
+
+return null;
+}
 
 }

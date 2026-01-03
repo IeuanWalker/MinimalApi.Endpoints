@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:6003/"
+      "url": "http://127.0.0.1:6010/"
     }
   ],
   "paths": {
@@ -1105,9 +1105,11 @@
             "description": "Validation rules:\n- Must be at least 5 characters and less than 15 characters"
           },
           "creditCard": {
+            "type": "string",
             "description": "Validation rules:\n- Must be a valid credit card number"
           },
           "url": {
+            "type": "string",
             "description": "Validation rules:\n- Must be a valid URL"
           },
           "isCompleted": {
@@ -1187,10 +1189,48 @@
             "description": "Validation rules:\n- Is required\n- Must be 200 characters or fewer"
           },
           "priorityName": {
-            "description": "Validation rules:\n- Is required\n- PriorityName has a range of values which does not include '{value}'."
+            "type": "string",
+            "description": "Enum: Low, Medium, High, Critical\n\nValidation rules:\n- Is required",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "x-enum-varnames": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "x-enum-descriptions": {
+              "Low": "Low priority task",
+              "Medium": "Medium priority task",
+              "High": "High priority task",
+              "Critical": "Critical priority task requiring immediate attention"
+            }
           },
           "statusName": {
-            "description": "Validation rules:\n- Is required\n- StatusName has a range of values which does not include '{value}'."
+            "type": "string",
+            "description": "Enum: NotStarted, InProgress, Completed, Cancelled\n\nValidation rules:\n- Is required",
+            "enum": [
+              "NotStarted",
+              "InProgress",
+              "Completed",
+              "Cancelled"
+            ],
+            "x-enum-varnames": [
+              "NotStarted",
+              "InProgress",
+              "Completed",
+              "Cancelled"
+            ],
+            "x-enum-descriptions": {
+              "NotStarted": "Task not yet started",
+              "InProgress": "Task is currently being worked on",
+              "Completed": "Task has been completed",
+              "Cancelled": "Task has been cancelled"
+            }
           }
         }
       },
@@ -1466,22 +1506,31 @@
             "format": "double"
           },
           "listStringMinCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "description": "Validation rules:\n- Must contain at least 1 item."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at least 1 item.",
+            "format": "int32"
           },
           "listIntMaxCount": {
-            "description": "Validation rules:\n- Must contain at most 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at most 10 items.",
+            "format": "int32"
           },
           "listIntRangeCount": {
-            "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+            "format": "int32"
           }
         }
       },
@@ -1561,22 +1610,31 @@
             "format": "double"
           },
           "listStringMinCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "description": "Validation rules:\n- Must contain at least 1 item."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at least 1 item.",
+            "format": "int32"
           },
           "listIntMaxCount": {
-            "description": "Validation rules:\n- Must contain at most 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at most 10 items.",
+            "format": "int32"
           },
           "listIntRangeCount": {
-            "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+            "format": "int32"
           },
           "nestedObject": {
             "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
@@ -1614,10 +1672,21 @@
             "$ref": "#/components/schemas/System.Int32"
           },
           "enumStringValidator": {
-            "description": "Validation rules:\n- EnumStringValidator has a range of values which does not include '{value}'."
+            "type": "string",
+            "description": "Enum: Success, Failure",
+            "enum": [
+              "Success",
+              "Failure"
+            ],
+            "x-enum-varnames": [
+              "Success",
+              "Failure"
+            ]
           },
           "enumIntValidator": {
-            "description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
+            "type": "integer",
+            "description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'.",
+            "format": "int32"
           },
           "enumTest": {
             "description": "Validation rules:\n- EnumTest has a range of values which does not include '{value}'."
@@ -1707,22 +1776,31 @@
             "format": "double"
           },
           "listStringMinCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "description": "Validation rules:\n- Must contain at least 1 item."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at least 1 item.",
+            "format": "int32"
           },
           "listIntMaxCount": {
-            "description": "Validation rules:\n- Must contain at most 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at most 10 items.",
+            "format": "int32"
           },
           "listIntRangeCount": {
-            "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+            "format": "int32"
           }
         }
       },
@@ -1802,22 +1880,31 @@
             "format": "double"
           },
           "listStringMinCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "description": "Validation rules:\n- Must contain at least 1 item."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at least 1 item.",
+            "format": "int32"
           },
           "listIntMaxCount": {
-            "description": "Validation rules:\n- Must contain at most 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at most 10 items.",
+            "format": "int32"
           },
           "listIntRangeCount": {
-            "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+            "format": "int32"
           },
           "nestedObject": {
             "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
@@ -1855,10 +1942,21 @@
             "$ref": "#/components/schemas/System.Int32"
           },
           "enumStringValidator": {
-            "description": "Validation rules:\n- EnumStringValidator has a range of values which does not include '{value}'."
+            "type": "string",
+            "description": "Enum: Success, Failure",
+            "enum": [
+              "Success",
+              "Failure"
+            ],
+            "x-enum-varnames": [
+              "Success",
+              "Failure"
+            ]
           },
           "enumIntValidator": {
-            "description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
+            "type": "integer",
+            "description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'.",
+            "format": "int32"
           },
           "enumTest": {
             "description": "Validation rules:\n- EnumTest has a range of values which does not include '{value}'."
@@ -1958,40 +2056,61 @@
             "description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
           },
           "intMin": {
-            "description": "Validation rules:\n- Must be >= 1"
+            "type": "integer",
+            "description": "Validation rules:\n- Must be >= 1",
+            "format": "int32"
           },
           "intMax": {
-            "description": "Validation rules:\n- Must be <= 100"
+            "type": "integer",
+            "description": "Validation rules:\n- Must be <= 100",
+            "format": "int32"
           },
           "intRange": {
-            "description": "Validation rules:\n- Must be between 1 and 100"
+            "type": "integer",
+            "description": "Validation rules:\n- Must be between 1 and 100",
+            "format": "int32"
           },
           "doubleMin": {
-            "description": "Validation rules:\n- Must be >= 0.1"
+            "type": "number",
+            "description": "Validation rules:\n- Must be >= 0.1",
+            "format": "double"
           },
           "doubleMax": {
-            "description": "Validation rules:\n- Must be <= 99.9"
+            "type": "number",
+            "description": "Validation rules:\n- Must be <= 99.9",
+            "format": "double"
           },
           "doubleRange": {
-            "description": "Validation rules:\n- Must be between 0.1 and 99.9"
+            "type": "number",
+            "description": "Validation rules:\n- Must be between 0.1 and 99.9",
+            "format": "double"
           },
           "listStringMinCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
+            "type": "string",
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "description": "Validation rules:\n- Must contain at least 1 item."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at least 1 item.",
+            "format": "int32"
           },
           "listIntMaxCount": {
-            "description": "Validation rules:\n- Must contain at most 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain at most 10 items.",
+            "format": "int32"
           },
           "listIntRangeCount": {
-            "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            "type": "integer",
+            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+            "format": "int32"
           },
           "nestedObject": {
             "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
