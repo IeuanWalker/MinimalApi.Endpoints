@@ -1099,49 +1099,10 @@
 					}
 				}
 			},
-			"ExampleApi.Endpoints.Todos.Post.NestedObject2Model": {
-				"required": [
-					"note"
-				],
-				"type": "object",
-				"properties": {
-					"note": {
-						"maxLength": 200,
-						"minLength": 1,
-						"type": "string",
-						"description": "Validation rules:\n- Is required\n- Must be 1 characters or more\n- Must be 200 characters or fewer"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.Post.NestedObjectModel": {
-				"required": [
-					"name"
-				],
-				"type": "object",
-				"properties": {
-					"name": {
-						"maxLength": 200,
-						"minLength": 1,
-						"type": "string",
-						"description": "Validation rules:\n- Is required\n- Must be 1 characters or more\n- Must be 200 characters or fewer"
-					},
-					"age": {
-						"maximum": true,
-						"exclusiveMaximum": true,
-						"minimum": true,
-						"exclusiveMinimum": true,
-						"type": "integer",
-						"description": "Validation rules:\n- Must be > 0\n- Must be < 80",
-						"format": "int32"
-					}
-				}
-			},
 			"ExampleApi.Endpoints.Todos.Post.RequestModel": {
 				"required": [
 					"title",
-					"description",
-					"nestedObject",
-					"nestedObject2"
+					"description"
 				],
 				"type": "object",
 				"properties": {
@@ -1155,53 +1116,6 @@
 						"maxLength": 1000,
 						"type": "string",
 						"description": "Validation rules:\n- Is required\n- Must be 1000 characters or fewer"
-					},
-					"email": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid email address",
-						"format": "email"
-					},
-					"pattern": {
-						"pattern": "^[A-Z][a-z]+$",
-						"type": "string",
-						"description": "Validation rules:\n- Must match pattern: ^[A-Z][a-z]+$"
-					},
-					"lengthRange": {
-						"maxLength": 15,
-						"minLength": 5,
-						"type": "string",
-						"description": "Validation rules:\n- Must be at least 5 characters and less than 15 characters"
-					},
-					"creditCard": {
-						"description": "Validation rules:\n- Must be a valid credit card number"
-					},
-					"url": {
-						"description": "Validation rules:\n- Must be a valid URL"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"isTest": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Post.NestedObjectModel"
-					},
-					"nestedObject2": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.Post.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-					},
-					"nullableString": {
-						"oneOf": [
-							{
-								"nullable": true
-							},
-							{
-								"$ref": "#/components/schemas/System.String"
-							}
-						]
-					},
-					"nonEmptyString": {
-						"$ref": "#/components/schemas/System.String"
 					}
 				}
 			},
@@ -2183,12 +2097,6 @@
 				"type": "array",
 				"items": {
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
-				}
-			},
-			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.Post.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Post.NestedObject2Model"
 				}
 			},
 			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {

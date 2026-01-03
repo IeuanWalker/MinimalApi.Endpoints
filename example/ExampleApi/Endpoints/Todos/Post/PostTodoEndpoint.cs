@@ -37,8 +37,7 @@ public class PostTodoEndpoint : IEndpoint<RequestModel, Results<Ok<ResponseModel
 		Todo todo = new()
 		{
 			Title = request.Title,
-			Description = request.Description,
-			IsCompleted = request.IsCompleted
+			Description = request.Description
 		};
 
 		Todo createdTodo = await _todoStore.CreateAsync(todo, ct);
