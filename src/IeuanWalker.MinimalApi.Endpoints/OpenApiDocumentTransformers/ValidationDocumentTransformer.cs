@@ -514,7 +514,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Validation.PatternRule => JsonSchemaType.String,
 			Validation.EmailRule => JsonSchemaType.String,
 			Validation.UrlRule => JsonSchemaType.String,
-			Validation.EnumRule enumRule => GetEnumSchemaType(enumRule.EnumType),
+			Validation.EnumRule enumRule => GetEnumRuleSchemaType(enumRule),
 			Validation.RangeRule<int> => JsonSchemaType.Integer,
 			Validation.RangeRule<long> => JsonSchemaType.Integer,
 			Validation.RangeRule<decimal> => JsonSchemaType.Number,
@@ -522,6 +522,36 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Validation.RangeRule<float> => JsonSchemaType.Number,
 			_ => null
 		};
+	}
+	
+	static JsonSchemaType GetEnumRuleSchemaType(Validation.EnumRule enumRule)
+	{
+		// Determine schema type based on the property type, not the enum type
+		// - string properties (IsEnumName) should be JsonSchemaType.String
+		// - int properties (IsInEnum on int) should be JsonSchemaType.Integer
+		// - enum properties (IsInEnum on TEnum) should be JsonSchemaType.Integer (enum's underlying type)
+		
+		Type propertyType = enumRule.PropertyType;
+		
+		// Handle nullable types
+		Type actualType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
+		
+		// If property type is string, return string schema type
+		if (actualType == typeof(string))
+		{
+			return JsonSchemaType.String;
+		}
+		
+		// If property type is int or an enum type, return integer schema type
+		if (actualType == typeof(int) || actualType == typeof(long) ||  
+			actualType == typeof(short) || actualType == typeof(byte) ||
+			actualType.IsEnum)
+		{
+			return JsonSchemaType.Integer;
+		}
+		
+		// Default fallback (shouldn't happen)
+		return JsonSchemaType.String;
 	}
 
 	static JsonSchemaType GetEnumSchemaType(Type enumType)
