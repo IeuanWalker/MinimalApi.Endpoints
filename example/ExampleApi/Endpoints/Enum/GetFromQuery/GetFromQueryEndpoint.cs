@@ -2,19 +2,19 @@ using System.Diagnostics.CodeAnalysis;
 using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 
-namespace ExampleApi.Endpoints.Enum.PostFromBody;
+namespace ExampleApi.Endpoints.Enum.GetFromQuery;
 
-public class PostFromBodyEndpoint : IEndpointWithoutResponse<RequestModel>
+public class GetFromQueryEndpoint : IEndpointWithoutResponse<RequestModel>
 {
 	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
 			.Group<EnumEndpointGroup>()
-			.Post()
+			.Get()
 			.Version(1.0)
-			.RequestFromBody()
-			.WithSummary("FromBody");
+			.RequestAsParameters()
+			.WithSummary("FromQuery");
 	}
 
 	public async Task Handle(RequestModel request, CancellationToken ct)
