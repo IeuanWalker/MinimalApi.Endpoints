@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -20,7 +21,7 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Process each schema in the document
-		foreach (var schemaEntry in document.Components.Schemas.ToList())
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
 		{
 			string schemaName = schemaEntry.Key;
 			IOpenApiSchema schemaInterface = schemaEntry.Value;
@@ -38,7 +39,7 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 
 			// Check if it's a direct enum type
-			Type? enumType = null;
+			Type? enumType;
 			if (foundType.IsEnum)
 			{
 				enumType = foundType;
@@ -66,9 +67,9 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		// Try to find the type by its full name
 		// Schema names are typically the full type name with + replaced by .
 		string typeName = schemaName.Replace('+', '.');
-		
+
 		// Try to load the type from all loaded assemblies
-		foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 		{
 			Type? type = assembly.GetType(typeName);
 			if (type is not null)
@@ -87,14 +88,14 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		{
 			// Get the underlying type
 			Type underlyingType = Nullable.GetUnderlyingType(type)!;
-			
+
 			// Check if the underlying type is an enum
 			if (underlyingType.IsEnum)
 			{
 				return underlyingType;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -102,7 +103,7 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 	{
 		// Get the underlying type (usually int, but could be byte, short, long, etc.)
 		Type underlyingType = Enum.GetUnderlyingType(enumType);
-		
+
 		// Get all enum values
 		Array enumValues = Enum.GetValues(enumType);
 		string[] enumNames = Enum.GetNames(enumType);
@@ -116,15 +117,15 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		{
 			object enumValue = enumValues.GetValue(i)!;
 			string enumName = enumNames[i];
-			
+
 			// Convert to underlying type value (integer)
 			long numericValue = Convert.ToInt64(enumValue);
 			values.Add(JsonValue.Create(numericValue)!);
 			varNames.Add(enumName);
 
 			// Check for Description attribute
-			var field = enumType.GetField(enumName);
-			var descriptionAttr = field?.GetCustomAttributes(typeof(DescriptionAttribute), false)
+			FieldInfo? field = enumType.GetField(enumName);
+			DescriptionAttribute? descriptionAttr = field?.GetCustomAttributes(typeof(DescriptionAttribute), false)
 				.OfType<DescriptionAttribute>()
 				.FirstOrDefault();
 
@@ -136,11 +137,11 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 
 		// Set the type based on the underlying type
 		schema.Type = GetJsonSchemaType(underlyingType);
-		
+
 		// Add the enum values array - use JsonNodeExtension for the enum property
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
 		schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
-		
+
 		// Add x-enum-varnames extension for member names
 		// This is a common extension supported by many OpenAPI tools
 		schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
@@ -149,7 +150,7 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		if (descriptions.Count > 0)
 		{
 			JsonObject descObj = [];
-			foreach (var kvp in descriptions)
+			foreach (KeyValuePair<string, string> kvp in descriptions)
 			{
 				descObj[kvp.Key] = kvp.Value;
 			}

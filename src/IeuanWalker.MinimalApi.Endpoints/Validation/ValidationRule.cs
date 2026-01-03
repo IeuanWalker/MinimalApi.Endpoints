@@ -237,8 +237,8 @@ public sealed record EnumRule : ValidationRule
 
 		EnumType = enumType;
 		PropertyType = propertyType;
-		ErrorMessage = string.IsNullOrWhiteSpace(errorMessage) 
-			? $"{propertyName} has a range of values which does not include '{{value}}'." 
+		ErrorMessage = string.IsNullOrWhiteSpace(errorMessage)
+			? $"{propertyName} has a range of values which does not include '{{value}}'."
 			: errorMessage;
 	}
 
@@ -246,7 +246,7 @@ public sealed record EnumRule : ValidationRule
 	/// The enum type that defines valid values
 	/// </summary>
 	public Type EnumType { get; init; }
-	
+
 	/// <summary>
 	/// The property type (string, int, int?, etc.) that is being validated
 	/// Used to determine how to serialize enum values in the schema

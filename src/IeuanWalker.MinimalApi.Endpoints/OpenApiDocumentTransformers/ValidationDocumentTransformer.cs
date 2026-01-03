@@ -1,4 +1,5 @@
-using System.Text;
+using System.ComponentModel;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.OpenApi;
@@ -15,8 +16,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	public bool AppendRulesToPropertyDescription { get; set; } = true;
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
-		string test = SerializeOpenApi(document);
-
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
 		Dictionary<Type, (List<Validation.ValidationRule>, bool appendRulesToPropertyDescription)> allValidationRules = [];
 
@@ -39,17 +38,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
-		test = SerializeOpenApi(document);
-
 		return Task.CompletedTask;
-	}
-	// TODO: Remove once no longer needed
-	static string SerializeOpenApi(OpenApiDocument doc)
-	{
-		var sb = new StringBuilder();
-		var writer = new OpenApiJsonWriter(new StringWriter(sb));
-		doc.SerializeAsV3(writer); // or SerializeAsV2
-		return sb.ToString();
 	}
 
 	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
@@ -133,12 +122,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// We need to preserve this structure when creating the inline schema
 		bool isNullableWrapper = originalOpenApiSchema?.OneOf is not null && originalOpenApiSchema.OneOf.Count > 0;
 		IOpenApiSchema? actualSchema = originalOpenApiSchema;
-		
+
 		if (isNullableWrapper)
 		{
-			// Find the non-null schema in the oneOf array 
+			// Find the non-null schema in the oneOf array
 			// The nullable marker is typically an empty or minimal schema
-			actualSchema = originalOpenApiSchema!.OneOf.FirstOrDefault(s => 
+			actualSchema = originalOpenApiSchema!.OneOf?.FirstOrDefault(s =>
 			{
 				if (s is OpenApiSchemaReference)
 				{
@@ -152,7 +141,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 				return false;
 			});
-			
+
 			// If we found a better schema to work with, update our reference
 			if (actualSchema is not null && actualSchema != originalOpenApiSchema)
 			{
@@ -164,7 +153,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		JsonSchemaType? referenceType = null;
 		string? referenceFormat = null;
 		bool isNullableReference = false;
-		
+
 		if (actualSchema is OpenApiSchemaReference schemaRef)
 		{
 			string? refId = schemaRef.Reference?.Id;
@@ -176,7 +165,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					isNullableWrapper = true;
 					isNullableReference = true;
 				}
-				
+
 				if (refId.Contains("System.String"))
 				{
 					referenceType = JsonSchemaType.String;
@@ -374,7 +363,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (originalOpenApiSchema?.Extensions is not null && originalOpenApiSchema.Extensions.Count > 0)
 		{
 			newInlineSchema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-			foreach (var extension in originalOpenApiSchema.Extensions)
+			foreach (KeyValuePair<string, IOpenApiExtension> extension in originalOpenApiSchema.Extensions)
 			{
 				newInlineSchema.Extensions[extension.Key] = extension.Value;
 			}
@@ -387,11 +376,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// The nullable option is represented as an empty schema
 			return new OpenApiSchema
 			{
-				OneOf = new List<IOpenApiSchema>
-				{
+				OneOf =
+				[
 					new OpenApiSchema(), // Empty schema represents the nullable option
 					newInlineSchema
-				}
+				]
 			};
 		}
 
@@ -523,33 +512,33 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			_ => null
 		};
 	}
-	
+
 	static JsonSchemaType GetEnumRuleSchemaType(Validation.EnumRule enumRule)
 	{
 		// Determine schema type based on the property type, not the enum type
 		// - string properties (IsEnumName) should be JsonSchemaType.String
 		// - int properties (IsInEnum on int) should be JsonSchemaType.Integer
 		// - enum properties (IsInEnum on TEnum) should be JsonSchemaType.Integer (enum's underlying type)
-		
+
 		Type propertyType = enumRule.PropertyType;
-		
+
 		// Handle nullable types
 		Type actualType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
-		
+
 		// If property type is string, return string schema type
 		if (actualType == typeof(string))
 		{
 			return JsonSchemaType.String;
 		}
-		
+
 		// If property type is int or an enum type, return integer schema type
-		if (actualType == typeof(int) || actualType == typeof(long) ||  
+		if (actualType == typeof(int) || actualType == typeof(long) ||
 			actualType == typeof(short) || actualType == typeof(byte) ||
 			actualType.IsEnum)
 		{
 			return JsonSchemaType.Integer;
 		}
-		
+
 		// Default fallback (shouldn't happen)
 		return JsonSchemaType.String;
 	}
@@ -558,7 +547,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		// Get the underlying type of the enum (byte, short, int, long, etc.)
 		Type underlyingType = Enum.GetUnderlyingType(enumType);
-		
+
 		// Map to appropriate JSON schema type
 		if (underlyingType == typeof(byte) || underlyingType == typeof(sbyte) ||
 			underlyingType == typeof(short) || underlyingType == typeof(ushort) ||
@@ -567,7 +556,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			return JsonSchemaType.Integer;
 		}
-		
+
 		// Default to string (shouldn't happen with normal enums, but just in case)
 		return JsonSchemaType.String;
 	}
@@ -619,8 +608,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			varNames.Add(enumName);
 
 			// Check for Description attribute
-			var field = enumType.GetField(enumName);
-			var descriptionAttr = field?.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+			FieldInfo? field = enumType.GetField(enumName);
+			DescriptionAttribute? descriptionAttr = field?.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
 			.OfType<System.ComponentModel.DescriptionAttribute>()
 			.FirstOrDefault();
 
@@ -645,7 +634,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (descriptions.Count > 0)
 		{
 			JsonObject descObj = [];
-			foreach (var kvp in descriptions)
+			foreach (KeyValuePair<string, string> kvp in descriptions)
 			{
 				descObj[kvp.Key] = kvp.Value;
 			}
@@ -715,11 +704,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (referencedSchema is OpenApiSchema enumSchema)
 		{
 			// Check if this is an enum schema by looking for the Extensions["enum"] property
-			if (enumSchema.Extensions?.TryGetValue("enum", out IOpenApiExtension? enumExtension) == true)
+			if (enumSchema.Extensions?.TryGetValue("enum", out IOpenApiExtension? _) == true)
 			{
 				return true;
 			}
-			
+
 			// Also check the standard Enum property as a fallback
 			if (enumSchema.Enum is not null && enumSchema.Enum.Count > 0)
 			{

@@ -154,7 +154,7 @@ partial class ValidationDocumentTransformer
 		}
 
 		// Check if this is an enum validator (IsEnumName for string, IsInEnum for int/enum)
-		(Type? enumType, Type? propertyType) = ExtractEnumAndPropertyTypes(propertyValidator, ruleComponent);
+		(Type? enumType, Type? propertyType) = ExtractEnumAndPropertyTypes(propertyValidator);
 		if (enumType is not null && propertyType is not null)
 		{
 			string enumErrorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, logger);
@@ -575,337 +575,341 @@ partial class ValidationDocumentTransformer
 	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to propery {PropertyName} from the object {ValidatorType}. Consider using .WithMessage().")]
 	static partial void LogVagueErrorMessage(ILogger logger, string validatorType, string propertyName);
 
-/// <summary>
-/// Extracts both the enum type and the property type from a FluentValidation validator
-/// Returns (enumType, propertyType) where:
-/// - enumType is the enum type being validated against
-/// - propertyType is the actual property type (string for IsEnumName, int for IsInEnum, TEnum for IsInEnum on enum)
-/// </summary>
-static (Type? enumType, Type? propertyType) ExtractEnumAndPropertyTypes(IPropertyValidator propertyValidator, IRuleComponent ruleComponent)
-{
-	Type validatorType = propertyValidator.GetType();
-	
-	// For built-in FluentValidation EnumValidator (used with .IsInEnum() on enum properties)
-	// This validator is used when calling .IsInEnum() on TEnum or TEnum? properties
-	if (validatorType.Name.Contains("EnumValidator"))
+	/// <summary>
+	/// Extracts both the enum type and the property type from a FluentValidation validator
+	/// Returns (enumType, propertyType) where:
+	/// - enumType is the enum type being validated against
+	/// - propertyType is the actual property type (string for IsEnumName, int for IsInEnum, TEnum for IsInEnum on enum)
+	/// </summary>
+	static (Type? enumType, Type? propertyType) ExtractEnumAndPropertyTypes(IPropertyValidator propertyValidator)
 	{
-		// Try to get the enum type from the generic type argument
-		// EnumValidator<TModel, TProperty> where TProperty is the enum type or Nullable<TEnum>
-		if (validatorType.IsGenericType)
+		Type validatorType = propertyValidator.GetType();
+
+		// For built-in FluentValidation EnumValidator (used with .IsInEnum() on enum properties)
+		// This validator is used when calling .IsInEnum() on TEnum or TEnum? properties
+		if (validatorType.Name.Contains("EnumValidator"))
 		{
-			Type[] genericArgs = validatorType.GetGenericArguments();
-			// EnumValidator has 2 generic arguments: TModel and TProperty
-			// We need the second one (TProperty)
-			if (genericArgs.Length >= 2)
+			// Try to get the enum type from the generic type argument
+			// EnumValidator<TModel, TProperty> where TProperty is the enum type or Nullable<TEnum>
+			if (validatorType.IsGenericType)
 			{
-				Type propertyType = genericArgs[1];
-				
-				// Check if it's directly an enum
-				if (propertyType.IsEnum)
+				Type[] genericArgs = validatorType.GetGenericArguments();
+				// EnumValidator has 2 generic arguments: TModel and TProperty
+				// We need the second one (TProperty)
+				if (genericArgs.Length >= 2)
 				{
-					return (propertyType, propertyType);
-				}
-				
-				// Check if it's a nullable enum (Nullable<TEnum>)
-				if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-				{
-					Type? underlyingType = Nullable.GetUnderlyingType(propertyType);
-					if (underlyingType is not null && underlyingType.IsEnum)
+					Type propertyType = genericArgs[1];
+
+					// Check if it's directly an enum
+					if (propertyType.IsEnum)
 					{
-						return (underlyingType, propertyType);  // Return enum type and nullable property type
+						return (propertyType, propertyType);
 					}
-				}
-			}
-		}
-		
-		// Fallback: Try to infer from _enumType field
-		var enumTypeField = validatorType.GetField("_enumType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-		if (enumTypeField is not null)
-		{
-			Type? enumType = enumTypeField.GetValue(propertyValidator) as Type;
-			if (enumType is not null && enumType.IsEnum)
-			{
-				// Assume property type is the enum type for built-in EnumValidator
-				return (enumType, enumType);
-			}
-		}
-	}
-	
-	// For IsEnumName validators (StringEnumValidator) - property type is string
-	var enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-	if (enumNamesField is not null)
-	{
-		string[]? enumNames = enumNamesField.GetValue(propertyValidator) as string[];
-		if (enumNames is not null && enumNames.Length > 0)
-		{
-			// Find the enum type by matching the names
-			Type? enumType = FindEnumTypeByNames(enumNames);
-			if (enumType is not null)
-			{
-				return (enumType, typeof(string));  // Property type is string for IsEnumName
-			}
-		}
-	}
-	
-	// For IsInEnum validators on int properties (PredicateValidator created by Must())
-	if (validatorType.Name.StartsWith("PredicateValidator"))
-	{
-		// First, try to extract from error message
-		var errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-		if (errorMessageSource is not null)
-		{
-			object? messageSource = errorMessageSource.GetValue(propertyValidator);
-			if (messageSource is not null)
-			{
-				var messageProperty = messageSource.GetType().GetProperty("Message", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-				if (messageProperty is not null)
-				{
-					string? message = messageProperty.GetValue(messageSource) as string;
-					if (message is not null && (message.Contains("must be a valid value of enum") || message.Contains("must be empty or a valid value of enum")))
+
+					// Check if it's a nullable enum (Nullable<TEnum>)
+					if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
 					{
-						Type? enumType = ExtractEnumTypeFromMessage(message);
-						if (enumType is not null)
+						Type? underlyingType = Nullable.GetUnderlyingType(propertyType);
+						if (underlyingType is not null && underlyingType.IsEnum)
 						{
-							// Property type is int for IsInEnum on int properties
-							return (enumType, typeof(int));
+							return (underlyingType, propertyType);  // Return enum type and nullable property type
 						}
 					}
 				}
 			}
-		}
-		
-		// Fallback: Try to extract from predicate closure
-		var predicateField = validatorType.GetField("_predicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-		if (predicateField is not null)
-		{
-			object? predicate = predicateField.GetValue(propertyValidator);
-			if (predicate is Delegate predicateDelegate)
+
+			// Fallback: Try to infer from _enumType field
+			FieldInfo? enumTypeField = validatorType.GetField("_enumType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (enumTypeField is not null)
 			{
-				// Recursively search through nested closures
-				Type? enumType = FindEnumTypeInClosure(predicateDelegate.Target);
+				Type? enumType = enumTypeField.GetValue(propertyValidator) as Type;
+				if (enumType is not null && enumType.IsEnum)
+				{
+					// Assume property type is the enum type for built-in EnumValidator
+					return (enumType, enumType);
+				}
+			}
+		}
+
+		// For IsEnumName validators (StringEnumValidator) - property type is string
+		FieldInfo? enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		if (enumNamesField is not null)
+		{
+			string[]? enumNames = enumNamesField.GetValue(propertyValidator) as string[];
+			if (enumNames is not null && enumNames.Length > 0)
+			{
+				// Find the enum type by matching the names
+				Type? enumType = FindEnumTypeByNames(enumNames);
 				if (enumType is not null)
 				{
-					// Property type is int for IsInEnum on int properties
-					return (enumType, typeof(int));
+					return (enumType, typeof(string));  // Property type is string for IsEnumName
 				}
 			}
 		}
-	}
-	
-	return (null, null);
-}
 
-static Type? ExtractEnumTypeFromValidator(IPropertyValidator propertyValidator)
-{
-Type validatorType = propertyValidator.GetType();
-
-// For built-in FluentValidation EnumValidator (used with .IsInEnum() on enum properties)
-// This validator is used when calling .IsInEnum() on TEnum or TEnum? properties
-if (validatorType.Name.Contains("EnumValidator"))
-{
-	// Try to get the enum type from the generic type argument
-	// EnumValidator<TModel, TProperty> where TProperty is the enum type or Nullable<TEnum>
-	if (validatorType.IsGenericType)
-	{
-		Type[] genericArgs = validatorType.GetGenericArguments();
-		// EnumValidator has 2 generic arguments: TModel and TProperty
-		// We need the second one (TProperty)
-		if (genericArgs.Length >= 2)
+		// For IsInEnum validators on int properties (PredicateValidator created by Must())
+		if (validatorType.Name.StartsWith("PredicateValidator"))
 		{
-			Type propertyType = genericArgs[1];
-			
-			// Check if it's directly an enum
-			if (propertyType.IsEnum)
+			// First, try to extract from error message
+			PropertyInfo? errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+			if (errorMessageSource is not null)
 			{
-				return propertyType;
-			}
-			
-			// Check if it's a nullable enum (Nullable<TEnum>)
-			if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-			{
-				Type? underlyingType = Nullable.GetUnderlyingType(propertyType);
-				if (underlyingType is not null && underlyingType.IsEnum)
+				object? messageSource = errorMessageSource.GetValue(propertyValidator);
+				if (messageSource is not null)
 				{
-					return underlyingType;
+					PropertyInfo? messageProperty = messageSource.GetType().GetProperty("Message", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+					if (messageProperty is not null)
+					{
+						string? message = messageProperty.GetValue(messageSource) as string;
+						if (message is not null && (message.Contains("must be a valid value of enum") || message.Contains("must be empty or a valid value of enum")))
+						{
+							Type? enumType = ExtractEnumTypeFromMessage(message);
+							if (enumType is not null)
+							{
+								// Property type is int for IsInEnum on int properties
+								return (enumType, typeof(int));
+							}
+						}
+					}
+				}
+			}
+
+			// Fallback: Try to extract from predicate closure
+			FieldInfo? predicateField = validatorType.GetField("_predicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (predicateField is not null)
+			{
+				object? predicate = predicateField.GetValue(propertyValidator);
+				if (predicate is Delegate predicateDelegate)
+				{
+					// Recursively search through nested closures
+					Type? enumType = FindEnumTypeInClosure(predicateDelegate.Target);
+					if (enumType is not null)
+					{
+						// Property type is int for IsInEnum on int properties
+						return (enumType, typeof(int));
+					}
 				}
 			}
 		}
+
+		return (null, null);
 	}
-	
-	// Fallback: Try to infer from property type by checking the validator's context
-	// The EnumValidator has access to the property type through its context
-	// Try to get it from any "_enumType" or similar field
-	var enumTypeField = validatorType.GetField("_enumType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-	if (enumTypeField is not null)
+
+	static Type? ExtractEnumTypeFromValidator(IPropertyValidator propertyValidator)
 	{
-		Type? enumType = enumTypeField.GetValue(propertyValidator) as Type;
-		if (enumType is not null && enumType.IsEnum)
+		Type validatorType = propertyValidator.GetType();
+
+		// For built-in FluentValidation EnumValidator (used with .IsInEnum() on enum properties)
+		// This validator is used when calling .IsInEnum() on TEnum or TEnum? properties
+		if (validatorType.Name.Contains("EnumValidator"))
 		{
-			return enumType;
+			// Try to get the enum type from the generic type argument
+			// EnumValidator<TModel, TProperty> where TProperty is the enum type or Nullable<TEnum>
+			if (validatorType.IsGenericType)
+			{
+				Type[] genericArgs = validatorType.GetGenericArguments();
+				// EnumValidator has 2 generic arguments: TModel and TProperty
+				// We need the second one (TProperty)
+				if (genericArgs.Length >= 2)
+				{
+					Type propertyType = genericArgs[1];
+
+					// Check if it's directly an enum
+					if (propertyType.IsEnum)
+					{
+						return propertyType;
+					}
+
+					// Check if it's a nullable enum (Nullable<TEnum>)
+					if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+					{
+						Type? underlyingType = Nullable.GetUnderlyingType(propertyType);
+						if (underlyingType is not null && underlyingType.IsEnum)
+						{
+							return underlyingType;
+						}
+					}
+				}
+			}
+
+			// Fallback: Try to infer from property type by checking the validator's context
+			// The EnumValidator has access to the property type through its context
+			// Try to get it from any "_enumType" or similar field
+			FieldInfo? enumTypeField = validatorType.GetField("_enumType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (enumTypeField is not null)
+			{
+				Type? enumType = enumTypeField.GetValue(propertyValidator) as Type;
+				if (enumType is not null && enumType.IsEnum)
+				{
+					return enumType;
+				}
+			}
 		}
+
+		// For IsEnumName validators (StringEnumValidator)
+		// Try to get enum names from the _enumNames field
+		FieldInfo? enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		if (enumNamesField is not null)
+		{
+			string[]? enumNames = enumNamesField.GetValue(propertyValidator) as string[];
+			if (enumNames is not null && enumNames.Length > 0)
+			{
+				// Find the enum type by matching the names
+				return FindEnumTypeByNames(enumNames);
+			}
+		}
+
+		// For IsInEnum validators (PredicateValidator created by Must())
+		// IsInEnum creates a Must validator with a predicate that captures the enum type
+		if (validatorType.Name.StartsWith("PredicateValidator"))
+		{
+			// First, try to extract from error message
+			PropertyInfo? errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+			if (errorMessageSource is not null)
+			{
+				object? messageSource = errorMessageSource.GetValue(propertyValidator);
+				if (messageSource is not null)
+				{
+					PropertyInfo? messageProperty = messageSource.GetType().GetProperty("Message", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+					if (messageProperty is not null)
+					{
+						string? message = messageProperty.GetValue(messageSource) as string;
+						if (message is not null && (message.Contains("must be a valid value of enum") || message.Contains("must be empty or a valid value of enum")))
+						{
+							Type? enumType = ExtractEnumTypeFromMessage(message);
+							if (enumType is not null)
+							{
+								return enumType;
+							}
+						}
+					}
+				}
+			}
+
+			// Fallback: Try to extract from predicate closure
+			// The IsInEnum extension captures the enumType in a nested closure structure
+			FieldInfo? predicateField = validatorType.GetField("_predicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (predicateField is not null)
+			{
+				object? predicate = predicateField.GetValue(propertyValidator);
+				if (predicate is Delegate predicateDelegate)
+				{
+					// Recursively search through nested closures
+					Type? enumType = FindEnumTypeInClosure(predicateDelegate.Target);
+					if (enumType is not null)
+					{
+						return enumType;
+					}
+				}
+			}
+		}
+
+		return null;
 	}
-}
 
-// For IsEnumName validators (StringEnumValidator)
-// Try to get enum names from the _enumNames field
-var enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-if (enumNamesField is not null)
-{
-string[]? enumNames = enumNamesField.GetValue(propertyValidator) as string[];
-if (enumNames is not null && enumNames.Length > 0)
-{
-// Find the enum type by matching the names
-return FindEnumTypeByNames(enumNames);
-}
-}
+	static Type? FindEnumTypeByNames(string[] names)
+	{
+		// Search for an enum type that has exactly these member names
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			try
+			{
+				foreach (Type type in assembly.GetTypes())
+				{
+					if (!type.IsEnum)
+					{
+						continue;
+					}
 
-// For IsInEnum validators (PredicateValidator created by Must())
-// IsInEnum creates a Must validator with a predicate that captures the enum type
-if (validatorType.Name.StartsWith("PredicateValidator"))
-{
-// First, try to extract from error message
-var errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-if (errorMessageSource is not null)
-{
-object? messageSource = errorMessageSource.GetValue(propertyValidator);
-if (messageSource is not null)
-{
-var messageProperty = messageSource.GetType().GetProperty("Message", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-if (messageProperty is not null)
-{
-string? message = messageProperty.GetValue(messageSource) as string;
-if (message is not null && (message.Contains("must be a valid value of enum") || message.Contains("must be empty or a valid value of enum")))
-{
-Type? enumType = ExtractEnumTypeFromMessage(message);
-if (enumType is not null)
-{
-return enumType;
-}
-}
-}
-}
-}
+					string[] typeEnumNames = Enum.GetNames(type);
+					if (typeEnumNames.Length == names.Length &&
+					typeEnumNames.OrderBy(n => n).SequenceEqual(names.OrderBy(n => n)))
+					{
+						return type;
+					}
+				}
+			}
+#pragma warning disable CA1031 // Do not catch general exception types
+			catch
+			{
+				// Skip assemblies that can't be inspected
+				continue;
+			}
+#pragma warning restore CA1031 // Do not catch general exception types
+		}
 
-// Fallback: Try to extract from predicate closure
-// The IsInEnum extension captures the enumType in a nested closure structure
-var predicateField = validatorType.GetField("_predicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-if (predicateField is not null)
-{
-object? predicate = predicateField.GetValue(propertyValidator);
-if (predicate is Delegate predicateDelegate)
-{
-// Recursively search through nested closures
-Type? enumType = FindEnumTypeInClosure(predicateDelegate.Target);
-if (enumType is not null)
-{
-return enumType;
-}
-}
-}
-}
+		return null;
+	}
 
-return null;
-}
+	static Type? ExtractEnumTypeFromMessage(string message)
+	{
+		// Extract enum type name from error message like "'{PropertyName}' must be a valid value of enum TodoPriority."
+		// or "'{PropertyName}' must be empty or a valid value of enum TodoPriority."
+		int enumIndex = message.IndexOf("enum ");
+		if (enumIndex < 0)
+		{
+			return null;
+		}
 
-static Type? FindEnumTypeByNames(string[] names)
-{
-// Search for an enum type that has exactly these member names
-foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-{
-try
-{
-foreach (var type in assembly.GetTypes())
-{
-if (!type.IsEnum)
-{
-continue;
-}
+		string afterEnum = message[(enumIndex + 5)..]; // Skip "enum "
+		int dotIndex = afterEnum.IndexOf('.');
+		string enumTypeName = dotIndex > 0 ? afterEnum[..dotIndex].Trim() : afterEnum.Trim();
 
-string[] typeEnumNames = Enum.GetNames(type);
-if (typeEnumNames.Length == names.Length && 
-typeEnumNames.OrderBy(n => n).SequenceEqual(names.OrderBy(n => n)))
-{
-return type;
-}
-}
-}
-catch
-{
-// Skip assemblies that can't be inspected
-continue;
-}
-}
+		// Search for enum type by name
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+		{
+			try
+			{
+				foreach (Type type in assembly.GetTypes())
+				{
+					if (type.IsEnum && type.Name == enumTypeName)
+					{
+						return type;
+					}
+				}
+			}
+#pragma warning disable CA1031 // Do not catch general exception types
+			catch
+			{
+				// Skip assemblies that can't be inspected
+				continue;
+			}
+#pragma warning restore CA1031 // Do not catch general exception types
+		}
 
-return null;
-}
+		return null;
+	}
 
-static Type? ExtractEnumTypeFromMessage(string message)
-{
-// Extract enum type name from error message like "'{PropertyName}' must be a valid value of enum TodoPriority."
-// or "'{PropertyName}' must be empty or a valid value of enum TodoPriority."
-int enumIndex = message.IndexOf("enum ");
-if (enumIndex < 0)
-{
-return null;
-}
+	static Type? FindEnumTypeInClosure(object? target, int maxDepth = 5)
+	{
+		if (target is null || maxDepth <= 0)
+		{
+			return null;
+		}
 
-string afterEnum = message.Substring(enumIndex + 5); // Skip "enum "
-int dotIndex = afterEnum.IndexOf('.');
-string enumTypeName = dotIndex > 0 ? afterEnum.Substring(0, dotIndex).Trim() : afterEnum.Trim();
+		FieldInfo[] fields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		foreach (FieldInfo field in fields)
+		{
+			object? fieldValue = field.GetValue(target);
 
-// Search for enum type by name
-foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-{
-try
-{
-foreach (var type in assembly.GetTypes())
-{
-if (type.IsEnum && type.Name == enumTypeName)
-{
-return type;
-}
-}
-}
-catch
-{
-// Skip assemblies that can't be inspected
-continue;
-}
-}
+			// Check if this field is directly an enum type
+			if (fieldValue is Type enumType && enumType.IsEnum)
+			{
+				return enumType;
+			}
 
-return null;
-}
+			// If it's a delegate, recurse into its closure
+			if (fieldValue is Delegate del && del.Target is not null)
+			{
+				Type? found = FindEnumTypeInClosure(del.Target, maxDepth - 1);
+				if (found is not null)
+				{
+					return found;
+				}
+			}
+		}
 
-static Type? FindEnumTypeInClosure(object? target, int maxDepth = 5)
-{
-if (target is null || maxDepth <= 0)
-{
-return null;
-}
-
-var fields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-foreach (var field in fields)
-{
-object? fieldValue = field.GetValue(target);
-
-// Check if this field is directly an enum type
-if (fieldValue is Type enumType && enumType.IsEnum)
-{
-return enumType;
-}
-
-// If it's a delegate, recurse into its closure
-if (fieldValue is Delegate del && del.Target is not null)
-{
-Type? found = FindEnumTypeInClosure(del.Target, maxDepth - 1);
-if (found is not null)
-{
-return found;
-}
-}
-}
-
-return null;
-}
+		return null;
+	}
 
 }
