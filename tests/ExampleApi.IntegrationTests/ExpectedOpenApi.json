@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://127.0.0.1:6022/"
+      "url": "http://localhost/"
     }
   ],
   "paths": {
@@ -1178,7 +1178,7 @@
       "ExampleApi.Endpoints.Todos.PostEnumString.RequestModel": {
         "required": [
           "title",
-          "priorityName",
+          "priorityNameAsString",
           "statusName"
         ],
         "type": "object",
@@ -1188,7 +1188,7 @@
             "type": "string",
             "description": "Validation rules:\n- Is required\n- Must be 200 characters or fewer"
           },
-          "priorityName": {
+          "priorityNameAsString": {
             "type": "string",
             "description": "Enum: Low, Medium, High, Critical\n\nValidation rules:\n- Is required",
             "enum": [
@@ -1203,6 +1203,35 @@
               "High": "High priority task",
               "Critical": "Critical priority task requiring immediate attention"
             }
+          },
+          "priorityNameAsEnum": {
+            "$ref": "#/components/schemas/ExampleApi.Data.TodoPriority"
+          },
+          "priorityNameAsStringNullable": {
+            "type": "string",
+            "description": "Enum: Low, Medium, High, Critical",
+            "enum": [
+              "Low",
+              "Medium",
+              "High",
+              "Critical"
+            ],
+            "x-enum-descriptions": {
+              "Low": "Low priority task",
+              "Medium": "Medium priority task",
+              "High": "High priority task",
+              "Critical": "Critical priority task requiring immediate attention"
+            }
+          },
+          "priorityNameAsEnumNullable": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[ExampleApi.Data.TodoPriority, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ]
           },
           "statusName": {
             "type": "string",
@@ -1239,6 +1268,26 @@
           },
           "createdAt": {
             "$ref": "#/components/schemas/System.DateTime"
+          },
+          "priorityNullable": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[ExampleApi.Data.TodoPriority, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ]
+          },
+          "statusNullable": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/System.Nullable`1[[ExampleApi.Data.TodoStatus, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+              }
+            ]
           }
         }
       },
@@ -2295,6 +2344,50 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/System.Int32"
+        }
+      },
+      "System.Nullable`1[[ExampleApi.Data.TodoPriority, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "integer",
+        "description": "Enum: Low, Medium, High, Critical",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "x-enum-varnames": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "x-enum-descriptions": {
+          "Low": "Low priority task",
+          "Medium": "Medium priority task",
+          "High": "High priority task",
+          "Critical": "Critical priority task requiring immediate attention"
+        }
+      },
+      "System.Nullable`1[[ExampleApi.Data.TodoStatus, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "integer",
+        "description": "Enum: NotStarted, InProgress, Completed, Cancelled",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "x-enum-varnames": [
+          "NotStarted",
+          "InProgress",
+          "Completed",
+          "Cancelled"
+        ],
+        "x-enum-descriptions": {
+          "NotStarted": "Task not yet started",
+          "InProgress": "Task is currently being worked on",
+          "Completed": "Task has been completed",
+          "Cancelled": "Task has been cancelled"
         }
       },
       "System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {

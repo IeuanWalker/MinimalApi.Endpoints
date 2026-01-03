@@ -42,6 +42,8 @@ public class ResponseModel
 	public TodoPriority Priority { get; set; }
 	public TodoStatus Status { get; set; }
 	public DateTime CreatedAt { get; set; }
+	public TodoPriority? PriorityNullable { get; set; }
+	public TodoStatus? StatusNullable { get; set; }
 
 	public static ResponseModel FromTodo(Todo todo)
 	{
@@ -51,7 +53,9 @@ public class ResponseModel
 			Title = todo.Title,
 			Priority = todo.Priority,
 			Status = todo.Status,
-			CreatedAt = todo.CreatedAt
+			CreatedAt = todo.CreatedAt,
+			PriorityNullable = todo.Priority,
+			StatusNullable = todo.Status
 		};
 	}
 }

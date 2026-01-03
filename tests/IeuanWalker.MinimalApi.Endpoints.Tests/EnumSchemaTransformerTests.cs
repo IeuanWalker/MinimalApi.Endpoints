@@ -246,4 +246,50 @@ public class EnumSchemaTransformerTests
 
 		return document.Components.Schemas[schemaKey] as OpenApiSchema;
 	}
+
+	[Fact]
+	public async Task TransformAsync_WithNullableEnum_EnrichesSchema()
+	{
+		// Arrange
+		var transformer = new EnumSchemaTransformer();
+		var document = CreateTestDocumentWithNullableEnum<SimpleEnum>();
+		var context = CreateContext();
+
+		// Act
+		await transformer.TransformAsync(document, context, CancellationToken.None);
+
+		// Assert
+		var nullableEnumSchema = GetSchema(document, typeof(SimpleEnum?));
+		nullableEnumSchema.ShouldNotBeNull();
+		
+		// Should have enum values
+		nullableEnumSchema.Extensions.ShouldContainKey("enum");
+		
+		// Should have varnames
+		nullableEnumSchema.Extensions.ShouldContainKey("x-enum-varnames");
+		
+		// Should have description
+		nullableEnumSchema.Description.ShouldContain("First");
+		nullableEnumSchema.Description.ShouldContain("Second");
+		nullableEnumSchema.Description.ShouldContain("Third");
+	}
+
+	static OpenApiDocument CreateTestDocumentWithNullableEnum<TEnum>() where TEnum : struct, Enum
+	{
+		var document = new OpenApiDocument
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					[typeof(Nullable<TEnum>).FullName!] = new OpenApiSchema
+					{
+						Type = JsonSchemaType.Integer
+					}
+				}
+			}
+		};
+
+		return document;
+	}
 }

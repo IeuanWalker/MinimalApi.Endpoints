@@ -31,8 +31,25 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 
 			// Try to find the corresponding .NET type for this schema
-			Type? enumType = FindTypeForSchema(schemaName);
-			if (enumType is null || !enumType.IsEnum)
+			Type? foundType = FindTypeForSchema(schemaName);
+			if (foundType is null)
+			{
+				continue;
+			}
+
+			// Check if it's a direct enum type
+			Type? enumType = null;
+			if (foundType.IsEnum)
+			{
+				enumType = foundType;
+			}
+			else
+			{
+				// Check if it's a nullable enum
+				enumType = GetEnumTypeFromNullable(foundType);
+			}
+
+			if (enumType is null)
 			{
 				continue;
 			}
@@ -60,6 +77,24 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
+		return null;
+	}
+
+	static Type? GetEnumTypeFromNullable(Type type)
+	{
+		// Check if it's a nullable type
+		if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+		{
+			// Get the underlying type
+			Type underlyingType = Nullable.GetUnderlyingType(type)!;
+			
+			// Check if the underlying type is an enum
+			if (underlyingType.IsEnum)
+			{
+				return underlyingType;
+			}
+		}
+		
 		return null;
 	}
 
