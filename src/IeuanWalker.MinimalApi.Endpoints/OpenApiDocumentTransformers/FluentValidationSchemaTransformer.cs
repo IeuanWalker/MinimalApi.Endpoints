@@ -704,55 +704,30 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 
 		// Determine if this is a string schema or integer schema
 		// Check the existing type first - if it's already set to String, this is a string enum validator (IsEnumName)
-		// Otherwise, it should be an integer type for actual enum properties or IsInEnum on int properties
+		// For actual enum properties in request models, the type is often null because it references the enum schema
+		// In that case, we should NOT override it - let the OpenAPI document determine the correct type
 		bool isStringSchema = schema.Type.HasValue && schema.Type.Value == JsonSchemaType.String;
 		
-		// If type is not set, determine it based on the underlying enum type
-		// For actual enum properties, we should use the enum's underlying type (typically int)
-		if (!schema.Type.HasValue)
-		{
-			// Get the underlying type of the enum (byte, int, long, etc.)
-			Type underlyingType = Enum.GetUnderlyingType(enumType);
-			
-			// Map to appropriate JSON schema type
-			if (underlyingType == typeof(byte) || underlyingType == typeof(sbyte) ||
-				underlyingType == typeof(short) || underlyingType == typeof(ushort) ||
-				underlyingType == typeof(int) || underlyingType == typeof(uint) ||
-				underlyingType == typeof(long) || underlyingType == typeof(ulong))
-			{
-				schema.Type = JsonSchemaType.Integer;
-				
-				// Set format based on the underlying type
-				if (underlyingType == typeof(long) || underlyingType == typeof(ulong))
-				{
-					schema.Format = "int64";
-				}
-				else
-				{
-					schema.Format = "int32";
-				}
-			}
-			else
-			{
-				// Fallback to string for edge cases
-				schema.Type = JsonSchemaType.String;
-				isStringSchema = true;
-			}
-		}
+		// Note: We do NOT set schema.Type if it's null. 
+		// The OpenAPI document already has the enum schema with the correct type (integer).
+		// When FluentValidation inlines the schema to add validation rules, we should preserve
+		// the nullability and let the document's original enum schema type be used.
+		// Setting it here would override the correct type inference from the enum schema reference.
 
 		for (int i = 0; i < enumValues.Length; i++)
 		{
 			object enumValue = enumValues.GetValue(i)!;
 			string enumName = enumNames[i];
 			
-			// For string schemas, add the enum names as valid values
-			// For integer schemas, add the numeric values
+			// For string schemas (IsEnumName validator), add the enum names as valid values
+			// For integer schemas and null type schemas (actual enum properties), add the numeric values
 			if (isStringSchema)
 			{
 				values.Add(JsonValue.Create(enumName)!);
 			}
 			else
 			{
+				// For enum properties, use numeric values regardless of whether type is set or null
 				long numericValue = Convert.ToInt64(enumValue);
 				values.Add(JsonValue.Create(numericValue)!);
 			}
@@ -775,8 +750,10 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
 		schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
 		
-		// Add x-enum-varnames extension for member names (only for integer schemas, not string schemas)
+		// Add x-enum-varnames extension for member names (only for integer/null schemas, not string schemas)
 		// For string schemas, the enum values already contain the names, so x-enum-varnames would be redundant
+		// For null type schemas (enum properties in request models), we still add x-enum-varnames because
+		// the actual type (integer) will be determined by the enum schema reference
 		if (!isStringSchema)
 		{
 			schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
