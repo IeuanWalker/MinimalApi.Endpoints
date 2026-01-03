@@ -10,8 +10,8 @@ public class RequestModel
 	public PriorityEnum? NullableEnum { get; set; }
 	public string EnumAsString { get; set; } = string.Empty;
 	public string NullableEnumAsString { get; set; } = string.Empty;
-	public required string EnumAsInt { get; set; }
-	public required string NullableEnumAsInt { get; set; }
+	public int EnumAsInt { get; set; }
+	public int? NullableEnumAsInt { get; set; }
 }
 
 public enum PriorityEnum
@@ -30,6 +30,12 @@ public class RequestModelValidator : Validator<RequestModel>
 {
 	public RequestModelValidator()
 	{
+		RuleFor(x => x.PlainEnum)
+			.IsInEnum();
+
+		RuleFor(x => x.NullableEnum)
+			.IsInEnum();
+
 		RuleFor(x => x.EnumAsString)
 			.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
 
@@ -37,9 +43,9 @@ public class RequestModelValidator : Validator<RequestModel>
 			.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
 
 		RuleFor(x => x.EnumAsInt)
-			.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
+			.IsInEnum(typeof(PriorityEnum));
 
 		RuleFor(x => x.NullableEnumAsInt)
-			.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
+			.IsInEnum(typeof(PriorityEnum));
 	}
 }
