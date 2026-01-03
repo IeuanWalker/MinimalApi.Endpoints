@@ -479,7 +479,7 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		
 		// Check if this is a PredicateValidator from IsInEnum extension method
 		// IsInEnum creates a Must validator with a predicate that captures the enum type
-		if (validatorType.Name == "PredicateValidator")
+		if (validatorType.Name.StartsWith("PredicateValidator"))
 		{
 			// First, try to extract from error message
 			var errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
@@ -506,33 +506,55 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 			}
 			
 			// Fallback: Try to extract from predicate closure
-			// The IsInEnum extension captures the enumType in a closure
-			var predicateProperty = validatorType.GetProperty("Predicate", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-			if (predicateProperty is not null)
+			// The IsInEnum extension captures the enumType in a nested closure structure
+			var predicateField = validatorType.GetField("_predicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			if (predicateField is not null)
 			{
-				object? predicate = predicateProperty.GetValue(validator);
+				object? predicate = predicateField.GetValue(validator);
 				if (predicate is Delegate predicateDelegate)
 				{
-					// Check the closure/target for captured variables
-					var target = predicateDelegate.Target;
-					if (target is not null)
+					// Recursively search through nested closures
+					Type? enumType = FindEnumTypeInClosure(predicateDelegate.Target);
+					if (enumType is not null)
 					{
-						// Look for fields in the closure that contain a Type that is an enum
-						var closureFields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-						foreach (var field in closureFields)
-						{
-							object? fieldValue = field.GetValue(target);
-							if (fieldValue is Type enumType && enumType.IsEnum)
-							{
-								EnrichSchemaWithEnumValues(propertySchema, enumType);
-								return;
-							}
-						}
+						EnrichSchemaWithEnumValues(propertySchema, enumType);
+						return;
 					}
 				}
 			}
 		}
 		
+	static Type? FindEnumTypeInClosure(object? target, int maxDepth = 5)
+	{
+		if (target is null || maxDepth <= 0)
+		{
+			return null;
+		}
+		
+		var fields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		foreach (var field in fields)
+		{
+			object? fieldValue = field.GetValue(target);
+			
+			// Check if this field is directly an enum type
+			if (fieldValue is Type enumType && enumType.IsEnum)
+			{
+				return enumType;
+			}
+			
+			// If it's a delegate, recurse into its closure
+			if (fieldValue is Delegate del && del.Target is not null)
+			{
+				Type? found = FindEnumTypeInClosure(del.Target, maxDepth - 1);
+				if (found is not null)
+				{
+					return found;
+				}
+			}
+		}
+		
+		return null;
+	}
 		// Fallback: Try to extract enum type from generic arguments
 		// Some enum validators might store the enum type as a generic parameter
 		if (validatorType.IsGenericType)
