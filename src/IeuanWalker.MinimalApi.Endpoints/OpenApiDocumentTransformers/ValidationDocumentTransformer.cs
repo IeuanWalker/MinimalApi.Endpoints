@@ -141,6 +141,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 
 				// Group rules by property name for easier lookup
+				// NOTE: HTTP query/path parameter names are case-insensitive in ASP.NET/OpenAPI.
+				// Validation rules are keyed by C# property names (usually PascalCase), while
+				// route/query parameters may be camelCase or lowercase. We use OrdinalIgnoreCase
+				// to reliably match validation rules to parameters regardless of casing.
 				Dictionary<string, List<Validation.ValidationRule>> rulesByProperty = rules
 					.GroupBy(r => r.PropertyName, StringComparer.OrdinalIgnoreCase)
 					.ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);

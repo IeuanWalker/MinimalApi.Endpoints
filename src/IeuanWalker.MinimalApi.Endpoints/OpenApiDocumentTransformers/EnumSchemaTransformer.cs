@@ -43,13 +43,19 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 
 			// Check if it's a direct or nullable enum type
-			Type? enumType = foundType.IsEnum
-				? foundType
-				: GetEnumTypeFromNullable(foundType);
-
-			if (enumType is null)
+			Type? enumType;
+			if (foundType.IsEnum)
 			{
-				continue;
+				enumType = foundType;
+			}
+			else
+			{
+				enumType = GetEnumTypeFromNullable(foundType);
+				if (enumType is null)
+				{
+					// Not an enum or nullable enum we can handle, skip this schema
+					continue;
+				}
 			}
 
 			// Enrich the enum schema with values and names

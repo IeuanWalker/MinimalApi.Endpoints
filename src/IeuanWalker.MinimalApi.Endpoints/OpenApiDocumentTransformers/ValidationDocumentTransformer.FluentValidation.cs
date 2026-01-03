@@ -731,7 +731,7 @@ partial class ValidationDocumentTransformer
 
 	static readonly object enumTypeCacheLock = new();
 	static Dictionary<string, Type>? enumTypesByName;
-	static bool enumTypeCacheInitialized;
+	static volatile bool enumTypeCacheInitialized;
 
 	static Type? FindEnumTypeBySimpleName(string enumTypeName)
 	{
@@ -746,7 +746,7 @@ partial class ValidationDocumentTransformer
 			{
 				if (!enumTypeCacheInitialized)
 				{
-					enumTypesByName = new(StringComparer.Ordinal);
+					enumTypesByName = new(StringComparer.OrdinalIgnoreCase);
 
 					foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 					{
