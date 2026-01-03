@@ -56,7 +56,7 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 			}
 
 			// Apply validation rules to this schema
-			ApplyValidationRules(schema, (IValidator)validator);
+			ApplyValidationRules(schema, (IValidator)validator, document);
 		}
 
 		return Task.CompletedTask;
@@ -81,7 +81,7 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		return null;
 	}
 
-	static void ApplyValidationRules(OpenApiSchema schema, IValidator validator)
+	static void ApplyValidationRules(OpenApiSchema schema, IValidator validator, OpenApiDocument document)
 	{
 		if (schema.Properties is null || schema.Properties.Count == 0)
 		{
@@ -97,7 +97,7 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 			string memberName = memberGroup.Key;
 			foreach (IValidationRule rule in descriptor.GetRulesForMember(memberName))
 			{
-				ProcessRule(rule, schema, requiredProperties);
+				ProcessRule(rule, schema, requiredProperties, document);
 			}
 		}
 
@@ -116,7 +116,7 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		schema.Extensions["x-validation-source"] = new JsonNodeExtension(JsonValue.Create("FluentValidation"));
 	}
 
-	static void ProcessRule(IValidationRule rule, OpenApiSchema schema, HashSet<string> requiredProperties)
+	static void ProcessRule(IValidationRule rule, OpenApiSchema schema, HashSet<string> requiredProperties, OpenApiDocument document)
 	{
 		string? propertyName = rule.PropertyName;
 		if (string.IsNullOrEmpty(propertyName))
@@ -138,15 +138,15 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		bool isComplexTypeReference = false;
 		
 		// If the property is a reference, we need to replace it with an inline schema
-		// so we can add validation constraints (but only for primitive types)
+		// so we can add validation constraints (but only for primitive types and enums)
 		if (propertySchemaInterface is OpenApiSchemaReference schemaRef)
 		{
-			// Check if this is a primitive type that we can inline
+			// Check if this is a primitive type or enum that we can inline
 			string? refId = schemaRef.Reference?.Id;
-			if (refId is not null && IsPrimitiveType(refId))
+			if (refId is not null && (IsPrimitiveType(refId) || IsEnumType(refId, document)))
 			{
 				// Create an inline schema based on the reference
-				propertySchema = CreateInlineSchemaFromReference(schemaRef);
+				propertySchema = CreateInlineSchemaFromReference(schemaRef, document);
 				// Replace the reference with the inline schema
 				schema.Properties[schemaPropertyName] = propertySchema;
 			}
@@ -199,7 +199,22 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		       refId.Contains("System.Guid");
 	}
 
-	static OpenApiSchema CreateInlineSchemaFromReference(OpenApiSchemaReference schemaRef)
+	static bool IsEnumType(string refId, OpenApiDocument document)
+	{
+		// Check if the refId exists in the document's schemas and if it has enum values
+		if (document.Components?.Schemas?.TryGetValue(refId, out var schema) == true)
+		{
+			// Check if the schema is an enum schema (has enum extension or is an integer with enum-related extensions)
+			if (schema is OpenApiSchema openApiSchema)
+			{
+				return openApiSchema.Extensions?.ContainsKey("enum") == true ||
+				       openApiSchema.Extensions?.ContainsKey("x-enum-varnames") == true;
+			}
+		}
+		return false;
+	}
+
+	static OpenApiSchema CreateInlineSchemaFromReference(OpenApiSchemaReference schemaRef, OpenApiDocument document)
 	{
 		// Map common system types to their OpenAPI equivalents
 		string? refId = schemaRef.Reference?.Id;
@@ -207,6 +222,22 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		if (refId is null)
 		{
 			return new OpenApiSchema();
+		}
+
+		// Check if this is an enum type - if so, copy the enum schema
+		if (document.Components?.Schemas?.TryGetValue(refId, out var referencedSchema) == true && 
+		    referencedSchema is OpenApiSchema enumSchema &&
+		    (enumSchema.Extensions?.ContainsKey("enum") == true || enumSchema.Extensions?.ContainsKey("x-enum-varnames") == true))
+		{
+			// Copy the enum schema including all its properties and extensions
+			var inlineEnumSchema = new OpenApiSchema
+			{
+				Type = enumSchema.Type,
+				Format = enumSchema.Format,
+				Description = enumSchema.Description,
+				Extensions = enumSchema.Extensions != null ? new Dictionary<string, IOpenApiExtension>(enumSchema.Extensions) : null
+			};
+			return inlineEnumSchema;
 		}
 
 		// Handle common .NET types
@@ -672,13 +703,41 @@ public class FluentValidationSchemaTransformer : IOpenApiDocumentTransformer
 		Dictionary<string, string> descriptions = [];
 
 		// Determine if this is a string schema or integer schema
-		// If Type is not set, default to string for enum name validators
-		bool isStringSchema = !schema.Type.HasValue || schema.Type.Value == JsonSchemaType.String;
+		// Check the existing type first - if it's already set to String, this is a string enum validator (IsEnumName)
+		// Otherwise, it should be an integer type for actual enum properties or IsInEnum on int properties
+		bool isStringSchema = schema.Type.HasValue && schema.Type.Value == JsonSchemaType.String;
 		
-		// Ensure the schema has a type set
+		// If type is not set, determine it based on the underlying enum type
+		// For actual enum properties, we should use the enum's underlying type (typically int)
 		if (!schema.Type.HasValue)
 		{
-			schema.Type = JsonSchemaType.String;
+			// Get the underlying type of the enum (byte, int, long, etc.)
+			Type underlyingType = Enum.GetUnderlyingType(enumType);
+			
+			// Map to appropriate JSON schema type
+			if (underlyingType == typeof(byte) || underlyingType == typeof(sbyte) ||
+				underlyingType == typeof(short) || underlyingType == typeof(ushort) ||
+				underlyingType == typeof(int) || underlyingType == typeof(uint) ||
+				underlyingType == typeof(long) || underlyingType == typeof(ulong))
+			{
+				schema.Type = JsonSchemaType.Integer;
+				
+				// Set format based on the underlying type
+				if (underlyingType == typeof(long) || underlyingType == typeof(ulong))
+				{
+					schema.Format = "int64";
+				}
+				else
+				{
+					schema.Format = "int32";
+				}
+			}
+			else
+			{
+				// Fallback to string for edge cases
+				schema.Type = JsonSchemaType.String;
+				isStringSchema = true;
+			}
 		}
 
 		for (int i = 0; i < enumValues.Length; i++)
