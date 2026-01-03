@@ -33,19 +33,19 @@ public class RequestModelValidator : Validator<RequestModel>
 		RuleFor(x => x.PlainEnum)
 			.IsInEnum();
 
-		//RuleFor(x => x.NullableEnum)
-		//	.IsInEnum();
+		RuleFor(x => x.NullableEnum)
+			.IsInEnum();
 
-		//RuleFor(x => x.EnumAsString)
-		//	.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
+		RuleFor(x => x.EnumAsString)
+			.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
 
-		//RuleFor(x => x.NullableEnumAsString)
-		//	.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
+		RuleFor(x => x.NullableEnumAsString)
+			.IsEnumName(typeof(PriorityEnum), caseSensitive: false);
 
-		//RuleFor(x => x.EnumAsInt)
-		//	.IsInEnum(typeof(PriorityEnum));
+		RuleFor(x => x.EnumAsInt)
+			.IsInEnum(typeof(PriorityEnum));
 
-		//RuleFor(x => x.NullableEnumAsInt)
-		//	.IsInEnum(typeof(PriorityEnum));
+		RuleFor(x => x.NullableEnumAsInt)
+			.IsInEnum(typeof(PriorityEnum));
 	}
 }
