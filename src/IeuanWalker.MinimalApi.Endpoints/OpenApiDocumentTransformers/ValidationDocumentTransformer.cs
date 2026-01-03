@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.OpenApi;
@@ -14,6 +15,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	public bool AppendRulesToPropertyDescription { get; set; } = true;
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
+		string test = SerializeOpenApi(document);
+
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
 		Dictionary<Type, (List<Validation.ValidationRule>, bool appendRulesToPropertyDescription)> allValidationRules = [];
 
@@ -36,7 +39,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
+		test = SerializeOpenApi(document);
+
 		return Task.CompletedTask;
+	}
+	// TODO: Remove once no longer needed
+	static string SerializeOpenApi(OpenApiDocument doc)
+	{
+		var sb = new StringBuilder();
+		var writer = new OpenApiJsonWriter(new StringWriter(sb));
+		doc.SerializeAsV3(writer); // or SerializeAsV2
+		return sb.ToString();
 	}
 
 	static void ApplyValidationToSchemas(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
@@ -104,47 +117,47 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRuleToPropertyDescription.HasValue)?.AppendRuleToPropertyDescription;
 		bool effectiveListRulesInDescription = perPropertySetting ?? typeAppendRulesToPropertyDescription;
 
-// Cast to OpenApiSchema to access properties
-OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
+		// Cast to OpenApiSchema to access properties
+		OpenApiSchema? originalOpenApiSchema = originalSchema as OpenApiSchema;
 
-// If original schema is a reference, we need to get the type from the reference ID
-JsonSchemaType? referenceType = null;
-string? referenceFormat = null;
-if (originalSchema is OpenApiSchemaReference schemaRef)
-{
-string? refId = schemaRef.Reference?.Id;
-if (refId is not null)
-{
-if (refId.Contains("System.String"))
-{
-referenceType = JsonSchemaType.String;
-}
-else if (refId.Contains("System.Int32") || refId.Contains("System.Int64"))
-{
-referenceType = JsonSchemaType.Integer;
-referenceFormat = refId.Contains("Int64") ? "int64" : "int32";
-}
-else if (refId.Contains("System.Decimal") || refId.Contains("System.Double") || refId.Contains("System.Single"))
-{
-referenceType = JsonSchemaType.Number;
-referenceFormat = refId.Contains("Double") ? "double" : refId.Contains("Single") ? "float" : null;
-}
-else if (refId.Contains("System.Boolean"))
-{
-referenceType = JsonSchemaType.Boolean;
-}
-else if (refId.Contains("System.DateTime") || refId.Contains("System.DateTimeOffset"))
-{
-referenceType = JsonSchemaType.String;
-referenceFormat = "date-time";
-}
-else if (refId.Contains("System.Guid"))
-{
-referenceType = JsonSchemaType.String;
-referenceFormat = "uuid";
-}
-}
-}
+		// If original schema is a reference, we need to get the type from the reference ID
+		JsonSchemaType? referenceType = null;
+		string? referenceFormat = null;
+		if (originalSchema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (refId is not null)
+			{
+				if (refId.Contains("System.String"))
+				{
+					referenceType = JsonSchemaType.String;
+				}
+				else if (refId.Contains("System.Int32") || refId.Contains("System.Int64"))
+				{
+					referenceType = JsonSchemaType.Integer;
+					referenceFormat = refId.Contains("Int64") ? "int64" : "int32";
+				}
+				else if (refId.Contains("System.Decimal") || refId.Contains("System.Double") || refId.Contains("System.Single"))
+				{
+					referenceType = JsonSchemaType.Number;
+					referenceFormat = refId.Contains("Double") ? "double" : refId.Contains("Single") ? "float" : null;
+				}
+				else if (refId.Contains("System.Boolean"))
+				{
+					referenceType = JsonSchemaType.Boolean;
+				}
+				else if (refId.Contains("System.DateTime") || refId.Contains("System.DateTimeOffset"))
+				{
+					referenceType = JsonSchemaType.String;
+					referenceFormat = "date-time";
+				}
+				else if (refId.Contains("System.Guid"))
+				{
+					referenceType = JsonSchemaType.String;
+					referenceFormat = "uuid";
+				}
+			}
+		}
 
 
 		// Check if this is a complex object (has AllOf for schema references or has Properties for inline object definitions)
@@ -196,7 +209,7 @@ referenceFormat = "uuid";
 				Format = originalOpenApiSchema.Format,
 				Items = originalOpenApiSchema.Items,
 				AdditionalProperties = originalOpenApiSchema.AdditionalProperties,
-			Extensions = originalOpenApiSchema.Extensions, // Preserve extensions (e.g., enum info)
+				Extensions = originalOpenApiSchema.Extensions, // Preserve extensions (e.g., enum info)
 				Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : originalOpenApiSchema.Description
 			};
 
@@ -204,24 +217,24 @@ referenceFormat = "uuid";
 		}
 
 		// For simple properties, create a new inline schema with all validation rules
-// Get the type from the first rule (all rules for same property should have same type)
-JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
-string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+		// Get the type from the first rule (all rules for same property should have same type)
+		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
 
-// If no type was determined from rules, try to get it from the original schema or reference
-if (!schemaType.HasValue)
-{
-if (originalOpenApiSchema is not null)
-{
-schemaType = originalOpenApiSchema.Type;
-format ??= originalOpenApiSchema.Format;
-}
-else if (referenceType.HasValue)
-{
-schemaType = referenceType;
-format ??= referenceFormat;
-}
-}
+		// If no type was determined from rules, try to get it from the original schema or reference
+		if (!schemaType.HasValue)
+		{
+			if (originalOpenApiSchema is not null)
+			{
+				schemaType = originalOpenApiSchema.Type;
+				format ??= originalOpenApiSchema.Format;
+			}
+			else if (referenceType.HasValue)
+			{
+				schemaType = referenceType;
+				format ??= referenceFormat;
+			}
+		}
 
 
 
@@ -461,81 +474,81 @@ format ??= referenceFormat;
 		};
 	}
 
-static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType)
-{
-// Get all enum values and names
-Array enumValues = Enum.GetValues(enumType);
-string[] enumNames = Enum.GetNames(enumType);
+	static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType)
+	{
+		// Get all enum values and names
+		Array enumValues = Enum.GetValues(enumType);
+		string[] enumNames = Enum.GetNames(enumType);
 
-List<JsonNode> values = [];
-List<string> varNames = [];
-Dictionary<string, string> descriptions = [];
+		List<JsonNode> values = [];
+		List<string> varNames = [];
+		Dictionary<string, string> descriptions = [];
 
-// Determine if this is a string schema or integer schema
-bool isStringSchema = schema.Type == JsonSchemaType.String;
+		// Determine if this is a string schema or integer schema
+		bool isStringSchema = schema.Type == JsonSchemaType.String;
 
-for (int i = 0; i < enumValues.Length; i++)
-{
-object enumValue = enumValues.GetValue(i)!;
-string enumName = enumNames[i];
+		for (int i = 0; i < enumValues.Length; i++)
+		{
+			object enumValue = enumValues.GetValue(i)!;
+			string enumName = enumNames[i];
 
-// For string schemas, add the enum names as valid values
-// For integer schemas, add the numeric values
-if (isStringSchema)
-{
-values.Add(JsonValue.Create(enumName)!);
-}
-else
-{
-long numericValue = Convert.ToInt64(enumValue);
-values.Add(JsonValue.Create(numericValue)!);
-}
+			// For string schemas, add the enum names as valid values
+			// For integer schemas, add the numeric values
+			if (isStringSchema)
+			{
+				values.Add(JsonValue.Create(enumName)!);
+			}
+			else
+			{
+				long numericValue = Convert.ToInt64(enumValue);
+				values.Add(JsonValue.Create(numericValue)!);
+			}
 
-varNames.Add(enumName);
+			varNames.Add(enumName);
 
-// Check for Description attribute
-var field = enumType.GetField(enumName);
-var descriptionAttr = field?.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
-.OfType<System.ComponentModel.DescriptionAttribute>()
-.FirstOrDefault();
+			// Check for Description attribute
+			var field = enumType.GetField(enumName);
+			var descriptionAttr = field?.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
+			.OfType<System.ComponentModel.DescriptionAttribute>()
+			.FirstOrDefault();
 
-if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
-{
-descriptions[enumName] = descriptionAttr.Description;
-}
-}
+			if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
+			{
+				descriptions[enumName] = descriptionAttr.Description;
+			}
+		}
 
-// Add the enum values
-schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
+		// Add the enum values
+		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+		schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
 
-// Add x-enum-varnames extension for member names (only if different from enum values)
-// For string schemas, the names are the same as the values, so no need to duplicate
-if (!isStringSchema)
-{
-	schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
-}
+		// Add x-enum-varnames extension for member names (only if different from enum values)
+		// For string schemas, the names are the same as the values, so no need to duplicate
+		if (!isStringSchema)
+		{
+			schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
+		}
 
-// Add x-enum-descriptions extension if any descriptions are present
-if (descriptions.Count > 0)
-{
-JsonObject descObj = [];
-foreach (var kvp in descriptions)
-{
-descObj[kvp.Key] = kvp.Value;
-}
-schema.Extensions["x-enum-descriptions"] = new JsonNodeExtension(descObj);
-}
+		// Add x-enum-descriptions extension if any descriptions are present
+		if (descriptions.Count > 0)
+		{
+			JsonObject descObj = [];
+			foreach (var kvp in descriptions)
+			{
+				descObj[kvp.Key] = kvp.Value;
+			}
+			schema.Extensions["x-enum-descriptions"] = new JsonNodeExtension(descObj);
+		}
 
-// Update the description to mention enum values if not already set with better context
-if (string.IsNullOrWhiteSpace(schema.Description) || schema.Description.Contains("has a range of values"))
-{
-schema.Description = $"Enum: {string.Join(", ", varNames)}";
-}
-else if (!schema.Description.Contains("Enum:"))
-{
-// Prepend enum info to existing description
-schema.Description = $"Enum: {string.Join(", ", varNames)}\n\n{schema.Description}";
-}
-}
+		// Update the description to mention enum values if not already set with better context
+		if (string.IsNullOrWhiteSpace(schema.Description) || schema.Description.Contains("has a range of values"))
+		{
+			schema.Description = $"Enum: {string.Join(", ", varNames)}";
+		}
+		else if (!schema.Description.Contains("Enum:"))
+		{
+			// Prepend enum info to existing description
+			schema.Description = $"Enum: {string.Join(", ", varNames)}\n\n{schema.Description}";
+		}
+	}
 }
