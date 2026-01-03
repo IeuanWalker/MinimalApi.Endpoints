@@ -93,10 +93,19 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Only create inline schema if there are validation rules other than just Required
 			// This preserves $ref for nested objects that only have Required validation
+			// ALSO preserve $ref for enum types - enum properties should reference the enum schema, not inline it
 			if (hasOtherRules)
 			{
 				if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 				{
+					// Check if this property is a reference to an enum schema
+					// Enum schemas should NOT be inlined - we preserve the $ref to maintain clean schema structure
+					if (IsEnumSchemaReference(propertySchemaInterface, document))
+					{
+						// Don't inline enum properties - preserve the $ref
+						// EnumRule validation is redundant since the enum schema itself defines valid values
+						continue;
+					}
 
 					// Create inline schema with all validation constraints for this property
 					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
@@ -550,5 +559,40 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// Prepend enum info to existing description
 			schema.Description = $"Enum: {string.Join(", ", varNames)}\n\n{schema.Description}";
 		}
+	}
+
+	/// <summary>
+	/// Checks if a property schema is a reference to an enum schema in the document
+	/// </summary>
+	static bool IsEnumSchemaReference(IOpenApiSchema propertySchema, OpenApiDocument document)
+	{
+		// Check if this is a schema reference
+		if (propertySchema is not OpenApiSchemaReference schemaRef)
+		{
+			return false;
+		}
+
+		// Get the reference ID
+		string? refId = schemaRef.Reference?.Id;
+		if (string.IsNullOrEmpty(refId))
+		{
+			return false;
+		}
+
+		// Look up the referenced schema in the document
+		if (document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? referencedSchema) != true)
+		{
+			return false;
+		}
+
+		// Check if the referenced schema is an enum schema
+		// Enum schemas have the "enum" or "x-enum-varnames" extensions set by EnumSchemaTransformer
+		if (referencedSchema is OpenApiSchema enumSchema)
+		{
+			return enumSchema.Extensions?.ContainsKey("enum") == true ||
+			       enumSchema.Extensions?.ContainsKey("x-enum-varnames") == true;
+		}
+
+		return false;
 	}
 }
