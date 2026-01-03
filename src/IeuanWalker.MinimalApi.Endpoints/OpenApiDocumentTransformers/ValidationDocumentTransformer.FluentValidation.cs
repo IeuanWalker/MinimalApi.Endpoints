@@ -310,7 +310,7 @@ partial class ValidationDocumentTransformer
 						PropertyInfo propInfo => propInfo.Name,
 						FieldInfo fieldInfo => fieldInfo.Name,
 						MemberInfo memberInfo => memberInfo.Name,
-						_ => memberValue.ToString() ?? string.Empty
+						_ => memberValue.ToString()
 					};
 					
 					// For property comparisons, replace {ComparisonValue} with the property name
