@@ -10,12 +10,187 @@
 		}
 	],
 	"paths": {
+		"/api/v1/enum": {
+			"get": {
+				"tags": [
+					"Enum"
+				],
+				"summary": "FromQuery",
+				"operationId": "get_Enum_0",
+				"parameters": [
+					{
+						"name": "PlainEnum",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum"
+						}
+					},
+					{
+						"name": "NullableEnum",
+						"in": "query",
+						"schema": {
+							"$ref": "#/components/schemas/System.Nullable`1[[ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+						}
+					},
+					{
+						"name": "PlainEnumWithoutFluentValidation",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum"
+						}
+					},
+					{
+						"name": "NullableEnumWithoutFluentValidation",
+						"in": "query",
+						"schema": {
+							"$ref": "#/components/schemas/System.Nullable`1[[ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+						}
+					},
+					{
+						"name": "EnumAsString",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Enum: Low, Medium, High, Critical",
+							"enum": [
+								"Low",
+								"Medium",
+								"High",
+								"Critical"
+							],
+							"x-enum-descriptions": {
+								"Low": "Low priority task",
+								"Medium": "Medium priority task",
+								"High": "High priority task",
+								"Critical": "Critical priority task requiring immediate attention"
+							}
+						}
+					},
+					{
+						"name": "NullableEnumAsString",
+						"in": "query",
+						"schema": {
+							"type": "string",
+							"description": "Enum: Low, Medium, High, Critical",
+							"enum": [
+								"Low",
+								"Medium",
+								"High",
+								"Critical"
+							],
+							"x-enum-descriptions": {
+								"Low": "Low priority task",
+								"Medium": "Medium priority task",
+								"High": "High priority task",
+								"Critical": "Critical priority task requiring immediate attention"
+							}
+						}
+					},
+					{
+						"name": "EnumAsInt",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"description": "Enum: Low, Medium, High, Critical",
+							"enum": [
+								0,
+								1,
+								2,
+								3
+							],
+							"x-enum-varnames": [
+								"Low",
+								"Medium",
+								"High",
+								"Critical"
+							],
+							"x-enum-descriptions": {
+								"Low": "Low priority task",
+								"Medium": "Medium priority task",
+								"High": "High priority task",
+								"Critical": "Critical priority task requiring immediate attention"
+							}
+						}
+					},
+					{
+						"name": "NullableEnumAsInt",
+						"in": "query",
+						"schema": {
+							"type": "integer",
+							"description": "Enum: Low, Medium, High, Critical",
+							"enum": [
+								0,
+								1,
+								2,
+								3
+							],
+							"x-enum-varnames": [
+								"Low",
+								"Medium",
+								"High",
+								"Critical"
+							],
+							"x-enum-descriptions": {
+								"Low": "Low priority task",
+								"Medium": "Medium priority task",
+								"High": "High priority task",
+								"Critical": "Critical priority task requiring immediate attention"
+							}
+						}
+					}
+				],
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			},
+			"post": {
+				"tags": [
+					"Enum"
+				],
+				"summary": "FromBody",
+				"operationId": "post_Enum_1",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.RequestModel"
+							}
+						}
+					}
+				},
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/weatherforecast": {
 			"get": {
 				"tags": [
 					"Weatherforecast"
 				],
-				"operationId": "get_Weatherforecast_0",
+				"operationId": "get_Weatherforecast_2",
 				"parameters": [
 					{
 						"name": "api-version",
@@ -44,7 +219,7 @@
 				"tags": [
 					"FileHandling"
 				],
-				"operationId": "post_FileHandlingListOfFiles_2",
+				"operationId": "post_FileHandlingListOfFiles_4",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -79,7 +254,7 @@
 				"tags": [
 					"FileHandling"
 				],
-				"operationId": "post_FileHandlingMultipart_3",
+				"operationId": "post_FileHandlingMultipart_5",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -114,7 +289,7 @@
 				"tags": [
 					"FileHandling"
 				],
-				"operationId": "post_FileHandlingSingleFile_4",
+				"operationId": "post_FileHandlingSingleFile_6",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -151,7 +326,7 @@
 				],
 				"summary": "Get all todos",
 				"description": "Retrieves all todos from the store",
-				"operationId": "get_Todos_5",
+				"operationId": "get_Todos_7",
 				"responses": {
 					"200": {
 						"description": "OK",
@@ -171,7 +346,7 @@
 				],
 				"summary": "Create a new todo",
 				"description": "Creates a new todo item",
-				"operationId": "post_Todos_8",
+				"operationId": "post_Todos_10",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -215,7 +390,7 @@
 				],
 				"summary": "Get todo by ID",
 				"description": "Retrieves a specific todo by its ID",
-				"operationId": "get_Todos_6",
+				"operationId": "get_Todos_8",
 				"parameters": [
 					{
 						"name": "id",
@@ -248,7 +423,7 @@
 				],
 				"summary": "Update a todo",
 				"description": "Updates an existing todo item completely",
-				"operationId": "put_Todos_9",
+				"operationId": "put_Todos_11",
 				"parameters": [
 					{
 						"name": "id",
@@ -291,7 +466,7 @@
 				],
 				"summary": "Partially update a todo",
 				"description": "Updates specific fields of an existing todo item",
-				"operationId": "patch_Todos_10",
+				"operationId": "patch_Todos_12",
 				"parameters": [
 					{
 						"name": "id",
@@ -331,7 +506,7 @@
 				],
 				"summary": "Delete a todo",
 				"description": "Deletes an existing todo item",
-				"operationId": "delete_Todos_11",
+				"operationId": "delete_Todos_13",
 				"parameters": [
 					{
 						"name": "id",
@@ -356,7 +531,7 @@
 				],
 				"summary": "Export todos",
 				"description": "Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.",
-				"operationId": "get_TodosExport_7",
+				"operationId": "get_TodosExport_9",
 				"responses": {
 					"204": {
 						"description": "No Content"
@@ -374,12 +549,254 @@
 				}
 			}
 		},
+		"/api/v1/validation/FluentValidation/FromQuery": {
+			"get": {
+				"tags": [
+					"Validation"
+				],
+				"operationId": "get_ValidationFluentValidationFromQuery_14",
+				"parameters": [
+					{
+						"name": "StringMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 3,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 3 characters or more"
+						}
+					},
+					{
+						"name": "StringMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 50,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 50 characters or fewer"
+						}
+					},
+					{
+						"name": "StringRange",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 50,
+							"minLength": 3,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 3 characters or more\n- Must be 50 characters or fewer"
+						}
+					},
+					{
+						"name": "StringPattern",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"pattern": "^[a-zA-Z0-9]+$",
+							"type": "string",
+							"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
+						}
+					},
+					{
+						"name": "IntMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= 1",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "IntMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"description": "Validation rules:\n- Must be <= 100",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "IntRange",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"description": "Validation rules:\n- Must be between 1 and 100",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "DoubleMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"description": "Validation rules:\n- Must be >= 0.1",
+							"format": "double"
+						}
+					},
+					{
+						"name": "DoubleMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"description": "Validation rules:\n- Must be <= 99.9",
+							"format": "double"
+						}
+					},
+					{
+						"name": "DoubleRange",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"description": "Validation rules:\n- Must be between 0.1 and 99.9",
+							"format": "double"
+						}
+					},
+					{
+						"name": "ListStringMinCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"description": "Validation rules:\n- Must contain at least 1 item."
+						}
+					},
+					{
+						"name": "ListStringMaxCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"description": "Validation rules:\n- Must contain at most 10 items."
+						}
+					},
+					{
+						"name": "ListStringRangeCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"description": "Validation rules:\n- Must contain between 1 and 10 items."
+						}
+					},
+					{
+						"name": "ListIntMinCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"description": "Validation rules:\n- Must contain at least 1 item."
+						}
+					},
+					{
+						"name": "ListIntMaxCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"description": "Validation rules:\n- Must contain at most 10 items."
+						}
+					},
+					{
+						"name": "ListIntRangeCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"description": "Validation rules:\n- Must contain between 1 and 10 items."
+						}
+					},
+					{
+						"name": "AllBuiltInStringValidators",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 250,
+							"minLength": 2,
+							"pattern": "^[a-zA-Z0-9]+$",
+							"type": "string",
+							"description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Must be at least 2 characters and less than 250 characters\n- Must be 250 characters or fewer\n- Must be 2 characters or more\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid credit card number\n- Must be empty.",
+							"format": "email"
+						}
+					},
+					{
+						"name": "AllBuiltInNumberValidators",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": false,
+							"exclusiveMaximum": true,
+							"minimum": false,
+							"exclusiveMinimum": true,
+							"type": "number",
+							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be < 0\n- Must be <= 100\n- Must be <= 0\n- Must be > 0\n- Must be >= 1\n- Must be >= 0\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+						}
+					},
+					{
+						"name": "MaxNumberTest",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Int32"
+						}
+					},
+					{
+						"name": "MinNumberTest",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Int32"
+						}
+					},
+					{
+						"name": "EnumStringValidator",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Enum: Success, Failure",
+							"enum": [
+								"Success",
+								"Failure"
+							]
+						}
+					},
+					{
+						"name": "EnumIntValidator",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
+						}
+					},
+					{
+						"name": "EnumTest",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.StatusEnum"
+						}
+					}
+				],
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/validation/DataValidation": {
 			"post": {
 				"tags": [
 					"Validation"
 				],
-				"operationId": "post_ValidationDataValidation_12",
+				"operationId": "post_ValidationDataValidation_15",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -401,7 +818,7 @@
 				"tags": [
 					"Validation"
 				],
-				"operationId": "post_ValidationFluentValidation_13",
+				"operationId": "post_ValidationFluentValidation_16",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -425,12 +842,47 @@
 				}
 			}
 		},
+		"/api/v1/validation/FluentValidation/FromForm": {
+			"post": {
+				"tags": [
+					"Validation"
+				],
+				"operationId": "post_ValidationFluentValidationFromForm_17",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.RequestModel"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.RequestModel"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/validation/WithValidation": {
 			"post": {
 				"tags": [
 					"Validation"
 				],
-				"operationId": "post_ValidationWithValidation_14",
+				"operationId": "post_ValidationWithValidation_18",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -450,6 +902,171 @@
 	},
 	"components": {
 		"schemas": {
+			"ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum": {
+				"type": "integer",
+				"description": "Enum: Low, Medium, High, Critical",
+				"enum": [
+					0,
+					1,
+					2,
+					3
+				],
+				"x-enum-varnames": [
+					"Low",
+					"Medium",
+					"High",
+					"Critical"
+				],
+				"x-enum-descriptions": {
+					"Low": "Low priority task",
+					"Medium": "Medium priority task",
+					"High": "High priority task",
+					"Critical": "Critical priority task requiring immediate attention"
+				}
+			},
+			"ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum": {
+				"type": "integer",
+				"description": "Enum: Low, Medium, High, Critical",
+				"enum": [
+					0,
+					1,
+					2,
+					3
+				],
+				"x-enum-varnames": [
+					"Low",
+					"Medium",
+					"High",
+					"Critical"
+				],
+				"x-enum-descriptions": {
+					"Low": "Low priority task",
+					"Medium": "Medium priority task",
+					"High": "High priority task",
+					"Critical": "Critical priority task requiring immediate attention"
+				}
+			},
+			"ExampleApi.Endpoints.Enum.PostFromBody.RequestModel": {
+				"type": "object",
+				"properties": {
+					"plainEnum": {
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum"
+					},
+					"nullableEnum": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+							}
+						]
+					},
+					"plainEnumWithoutFluentValidation": {
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum"
+					},
+					"nullableEnumWithoutFluentValidation": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+							}
+						]
+					},
+					"enumAsString": {
+						"type": "string",
+						"description": "Enum: Low, Medium, High, Critical",
+						"enum": [
+							"Low",
+							"Medium",
+							"High",
+							"Critical"
+						],
+						"x-enum-descriptions": {
+							"Low": "Low priority task",
+							"Medium": "Medium priority task",
+							"High": "High priority task",
+							"Critical": "Critical priority task requiring immediate attention"
+						}
+					},
+					"nullableEnumAsString": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"type": "string",
+								"description": "Enum: Low, Medium, High, Critical",
+								"enum": [
+									"Low",
+									"Medium",
+									"High",
+									"Critical"
+								],
+								"x-enum-descriptions": {
+									"Low": "Low priority task",
+									"Medium": "Medium priority task",
+									"High": "High priority task",
+									"Critical": "Critical priority task requiring immediate attention"
+								}
+							}
+						]
+					},
+					"enumAsInt": {
+						"type": "integer",
+						"description": "Enum: Low, Medium, High, Critical",
+						"enum": [
+							0,
+							1,
+							2,
+							3
+						],
+						"x-enum-varnames": [
+							"Low",
+							"Medium",
+							"High",
+							"Critical"
+						],
+						"x-enum-descriptions": {
+							"Low": "Low priority task",
+							"Medium": "Medium priority task",
+							"High": "High priority task",
+							"Critical": "Critical priority task requiring immediate attention"
+						}
+					},
+					"nullableEnumAsInt": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"type": "integer",
+								"description": "Enum: Low, Medium, High, Critical",
+								"enum": [
+									0,
+									1,
+									2,
+									3
+								],
+								"x-enum-varnames": [
+									"Low",
+									"Medium",
+									"High",
+									"Critical"
+								],
+								"x-enum-descriptions": {
+									"Low": "Low priority task",
+									"Medium": "Medium priority task",
+									"High": "High priority task",
+									"Critical": "Critical priority task requiring immediate attention"
+								}
+							}
+						]
+					}
+				}
+			},
 			"ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel": {
 				"required": [
 					"fileName",
@@ -692,49 +1309,10 @@
 					}
 				}
 			},
-			"ExampleApi.Endpoints.Todos.Post.NestedObject2Model": {
-				"required": [
-					"note"
-				],
-				"type": "object",
-				"properties": {
-					"note": {
-						"maxLength": 200,
-						"minLength": 1,
-						"type": "string",
-						"description": "Validation rules:\n- Is required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
-					}
-				}
-			},
-			"ExampleApi.Endpoints.Todos.Post.NestedObjectModel": {
-				"required": [
-					"name"
-				],
-				"type": "object",
-				"properties": {
-					"name": {
-						"maxLength": 200,
-						"minLength": 1,
-						"type": "string",
-						"description": "Validation rules:\n- Is required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
-					},
-					"age": {
-						"maximum": true,
-						"exclusiveMaximum": true,
-						"minimum": true,
-						"exclusiveMinimum": true,
-						"type": "integer",
-						"description": "Validation rules:\n- Must be > 0\n- Must be < 80",
-						"format": "int32"
-					}
-				}
-			},
 			"ExampleApi.Endpoints.Todos.Post.RequestModel": {
 				"required": [
 					"title",
-					"description",
-					"nestedObject",
-					"nestedObject2"
+					"description"
 				],
 				"type": "object",
 				"properties": {
@@ -742,24 +1320,12 @@
 						"maxLength": 200,
 						"minLength": 1,
 						"type": "string",
-						"description": "Validation rules:\n- Is required\n- Minimum length: 1 characters\n- Maximum length: 200 characters"
+						"description": "Validation rules:\n- Is required\n- Must be 1 characters or more\n- Must be 200 characters or fewer"
 					},
 					"description": {
 						"maxLength": 1000,
 						"type": "string",
-						"description": "Validation rules:\n- Is required\n- Maximum length: 1000 characters"
-					},
-					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Post.NestedObjectModel"
-					},
-					"nestedObject2": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.Post.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
-					},
-					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
-					},
-					"isTest": {
-						"$ref": "#/components/schemas/System.Boolean"
+						"description": "Validation rules:\n- Is required\n- Must be 1000 characters or fewer"
 					}
 				}
 			},
@@ -839,6 +1405,18 @@
 						]
 					}
 				}
+			},
+			"ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.StatusEnum": {
+				"type": "integer",
+				"description": "Enum: Success, Failure",
+				"enum": [
+					0,
+					1
+				],
+				"x-enum-varnames": [
+					"Success",
+					"Failure"
+				]
 			},
 			"ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel": {
 				"type": "object",
@@ -968,18 +1546,18 @@
 					"stringMin": {
 						"minLength": 3,
 						"type": "string",
-						"description": "Validation rules:\n- Minimum length: 3 characters"
+						"description": "Validation rules:\n- Must be 3 characters or more"
 					},
 					"stringMax": {
 						"maxLength": 50,
 						"type": "string",
-						"description": "Validation rules:\n- Maximum length: 50 characters"
+						"description": "Validation rules:\n- Must be 50 characters or fewer"
 					},
 					"stringRange": {
 						"maxLength": 50,
 						"minLength": 3,
 						"type": "string",
-						"description": "Validation rules:\n- Length must be between 3 and 50 characters"
+						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
 					},
 					"stringPattern": {
 						"pattern": "^[a-zA-Z0-9]+$",
@@ -1063,18 +1641,18 @@
 					"stringMin": {
 						"minLength": 3,
 						"type": "string",
-						"description": "Validation rules:\n- Minimum length: 3 characters"
+						"description": "Validation rules:\n- Must be 3 characters or more"
 					},
 					"stringMax": {
 						"maxLength": 50,
 						"type": "string",
-						"description": "Validation rules:\n- Maximum length: 50 characters"
+						"description": "Validation rules:\n- Must be 50 characters or fewer"
 					},
 					"stringRange": {
 						"maxLength": 50,
 						"minLength": 3,
 						"type": "string",
-						"description": "Validation rules:\n- Length must be between 3 and 50 characters"
+						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
 					},
 					"stringPattern": {
 						"pattern": "^[a-zA-Z0-9]+$",
@@ -1159,20 +1737,34 @@
 						]
 					},
 					"allBuiltInStringValidators": {
-						"maxLength": 250,
-						"minLength": 2,
-						"pattern": "^[a-zA-Z0-9]+$",
-						"type": "string",
-						"description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Length must be between 2 and 250 characters\n- Maximum length: 250 characters\n- Minimum length: 2 characters\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- 'AllBuiltInStringValidators' is not a valid credit card number.\n- Must be empty.",
-						"format": "email"
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"maxLength": 250,
+								"minLength": 2,
+								"pattern": "^[a-zA-Z0-9]+$",
+								"type": "string",
+								"description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Must be at least 2 characters and less than 250 characters\n- Must be 250 characters or fewer\n- Must be 2 characters or more\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid credit card number\n- Must be empty.",
+								"format": "email"
+							}
+						]
 					},
 					"allBuiltInNumberValidators": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
-						"type": "number",
-						"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be < 0\n- Must be <= 100\n- Must be <= 0\n- Must be > 0\n- Must be >= 1\n- Must be >= 0\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"maximum": false,
+								"exclusiveMaximum": true,
+								"minimum": false,
+								"exclusiveMinimum": true,
+								"type": "number",
+								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be < 0\n- Must be <= 100\n- Must be <= 0\n- Must be > 0\n- Must be >= 1\n- Must be >= 0\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+							}
+						]
 					},
 					"maxNumberTest": {
 						"$ref": "#/components/schemas/System.Int32"
@@ -1181,18 +1773,292 @@
 						"$ref": "#/components/schemas/System.Int32"
 					},
 					"enumStringValidator": {
-						"description": "Validation rules:\n- EnumStringValidator has a range of values which does not include '{value}'."
+						"type": "string",
+						"description": "Enum: Success, Failure",
+						"enum": [
+							"Success",
+							"Failure"
+						]
 					},
 					"enumIntValidator": {
 						"description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
 					},
 					"enumTest": {
-						"description": "Validation rules:\n- EnumTest has a range of values which does not include '{value}'."
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum"
 					}
 				}
 			},
 			"ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum": {
-				"type": "integer"
+				"type": "integer",
+				"description": "Enum: Success, Failure",
+				"enum": [
+					0,
+					1
+				],
+				"x-enum-varnames": [
+					"Success",
+					"Failure"
+				]
+			},
+			"ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel": {
+				"type": "object",
+				"properties": {
+					"stringMin": {
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 3 characters or more"
+					},
+					"stringMax": {
+						"maxLength": 50,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 50 characters or fewer"
+					},
+					"stringRange": {
+						"maxLength": 50,
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
+					},
+					"stringPattern": {
+						"pattern": "^[a-zA-Z0-9]+$",
+						"type": "string",
+						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
+					},
+					"intMin": {
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1",
+						"format": "int32"
+					},
+					"intMax": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be <= 100",
+						"format": "int32"
+					},
+					"intRange": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 100",
+						"format": "int32"
+					},
+					"doubleMin": {
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1",
+						"format": "double"
+					},
+					"doubleMax": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be <= 99.9",
+						"format": "double"
+					},
+					"doubleRange": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
+						"format": "double"
+					},
+					"listStringMinCount": {
+						"description": "Validation rules:\n- Must contain at least 1 item."
+					},
+					"listStringMaxCount": {
+						"description": "Validation rules:\n- Must contain at most 10 items."
+					},
+					"listStringRangeCount": {
+						"description": "Validation rules:\n- Must contain between 1 and 10 items."
+					},
+					"listIntMinCount": {
+						"description": "Validation rules:\n- Must contain at least 1 item."
+					},
+					"listIntMaxCount": {
+						"description": "Validation rules:\n- Must contain at most 10 items."
+					},
+					"listIntRangeCount": {
+						"description": "Validation rules:\n- Must contain between 1 and 10 items."
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.RequestModel": {
+				"required": [
+					"nestedObject",
+					"allBuiltInStringValidators",
+					"allBuiltInNumberValidators"
+				],
+				"type": "object",
+				"properties": {
+					"stringMin": {
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 3 characters or more"
+					},
+					"stringMax": {
+						"maxLength": 50,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 50 characters or fewer"
+					},
+					"stringRange": {
+						"maxLength": 50,
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
+					},
+					"stringPattern": {
+						"pattern": "^[a-zA-Z0-9]+$",
+						"type": "string",
+						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
+					},
+					"intMin": {
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1",
+						"format": "int32"
+					},
+					"intMax": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be <= 100",
+						"format": "int32"
+					},
+					"intRange": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 100",
+						"format": "int32"
+					},
+					"doubleMin": {
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1",
+						"format": "double"
+					},
+					"doubleMax": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be <= 99.9",
+						"format": "double"
+					},
+					"doubleRange": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
+						"format": "double"
+					},
+					"listStringMinCount": {
+						"description": "Validation rules:\n- Must contain at least 1 item."
+					},
+					"listStringMaxCount": {
+						"description": "Validation rules:\n- Must contain at most 10 items."
+					},
+					"listStringRangeCount": {
+						"description": "Validation rules:\n- Must contain between 1 and 10 items."
+					},
+					"listIntMinCount": {
+						"description": "Validation rules:\n- Must contain at least 1 item."
+					},
+					"listIntMaxCount": {
+						"description": "Validation rules:\n- Must contain at most 10 items."
+					},
+					"listIntRangeCount": {
+						"description": "Validation rules:\n- Must contain between 1 and 10 items."
+					},
+					"nestedObject": {
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
+					},
+					"listNestedObject": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+							}
+						]
+					},
+					"allBuiltInStringValidators": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"maxLength": 250,
+								"minLength": 2,
+								"pattern": "^[a-zA-Z0-9]+$",
+								"type": "string",
+								"description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Must be at least 2 characters and less than 250 characters\n- Must be 250 characters or fewer\n- Must be 2 characters or more\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid credit card number\n- Must be empty.",
+								"format": "email"
+							}
+						]
+					},
+					"allBuiltInNumberValidators": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"maximum": false,
+								"exclusiveMaximum": true,
+								"minimum": false,
+								"exclusiveMinimum": true,
+								"type": "number",
+								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be < 0\n- Must be <= 100\n- Must be <= 0\n- Must be > 0\n- Must be >= 1\n- Must be >= 0\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+							}
+						]
+					},
+					"maxNumberTest": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"minNumberTest": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"enumStringValidator": {
+						"type": "string",
+						"description": "Enum: Success, Failure",
+						"enum": [
+							"Success",
+							"Failure"
+						]
+					},
+					"enumIntValidator": {
+						"description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
+					},
+					"enumTest": {
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.StatusEnum"
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.StatusEnum": {
+				"type": "integer",
+				"description": "Enum: Success, Failure",
+				"enum": [
+					0,
+					1
+				],
+				"x-enum-varnames": [
+					"Success",
+					"Failure"
+				]
 			},
 			"ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel": {
 				"type": "object",
@@ -1256,18 +2122,18 @@
 					"stringMin": {
 						"minLength": 3,
 						"type": "string",
-						"description": "Validation rules:\n- Minimum length: 3 characters"
+						"description": "Validation rules:\n- Must be 3 characters or more"
 					},
 					"stringMax": {
 						"maxLength": 50,
 						"type": "string",
-						"description": "Validation rules:\n- Maximum length: 50 characters"
+						"description": "Validation rules:\n- Must be 50 characters or fewer"
 					},
 					"stringRange": {
 						"maxLength": 50,
 						"minLength": 3,
 						"type": "string",
-						"description": "Validation rules:\n- Minimum length: 3 characters\n- Maximum length: 50 characters"
+						"description": "Validation rules:\n- Must be 3 characters or more\n- Must be 50 characters or fewer"
 					},
 					"stringPattern": {
 						"pattern": "^[a-zA-Z0-9]+$",
@@ -1451,12 +2317,6 @@
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
 				}
 			},
-			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Todos.Post.NestedObject2Model, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
-				"type": "array",
-				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.Todos.Post.NestedObject2Model"
-				}
-			},
 			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
 				"type": "array",
 				"items": {
@@ -1467,6 +2327,12 @@
 				"type": "array",
 				"items": {
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
+				}
+			},
+			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
 				}
 			},
 			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
@@ -1503,6 +2369,56 @@
 				"pattern": "^-?(?:0|[1-9]\\d*)$",
 				"format": "int32"
 			},
+			"System.Int32[]": {
+				"type": "array",
+				"items": {
+					"$ref": "#/components/schemas/System.Int32"
+				}
+			},
+			"System.Nullable`1[[ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+				"type": "integer",
+				"description": "Enum: Low, Medium, High, Critical",
+				"enum": [
+					0,
+					1,
+					2,
+					3
+				],
+				"x-enum-varnames": [
+					"Low",
+					"Medium",
+					"High",
+					"Critical"
+				],
+				"x-enum-descriptions": {
+					"Low": "Low priority task",
+					"Medium": "Medium priority task",
+					"High": "High priority task",
+					"Critical": "Critical priority task requiring immediate attention"
+				}
+			},
+			"System.Nullable`1[[ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+				"type": "integer",
+				"description": "Enum: Low, Medium, High, Critical",
+				"enum": [
+					0,
+					1,
+					2,
+					3
+				],
+				"x-enum-varnames": [
+					"Low",
+					"Medium",
+					"High",
+					"Critical"
+				],
+				"x-enum-descriptions": {
+					"Low": "Low priority task",
+					"Medium": "Medium priority task",
+					"High": "High priority task",
+					"Critical": "Critical priority task requiring immediate attention"
+				}
+			},
 			"System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
 				"type": "boolean"
 			},
@@ -1530,6 +2446,9 @@
 		}
 	},
 	"tags": [
+		{
+			"name": "Enum"
+		},
 		{
 			"name": "Weatherforecast"
 		},
