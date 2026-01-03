@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -31,6 +32,9 @@ public partial class InfrastructureTests : IClassFixture<ExampleApiWebApplicatio
 		response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
 
 		string actualContent = await response.Content.ReadAsStringAsync();
+
+		Debugger.Break();
+
 		actualContent.ShouldNotBeNullOrWhiteSpace();
 
 		// Load expected OpenAPI JSON

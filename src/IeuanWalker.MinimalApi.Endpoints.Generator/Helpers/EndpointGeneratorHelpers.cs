@@ -1,5 +1,4 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
-using Microsoft.CodeAnalysis;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
 

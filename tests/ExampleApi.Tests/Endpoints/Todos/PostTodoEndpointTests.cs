@@ -1,9 +1,9 @@
 using ExampleApi.Data;
-using ExampleApi.Endpoints.Todos.PostFluentValidation;
+using ExampleApi.Endpoints.Todos.Post;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
-public class PostFluentValidationTodoEndpointTests
+public class PostTodoEndpointTests
 {
 	[Fact]
 	public async Task Handle_ReturnsConflict_WhenTitleExists()
@@ -16,7 +16,7 @@ public class PostFluentValidationTodoEndpointTests
 			.Returns(new[] { existing });
 
 		PostTodoEndpoint endpoint = new(todoStore);
-		RequestModel request = new() { Title = "Exists", Description = "D", IsCompleted = false };
+		RequestModel request = new() { Title = "Exists", Description = "D" };
 
 		// Act
 		_ = await endpoint.Handle(request, CancellationToken.None);
@@ -32,7 +32,7 @@ public class PostFluentValidationTodoEndpointTests
 	{
 		// Arrange
 		ITodoStore todoStore = Substitute.For<ITodoStore>();
-		Todo created = new() { Id = 10, Title = "New", Description = "Desc", IsCompleted = false, CreatedAt = DateTime.UtcNow };
+		Todo created = new() { Id = 10, Title = "New", Description = "Desc", CreatedAt = DateTime.UtcNow };
 		todoStore
 			.GetAllAsync(Arg.Any<CancellationToken>())
 			.Returns(Array.Empty<Todo>());
@@ -41,7 +41,7 @@ public class PostFluentValidationTodoEndpointTests
 			.Returns(created);
 
 		PostTodoEndpoint endpoint = new(todoStore);
-		RequestModel request = new() { Title = "New", Description = "Desc", IsCompleted = false };
+		RequestModel request = new() { Title = "New", Description = "Desc" };
 
 		// Act
 		_ = await endpoint.Handle(request, CancellationToken.None);

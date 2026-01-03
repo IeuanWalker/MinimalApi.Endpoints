@@ -21,7 +21,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = result.ToArray();
+		ResponseModel[] resultArray = [.. result];
 		resultArray.Length.ShouldBe(3);
 
 		resultArray[0].FileName.ShouldBe("document.pdf");
@@ -50,7 +50,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = result.ToArray();
+		ResponseModel[] resultArray = [.. result];
 		resultArray.ShouldHaveSingleItem();
 		resultArray[0].FileName.ShouldBe("test.txt");
 		resultArray[0].PropertyName.ShouldBe("uploadedFile");
@@ -85,7 +85,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = result.ToArray();
+		ResponseModel[] resultArray = [.. result];
 		resultArray.ShouldHaveSingleItem();
 		resultArray[0].Size.ShouldBe(0);
 	}
@@ -104,7 +104,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = result.ToArray();
+		ResponseModel[] resultArray = [.. result];
 		resultArray.ShouldHaveSingleItem();
 		resultArray[0].Size.ShouldBe(largeFileSize);
 	}

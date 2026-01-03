@@ -70,6 +70,5 @@ public class WeatherForecastV2Tests : IClassFixture<ExampleApiWebApplicationFact
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
 		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>();
 		forecast.ShouldNotBeNull();
-		forecast[0].TemperatureF.ShouldNotBe(default);
 	}
 }

@@ -17,7 +17,7 @@ public class ExampleApiWebApplicationFactory : WebApplicationFactory<Program>
 		{
 			// Remove the existing ITodoStore registration
 			ServiceDescriptor? descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(ITodoStore));
-			if (descriptor != null)
+			if (descriptor is not null)
 			{
 				services.Remove(descriptor);
 			}

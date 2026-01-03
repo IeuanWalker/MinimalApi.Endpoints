@@ -1,4 +1,5 @@
-﻿using IeuanWalker.MinimalApi.Endpoints;
+﻿using ExampleApi.Infrastructure;
+using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.FileHandling.PostSingleFile;
 
@@ -8,6 +9,7 @@ public class PostFileHandlingSingleFileEndpoint : IEndpoint<IFormFile, ResponseM
 	{
 		builder
 			.Post("api/v{version:apiVersion}/FileHandling/SingleFile")
+			.Version(1)
 			.RequestFromForm()
 			.DisableAntiforgery();
 	}
