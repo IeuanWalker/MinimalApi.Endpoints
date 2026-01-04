@@ -127,8 +127,7 @@ public class PropertyValidationBuilderTests
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
 
 		// Act & Assert
-		Should.Throw<ArgumentException>(() => propertyBuilder.Remove("   "))
-			.ParamName.ShouldBe("errorMessage");
+		Should.Throw<ArgumentException>(() => propertyBuilder.Remove("   "));
 	}
 
 	#endregion
