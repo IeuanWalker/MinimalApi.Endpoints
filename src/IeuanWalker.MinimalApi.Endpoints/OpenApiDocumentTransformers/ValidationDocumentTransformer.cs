@@ -104,11 +104,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 				{
-					// Check if this property is a reference to an enum schema
-					// Enum schemas should NOT be inlined - we preserve the $ref to maintain clean schema structure
-					if (IsEnumSchemaReference(propertySchemaInterface, document))
+					// Check if this property is a reference to an enum schema OR has inline enum values
+					// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
+					if (IsEnumSchemaReference(propertySchemaInterface, document) || IsInlineEnumSchema(propertySchemaInterface))
 					{
-						// Don't inline enum properties - preserve the $ref
+						// Don't modify enum properties - preserve the $ref or inline enum info
 						// EnumRule validation is redundant since the enum schema itself defines valid values
 						continue;
 					}
@@ -291,15 +291,24 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
 
 					// Only modify the parameter schema if there are validation rules other than just Required
-					// ALSO preserve $ref for enum types - enum properties should reference the enum schema, not inline it
+					// ALSO preserve enum types - enum properties should keep their enum information
 					if (hasOtherRules && parameter.Schema is not null)
 					{
-						// Check if this parameter is a reference to an enum schema
-						// Enum schemas should NOT be inlined - we preserve the $ref to maintain clean schema structure
-						if (IsEnumSchemaReference(parameter.Schema, document))
+						// Check if this parameter has an EnumRule
+						// Parameters with EnumRule validation should not have their schema modified
+						// because the inline enum schema from ASP.NET Core contains all necessary enum information
+						bool hasEnumRule = propertyRules.Any(r => r is Validation.EnumRule);
+						if (hasEnumRule)
 						{
-							// Don't inline enum properties - preserve the $ref
-							// EnumRule validation is redundant since the enum schema itself defines valid values
+							// Don't modify parameters with EnumRule - preserve the inline enum schema from ASP.NET Core
+							continue;
+						}
+
+						// Check if this parameter is a reference to an enum schema OR has inline enum values
+						// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
+						if (IsEnumSchemaReference(parameter.Schema, document) || IsInlineEnumSchema(parameter.Schema))
+						{
+							// Don't modify enum properties - preserve the $ref or inline enum info
 							continue;
 						}
 
@@ -559,6 +568,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		else if (resolvedReferenceSchema?.Items is not null)
 		{
 			newInlineSchema.Items = resolvedReferenceSchema.Items;
+		}
+
+		// Preserve Enum values from the original or resolved schema (for enum types)
+		if (originalOpenApiSchema?.Enum is not null && originalOpenApiSchema.Enum.Count > 0)
+		{
+			newInlineSchema.Enum = originalOpenApiSchema.Enum;
+		}
+		else if (resolvedReferenceSchema?.Enum is not null && resolvedReferenceSchema.Enum.Count > 0)
+		{
+			newInlineSchema.Enum = resolvedReferenceSchema.Enum;
 		}
 
 		// Extract custom description from DescriptionRule if present
@@ -987,6 +1006,28 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			if (enumSchema.Enum is not null && enumSchema.Enum.Count > 0)
 			{
 				return true;
+			}
+		}
+
+		return false;
+	}
+
+	static bool IsInlineEnumSchema(IOpenApiSchema schema)
+	{
+		// Check if this is an inline enum schema (has Enum property with values)
+		if (schema is OpenApiSchema openApiSchema)
+		{
+			// Inline enum schemas have the Enum property set with valid values
+			if (openApiSchema.Enum is not null && openApiSchema.Enum.Count > 0)
+			{
+				return true;
+			}
+
+			// Also check if there's a oneOf pattern (nullable enum)
+			if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+			{
+				// Check if any of the oneOf schemas is an inline enum
+				return openApiSchema.OneOf.Any(IsInlineEnumSchema);
 			}
 		}
 
