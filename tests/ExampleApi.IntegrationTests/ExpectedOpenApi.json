@@ -53,40 +53,14 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"description": "Enum: Low, Medium, High, Critical",
-							"enum": [
-								"Low",
-								"Medium",
-								"High",
-								"Critical"
-							],
-							"x-enum-descriptions": {
-								"Low": "Low priority task",
-								"Medium": "Medium priority task",
-								"High": "High priority task",
-								"Critical": "Critical priority task requiring immediate attention"
-							}
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
 						"name": "NullableEnumAsString",
 						"in": "query",
 						"schema": {
-							"type": "string",
-							"description": "Enum: Low, Medium, High, Critical",
-							"enum": [
-								"Low",
-								"Medium",
-								"High",
-								"Critical"
-							],
-							"x-enum-descriptions": {
-								"Low": "Low priority task",
-								"Medium": "Medium priority task",
-								"High": "High priority task",
-								"Critical": "Critical priority task requiring immediate attention"
-							}
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
@@ -94,52 +68,14 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "integer",
-							"description": "Enum: Low, Medium, High, Critical",
-							"enum": [
-								0,
-								1,
-								2,
-								3
-							],
-							"x-enum-varnames": [
-								"Low",
-								"Medium",
-								"High",
-								"Critical"
-							],
-							"x-enum-descriptions": {
-								"Low": "Low priority task",
-								"Medium": "Medium priority task",
-								"High": "High priority task",
-								"Critical": "Critical priority task requiring immediate attention"
-							}
+							"$ref": "#/components/schemas/System.Int32"
 						}
 					},
 					{
 						"name": "NullableEnumAsInt",
 						"in": "query",
 						"schema": {
-							"type": "integer",
-							"description": "Enum: Low, Medium, High, Critical",
-							"enum": [
-								0,
-								1,
-								2,
-								3
-							],
-							"x-enum-varnames": [
-								"Low",
-								"Medium",
-								"High",
-								"Critical"
-							],
-							"x-enum-descriptions": {
-								"Low": "Low priority task",
-								"Medium": "Medium priority task",
-								"High": "High priority task",
-								"Critical": "Critical priority task requiring immediate attention"
-							}
+							"$ref": "#/components/schemas/System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 						}
 					}
 				],
@@ -562,9 +498,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"minLength": 3,
-							"type": "string",
-							"description": "Validation rules:\n- Must be 3 characters or more"
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
@@ -572,9 +506,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maxLength": 50,
-							"type": "string",
-							"description": "Validation rules:\n- Must be 50 characters or fewer"
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
@@ -582,10 +514,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maxLength": 50,
-							"minLength": 3,
-							"type": "string",
-							"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
@@ -593,9 +522,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"pattern": "^[a-zA-Z0-9]+$",
-							"type": "string",
-							"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
@@ -603,11 +530,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"minimum": false,
-							"exclusiveMinimum": true,
-							"type": "integer",
-							"description": "Validation rules:\n- Must be >= 1",
-							"format": "int32"
+							"$ref": "#/components/schemas/System.Int32"
 						}
 					},
 					{
@@ -615,11 +538,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
-							"type": "integer",
-							"description": "Validation rules:\n- Must be <= 100",
-							"format": "int32"
+							"$ref": "#/components/schemas/System.Int32"
 						}
 					},
 					{
@@ -627,13 +546,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
-							"minimum": false,
-							"exclusiveMinimum": true,
-							"type": "integer",
-							"description": "Validation rules:\n- Must be >= 1 and <= 100",
-							"format": "int32"
+							"$ref": "#/components/schemas/System.Int32"
 						}
 					},
 					{
@@ -641,11 +554,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"minimum": false,
-							"exclusiveMinimum": true,
-							"type": "number",
-							"description": "Validation rules:\n- Must be >= 0.1",
-							"format": "double"
+							"$ref": "#/components/schemas/System.Double"
 						}
 					},
 					{
@@ -653,11 +562,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
-							"type": "number",
-							"description": "Validation rules:\n- Must be <= 99.9",
-							"format": "double"
+							"$ref": "#/components/schemas/System.Double"
 						}
 					},
 					{
@@ -665,13 +570,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
-							"minimum": false,
-							"exclusiveMinimum": true,
-							"type": "number",
-							"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
-							"format": "double"
+							"$ref": "#/components/schemas/System.Double"
 						}
 					},
 					{
@@ -679,11 +578,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.String"
-							},
-							"description": "Validation rules:\n- Must contain at least 1 item."
+							"$ref": "#/components/schemas/System.String[]"
 						}
 					},
 					{
@@ -691,11 +586,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.String"
-							},
-							"description": "Validation rules:\n- Must contain at most 10 items."
+							"$ref": "#/components/schemas/System.String[]"
 						}
 					},
 					{
@@ -703,11 +594,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.String"
-							},
-							"description": "Validation rules:\n- Must contain between 1 and 10 items."
+							"$ref": "#/components/schemas/System.String[]"
 						}
 					},
 					{
@@ -715,11 +602,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.Int32"
-							},
-							"description": "Validation rules:\n- Must contain at least 1 item."
+							"$ref": "#/components/schemas/System.Int32[]"
 						}
 					},
 					{
@@ -727,11 +610,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.Int32"
-							},
-							"description": "Validation rules:\n- Must contain at most 10 items."
+							"$ref": "#/components/schemas/System.Int32[]"
 						}
 					},
 					{
@@ -739,37 +618,21 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.Int32"
-							},
-							"description": "Validation rules:\n- Must contain between 1 and 10 items."
+							"$ref": "#/components/schemas/System.Int32[]"
 						}
 					},
 					{
 						"name": "AllBuiltInStringValidators",
 						"in": "query",
-						"required": true,
 						"schema": {
-							"maxLength": 250,
-							"minLength": 2,
-							"pattern": "^[a-zA-Z0-9]+$",
-							"type": "string",
-							"description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Must be at least 2 characters and less than 250 characters\n- Must be 250 characters or fewer\n- Must be 2 characters or more\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid credit card number\n- Must be empty.",
-							"format": "email"
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
 						"name": "AllBuiltInNumberValidators",
 						"in": "query",
-						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
-							"minimum": false,
-							"exclusiveMinimum": true,
-							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+							"$ref": "#/components/schemas/System.Nullable`1[[System.Decimal, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 						}
 					},
 					{
@@ -793,12 +656,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"type": "string",
-							"description": "Enum: Success, Failure",
-							"enum": [
-								"Success",
-								"Failure"
-							]
+							"$ref": "#/components/schemas/System.String"
 						}
 					},
 					{
@@ -806,8 +664,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'.",
-							"format": "int32"
+							"$ref": "#/components/schemas/System.Int32"
 						}
 					},
 					{
