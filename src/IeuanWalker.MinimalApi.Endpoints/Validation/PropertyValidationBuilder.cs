@@ -7,6 +7,7 @@ public sealed class PropertyValidationBuilder<TRequest, TProperty>
 {
 	readonly string _propertyName;
 	readonly List<ValidationRule> _rules = [];
+	readonly List<ValidationRuleOperation> _operations = [];
 	bool? _appendRulesToPropertyDescription;
 
 	internal PropertyValidationBuilder(string propertyName)
@@ -18,6 +19,9 @@ public sealed class PropertyValidationBuilder<TRequest, TProperty>
 
 	internal IEnumerable<ValidationRule> Build()
 	{
+		// Don't apply operations here - they will be applied later in ValidationDocumentTransformer
+		// after FluentValidation rules are merged
+
 		// Apply the per-property AppendRulesToPropertyDescription setting to all rules
 		if (_appendRulesToPropertyDescription.HasValue)
 		{
@@ -30,43 +34,45 @@ public sealed class PropertyValidationBuilder<TRequest, TProperty>
 		return _rules;
 	}
 
+	internal IReadOnlyList<ValidationRuleOperation> GetOperations() => _operations.AsReadOnly();
+
 	/// <summary>
 	/// Replaces the error message of an existing validation rule with a new message.
+	/// The operation is applied after all rules are collected, including FluentValidation auto-discovered rules.
 	/// </summary>
-	/// <param name="oldRule">The error message of the validation rule to be replaced. Must match an existing rule's error message.</param>
-	/// <param name="newRule">The new error message to assign to the specified validation rule.</param>
+	/// <param name="oldErrorMessage">The error message of the validation rule to be replaced. Must match an existing rule's error message.</param>
+	/// <param name="newErrorMessage">The new error message to assign to the specified validation rule.</param>
 	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
-	/// <exception cref="ArgumentNullException">Thrown if no validation rule exists with an error message equal to <paramref name="oldRule"/>.</exception>
-	public PropertyValidationBuilder<TRequest, TProperty> Alter(string oldRule, string newRule)
+	/// <exception cref="ArgumentException">Thrown if no validation rule exists with an error message equal to <paramref name="oldErrorMessage"/>.</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> Alter(string oldErrorMessage, string newErrorMessage)
 	{
-		// TODO: Throw exception if oldRule doesnt exist
-
-		throw new NotImplementedException();
+		_operations.Add(new AlterOperation(oldErrorMessage, newErrorMessage));
+		return this;
 	}
 
 	/// <summary>
-	/// Removes the validation rule with the specified name from the property validation builder.
+	/// Removes the validation rule with the specified error message from the property validation builder.
+	/// The operation is applied after all rules are collected, including FluentValidation auto-discovered rules.
 	/// </summary>
-	/// <param name="rule">The name of the validation rule to remove. Cannot be null or empty.</param>
+	/// <param name="errorMessage">The error message of the validation rule to remove. Cannot be null or empty.</param>
 	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
-	/// <exception cref="NotImplementedException">The method is not implemented.</exception>
-	public PropertyValidationBuilder<TRequest, TProperty> Remove(string rule)
+	/// <exception cref="ArgumentException">Thrown if no validation rule exists with an error message equal to <paramref name="rule"/>.</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> Remove(string errorMessage)
 	{
-		// TODO: Throw exception if rule doesnt exist
-
-		throw new NotImplementedException();
+		_operations.Add(new RemoveOperation(errorMessage));
+		return this;
 	}
 
 	/// <summary>
 	/// Removes all validation rules from the property validation builder.
+	/// The operation is applied after all rules are collected, including FluentValidation auto-discovered rules.
 	/// </summary>
 	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
-	/// <exception cref="NotImplementedException">Thrown in all cases. This method is not yet implemented.</exception>
+	/// <exception cref="InvalidOperationException">Thrown if there are no validation rules to remove.</exception>
 	public PropertyValidationBuilder<TRequest, TProperty> RemoveAll()
 	{
-		// TODO: Throw exception if rules is empty
-
-		throw new NotImplementedException();
+		_operations.Add(new RemoveAllOperation());
+		return this;
 	}
 
 	/// <summary>

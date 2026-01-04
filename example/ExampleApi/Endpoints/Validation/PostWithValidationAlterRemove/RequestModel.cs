@@ -10,7 +10,6 @@ public class RequestModel
 	public string RemoveAll { get; set; } = string.Empty;
 }
 
-
 sealed class RequestModelValidator : Validator<RequestModel>
 {
 	public RequestModelValidator()
@@ -24,7 +23,7 @@ sealed class RequestModelValidator : Validator<RequestModel>
 			.MaximumLength(100)
 			.Matches(@"^[a-zA-Z0-9]+$");
 
-		RuleFor(x => x.Remove1)
+		RuleFor(x => x.RemoveAll)
 			.MinimumLength(10)
 			.MaximumLength(100)
 			.Matches(@"^[a-zA-Z0-9]+$");

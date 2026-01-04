@@ -62,6 +62,33 @@ partial class ValidationDocumentTransformer
 			rules.AddRange(manualRules);
 
 			allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
+
+			// Extract and apply operations from the configuration object
+			PropertyInfo? operationsProp = config.GetType().GetProperty(nameof(Validation.ValidationConfiguration<>.OperationsByProperty), BindingFlags.Instance | BindingFlags.NonPublic);
+			if (operationsProp?.GetValue(config) is IReadOnlyDictionary<string, IReadOnlyList<Validation.ValidationRuleOperation>> operationsByProperty)
+			{
+				// Apply operations for each property
+				foreach (KeyValuePair<string, IReadOnlyList<Validation.ValidationRuleOperation>> kvp in operationsByProperty)
+				{
+					string propertyName = kvp.Key;
+					IReadOnlyList<Validation.ValidationRuleOperation> operations = kvp.Value;
+
+					// Get all rules for this property
+					List<Validation.ValidationRule> propertyRules = [.. rules.Where(r => r.PropertyName == propertyName)];
+
+					// Apply all operations in order
+					foreach (Validation.ValidationRuleOperation operation in operations)
+					{
+						operation.Apply(propertyRules);
+					}
+
+					// Replace the rules for this property with the modified ones
+					rules.RemoveAll(r => r.PropertyName == propertyName);
+					rules.AddRange(propertyRules);
+				}
+
+				allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
+			}
 		}
 	}
 }

@@ -2252,14 +2252,13 @@
 						"minLength": 10,
 						"pattern": "^[a-zA-Z0-9]+$",
 						"type": "string",
-						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be 10 characters or more"
+						"description": "Validation rules:\n- Must be alphanumeric\n- Must be 10 characters or more"
 					},
 					"remove1": {
-						"maxLength": 100,
 						"minLength": 10,
 						"pattern": "^[a-zA-Z0-9]+$",
 						"type": "string",
-						"description": "Validation rules:\n- Must be 10 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$"
+						"description": "Validation rules:\n- Must be 10 characters or more\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"removeAll": {
 						"$ref": "#/components/schemas/System.String"

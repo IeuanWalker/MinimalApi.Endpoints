@@ -39,9 +39,14 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 	internal ValidationConfiguration<TRequest> Build()
 	{
 		List<ValidationRule> allRules = [];
+		Dictionary<string, IReadOnlyList<ValidationRuleOperation>> operationsByProperty = [];
 
 		foreach (object builder in _propertyBuilders)
 		{
+			// Use reflection to get the property name
+			FieldInfo? propertyNameField = builder.GetType().GetField("_propertyName", BindingFlags.Instance | BindingFlags.NonPublic);
+			string? propertyName = propertyNameField?.GetValue(builder) as string;
+
 			// Use reflection to call Build() on each property builder
 			MethodInfo? buildMethod = builder.GetType().GetMethod("Build", BindingFlags.Instance | BindingFlags.NonPublic);
 
@@ -49,9 +54,19 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 			{
 				allRules.AddRange(rules);
 			}
+
+			// Get operations from the property builder
+			MethodInfo? getOperationsMethod = builder.GetType().GetMethod("GetOperations", BindingFlags.Instance | BindingFlags.NonPublic);
+			if (getOperationsMethod is not null &&
+				getOperationsMethod.Invoke(builder, null) is IReadOnlyList<ValidationRuleOperation> operations &&
+				operations.Count > 0 &&
+				propertyName is not null)
+			{
+				operationsByProperty[propertyName] = operations;
+			}
 		}
 
-		return new ValidationConfiguration<TRequest>(allRules, _appendRulesToPropertyDescription);
+		return new ValidationConfiguration<TRequest>(allRules, _appendRulesToPropertyDescription, operationsByProperty);
 	}
 
 	static string GetPropertyName<TProperty>(Expression<Func<TRequest, TProperty>> expression) => expression.Body switch
