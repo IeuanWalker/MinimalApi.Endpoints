@@ -11,52 +11,37 @@ public class PropertyValidationBuilderTests
 		public int Age { get; set; }
 	}
 
-	static List<ValidationRule> GetRules<TRequest, TProperty>(PropertyValidationBuilder<TRequest, TProperty> builder)
+	// Helper to check if operations are stored
+	static int GetOperationsCount<TRequest, TProperty>(PropertyValidationBuilder<TRequest, TProperty> builder)
 	{
-		FieldInfo? field = builder.GetType().GetField("_rules", BindingFlags.Instance | BindingFlags.NonPublic);
-		return (List<ValidationRule>)field!.GetValue(builder)!;
+		MethodInfo? method = builder.GetType().GetMethod("GetOperations", BindingFlags.Instance | BindingFlags.NonPublic);
+		object? result = method?.Invoke(builder, null);
+		if (result is System.Collections.ICollection collection)
+		{
+			return collection.Count;
+		}
+		return 0;
 	}
 
 	#region Alter Tests
 
 	[Fact]
-	public void Alter_WhenOldRuleExists_UpdatesErrorMessage()
+	public void Alter_StoresOperation()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.MinLength(5);
 
 		// Act
-		PropertyValidationBuilder<TestRequest, string> result = propertyBuilder.Alter("Must be 5 characters or more", "Minimum 5 chars required");
+		PropertyValidationBuilder<TestRequest, string> result = propertyBuilder.Alter("Old message", "New message");
 
 		// Assert
 		result.ShouldBeSameAs(propertyBuilder); // Method chaining works
-		List<ValidationRule> rules = GetRules(propertyBuilder);
-		ValidationRule? alteredRule = rules.FirstOrDefault(r => r.ErrorMessage == "Minimum 5 chars required");
-		alteredRule.ShouldNotBeNull();
-		alteredRule.ShouldBeOfType<StringLengthRule>();
+		GetOperationsCount(propertyBuilder).ShouldBe(1);
 	}
 
 	[Fact]
-	public void Alter_WhenOldRuleDoesNotExist_ThrowsArgumentException()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-
-		// Act & Assert
-		ArgumentException ex = Should.Throw<ArgumentException>(() =>
-			propertyBuilder.Alter("Non-existent rule", "New message"));
-
-		ex.ParamName.ShouldBe("oldRule");
-		ex.Message.ShouldContain("No validation rule exists with error message: 'Non-existent rule'");
-	}
-
-	[Fact]
-	public void Alter_WhenOldRuleIsNull_ThrowsArgumentNullException()
+	public void Alter_WithNullOldRule_ThrowsArgumentNullException()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
@@ -64,11 +49,11 @@ public class PropertyValidationBuilderTests
 
 		// Act & Assert
 		Should.Throw<ArgumentNullException>(() => propertyBuilder.Alter(null!, "New message"))
-			.ParamName.ShouldBe("oldRule");
+			.ParamName.ShouldBe("oldErrorMessage");
 	}
 
 	[Fact]
-	public void Alter_WhenOldRuleIsWhiteSpace_ThrowsArgumentException()
+	public void Alter_WithWhitespaceOldRule_ThrowsArgumentException()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
@@ -76,52 +61,31 @@ public class PropertyValidationBuilderTests
 
 		// Act & Assert
 		Should.Throw<ArgumentException>(() => propertyBuilder.Alter("   ", "New message"))
-			.ParamName.ShouldBe("oldRule");
+			.ParamName.ShouldBe("oldErrorMessage");
 	}
 
 	[Fact]
-	public void Alter_WhenNewRuleIsNull_ThrowsArgumentNullException()
+	public void Alter_WithNullNewRule_ThrowsArgumentNullException()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
 
 		// Act & Assert
-		Should.Throw<ArgumentNullException>(() => propertyBuilder.Alter("Is required", null!))
-			.ParamName.ShouldBe("newRule");
+		Should.Throw<ArgumentNullException>(() => propertyBuilder.Alter("Old message", null!))
+			.ParamName.ShouldBe("newErrorMessage");
 	}
 
 	[Fact]
-	public void Alter_WhenNewRuleIsWhiteSpace_ThrowsArgumentException()
+	public void Alter_WithWhitespaceNewRule_ThrowsArgumentException()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
 
 		// Act & Assert
-		Should.Throw<ArgumentException>(() => propertyBuilder.Alter("Is required", "   "))
-			.ParamName.ShouldBe("newRule");
-	}
-
-	[Fact]
-	public void Alter_WithCustomErrorMessage_UpdatesCorrectly()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required("Name field is mandatory");
-		propertyBuilder.MinLength(3, "Too short!");
-
-		// Act
-		propertyBuilder.Alter("Too short!", "Must have at least 3 characters");
-
-		// Assert
-		
-		ValidationRule? alteredRule = GetRules(propertyBuilder).FirstOrDefault(r => r.ErrorMessage == "Must have at least 3 characters");
-		alteredRule.ShouldNotBeNull();
-		alteredRule.ShouldBeOfType<StringLengthRule>();
+		Should.Throw<ArgumentException>(() => propertyBuilder.Alter("Old message", "   "))
+			.ParamName.ShouldBe("newErrorMessage");
 	}
 
 	#endregion
@@ -129,43 +93,22 @@ public class PropertyValidationBuilderTests
 	#region Remove Tests
 
 	[Fact]
-	public void Remove_WhenRuleExists_RemovesTheRule()
+	public void Remove_StoresOperation()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.MinLength(5);
-		propertyBuilder.MaxLength(100);
 
 		// Act
-		PropertyValidationBuilder<TestRequest, string> result = propertyBuilder.Remove("Must be 5 characters or more");
+		PropertyValidationBuilder<TestRequest, string> result = propertyBuilder.Remove("Message to remove");
 
 		// Assert
 		result.ShouldBeSameAs(propertyBuilder); // Method chaining works
-		
-		GetRules(propertyBuilder).Count().ShouldBe(2); // Should have Required and MaxLength only
-		GetRules(propertyBuilder).ShouldNotContain(r => r.ErrorMessage == "Must be 5 characters or more");
+		GetOperationsCount(propertyBuilder).ShouldBe(1);
 	}
 
 	[Fact]
-	public void Remove_WhenRuleDoesNotExist_ThrowsArgumentException()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-
-		// Act & Assert
-		ArgumentException ex = Should.Throw<ArgumentException>(() =>
-			propertyBuilder.Remove("Non-existent rule"));
-
-		ex.ParamName.ShouldBe("rule");
-		ex.Message.ShouldContain("No validation rule exists with error message: 'Non-existent rule'");
-	}
-
-	[Fact]
-	public void Remove_WhenRuleIsNull_ThrowsArgumentNullException()
+	public void Remove_WithNullRule_ThrowsArgumentNullException()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
@@ -173,11 +116,11 @@ public class PropertyValidationBuilderTests
 
 		// Act & Assert
 		Should.Throw<ArgumentNullException>(() => propertyBuilder.Remove(null!))
-			.ParamName.ShouldBe("rule");
+			.ParamName.ShouldBe("errorMessage");
 	}
 
 	[Fact]
-	public void Remove_WhenRuleIsWhiteSpace_ThrowsArgumentException()
+	public void Remove_WithWhitespaceRule_ThrowsArgumentException()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
@@ -185,45 +128,7 @@ public class PropertyValidationBuilderTests
 
 		// Act & Assert
 		Should.Throw<ArgumentException>(() => propertyBuilder.Remove("   "))
-			.ParamName.ShouldBe("rule");
-	}
-
-	[Fact]
-	public void Remove_WithCustomErrorMessage_RemovesCorrectly()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required("Custom required message");
-		propertyBuilder.MinLength(3, "Too short!");
-		propertyBuilder.MaxLength(50);
-
-		// Act
-		propertyBuilder.Remove("Too short!");
-
-		// Assert
-		
-		GetRules(propertyBuilder).Count().ShouldBe(2); // Should have Required and MaxLength only
-		GetRules(propertyBuilder).ShouldNotContain(r => r.ErrorMessage == "Too short!");
-		GetRules(propertyBuilder).ShouldContain(r => r.ErrorMessage == "Custom required message");
-	}
-
-	[Fact]
-	public void Remove_AllRulesOneByOne_LeavesEmptyList()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.MinLength(5);
-
-		// Act
-		propertyBuilder.Remove("Is required");
-		propertyBuilder.Remove("Must be 5 characters or more");
-
-		// Assert
-		
-		GetRules(propertyBuilder).ShouldBeEmpty();
+			.ParamName.ShouldBe("errorMessage");
 	}
 
 	#endregion
@@ -231,65 +136,18 @@ public class PropertyValidationBuilderTests
 	#region RemoveAll Tests
 
 	[Fact]
-	public void RemoveAll_WhenRulesExist_RemovesAllRules()
+	public void RemoveAll_StoresOperation()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.MinLength(5);
-		propertyBuilder.MaxLength(100);
-		propertyBuilder.Pattern("^[a-z]+$");
 
 		// Act
 		PropertyValidationBuilder<TestRequest, string> result = propertyBuilder.RemoveAll();
 
 		// Assert
 		result.ShouldBeSameAs(propertyBuilder); // Method chaining works
-		
-		GetRules(propertyBuilder).ShouldBeEmpty();
-	}
-
-	[Fact]
-	public void RemoveAll_WhenNoRulesExist_ThrowsInvalidOperationException()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-
-		// Act & Assert
-		InvalidOperationException ex = Should.Throw<InvalidOperationException>(() => propertyBuilder.RemoveAll());
-		ex.Message.ShouldBe("No validation rules exist to remove.");
-	}
-
-	[Fact]
-	public void RemoveAll_AfterRemovingAllRulesIndividually_ThrowsInvalidOperationException()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.Remove("Is required");
-
-		// Act & Assert
-		InvalidOperationException ex = Should.Throw<InvalidOperationException>(() => propertyBuilder.RemoveAll());
-		ex.Message.ShouldBe("No validation rules exist to remove.");
-	}
-
-	[Fact]
-	public void RemoveAll_WithSingleRule_RemovesIt()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-
-		// Act
-		propertyBuilder.RemoveAll();
-
-		// Assert
-		
-		GetRules(propertyBuilder).ShouldBeEmpty();
+		GetOperationsCount(propertyBuilder).ShouldBe(1);
 	}
 
 	#endregion
@@ -297,68 +155,21 @@ public class PropertyValidationBuilderTests
 	#region Integration Tests with Multiple Operations
 
 	[Fact]
-	public void ChainedOperations_AlterThenRemove_WorksCorrectly()
+	public void ChainedOperations_StoresMultipleOperationsInOrder()
 	{
 		// Arrange
 		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.MinLength(5);
-		propertyBuilder.MaxLength(100);
 
 		// Act
 		propertyBuilder
-			.Alter("Must be 5 characters or more", "Minimum 5 chars")
-			.Remove("Minimum 5 chars");
+			.Alter("Message 1", "Modified 1")
+			.Remove("Message 2")
+			.Alter("Message 3", "Modified 3")
+			.RemoveAll();
 
 		// Assert
-		
-		GetRules(propertyBuilder).Count().ShouldBe(2); // Should have Required and MaxLength only
-		GetRules(propertyBuilder).Where(r => r is StringLengthRule sl && sl.MinLength.HasValue).ShouldBeEmpty();
-	}
-
-	[Fact]
-	public void ChainedOperations_RemoveThenAlter_WorksCorrectly()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.MinLength(5);
-		propertyBuilder.MaxLength(100);
-
-		// Act
-		propertyBuilder
-			.Remove("Must be 5 characters or more")
-			.Alter("Must be 100 characters or fewer", "Max 100 characters");
-
-		// Assert
-		
-		GetRules(propertyBuilder).Count().ShouldBe(2); // Should have Required and MaxLength only
-		ValidationRule? alteredRule = GetRules(propertyBuilder).FirstOrDefault(r => r.ErrorMessage == "Max 100 characters");
-		alteredRule.ShouldNotBeNull();
-		alteredRule.ShouldBeOfType<StringLengthRule>();
-	}
-
-	[Fact]
-	public void ChainedOperations_AlterMultipleTimes_UpdatesCorrectly()
-	{
-		// Arrange
-		ValidationConfigurationBuilder<TestRequest> configBuilder = new();
-		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
-		propertyBuilder.Required();
-		propertyBuilder.MinLength(5);
-
-		// Act
-		propertyBuilder
-			.Alter("Must be 5 characters or more", "Intermediate message")
-			.Alter("Intermediate message", "Final message");
-
-		// Assert
-		
-		ValidationRule? alteredRule = GetRules(propertyBuilder).FirstOrDefault(r => r.ErrorMessage == "Final message");
-		alteredRule.ShouldNotBeNull();
-		alteredRule.ShouldBeOfType<StringLengthRule>();
+		GetOperationsCount(propertyBuilder).ShouldBe(4);
 	}
 
 	#endregion

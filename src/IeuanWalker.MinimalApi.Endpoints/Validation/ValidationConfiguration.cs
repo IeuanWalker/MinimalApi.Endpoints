@@ -15,9 +15,18 @@ public sealed class ValidationConfiguration<TRequest>
 	/// </summary>
 	public bool AppendRulesToPropertyDescription { get; }
 
-	internal ValidationConfiguration(IReadOnlyList<ValidationRule> rules, bool appendRulesToPropertyDescription)
+	/// <summary>
+	/// Operations to apply to validation rules grouped by property name
+	/// </summary>
+	internal IReadOnlyDictionary<string, IReadOnlyList<ValidationRuleOperation>> OperationsByProperty { get; }
+
+	internal ValidationConfiguration(
+		IReadOnlyList<ValidationRule> rules, 
+		bool appendRulesToPropertyDescription,
+		IReadOnlyDictionary<string, IReadOnlyList<ValidationRuleOperation>> operationsByProperty)
 	{
 		Rules = rules;
 		AppendRulesToPropertyDescription = appendRulesToPropertyDescription;
+		OperationsByProperty = operationsByProperty;
 	}
 }

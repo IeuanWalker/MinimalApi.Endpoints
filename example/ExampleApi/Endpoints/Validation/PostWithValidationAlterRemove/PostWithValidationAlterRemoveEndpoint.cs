@@ -17,23 +17,14 @@ public class PostWithValidationAlterRemoveEndpoint : IEndpointWithoutResponse<Re
 			.WithSummary("WithValidationAlterAndRemove")
 			.WithValidationRules<RequestModel>(x =>
 			{
-				// Demonstrate Alter: Add a pattern rule then change its error message
-				x.Property(p => p.Alter)
-					.Pattern(@"^[a-zA-Z0-9]+$")
-					.Alter("Must match pattern: ^[a-zA-Z0-9]+$", "Must be alphanumeric");
+				// Demonstrate Alter: Change the FluentValidation pattern error message
+				x.Property(p => p.Alter).Alter("Must match pattern: ^[a-zA-Z0-9]+$", "Must be alphanumeric");
 
-				// Demonstrate Remove: Add multiple rules then remove one
-				x.Property(p => p.Remove1)
-					.MinLength(10)
-					.MaxLength(100)
-					.Remove("Must be 100 characters or fewer");
+				// Demonstrate Remove: Remove the MaxLength rule from FluentValidation
+				x.Property(p => p.Remove1).Remove("Must be 100 characters or fewer");
 
-				// Demonstrate RemoveAll: Add multiple rules then remove all
-				x.Property(p => p.RemoveAll)
-					.MinLength(10)
-					.MaxLength(100)
-					.Pattern(@"^[a-zA-Z0-9]+$")
-					.RemoveAll();
+				// Demonstrate RemoveAll: Remove all FluentValidation rules for this property
+				x.Property(p => p.RemoveAll).RemoveAll();
 			});
 	}
 
