@@ -332,6 +332,6 @@ partial class ValidationDocumentTransformer
 		return new Validation.CustomRule<object>(propertyName, errorMessage);
 	}
 
-	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to propery {PropertyName} from the object {ValidatorType}. Consider manually setting the error message.")]
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to property {PropertyName} from the object {ValidatorType}. Consider manually setting the error message.")]
 	static partial void LogVagueErrorMessageDataAnnotation(ILogger logger, string validatorType, string propertyName);
 }
