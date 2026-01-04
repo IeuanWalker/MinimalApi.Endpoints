@@ -1520,12 +1520,7 @@
 								"nullable": true
 							},
 							{
-								"maxLength": 100,
-								"minLength": 3,
-								"pattern": "^[a-zA-Z0-9]+$",
-								"type": "string",
-								"description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number\n- AllBuiltInStringValidators is not valid.\n- Default error message",
-								"format": "uri"
+								"$ref": "#/components/schemas/System.String"
 							}
 						]
 					},
@@ -1535,10 +1530,7 @@
 								"nullable": true
 							},
 							{
-								"maxLength": 100,
-								"minLength": 3,
-								"type": "string",
-								"description": "Validation rules:\n- Is required\n- Must be between 10 and 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+								"$ref": "#/components/schemas/System.Nullable`1[[System.Decimal, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 							}
 						]
 					},
@@ -1549,23 +1541,13 @@
 						"$ref": "#/components/schemas/System.Int32"
 					},
 					"stringLength": {
-						"maxLength": 50,
-						"minLength": 3,
-						"type": "string",
-						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringMin": {
-						"minLength": 3,
-						"type": "string",
-						"description": "Validation rules:\n- Must be 3 characters or more"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"listMin": {
-						"minLength": 3,
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/System.String"
-						},
-						"description": "Validation rules:\n- Must be 3 characters or more"
+						"$ref": "#/components/schemas/System.String[]"
 					},
 					"stringMax": {
 						"maxLength": 100,
@@ -1573,21 +1555,13 @@
 						"description": "Validation rules:\n- Must be 100 characters or fewer"
 					},
 					"listMax": {
-						"maxLength": 10,
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/System.String"
-						},
-						"description": "Validation rules:\n- Must be 10 characters or fewer"
+						"$ref": "#/components/schemas/System.String[]"
 					},
 					"rangeInt": {
-						"description": "Validation rules:\n- Must be between 10 and 25",
-						"format": "int32"
+						"$ref": "#/components/schemas/System.Int32"
 					},
 					"rangeDateTime": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be between 1996-06-08 and 2026-01-04",
-						"format": "date-time"
+						"$ref": "#/components/schemas/System.DateTime"
 					},
 					"stringPattern": {
 						"pattern": "^[a-zA-Z0-9]+$",
@@ -1595,18 +1569,13 @@
 						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"stringEmail": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid email address",
-						"format": "email"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringPhoneNumber": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid phone number"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringUrl": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid URL",
-						"format": "uri"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"actualUri": {
 						"oneOf": [
@@ -1619,16 +1588,13 @@
 						]
 					},
 					"compare1": {
-						"type": "string",
-						"description": "Validation rules:\n- Must match Compare2"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"compare2": {
-						"type": "string",
-						"description": "Validation rules:\n- Must match Compare1"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringCreditCard": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid credit card number"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"fileExtension": {
 						"oneOf": [
@@ -1636,8 +1602,7 @@
 								"nullable": true
 							},
 							{
-								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
-								"nullable": true
+								"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
 							}
 						]
 					},
@@ -1707,33 +1672,22 @@
 						"description": "Validation rules:\n- Must be 10 characters or fewer"
 					},
 					"listIntRangeCount": {
-						"maxLength": 10,
-						"minLength": 1,
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/System.Int32"
-						},
-						"description": "Validation rules:\n- Must be 1 characters or more\n- Must be 10 characters or fewer"
+						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 					},
 					"customValidatedProperty": {
-						"type": "string",
-						"description": "Validation rules:\n- CustomValidatedProperty is not valid."
+						"$ref": "#/components/schemas/System.String"
 					},
 					"customValidationWithDefaultMessage": {
-						"type": "string",
-						"description": "Validation rules:\n- Default error message"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"customValidationWithoutDefaultMessage": {
-						"type": "string",
-						"description": "Validation rules:\n- The field CustomValidationWithoutDefaultMessage is invalid."
+						"$ref": "#/components/schemas/System.String"
 					},
 					"customValidationWithoutDefaultMessageSetManually": {
-						"type": "string",
-						"description": "Validation rules:\n- Setting error message manuall"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"customValidationWithDefaultMessageOverrideMessage": {
-						"type": "string",
-						"description": "Validation rules:\n- Override error message"
+						"$ref": "#/components/schemas/System.String"
 					}
 				}
 			},
@@ -1753,12 +1707,7 @@
 								"nullable": true
 							},
 							{
-								"maxLength": 100,
-								"minLength": 3,
-								"pattern": "^[a-zA-Z0-9]+$",
-								"type": "string",
-								"description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number",
-								"format": "uri"
+								"$ref": "#/components/schemas/System.String"
 							}
 						]
 					},
@@ -1768,10 +1717,7 @@
 								"nullable": true
 							},
 							{
-								"maxLength": 100,
-								"minLength": 3,
-								"type": "string",
-								"description": "Validation rules:\n- Is required\n- Must be between 10 and 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+								"$ref": "#/components/schemas/System.Nullable`1[[System.Decimal, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 							}
 						]
 					},
@@ -1782,64 +1728,37 @@
 						"$ref": "#/components/schemas/System.Int32"
 					},
 					"stringLength": {
-						"maxLength": 50,
-						"minLength": 3,
-						"type": "string",
-						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringMin": {
-						"minLength": 3,
-						"type": "string",
-						"description": "Validation rules:\n- Must be 3 characters or more"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"listMin": {
-						"minLength": 3,
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/System.String"
-						},
-						"description": "Validation rules:\n- Must be 3 characters or more"
+						"$ref": "#/components/schemas/System.String[]"
 					},
 					"stringMax": {
-						"maxLength": 100,
-						"type": "string",
-						"description": "Validation rules:\n- Must be 100 characters or fewer"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"listMax": {
-						"maxLength": 10,
-						"type": "array",
-						"items": {
-							"$ref": "#/components/schemas/System.String"
-						},
-						"description": "Validation rules:\n- Must be 10 characters or fewer"
+						"$ref": "#/components/schemas/System.String[]"
 					},
 					"rangeInt": {
-						"description": "Validation rules:\n- Must be between 10 and 25",
-						"format": "int32"
+						"$ref": "#/components/schemas/System.Int32"
 					},
 					"rangeDateTime": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be between 1996-06-08 and 2026-01-04",
-						"format": "date-time"
+						"$ref": "#/components/schemas/System.DateTime"
 					},
 					"stringPattern": {
-						"pattern": "^[a-zA-Z0-9]+$",
-						"type": "string",
-						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringEmail": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid email address",
-						"format": "email"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringPhoneNumber": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid phone number"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringUrl": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid URL",
-						"format": "uri"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"actualUri": {
 						"oneOf": [
@@ -1852,16 +1771,13 @@
 						]
 					},
 					"compare1": {
-						"type": "string",
-						"description": "Validation rules:\n- Must match Compare2"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"compare2": {
-						"type": "string",
-						"description": "Validation rules:\n- Must match Compare1"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"stringCreditCard": {
-						"type": "string",
-						"description": "Validation rules:\n- Must be a valid credit card number"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"fileExtension": {
 						"oneOf": [
@@ -1869,8 +1785,7 @@
 								"nullable": true
 							},
 							{
-								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
-								"nullable": true
+								"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
 							}
 						]
 					},
@@ -1956,6 +1871,12 @@
 						"type": "string",
 						"description": "Validation rules:\n- Default error message"
 					},
+					"customValidatedProperty": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"throwsCustomValidationProperty": {
+						"$ref": "#/components/schemas/System.String"
+					},
 					"nestedObject": {
 						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
 					},
@@ -1973,20 +1894,16 @@
 						]
 					},
 					"customValidationWithDefaultMessage": {
-						"type": "string",
-						"description": "Validation rules:\n- Default error message"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"customValidationWithoutDefaultMessage": {
-						"type": "string",
-						"description": "Validation rules:\n- The field CustomValidationWithoutDefaultMessage is invalid."
+						"$ref": "#/components/schemas/System.String"
 					},
 					"customValidationWithoutDefaultMessageSetManually": {
-						"type": "string",
-						"description": "Validation rules:\n- Setting error message manuall"
+						"$ref": "#/components/schemas/System.String"
 					},
 					"customValidationWithDefaultMessageOverrideMessage": {
-						"type": "string",
-						"description": "Validation rules:\n- Override error message"
+						"$ref": "#/components/schemas/System.String"
 					}
 				}
 			},
