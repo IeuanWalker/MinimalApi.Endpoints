@@ -93,7 +93,6 @@ public class ValidationParameterIsolationTests : IClassFixture<ExampleApiWebAppl
 		int? minLengthB = schemaB.TryGetProperty("minLength", out JsonElement minB) ? minB.GetInt32() : (int?)null;
 
 		// This is the key assertion - they should be different!
-		// Currently this test will FAIL because of the bug
 		minLengthA.ShouldNotBe(minLengthB, 
 			$"Endpoint A and B should have different validation rules. " +
 			$"A has minLength={minLengthA}, B has minLength={minLengthB}");
