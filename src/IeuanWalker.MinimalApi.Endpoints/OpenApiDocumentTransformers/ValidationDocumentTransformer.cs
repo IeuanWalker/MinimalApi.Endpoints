@@ -176,21 +176,25 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				.Select(param => param.ParameterType)
 				.FirstOrDefault(paramType => allValidationRules.ContainsKey(paramType));
 
-			if (matchingParamType is not null && !mapping.ContainsKey(routePattern))
+			if (matchingParamType is null)
+			{
+				continue;
+			}
+
+			if (mapping.TryGetValue(routePattern, out Type existingType))
+			{
+				// Log a warning when a collision is detected
+				if (existingType != matchingParamType)
+				{
+					ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
+					LogRoutePatternCollision(logger, routePattern, existingType.Name, matchingParamType.Name);
+				}
+			}
+			else
 			{
 				// Only set the mapping if this route pattern hasn't been mapped yet
 				// This prevents collisions when multiple endpoints share the same route pattern
 				mapping[routePattern] = matchingParamType;
-			}
-			else if (matchingParamType is not null && mapping.ContainsKey(routePattern))
-			{
-				// Log a warning when a collision is detected
-				ILogger logger = context.ApplicationServices.GetService<ILogger<ValidationDocumentTransformer>>() ?? NullLogger<ValidationDocumentTransformer>.Instance;
-				Type existingType = mapping[routePattern];
-				if (existingType != matchingParamType)
-				{
-					LogRoutePatternCollision(logger, routePattern, existingType.Name, matchingParamType.Name);
-				}
 			}
 		}
 
