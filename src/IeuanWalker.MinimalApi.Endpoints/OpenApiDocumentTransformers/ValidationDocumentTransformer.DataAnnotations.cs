@@ -235,9 +235,7 @@ partial class ValidationDocumentTransformer
 		catch
 		{
 			// Log a warning when we have to fall back to a generic message
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
+			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.FullName ?? string.Empty, propertyName);
 			// If formatting fails, use the default message
 			return defaultMessage;
 		}
@@ -310,9 +308,7 @@ partial class ValidationDocumentTransformer
 
 				if (errorMessage.Equals($"The field {propertyName} is invalid."))
 				{
-#pragma warning disable CA1873 // Avoid potentially expensive logging
 					LogVagueErrorMessageDataAnnotation(logger, propertyValidator.FullName ?? string.Empty, propertyName);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
 				}
 			}
 #pragma warning disable CA1031 // Do not catch general exception types
@@ -320,9 +316,7 @@ partial class ValidationDocumentTransformer
 			{
 				// If FormatErrorMessage fails, use a default message
 				// Log a warning when we have to fall back to a generic message
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-				LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
+				LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.FullName ?? string.Empty, propertyName);
 				errorMessage = $"{propertyName} validation failed";
 			}
 #pragma warning restore CA1031 // Do not catch general exception types
@@ -331,9 +325,7 @@ partial class ValidationDocumentTransformer
 		// If the error message is still empty or null, use a default
 		if (string.IsNullOrEmpty(errorMessage))
 		{
-#pragma warning disable CA1873 // Avoid potentially expensive logging
-			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
+			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.FullName ?? string.Empty, propertyName);
 			errorMessage = $"{propertyName} validation failed";
 		}
 
@@ -342,5 +334,4 @@ partial class ValidationDocumentTransformer
 
 	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to propery {PropertyName} from the object {ValidatorType}. Consider manually setting the error message.")]
 	static partial void LogVagueErrorMessageDataAnnotation(ILogger logger, string validatorType, string propertyName);
-
 }
