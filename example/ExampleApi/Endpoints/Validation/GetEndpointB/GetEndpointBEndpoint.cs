@@ -17,9 +17,9 @@ public class GetEndpointBEndpoint : IEndpointWithoutResponse<RequestModel>
 			.WithSummary("Test Endpoint B with Name property validation");
 	}
 
-	public async Task Handle(RequestModel request, CancellationToken ct)
+	public Task Handle(RequestModel request, CancellationToken ct)
 	{
 		// Just a test endpoint
-		await Task.CompletedTask;
+		return Task.CompletedTask;
 	}
 }
