@@ -10,6 +10,9 @@ partial class ValidationDocumentTransformer
 		// Get all loaded assemblies
 		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 
+		// Keep track of types we've already processed to avoid infinite recursion
+		HashSet<Type> processedTypes = [];
+
 		foreach (Assembly assembly in assemblies)
 		{
 			// Skip system assemblies
@@ -37,28 +40,95 @@ partial class ValidationDocumentTransformer
 						continue;
 					}
 
-					// Extract validation rules from this type
-					List<Validation.ValidationRule> rules = ExtractDataAnnotationRules(type);
-
-					if (rules.Count <= 0)
-					{
-						continue;
-					}
-
-					if (!allValidationRules.TryGetValue(type, out (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) value))
-					{
-						value.rules = [];
-						value.appendRulesToPropertyDescription = true;
-						allValidationRules[type] = value;
-					}
-
-					value.rules.AddRange(rules);
+					// Process this type and any nested types recursively
+					ProcessTypeRecursively(type, allValidationRules, processedTypes);
 				}
 			}
 			catch (ReflectionTypeLoadException)
 			{
 				// Skip assemblies that can't be reflected
 				continue;
+			}
+		}
+	}
+
+	static void ProcessTypeRecursively(Type type, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, HashSet<Type> processedTypes)
+	{
+		// Avoid processing the same type multiple times
+		if (processedTypes.Contains(type))
+		{
+			return;
+		}
+
+		processedTypes.Add(type);
+
+		// Extract validation rules from this type
+		List<Validation.ValidationRule> rules = ExtractDataAnnotationRules(type);
+
+		if (rules.Count > 0)
+		{
+			if (!allValidationRules.TryGetValue(type, out (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) value))
+			{
+				value.rules = [];
+				value.appendRulesToPropertyDescription = true;
+				allValidationRules[type] = value;
+			}
+
+			value.rules.AddRange(rules);
+		}
+
+		// Get all properties to find nested objects
+		PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+		foreach (PropertyInfo property in properties)
+		{
+			Type propertyType = property.PropertyType;
+
+			// Get the actual type if it's nullable
+			Type actualType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
+
+			// Check if it's a collection type
+			if (actualType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(actualType))
+			{
+				// Get the element type for collections
+				if (actualType.IsGenericType)
+				{
+					Type[] genericArgs = actualType.GetGenericArguments();
+					if (genericArgs.Length > 0)
+					{
+						actualType = genericArgs[0];
+					}
+				}
+				else if (actualType.IsArray)
+				{
+					actualType = actualType.GetElementType() ?? actualType;
+				}
+			}
+
+			// Skip primitive types, system types, and types we've already processed
+			if (actualType.IsPrimitive || 
+				actualType == typeof(string) || 
+				actualType == typeof(decimal) ||
+				actualType == typeof(DateTime) ||
+				actualType == typeof(DateTimeOffset) ||
+				actualType == typeof(TimeSpan) ||
+				actualType == typeof(Guid) ||
+				actualType.Namespace?.StartsWith("System.") == true ||
+				actualType.Namespace?.StartsWith("Microsoft.") == true ||
+				processedTypes.Contains(actualType))
+			{
+				continue;
+			}
+
+			// Check if this is a complex type with validation attributes
+			// (it doesn't need [ValidatableType] if it's a nested object)
+			PropertyInfo[] nestedProperties = actualType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+			bool hasValidationAttributes = nestedProperties.Any(p => p.GetCustomAttributes<ValidationAttribute>(inherit: true).Any());
+
+			if (hasValidationAttributes)
+			{
+				// Recursively process this nested type
+				ProcessTypeRecursively(actualType, allValidationRules, processedTypes);
 			}
 		}
 	}
