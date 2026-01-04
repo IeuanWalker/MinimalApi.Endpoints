@@ -57,10 +57,10 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 
 			// Get operations from the property builder
 			MethodInfo? getOperationsMethod = builder.GetType().GetMethod("GetOperations", BindingFlags.Instance | BindingFlags.NonPublic);
-			if (getOperationsMethod is not null && 
-			    getOperationsMethod.Invoke(builder, null) is IReadOnlyList<ValidationRuleOperation> operations &&
-			    operations.Count > 0 &&
-			    propertyName is not null)
+			if (getOperationsMethod is not null &&
+				getOperationsMethod.Invoke(builder, null) is IReadOnlyList<ValidationRuleOperation> operations &&
+				operations.Count > 0 &&
+				propertyName is not null)
 			{
 				operationsByProperty[propertyName] = operations;
 			}

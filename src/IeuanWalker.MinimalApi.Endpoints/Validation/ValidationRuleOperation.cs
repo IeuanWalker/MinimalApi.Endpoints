@@ -3,7 +3,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 /// <summary>
 /// Base class for validation rule operations that can be applied to a list of rules
 /// </summary>
-internal abstract record ValidationRuleOperation
+abstract record ValidationRuleOperation
 {
 	/// <summary>
 	/// Applies the operation to a list of validation rules
@@ -15,7 +15,7 @@ internal abstract record ValidationRuleOperation
 /// <summary>
 /// Operation to alter the error message of an existing validation rule
 /// </summary>
-internal sealed record AlterOperation : ValidationRuleOperation
+sealed record AlterOperation : ValidationRuleOperation
 {
 	public string OldErrorMessage { get; init; }
 	public string NewErrorMessage { get; init; }
@@ -31,11 +31,8 @@ internal sealed record AlterOperation : ValidationRuleOperation
 
 	public override void Apply(List<ValidationRule> rules)
 	{
-		ValidationRule? rule = rules.FirstOrDefault(r => r.ErrorMessage == OldErrorMessage);
-		if (rule is null)
-		{
-			throw new ArgumentException($"No validation rule exists with error message: '{OldErrorMessage}'");
-		}
+		ValidationRule? rule = rules.FirstOrDefault(r => r.ErrorMessage == OldErrorMessage)
+			?? throw new ArgumentException($"No validation rule exists with error message: '{OldErrorMessage}'");
 
 		rule.ErrorMessage = NewErrorMessage;
 	}
@@ -44,7 +41,7 @@ internal sealed record AlterOperation : ValidationRuleOperation
 /// <summary>
 /// Operation to remove a validation rule by its error message
 /// </summary>
-internal sealed record RemoveOperation : ValidationRuleOperation
+sealed record RemoveOperation : ValidationRuleOperation
 {
 	public string ErrorMessage { get; init; }
 
@@ -57,11 +54,8 @@ internal sealed record RemoveOperation : ValidationRuleOperation
 
 	public override void Apply(List<ValidationRule> rules)
 	{
-		ValidationRule? ruleToRemove = rules.FirstOrDefault(r => r.ErrorMessage == ErrorMessage);
-		if (ruleToRemove is null)
-		{
-			throw new ArgumentException($"No validation rule exists with error message: '{ErrorMessage}'");
-		}
+		ValidationRule? ruleToRemove = rules.FirstOrDefault(r => r.ErrorMessage == ErrorMessage)
+			?? throw new ArgumentException($"No validation rule exists with error message: '{ErrorMessage}'");
 
 		rules.Remove(ruleToRemove);
 	}
@@ -70,7 +64,7 @@ internal sealed record RemoveOperation : ValidationRuleOperation
 /// <summary>
 /// Operation to remove all validation rules
 /// </summary>
-internal sealed record RemoveAllOperation : ValidationRuleOperation
+sealed record RemoveAllOperation : ValidationRuleOperation
 {
 	public override void Apply(List<ValidationRule> rules)
 	{

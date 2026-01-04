@@ -74,7 +74,7 @@ partial class ValidationDocumentTransformer
 					IReadOnlyList<Validation.ValidationRuleOperation> operations = kvp.Value;
 
 					// Get all rules for this property
-					List<Validation.ValidationRule> propertyRules = rules.Where(r => r.PropertyName == propertyName).ToList();
+					List<Validation.ValidationRule> propertyRules = [.. rules.Where(r => r.PropertyName == propertyName)];
 
 					// Apply all operations in order
 					foreach (Validation.ValidationRuleOperation operation in operations)

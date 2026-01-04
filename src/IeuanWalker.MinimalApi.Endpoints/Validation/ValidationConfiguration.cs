@@ -21,7 +21,7 @@ public sealed class ValidationConfiguration<TRequest>
 	internal IReadOnlyDictionary<string, IReadOnlyList<ValidationRuleOperation>> OperationsByProperty { get; }
 
 	internal ValidationConfiguration(
-		IReadOnlyList<ValidationRule> rules, 
+		IReadOnlyList<ValidationRule> rules,
 		bool appendRulesToPropertyDescription,
 		IReadOnlyDictionary<string, IReadOnlyList<ValidationRuleOperation>> operationsByProperty)
 	{
