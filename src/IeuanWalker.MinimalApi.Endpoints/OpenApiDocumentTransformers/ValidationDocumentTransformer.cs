@@ -168,12 +168,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Get the parameters of the handler method
 			ParameterInfo[] parameters = handlerMethod.GetParameters();
-			
+
 			// Try to find a parameter that matches one of our request types
 			foreach (ParameterInfo param in parameters)
 			{
 				Type paramType = param.ParameterType;
-				
+
 				// Check if this parameter type is one we have validation rules for
 				if (allValidationRules.ContainsKey(paramType))
 				{
@@ -204,7 +204,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// Check if this path matches the current request type we're processing
 			// Convert OpenAPI path format to route pattern (e.g., "/api/v1/todos/{id}" -> "/api/v1/todos/{id}")
 			string pathPattern = pathItem.Key;
-			
+
 			// Try to find matching endpoint in our mapping
 			// We need to check if this path belongs to an endpoint that uses this request type
 			Type? pathRequestType = null;
