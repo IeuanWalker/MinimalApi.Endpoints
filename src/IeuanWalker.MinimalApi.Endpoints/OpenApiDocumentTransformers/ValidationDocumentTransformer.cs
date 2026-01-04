@@ -113,7 +113,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					}
 
 					// Create inline schema with all validation constraints for this property
-					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
+					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
 				}
 			}
 		}
@@ -194,14 +194,14 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						}
 
 						// Create inline schema with all validation constraints for this parameter
-						parameter.Schema = CreateInlineSchemaWithAllValidation(parameter.Schema, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
+						parameter.Schema = CreateInlineSchemaWithAllValidation(parameter.Schema, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
 					}
 				}
 			}
 		}
 	}
 
-	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription, OpenApiDocument document)
 	{
 		// Check for per-property AppendRulesToPropertyDescription setting (takes precedence over global setting)
 		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRuleToPropertyDescription.HasValue)?.AppendRuleToPropertyDescription;
@@ -240,17 +240,27 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				originalOpenApiSchema = actualSchema as OpenApiSchema;
 			}
 		}
+		
+		// If we still don't have an actualSchema but originalSchema is a reference, use it
+		actualSchema ??= originalSchema;
 
 		// If original schema is a reference, we need to get the type from the reference ID
 		JsonSchemaType? referenceType = null;
 		string? referenceFormat = null;
 		bool isNullableReference = false;
+		OpenApiSchema? resolvedReferenceSchema = null;
 
 		if (actualSchema is OpenApiSchemaReference schemaRef)
 		{
 			string? refId = schemaRef.Reference?.Id;
 			if (refId is not null)
 			{
+				// Try to resolve the reference to get the actual schema
+				if (document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? referencedSchema) == true)
+				{
+					resolvedReferenceSchema = referencedSchema as OpenApiSchema;
+				}
+				
 				// Check if this is a nullable reference (System.Nullable`1[[...]])
 				if (refId.Contains("System.Nullable`1"))
 				{
@@ -258,7 +268,18 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					isNullableReference = true;
 				}
 
-				if (refId.Contains("System.String"))
+				// Check for array types (e.g., System.String[], System.Int32[])
+				if (refId.EndsWith("[]"))
+				{
+					referenceType = JsonSchemaType.Array;
+				}
+				else if (refId.Contains("System.Collections.Generic.List`1") || 
+				         refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+				         refId.Contains("System.Collections.Generic.ICollection`1"))
+				{
+					referenceType = JsonSchemaType.Array;
+				}
+				else if (refId.Contains("System.String") && !refId.Contains("[]"))
 				{
 					referenceType = JsonSchemaType.String;
 				}
@@ -347,23 +368,34 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// For simple properties, create a new inline schema with all validation rules
-		// Get the type from the first rule (all rules for same property should have same type)
-		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
-		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
-
-		// If no type was determined from rules, try to get it from the original schema or reference
+		// Get the type from the original schema first (including resolved references), then fall back to type inferred from rules
+		JsonSchemaType? schemaType = null;
+		string? format = null;
+		
+		// First, try to get the type from the original schema or resolved reference
+		// This preserves array types and other complex types
+		if (originalOpenApiSchema is not null)
+		{
+			schemaType = originalOpenApiSchema.Type;
+			format = originalOpenApiSchema.Format;
+		}
+		else if (resolvedReferenceSchema is not null)
+		{
+			schemaType = resolvedReferenceSchema.Type;
+			format = resolvedReferenceSchema.Format;
+		}
+		else if (referenceType.HasValue)
+		{
+			schemaType = referenceType;
+			format = referenceFormat;
+		}
+		
+		// If no type was determined from the original schema, infer it from validation rules
+		// This handles cases where the original schema doesn't have a type set
 		if (!schemaType.HasValue)
 		{
-			if (originalOpenApiSchema is not null)
-			{
-				schemaType = originalOpenApiSchema.Type;
-				format ??= originalOpenApiSchema.Format;
-			}
-			else if (referenceType.HasValue)
-			{
-				schemaType = referenceType;
-				format ??= referenceFormat;
-			}
+			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+			format ??= rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
 		}
 
 
@@ -379,6 +411,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (format is not null)
 		{
 			newInlineSchema.Format = format;
+		}
+		
+		// Preserve Items for array types from the original or resolved schema
+		if (originalOpenApiSchema?.Items is not null)
+		{
+			newInlineSchema.Items = originalOpenApiSchema.Items;
+		}
+		else if (resolvedReferenceSchema?.Items is not null)
+		{
+			newInlineSchema.Items = resolvedReferenceSchema.Items;
 		}
 
 		// Extract custom description from DescriptionRule if present
