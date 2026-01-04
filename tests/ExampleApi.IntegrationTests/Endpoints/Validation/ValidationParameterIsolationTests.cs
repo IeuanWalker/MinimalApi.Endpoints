@@ -1,5 +1,3 @@
-using ExampleApi.IntegrationTests.Infrastructure;
-using Shouldly;
 using System.Text.Json;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Validation;
@@ -21,16 +19,16 @@ public class ValidationParameterIsolationTests : IClassFixture<ExampleApiWebAppl
 		// Act - Get OpenAPI document as JSON
 		HttpResponseMessage response = await _client.GetAsync("/openapi/v1.json");
 		response.EnsureSuccessStatusCode();
-		
+
 		string content = await response.Content.ReadAsStringAsync();
 		using JsonDocument document = JsonDocument.Parse(content);
 
 		// Find both endpoints in the paths
 		JsonElement paths = document.RootElement.GetProperty("paths");
-		
+
 		JsonElement? endpointA = null;
 		JsonElement? endpointB = null;
-		
+
 		foreach (JsonProperty path in paths.EnumerateObject())
 		{
 			if (path.Name.Contains("/EndpointA"))
@@ -57,8 +55,8 @@ public class ValidationParameterIsolationTests : IClassFixture<ExampleApiWebAppl
 		if (opA.TryGetProperty("parameters", out JsonElement paramsA))
 		{
 			paramA = paramsA.EnumerateArray()
-				.Where(param => param.TryGetProperty("name", out JsonElement nameElem) && 
-				                nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
+				.Where(param => param.TryGetProperty("name", out JsonElement nameElem) &&
+								nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
 				.Cast<JsonElement?>()
 				.FirstOrDefault();
 		}
@@ -66,8 +64,8 @@ public class ValidationParameterIsolationTests : IClassFixture<ExampleApiWebAppl
 		if (opB.TryGetProperty("parameters", out JsonElement paramsB))
 		{
 			paramB = paramsB.EnumerateArray()
-				.Where(param => param.TryGetProperty("name", out JsonElement nameElem) && 
-				                nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
+				.Where(param => param.TryGetProperty("name", out JsonElement nameElem) &&
+								nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
 				.Cast<JsonElement?>()
 				.FirstOrDefault();
 		}
@@ -84,10 +82,10 @@ public class ValidationParameterIsolationTests : IClassFixture<ExampleApiWebAppl
 		int? minLengthB = schemaB.TryGetProperty("minLength", out JsonElement minB) ? minB.GetInt32() : (int?)null;
 
 		// This is the key assertion - they should be different!
-		minLengthA.ShouldNotBe(minLengthB, 
+		minLengthA.ShouldNotBe(minLengthB,
 			$"Endpoint A and B should have different validation rules. " +
 			$"A has minLength={minLengthA}, B has minLength={minLengthB}");
-		
+
 		minLengthA.ShouldBe(5, "Endpoint A should have minLength=5");
 		minLengthB.ShouldBe(10, "Endpoint B should have minLength=10");
 	}
