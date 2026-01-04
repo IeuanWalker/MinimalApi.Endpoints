@@ -8,7 +8,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 partial class ValidationDocumentTransformer
 {
-	static void DiscoverDataAnnotationValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, HashSet<Type> dataAnnotationTypes)
+	static void DiscoverDataAnnotationValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
 		// Get all loaded assemblies
 		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -46,11 +46,8 @@ partial class ValidationDocumentTransformer
 						continue;
 					}
 
-					// Track this as a DataAnnotations type
-					dataAnnotationTypes.Add(type);
-
 					// Process this type and any nested types recursively
-					ProcessTypeRecursively(type, allValidationRules, processedTypes, logger, dataAnnotationTypes);
+					ProcessTypeRecursively(type, allValidationRules, processedTypes, logger);
 				}
 			}
 			catch (ReflectionTypeLoadException)
@@ -61,7 +58,7 @@ partial class ValidationDocumentTransformer
 		}
 	}
 
-	static void ProcessTypeRecursively(Type type, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, HashSet<Type> processedTypes, ILogger logger, HashSet<Type> dataAnnotationTypes)
+	static void ProcessTypeRecursively(Type type, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, HashSet<Type> processedTypes, ILogger logger)
 	{
 		// Avoid processing the same type multiple times
 		if (processedTypes.Contains(type))
@@ -70,9 +67,6 @@ partial class ValidationDocumentTransformer
 		}
 
 		processedTypes.Add(type);
-		
-		// Track this type as a DataAnnotations type
-		dataAnnotationTypes.Add(type);
 
 		// Extract validation rules from this type
 		List<Validation.ValidationRule> rules = ExtractDataAnnotationRules(type, logger);
@@ -140,7 +134,7 @@ partial class ValidationDocumentTransformer
 			if (hasValidationAttributes)
 			{
 				// Recursively process this nested type
-				ProcessTypeRecursively(actualType, allValidationRules, processedTypes, logger, dataAnnotationTypes);
+				ProcessTypeRecursively(actualType, allValidationRules, processedTypes, logger);
 			}
 		}
 	}

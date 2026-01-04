@@ -19,10 +19,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
 		Dictionary<Type, (List<Validation.ValidationRule>, bool appendRulesToPropertyDescription)> allValidationRules = [];
-		
-		// HashSet to track which types are from DataAnnotations discovery
-		// (used to limit URL-based parameter matching to only DataAnnotations types)
-		HashSet<Type> dataAnnotationTypes = [];
 
 		// Step 1: Discover FluentValidation rules
 		if (AutoDocumentFluentValdation)
@@ -33,7 +29,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 2: Discover DataAnnotationValidation rules
 		if (AutoDocumentDataAnnotationValdation)
 		{
-			DiscoverDataAnnotationValidationRules(context, allValidationRules, dataAnnotationTypes);
+			DiscoverDataAnnotationValidationRules(context, allValidationRules);
 		}
 
 		// Step 3: Discover manual WithValidation rules (these override FluentValidation per property)
@@ -56,7 +52,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			List<Validation.ValidationRule> rules = kvp.Value.rules;
 			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
 
-			ApplyValidationToParameters(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription, dataAnnotationTypes);
+			ApplyValidationToParameters(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
 		return Task.CompletedTask;
@@ -130,7 +126,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription, HashSet<Type> dataAnnotationTypes)
+	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
 		if (document.Paths is null || rules.Count == 0)
 		{
@@ -139,36 +135,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// Get the schema name for the request type to match against operations
 		string requestTypeSchemaName = requestType.FullName ?? requestType.Name;
-
-		// Extract meaningful parts from the type's full name to match against URL paths
-		// This works for both FluentValidation and DataAnnotations types
-		List<string> typeNameParts = [];
-		if (requestType.FullName is not null)
-		{
-			string[] parts = requestType.FullName.Split('.');
-			foreach (string part in parts)
-			{
-				// Skip common prefixes
-				if (part.Equals("ExampleApi", StringComparison.OrdinalIgnoreCase) ||
-					part.Equals("Endpoints", StringComparison.OrdinalIgnoreCase) ||
-					part.Equals("RequestModel", StringComparison.OrdinalIgnoreCase) ||
-					part.Equals("ResponseModel", StringComparison.OrdinalIgnoreCase))
-				{
-					continue;
-				}
-
-				// Split PascalCase/camelCase into separate words
-				// E.g., "GetFluentValidationFromQuery" -> ["Get", "Fluent", "Validation", "From", "Query"]
-				string[] subParts = System.Text.RegularExpressions.Regex.Split(part, @"(?<!^)(?=[A-Z])");
-				foreach (string subPart in subParts)
-				{
-					if (!string.IsNullOrEmpty(subPart) && subPart.Length > 2) // Ignore very short parts like "V1"
-					{
-						typeNameParts.Add(subPart);
-					}
-				}
-			}
-		}
 
 		// Iterate through all paths and operations
 		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
@@ -185,8 +151,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					continue;
 				}
 
-				// Check if this operation uses the request type
-				// Strategy 1: Check if the operation's request body schema matches the request type
+				// Check if this operation uses the request type by checking the request body schema
 				bool operationUsesRequestType = false;
 
 				if (operation.Value.RequestBody?.Content is not null)
@@ -201,75 +166,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 								break;
 							}
 						}
-					}
-				}
-
-				// Strategy 2: For operations with query/path parameters only (no request body),
-				// match based on the URL path containing parts of the type's namespace
-				// This handles [AsParameters] scenarios where the type's properties become parameters
-				if (!operationUsesRequestType && operation.Value.RequestBody is null && typeNameParts.Count > 0)
-				{
-					string path = pathItem.Key;
-					
-					// Check if the path contains significant parts of the type's namespace
-					// We check for matches and also verify they appear in a reasonable order
-					List<string> matchedParts = [];
-					foreach (string typePart in typeNameParts)
-					{
-						if (path.Contains(typePart, StringComparison.OrdinalIgnoreCase))
-						{
-							matchedParts.Add(typePart);
-						}
-					}
-
-					// To avoid false positives, we need:
-					// 1. At least 3 matching parts, OR
-					// 2. At least 2 matching parts where one is NOT just "Validation" (which is too generic), OR
-					// 3. At least 1 matching part that is specific (not a generic HTTP verb or common term)
-					bool hasStrongMatch = false;
-					if (matchedParts.Count >= 3)
-					{
-						hasStrongMatch = true;
-					}
-					else if (matchedParts.Count >= 2)
-					{
-						// Check if we have at least one specific (non-generic) matching part
-						bool hasSpecificPart = matchedParts.Any(p => 
-							!p.Equals("Validation", StringComparison.OrdinalIgnoreCase) &&
-							!p.Equals("Api", StringComparison.OrdinalIgnoreCase) &&
-							!p.Equals("Get", StringComparison.OrdinalIgnoreCase) &&
-							!p.Equals("Post", StringComparison.OrdinalIgnoreCase) &&
-							!p.Equals("Put", StringComparison.OrdinalIgnoreCase) &&
-							!p.Equals("Delete", StringComparison.OrdinalIgnoreCase) &&
-							!p.Equals("From", StringComparison.OrdinalIgnoreCase));
-						
-						if (hasSpecificPart)
-						{
-							hasStrongMatch = true;
-						}
-					}
-					else if (matchedParts.Count == 1)
-					{
-						// For single matching part, require it to be specific and reasonably long
-						string singlePart = matchedParts[0];
-						bool isSpecific = !singlePart.Equals("Validation", StringComparison.OrdinalIgnoreCase) &&
-										  !singlePart.Equals("Api", StringComparison.OrdinalIgnoreCase) &&
-										  !singlePart.Equals("Get", StringComparison.OrdinalIgnoreCase) &&
-										  !singlePart.Equals("Post", StringComparison.OrdinalIgnoreCase) &&
-										  !singlePart.Equals("Put", StringComparison.OrdinalIgnoreCase) &&
-										  !singlePart.Equals("Delete", StringComparison.OrdinalIgnoreCase) &&
-										  !singlePart.Equals("From", StringComparison.OrdinalIgnoreCase) &&
-										  singlePart.Length >= 4; // Require at least 4 characters
-						
-						if (isSpecific)
-						{
-							hasStrongMatch = true;
-						}
-					}
-
-					if (hasStrongMatch)
-					{
-						operationUsesRequestType = true;
 					}
 				}
 
