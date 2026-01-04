@@ -240,7 +240,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				originalOpenApiSchema = actualSchema as OpenApiSchema;
 			}
 		}
-		
+
 		// If we still don't have an actualSchema but originalSchema is a reference, use it
 		actualSchema ??= originalSchema;
 
@@ -260,7 +260,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					resolvedReferenceSchema = referencedSchema as OpenApiSchema;
 				}
-				
+
 				// Check if this is a nullable reference (System.Nullable`1[[...]])
 				if (refId.Contains("System.Nullable`1"))
 				{
@@ -273,9 +273,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					referenceType = JsonSchemaType.Array;
 				}
-				else if (refId.Contains("System.Collections.Generic.List`1") || 
-				         refId.Contains("System.Collections.Generic.IEnumerable`1") ||
-				         refId.Contains("System.Collections.Generic.ICollection`1"))
+				else if (refId.Contains("System.Collections.Generic.List`1") ||
+						 refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+						 refId.Contains("System.Collections.Generic.ICollection`1"))
 				{
 					referenceType = JsonSchemaType.Array;
 				}
@@ -373,12 +373,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// - For other types: prioritize validation rules type, then schema type
 		JsonSchemaType? schemaType = null;
 		string? format = null;
-		
+
 		// Check if this is an array type based on resolved schema or reference
 		bool isArrayType = resolvedReferenceSchema?.Type == JsonSchemaType.Array ||
-		                   originalOpenApiSchema?.Type == JsonSchemaType.Array ||
-		                   referenceType == JsonSchemaType.Array;
-		
+						   originalOpenApiSchema?.Type == JsonSchemaType.Array ||
+						   referenceType == JsonSchemaType.Array;
+
 		if (isArrayType)
 		{
 			// For arrays, prioritize schema type to preserve array structure
@@ -403,7 +403,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// For non-array types, get type from validation rules first (original behavior)
 			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
 			format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
-			
+
 			// If no type from rules, try original schema or reference
 			if (!schemaType.HasValue)
 			{
@@ -424,14 +424,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 		}
-		
+
 		// If format wasn't set yet, try to get it from original schema
-		if (format is null)
-		{
-			format = originalOpenApiSchema?.Format;
-		}
-
-
+		format ??= originalOpenApiSchema?.Format;
 
 		// Create inline schema - set properties after creation to avoid initialization issues
 		OpenApiSchema newInlineSchema = new();
@@ -445,7 +440,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			newInlineSchema.Format = format;
 		}
-		
+
 		// Preserve Items for array types from the original or resolved schema
 		if (originalOpenApiSchema?.Items is not null)
 		{
