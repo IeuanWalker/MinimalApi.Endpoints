@@ -221,7 +221,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 					// To avoid false positives, we need:
 					// 1. At least 3 matching parts, OR
-					// 2. At least 2 matching parts where one is NOT just "Validation" (which is too generic)
+					// 2. At least 2 matching parts where one is NOT just "Validation" (which is too generic), OR
+					// 3. At least 1 matching part that is specific (not a generic HTTP verb or common term)
 					bool hasStrongMatch = false;
 					if (matchedParts.Count >= 3)
 					{
@@ -240,6 +241,24 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 							!p.Equals("From", StringComparison.OrdinalIgnoreCase));
 						
 						if (hasSpecificPart)
+						{
+							hasStrongMatch = true;
+						}
+					}
+					else if (matchedParts.Count == 1)
+					{
+						// For single matching part, require it to be specific and reasonably long
+						string singlePart = matchedParts[0];
+						bool isSpecific = !singlePart.Equals("Validation", StringComparison.OrdinalIgnoreCase) &&
+										  !singlePart.Equals("Api", StringComparison.OrdinalIgnoreCase) &&
+										  !singlePart.Equals("Get", StringComparison.OrdinalIgnoreCase) &&
+										  !singlePart.Equals("Post", StringComparison.OrdinalIgnoreCase) &&
+										  !singlePart.Equals("Put", StringComparison.OrdinalIgnoreCase) &&
+										  !singlePart.Equals("Delete", StringComparison.OrdinalIgnoreCase) &&
+										  !singlePart.Equals("From", StringComparison.OrdinalIgnoreCase) &&
+										  singlePart.Length >= 4; // Require at least 4 characters
+						
+						if (isSpecific)
 						{
 							hasStrongMatch = true;
 						}
@@ -291,19 +310,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
 
 					// Only modify the parameter schema if there are validation rules other than just Required
-					// ALSO preserve enum types - enum properties should keep their enum information
 					if (hasOtherRules && parameter.Schema is not null)
 					{
-						// Check if this parameter has an EnumRule
-						// Parameters with EnumRule validation should not have their schema modified
-						// because the inline enum schema from ASP.NET Core contains all necessary enum information
-						bool hasEnumRule = propertyRules.Any(r => r is Validation.EnumRule);
-						if (hasEnumRule)
-						{
-							// Don't modify parameters with EnumRule - preserve the inline enum schema from ASP.NET Core
-							continue;
-						}
-
 						// Check if this parameter is a reference to an enum schema OR has inline enum values
 						// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
 						if (IsEnumSchemaReference(parameter.Schema, document) || IsInlineEnumSchema(parameter.Schema))

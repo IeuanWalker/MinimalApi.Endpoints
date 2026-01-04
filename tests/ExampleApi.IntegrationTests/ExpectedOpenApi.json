@@ -585,7 +585,7 @@
               "maxLength": 50,
               "minLength": 3,
               "type": "string",
-              "description": "Validation rules:\n- Must be 3 characters or more\n- Must be 50 characters or fewer"
+              "description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
             }
           },
           {
@@ -603,6 +603,8 @@
             "in": "query",
             "required": true,
             "schema": {
+              "minimum": false,
+              "exclusiveMinimum": true,
               "type": "integer",
               "description": "Validation rules:\n- Must be >= 1",
               "format": "int32"
@@ -613,6 +615,8 @@
             "in": "query",
             "required": true,
             "schema": {
+              "maximum": false,
+              "exclusiveMaximum": true,
               "type": "integer",
               "description": "Validation rules:\n- Must be <= 100",
               "format": "int32"
@@ -623,8 +627,12 @@
             "in": "query",
             "required": true,
             "schema": {
+              "maximum": false,
+              "exclusiveMaximum": true,
+              "minimum": false,
+              "exclusiveMinimum": true,
               "type": "integer",
-              "description": "Validation rules:\n- Must be between 1 and 100",
+              "description": "Validation rules:\n- Must be >= 1 and <= 100",
               "format": "int32"
             }
           },
@@ -633,6 +641,8 @@
             "in": "query",
             "required": true,
             "schema": {
+              "minimum": false,
+              "exclusiveMinimum": true,
               "type": "number",
               "description": "Validation rules:\n- Must be >= 0.1",
               "format": "double"
@@ -643,6 +653,8 @@
             "in": "query",
             "required": true,
             "schema": {
+              "maximum": false,
+              "exclusiveMaximum": true,
               "type": "number",
               "description": "Validation rules:\n- Must be <= 99.9",
               "format": "double"
@@ -653,8 +665,12 @@
             "in": "query",
             "required": true,
             "schema": {
+              "maximum": false,
+              "exclusiveMaximum": true,
+              "minimum": false,
+              "exclusiveMinimum": true,
               "type": "number",
-              "description": "Validation rules:\n- Must be between 0.1 and 99.9",
+              "description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
               "format": "double"
             }
           },
