@@ -1,5 +1,4 @@
 using ExampleApi.IntegrationTests.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using System.Text.Json;
 

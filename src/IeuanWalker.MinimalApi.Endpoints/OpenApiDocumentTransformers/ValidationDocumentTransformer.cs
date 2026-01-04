@@ -174,14 +174,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				.Select(param => param.ParameterType)
 				.FirstOrDefault(paramType => allValidationRules.ContainsKey(paramType));
 
-			if (matchingParamType is not null)
+			if (matchingParamType is not null && !mapping.ContainsKey(routePattern))
 			{
 				// Only set the mapping if this route pattern hasn't been mapped yet
 				// This prevents collisions when multiple endpoints share the same route pattern
-				if (!mapping.ContainsKey(routePattern))
-				{
-					mapping[routePattern] = matchingParamType;
-				}
+				mapping[routePattern] = matchingParamType;
 			}
 		}
 
@@ -335,15 +332,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// Check for version parameter matching (e.g., "v1" matches "v{version:apiversion}")
 			// This handles the case where OpenAPI has "v1" but route pattern has "v{version:apiVersion}"
 			// Ensure the route segment is a version placeholder and the OpenAPI segment matches the expected format
-			if (routeSeg.StartsWith("v{") && routeSeg.Contains("version", StringComparison.OrdinalIgnoreCase) && routeSeg.EndsWith('}'))
+			if (routeSeg.StartsWith("v{") &&
+			    routeSeg.Contains("version", StringComparison.OrdinalIgnoreCase) &&
+			    routeSeg.EndsWith('}') &&
+			    openApiSeg.StartsWith('v') &&
+			    openApiSeg.Length > 1 &&
+			    openApiSeg[1..].All(char.IsDigit))
 			{
 				// OpenAPI segment should be exactly in format "v{digit}+" (e.g., "v1", "v2", "v10")
 				// All characters after 'v' must be digits
-				if (openApiSeg.StartsWith('v') && openApiSeg.Length > 1 && 
-				    openApiSeg[1..].All(char.IsDigit))
-				{
-					continue; // Version placeholder matches versioned path
-				}
+				continue; // Version placeholder matches versioned path
 			}
 
 			// No match
