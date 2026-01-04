@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
-using Microsoft.AspNetCore.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 partial class ValidationDocumentTransformer
 {
-	static void DiscoverDataAnnotationValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
+	static void DiscoverDataAnnotationValidationRules(Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
 		// Get all loaded assemblies
 		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -74,7 +73,7 @@ partial class ValidationDocumentTransformer
 		foreach (PropertyInfo property in properties)
 		{
 			// Get all validation attributes on this property
-			ValidationAttribute[] validationAttributes = property.GetCustomAttributes<ValidationAttribute>(inherit: true).ToArray();
+			ValidationAttribute[] validationAttributes = [.. property.GetCustomAttributes<ValidationAttribute>(inherit: true)];
 
 			foreach (ValidationAttribute attribute in validationAttributes)
 			{
@@ -94,54 +93,36 @@ partial class ValidationDocumentTransformer
 		// Map DataAnnotation attributes to internal ValidationRule types
 		return attribute switch
 		{
-			RequiredAttribute required => new Validation.RequiredRule(
-				propertyName,
-				GetFormattedErrorMessage(required, propertyName)),
+			RequiredAttribute => new Validation.RequiredRule(propertyName),
 
 			StringLengthAttribute stringLength => new Validation.StringLengthRule(
 				propertyName,
 				minLength: stringLength.MinimumLength > 0 ? stringLength.MinimumLength : null,
-				maxLength: stringLength.MaximumLength,
-				errorMessage: GetFormattedErrorMessage(stringLength, propertyName)),
+				maxLength: stringLength.MaximumLength),
 
 			MinLengthAttribute minLength => new Validation.StringLengthRule(
 				propertyName,
 				minLength: minLength.Length,
-				maxLength: null,
-				errorMessage: GetFormattedErrorMessage(minLength, propertyName)),
+				maxLength: null),
 
 			MaxLengthAttribute maxLength => new Validation.StringLengthRule(
 				propertyName,
 				minLength: null,
-				maxLength: maxLength.Length,
-				errorMessage: GetFormattedErrorMessage(maxLength, propertyName)),
+				maxLength: maxLength.Length),
 
 			RangeAttribute range => CreateRangeRuleFromAttribute(propertyName, propertyType, range),
 
-			RegularExpressionAttribute regex => new Validation.PatternRule(
-				propertyName,
-				regex.Pattern,
-				errorMessage: GetFormattedErrorMessage(regex, propertyName)),
+			RegularExpressionAttribute regex => new Validation.PatternRule(propertyName, regex.Pattern),
 
-			EmailAddressAttribute email => new Validation.EmailRule(
-				propertyName,
-				GetFormattedErrorMessage(email, propertyName, "Must be a valid email address")),
+			EmailAddressAttribute => new Validation.EmailRule(propertyName),
 
-			UrlAttribute url => new Validation.UrlRule(
-				propertyName,
-				GetFormattedErrorMessage(url, propertyName, "Must be a valid URL")),
+			UrlAttribute => new Validation.UrlRule(propertyName),
 
-			PhoneAttribute phone => new Validation.CustomRule<object>(
-				propertyName,
-				GetFormattedErrorMessage(phone, propertyName, "Must be a valid phone number") ?? "Must be a valid phone number"),
+			PhoneAttribute => new Validation.CustomRule<object>(propertyName, "Must be a valid phone number"),
 
-			CreditCardAttribute creditCard => new Validation.CustomRule<object>(
-				propertyName,
-				GetFormattedErrorMessage(creditCard, propertyName, "Must be a valid credit card number") ?? "Must be a valid credit card number"),
+			CreditCardAttribute => new Validation.CustomRule<object>(propertyName, "Must be a valid credit card number"),
 
-			CompareAttribute compare => new Validation.CustomRule<object>(
-				propertyName,
-				GetFormattedErrorMessage(compare, propertyName, $"Must match {compare.OtherProperty}") ?? $"Must match {compare.OtherProperty}"),
+			CompareAttribute compare => new Validation.CustomRule<object>(propertyName, $"Must match {compare.OtherProperty}"),
 
 			FileExtensionsAttribute fileExtensions => new Validation.CustomRule<object>(
 				propertyName,
@@ -190,55 +171,50 @@ partial class ValidationDocumentTransformer
 		// Get the underlying type if it's nullable
 		Type actualType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
 
-		// Get formatted error message
-		string? errorMessage = GetFormattedErrorMessage(range, propertyName);
-
 		// Handle type-specific ranges
 		if (actualType == typeof(int))
 		{
 			int min = Convert.ToInt32(range.Minimum);
 			int max = Convert.ToInt32(range.Maximum);
-			return new Validation.RangeRule<int>(propertyName, minimum: min, maximum: max, errorMessage: errorMessage);
+			return new Validation.RangeRule<int>(propertyName, minimum: min, maximum: max);
 		}
 		else if (actualType == typeof(long))
 		{
 			long min = Convert.ToInt64(range.Minimum);
 			long max = Convert.ToInt64(range.Maximum);
-			return new Validation.RangeRule<long>(propertyName, minimum: min, maximum: max, errorMessage: errorMessage);
+			return new Validation.RangeRule<long>(propertyName, minimum: min, maximum: max);
 		}
 		else if (actualType == typeof(double))
 		{
 			double min = Convert.ToDouble(range.Minimum);
 			double max = Convert.ToDouble(range.Maximum);
-			return new Validation.RangeRule<double>(propertyName, minimum: min, maximum: max, errorMessage: errorMessage);
+			return new Validation.RangeRule<double>(propertyName, minimum: min, maximum: max);
 		}
 		else if (actualType == typeof(float))
 		{
 			float min = Convert.ToSingle(range.Minimum);
 			float max = Convert.ToSingle(range.Maximum);
-			return new Validation.RangeRule<float>(propertyName, minimum: min, maximum: max, errorMessage: errorMessage);
+			return new Validation.RangeRule<float>(propertyName, minimum: min, maximum: max);
 		}
 		else if (actualType == typeof(decimal))
 		{
 			decimal min = Convert.ToDecimal(range.Minimum);
 			decimal max = Convert.ToDecimal(range.Maximum);
-			return new Validation.RangeRule<decimal>(propertyName, minimum: min, maximum: max, errorMessage: errorMessage);
+			return new Validation.RangeRule<decimal>(propertyName, minimum: min, maximum: max);
 		}
 		else if (actualType == typeof(DateTime))
 		{
 			// DateTime ranges cannot be represented in OpenAPI schemas, so create a custom rule
 			return new Validation.CustomRule<object>(
-				propertyName,
-				errorMessage ?? $"Must be between {range.Minimum} and {range.Maximum}");
+				propertyName, $"Must be between {range.Minimum} and {range.Maximum}");
 		}
 
 		// For other types, create a custom rule with the error message
 		return new Validation.CustomRule<object>(
-			propertyName,
-			errorMessage ?? $"Must be between {range.Minimum} and {range.Maximum}");
+			propertyName, $"Must be between {range.Minimum} and {range.Maximum}");
 	}
 
-	static Validation.ValidationRule? CreateCustomRuleFromValidationAttribute(string propertyName, ValidationAttribute attribute)
+	static Validation.CustomRule<object>? CreateCustomRuleFromValidationAttribute(string propertyName, ValidationAttribute attribute)
 	{
 		// For custom ValidationAttribute subclasses, we need to get the error message
 		// The error message might be set in the ErrorMessage property, or might be generated

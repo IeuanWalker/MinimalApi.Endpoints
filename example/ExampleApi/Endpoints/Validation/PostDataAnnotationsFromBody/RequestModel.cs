@@ -17,8 +17,6 @@ public class RequestModel
 	[Phone]
 	[Url]
 	[CreditCard]
-	[CustomValidation(typeof(RequestModelValidators), nameof(RequestModelValidators.ValidateCustomProperty))]
-	[WithDefaultErrorMessage]
 	public string? AllBuiltInStringValidators { get; set; }
 
 	[Required]

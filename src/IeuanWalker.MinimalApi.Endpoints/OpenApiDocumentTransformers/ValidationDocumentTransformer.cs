@@ -29,7 +29,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 2: Discover DataAnnotationValidation rules
 		if (AutoDocumentDataAnnotationValdation)
 		{
-			DiscoverDataAnnotationValidationRules(context, allValidationRules);
+			DiscoverDataAnnotationValidationRules(allValidationRules);
 		}
 
 		// Step 3: Discover manual WithValidation rules (these override FluentValidation per property)
