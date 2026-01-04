@@ -139,14 +139,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// Get the schema name for the request type to match against operations
 		string requestTypeSchemaName = requestType.FullName ?? requestType.Name;
-		
-		// Check if this is a DataAnnotations type
-		bool isDataAnnotationType = dataAnnotationTypes.Contains(requestType);
 
 		// Extract meaningful parts from the type's full name to match against URL paths
-		// Only do this for DataAnnotations types - FluentValidation types will only match via request body
+		// This works for both FluentValidation and DataAnnotations types
 		List<string> typeNameParts = [];
-		if (isDataAnnotationType && requestType.FullName is not null)
+		if (requestType.FullName is not null)
 		{
 			string[] parts = requestType.FullName.Split('.');
 			foreach (string part in parts)
