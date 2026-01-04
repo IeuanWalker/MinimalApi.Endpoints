@@ -46,10 +46,26 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Step 5: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
+		// NOTE: Only apply FluentValidation rules to parameters, not DataAnnotations rules.
+		// DataAnnotations are primarily used for request body models and shouldn't be applied
+		// to query parameters to avoid rule collisions between different types with same property names.
 		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
+			Type requestType = kvp.Key;
 			List<Validation.ValidationRule> rules = kvp.Value.rules;
 			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
+
+			// Skip DataAnnotations types (marked with [ValidatableType]) for parameter validation
+			// to prevent rules from body models being incorrectly applied to query parameters
+#pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+			bool isDataAnnotationsType = requestType.GetCustomAttribute<Microsoft.Extensions.Validation.ValidatableTypeAttribute>() is not null;
+#pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+			if (isDataAnnotationsType)
+			{
+				// Skip applying DataAnnotations validation rules to query/path parameters
+				continue;
+			}
 
 			ApplyValidationToParameters(document, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
