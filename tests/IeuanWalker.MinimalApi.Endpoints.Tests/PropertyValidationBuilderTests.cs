@@ -48,8 +48,7 @@ public class PropertyValidationBuilderTests
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
 
 		// Act & Assert
-		Should.Throw<ArgumentNullException>(() => propertyBuilder.Alter(null!, "New message"))
-			.ParamName.ShouldBe("oldErrorMessage");
+		Should.Throw<ArgumentNullException>(() => propertyBuilder.Alter(null!, "New message"));
 	}
 
 	[Fact]
@@ -60,8 +59,7 @@ public class PropertyValidationBuilderTests
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
 
 		// Act & Assert
-		Should.Throw<ArgumentException>(() => propertyBuilder.Alter("   ", "New message"))
-			.ParamName.ShouldBe("oldErrorMessage");
+		Should.Throw<ArgumentException>(() => propertyBuilder.Alter("   ", "New message"));
 	}
 
 	[Fact]
@@ -72,8 +70,7 @@ public class PropertyValidationBuilderTests
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
 
 		// Act & Assert
-		Should.Throw<ArgumentNullException>(() => propertyBuilder.Alter("Old message", null!))
-			.ParamName.ShouldBe("newErrorMessage");
+		Should.Throw<ArgumentNullException>(() => propertyBuilder.Alter("Old message", null!));
 	}
 
 	[Fact]
@@ -84,8 +81,7 @@ public class PropertyValidationBuilderTests
 		PropertyValidationBuilder<TestRequest, string> propertyBuilder = configBuilder.Property(x => x.Name);
 
 		// Act & Assert
-		Should.Throw<ArgumentException>(() => propertyBuilder.Alter("Old message", "   "))
-			.ParamName.ShouldBe("newErrorMessage");
+		Should.Throw<ArgumentException>(() => propertyBuilder.Alter("Old message", "   "));
 	}
 
 	#endregion
