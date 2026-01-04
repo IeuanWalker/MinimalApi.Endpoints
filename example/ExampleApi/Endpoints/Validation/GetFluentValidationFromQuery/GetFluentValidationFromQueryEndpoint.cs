@@ -13,7 +13,8 @@ public class GetFluentValidationFromQuery : IEndpointWithoutResponse<RequestMode
 			.Group<ValidationEndpointGroup>()
 			.Get("/FluentValidation/FromQuery")
 			.Version(1)
-			.RequestAsParameters();
+			.RequestAsParameters()
+			.WithSummary("FluentValidationFromQuery");
 	}
 
 	public async Task Handle(RequestModel request, CancellationToken ct)

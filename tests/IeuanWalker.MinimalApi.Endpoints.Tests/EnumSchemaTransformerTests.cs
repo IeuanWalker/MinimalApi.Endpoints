@@ -278,7 +278,7 @@ public class EnumSchemaTransformerTests
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>
 				{
-					[typeof(Nullable<TEnum>).FullName!] = new OpenApiSchema
+					[typeof(TEnum?).FullName!] = new OpenApiSchema
 					{
 						Type = JsonSchemaType.Integer
 					}

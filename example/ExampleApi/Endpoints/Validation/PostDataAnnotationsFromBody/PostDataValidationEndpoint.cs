@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using ExampleApi.Infrastructure;
 using IeuanWalker.MinimalApi.Endpoints;
 
-namespace ExampleApi.Endpoints.Validation.PostDataValidation;
+namespace ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody;
 
 public class PostDataValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 {
@@ -13,7 +13,8 @@ public class PostDataValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 			.Group<ValidationEndpointGroup>()
 			.Post("/DataValidation")
 			.Version(1)
-			.RequestFromBody();
+			.RequestFromBody()
+			.WithSummary("DataAnnotationsFromBody");
 	}
 
 	public async Task Handle(RequestModel request, CancellationToken ct)

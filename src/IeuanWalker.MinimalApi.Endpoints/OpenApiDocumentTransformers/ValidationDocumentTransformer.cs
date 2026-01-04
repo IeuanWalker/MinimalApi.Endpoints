@@ -703,8 +703,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Check for Description attribute
 			FieldInfo? field = enumType.GetField(enumName);
-			DescriptionAttribute? descriptionAttr = field?.GetCustomAttributes(typeof(System.ComponentModel.DescriptionAttribute), false)
-			.OfType<System.ComponentModel.DescriptionAttribute>()
+			DescriptionAttribute? descriptionAttr = field?.GetCustomAttributes(typeof(DescriptionAttribute), false)
+			.OfType<DescriptionAttribute>()
 			.FirstOrDefault();
 
 			if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))

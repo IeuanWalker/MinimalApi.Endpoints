@@ -36,7 +36,7 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 			ListIntMinCount = [1],
 			ListIntMaxCount = [],
 			ListIntRangeCount = [1],
-			NestedObject = new ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				StringMin = "abc",
 				StringMax = "ok",
@@ -76,7 +76,7 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 		RequestModel request = new()
 		{
 			StringMin = "ab", // too short (min length 3)
-			NestedObject = new ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				StringMin = "abc",
 				StringMax = "ok",
