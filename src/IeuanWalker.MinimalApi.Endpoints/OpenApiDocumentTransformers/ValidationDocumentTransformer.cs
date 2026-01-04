@@ -159,52 +159,26 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			// Try to find the request type from metadata
-			// Look through all metadata for types that match our validation rules
-			foreach (Type requestType in allValidationRules.Keys)
+			// Look for the handler method in metadata (usually RuntimeMethodInfo)
+			MethodInfo? handlerMethod = routeEndpoint.Metadata.OfType<MethodInfo>().FirstOrDefault();
+			if (handlerMethod is null)
 			{
-				// Check if this endpoint has metadata referencing this request type
-				bool hasMatchingMetadata = routeEndpoint.Metadata.Any(m =>
-				{
-					Type metadataType = m.GetType();
-					
-					// Check if metadata is generic and contains the request type
-					if (metadataType.IsGenericType)
-					{
-						Type[] genericArgs = metadataType.GetGenericArguments();
-						if (genericArgs.Any(arg => arg == requestType))
-						{
-							return true;
-						}
-					}
-					
-					// Check properties for RequestType or similar
-					foreach (PropertyInfo prop in metadataType.GetProperties(BindingFlags.Public | BindingFlags.Instance))
-					{
-						try
-						{
-							if (prop.PropertyType == typeof(Type))
-							{
-								Type? propValue = prop.GetValue(m) as Type;
-								if (propValue == requestType)
-								{
-									return true;
-								}
-							}
-						}
-						catch
-						{
-							// Skip properties that throw on access
-						}
-					}
-					
-					return false;
-				});
+				continue;
+			}
 
-				if (hasMatchingMetadata)
+			// Get the parameters of the handler method
+			ParameterInfo[] parameters = handlerMethod.GetParameters();
+			
+			// Try to find a parameter that matches one of our request types
+			foreach (ParameterInfo param in parameters)
+			{
+				Type paramType = param.ParameterType;
+				
+				// Check if this parameter type is one we have validation rules for
+				if (allValidationRules.ContainsKey(paramType))
 				{
-					mapping[routePattern] = requestType;
-					break; // Found a match, move to next endpoint
+					mapping[routePattern] = paramType;
+					break; // Found the request type for this endpoint
 				}
 			}
 		}
@@ -315,7 +289,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 	/// <summary>
 	/// Determines if two path patterns match, accounting for different format variations.
-	/// Handles OpenAPI path format (/api/v1/endpoint/{param}) vs ASP.NET route patterns.
+	/// Handles OpenAPI path format (/api/v1/endpoint/{param}) vs ASP.NET route patterns (/api/v{version:apiVersion}/endpoint/{param}).
 	/// </summary>
 	static bool PathsMatch(string openApiPath, string routePattern)
 	{
@@ -362,6 +336,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				routeSeg.StartsWith('{') && routeSeg.EndsWith('}'))
 			{
 				continue;
+			}
+
+			// Check for version parameter matching (e.g., "v1" matches "v{version:apiversion}")
+			// This handles the case where OpenAPI has "v1" but route pattern has "v{version:apiVersion}"
+			if (routeSeg.StartsWith("v{") && routeSeg.Contains("version") && routeSeg.EndsWith('}'))
+			{
+				// OpenAPI segment should be something like "v1", "v2", etc.
+				if (openApiSeg.StartsWith('v') && openApiSeg.Length > 1 && char.IsDigit(openApiSeg[1]))
+				{
+					continue; // Version placeholder matches versioned path
+				}
 			}
 
 			// No match
