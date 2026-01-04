@@ -368,34 +368,67 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// For simple properties, create a new inline schema with all validation rules
-		// Get the type from the original schema first (including resolved references), then fall back to type inferred from rules
+		// Strategy:
+		// - For array types: prioritize schema type to preserve array structure
+		// - For other types: prioritize validation rules type, then schema type
 		JsonSchemaType? schemaType = null;
 		string? format = null;
 		
-		// First, try to get the type from the original schema or resolved reference
-		// This preserves array types and other complex types
-		if (originalOpenApiSchema is not null)
+		// Check if this is an array type based on resolved schema or reference
+		bool isArrayType = resolvedReferenceSchema?.Type == JsonSchemaType.Array ||
+		                   originalOpenApiSchema?.Type == JsonSchemaType.Array ||
+		                   referenceType == JsonSchemaType.Array;
+		
+		if (isArrayType)
 		{
-			schemaType = originalOpenApiSchema.Type;
-			format = originalOpenApiSchema.Format;
+			// For arrays, prioritize schema type to preserve array structure
+			if (originalOpenApiSchema?.Type is not null)
+			{
+				schemaType = originalOpenApiSchema.Type;
+				format = originalOpenApiSchema.Format;
+			}
+			else if (resolvedReferenceSchema?.Type is not null)
+			{
+				schemaType = resolvedReferenceSchema.Type;
+				format = resolvedReferenceSchema.Format;
+			}
+			else if (referenceType.HasValue)
+			{
+				schemaType = referenceType;
+				format = referenceFormat;
+			}
 		}
-		else if (resolvedReferenceSchema is not null)
+		else
 		{
-			schemaType = resolvedReferenceSchema.Type;
-			format = resolvedReferenceSchema.Format;
-		}
-		else if (referenceType.HasValue)
-		{
-			schemaType = referenceType;
-			format = referenceFormat;
+			// For non-array types, get type from validation rules first (original behavior)
+			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+			format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+			
+			// If no type from rules, try original schema or reference
+			if (!schemaType.HasValue)
+			{
+				if (originalOpenApiSchema?.Type is not null)
+				{
+					schemaType = originalOpenApiSchema.Type;
+					format ??= originalOpenApiSchema.Format;
+				}
+				else if (resolvedReferenceSchema?.Type is not null)
+				{
+					schemaType = resolvedReferenceSchema.Type;
+					format ??= resolvedReferenceSchema.Format;
+				}
+				else if (referenceType.HasValue)
+				{
+					schemaType = referenceType;
+					format ??= referenceFormat;
+				}
+			}
 		}
 		
-		// If no type was determined from the original schema, infer it from validation rules
-		// This handles cases where the original schema doesn't have a type set
-		if (!schemaType.HasValue)
+		// If format wasn't set yet, try to get it from original schema
+		if (format is null)
 		{
-			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
-			format ??= rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+			format = originalOpenApiSchema?.Format;
 		}
 
 
