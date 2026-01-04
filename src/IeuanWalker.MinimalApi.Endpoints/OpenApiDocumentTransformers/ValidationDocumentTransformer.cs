@@ -3,6 +3,9 @@ using System.Reflection;
 using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
@@ -45,13 +48,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
-		// Step 5: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
+		// Step 5: Build a mapping from endpoints to their request types
+		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context, allValidationRules);
+
+		// Step 6: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
 		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
+			Type requestType = kvp.Key;
 			List<Validation.ValidationRule> rules = kvp.Value.rules;
 			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
 
-			ApplyValidationToParameters(document, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
+			ApplyValidationToParameters(document, requestType, rules, endpointToRequestType, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
 		return Task.CompletedTask;
@@ -125,17 +132,115 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static void ApplyValidationToParameters(OpenApiDocument document, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	/// <summary>
+	/// Builds a mapping from OpenAPI endpoint paths to their associated request types.
+	/// This enables matching validation rules to the correct endpoint when multiple endpoints
+	/// use parameters with the same name.
+	/// </summary>
+	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
+	{
+		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
+
+		// Get all endpoints
+		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
+		{
+			return mapping;
+		}
+
+		foreach (Microsoft.AspNetCore.Http.Endpoint endpoint in endpointDataSource.Endpoints)
+		{
+			if (endpoint is not RouteEndpoint routeEndpoint)
+			{
+				continue;
+			}
+
+			// Get the route pattern - this is the full pattern including any group prefixes
+			string? routePattern = routeEndpoint.RoutePattern.RawText;
+			if (string.IsNullOrEmpty(routePattern))
+			{
+				continue;
+			}
+
+			// Look for the handler method in metadata (usually RuntimeMethodInfo)
+			MethodInfo? handlerMethod = routeEndpoint.Metadata.OfType<MethodInfo>().FirstOrDefault();
+			if (handlerMethod is null)
+			{
+				continue;
+			}
+
+			// Get the parameters of the handler method
+			ParameterInfo[] parameters = handlerMethod.GetParameters();
+
+			// Try to find a parameter that matches one of our request types
+			Type? matchingParamType = parameters
+				.Select(param => param.ParameterType)
+				.FirstOrDefault(paramType => allValidationRules.ContainsKey(paramType));
+
+			if (matchingParamType is null)
+			{
+				continue;
+			}
+
+			if (mapping.TryGetValue(routePattern, out Type existingType))
+			{
+				// Log a warning when a collision is detected
+				if (existingType != matchingParamType)
+				{
+					ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
+					LogRoutePatternCollision(logger, routePattern, existingType.Name, matchingParamType.Name);
+				}
+			}
+			else
+			{
+				// Only set the mapping if this route pattern hasn't been mapped yet
+				// This prevents collisions when multiple endpoints share the same route pattern
+				mapping[routePattern] = matchingParamType;
+			}
+		}
+
+		return mapping;
+	}
+
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Route pattern '{RoutePattern}' is shared by multiple endpoints with different request types. Using validation rules from '{FirstType}', ignoring '{SecondType}'. Consider using different route patterns or HTTP methods to avoid validation rule conflicts.")]
+	static partial void LogRoutePatternCollision(ILogger logger, string routePattern, string firstType, string secondType);
+
+	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, Dictionary<string, Type> endpointToRequestType, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
 		if (document.Paths is null || rules.Count == 0)
 		{
 			return;
 		}
 
+		// Build a lookup cache for this invocation to optimize repeated PathsMatch calls
+		// This provides O(1) lookup instead of O(M) linear search for each path
+		Dictionary<string, Type?> pathMatchCache = new(StringComparer.OrdinalIgnoreCase);
+
 		// Iterate through all paths and operations
 		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
 		{
 			if (pathItem.Value is not OpenApiPathItem pathItemValue)
+			{
+				continue;
+			}
+
+			// Check if this path matches the current request type we're processing
+			// Use the OpenAPI path as the pattern that will be compared against endpoint route patterns
+			string pathPattern = pathItem.Key;
+
+			// Try to find matching endpoint - use cache to avoid redundant PathsMatch calls
+			if (!pathMatchCache.TryGetValue(pathPattern, out Type? pathRequestType))
+			{
+				// Cache miss - perform the search and cache the result
+				pathRequestType = endpointToRequestType
+					.Where(mapping => PathsMatch(pathPattern, mapping.Key))
+					.Select(mapping => mapping.Value)
+					.FirstOrDefault();
+				
+				pathMatchCache[pathPattern] = pathRequestType;
+			}
+
+			// Skip this path if it doesn't belong to the current request type
+			if (pathRequestType is null || pathRequestType != requestType)
 			{
 				continue;
 			}
@@ -199,6 +304,79 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 		}
+	}
+
+	/// <summary>
+	/// Determines if two path patterns match, accounting for different format variations.
+	/// Handles OpenAPI path format (/api/v1/endpoint/{param}) vs ASP.NET route patterns (/api/v{version:apiVersion}/endpoint/{param}).
+	/// </summary>
+	static bool PathsMatch(string openApiPath, string routePattern)
+	{
+		// Direct match
+		if (string.Equals(openApiPath, routePattern, StringComparison.OrdinalIgnoreCase))
+		{
+			return true;
+		}
+
+		// Normalize both paths for comparison
+		// Remove leading/trailing slashes and convert to lowercase
+		string normalizedOpenApi = openApiPath.Trim('/').ToLowerInvariant();
+		string normalizedRoute = routePattern.Trim('/').ToLowerInvariant();
+
+		// Check if they match after normalization
+		if (normalizedOpenApi == normalizedRoute)
+		{
+			return true;
+		}
+
+		// Split by '/' and compare segments
+		string[] openApiSegments = normalizedOpenApi.Split('/');
+		string[] routeSegments = normalizedRoute.Split('/');
+
+		if (openApiSegments.Length != routeSegments.Length)
+		{
+			return false;
+		}
+
+		// Compare each segment
+		for (int i = 0; i < openApiSegments.Length; i++)
+		{
+			string openApiSeg = openApiSegments[i];
+			string routeSeg = routeSegments[i];
+
+			// Exact match
+			if (openApiSeg == routeSeg)
+			{
+				continue;
+			}
+
+			// Both are parameters (enclosed in {})
+			if (openApiSeg.StartsWith('{') && openApiSeg.EndsWith('}') &&
+				routeSeg.StartsWith('{') && routeSeg.EndsWith('}'))
+			{
+				continue;
+			}
+
+			// Check for version parameter matching (e.g., "v1" matches "v{version:apiversion}")
+			// This handles the case where OpenAPI has "v1" but route pattern has "v{version:apiVersion}"
+			// Ensure the route segment is a version placeholder and the OpenAPI segment matches the expected format
+			if (routeSeg.StartsWith("v{") &&
+			    routeSeg.Contains("version", StringComparison.OrdinalIgnoreCase) &&
+			    routeSeg.EndsWith('}') &&
+			    openApiSeg.StartsWith('v') &&
+			    openApiSeg.Length > 1 &&
+			    openApiSeg[1..].All(char.IsDigit))
+			{
+				// OpenAPI segment should be exactly in format "v{digit}+" (e.g., "v1", "v2", "v10")
+				// All characters after 'v' must be digits
+				continue; // Version placeholder matches versioned path
+			}
+
+			// No match
+			return false;
+		}
+
+		return true;
 	}
 
 	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)

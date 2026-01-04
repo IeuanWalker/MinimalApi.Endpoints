@@ -549,13 +549,79 @@
 				}
 			}
 		},
+		"/api/v1/validation/EndpointA": {
+			"get": {
+				"tags": [
+					"Validation"
+				],
+				"summary": "Test Endpoint A with Name property validation",
+				"operationId": "get_ValidationEndpointA_14",
+				"parameters": [
+					{
+						"name": "Name",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 5,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 5 characters or more"
+						}
+					}
+				],
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/validation/EndpointB": {
+			"get": {
+				"tags": [
+					"Validation"
+				],
+				"summary": "Test Endpoint B with Name property validation",
+				"operationId": "get_ValidationEndpointB_15",
+				"parameters": [
+					{
+						"name": "Name",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 10,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 10 characters or more"
+						}
+					}
+				],
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/validation/FluentValidation/FromQuery": {
 			"get": {
 				"tags": [
 					"Validation"
 				],
 				"summary": "FluentValidationFromQuery",
-				"operationId": "get_ValidationFluentValidationFromQuery_14",
+				"operationId": "get_ValidationFluentValidationFromQuery_16",
 				"parameters": [
 					{
 						"name": "StringMin",
@@ -585,7 +651,7 @@
 							"maxLength": 50,
 							"minLength": 3,
 							"type": "string",
-							"description": "Validation rules:\n- Must be 3 characters or more\n- Must be 50 characters or fewer"
+							"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
 						}
 					},
 					{
@@ -603,6 +669,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"minimum": false,
+							"exclusiveMinimum": true,
 							"type": "integer",
 							"description": "Validation rules:\n- Must be >= 1",
 							"format": "int32"
@@ -613,6 +681,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"maximum": false,
+							"exclusiveMaximum": true,
 							"type": "integer",
 							"description": "Validation rules:\n- Must be <= 100",
 							"format": "int32"
@@ -623,8 +693,12 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"maximum": false,
+							"exclusiveMaximum": true,
+							"minimum": false,
+							"exclusiveMinimum": true,
 							"type": "integer",
-							"description": "Validation rules:\n- Must be between 1 and 100",
+							"description": "Validation rules:\n- Must be >= 1 and <= 100",
 							"format": "int32"
 						}
 					},
@@ -633,6 +707,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"minimum": false,
+							"exclusiveMinimum": true,
 							"type": "number",
 							"description": "Validation rules:\n- Must be >= 0.1",
 							"format": "double"
@@ -643,6 +719,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"maximum": false,
+							"exclusiveMaximum": true,
 							"type": "number",
 							"description": "Validation rules:\n- Must be <= 99.9",
 							"format": "double"
@@ -653,8 +731,12 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"maximum": false,
+							"exclusiveMaximum": true,
+							"minimum": false,
+							"exclusiveMinimum": true,
 							"type": "number",
-							"description": "Validation rules:\n- Must be between 0.1 and 99.9",
+							"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 							"format": "double"
 						}
 					},
@@ -798,7 +880,7 @@
 					"Validation"
 				],
 				"summary": "DataAnnotationsFromBody",
-				"operationId": "post_ValidationDataValidation_15",
+				"operationId": "post_ValidationDataValidation_17",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -821,7 +903,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromBody",
-				"operationId": "post_ValidationFluentValidation_16",
+				"operationId": "post_ValidationFluentValidation_18",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -851,7 +933,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromForm",
-				"operationId": "post_ValidationFluentValidationFromForm_17",
+				"operationId": "post_ValidationFluentValidationFromForm_19",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -887,7 +969,7 @@
 					"Validation"
 				],
 				"summary": "ManualWithValidation",
-				"operationId": "post_ValidationWithValidation_18",
+				"operationId": "post_ValidationWithValidation_20",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -910,7 +992,7 @@
 					"Validation"
 				],
 				"summary": "WithValidationAlterAndRemove",
-				"operationId": "post_ValidationWithValidationAlterAndRemove_19",
+				"operationId": "post_ValidationWithValidationAlterAndRemove_21",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
