@@ -13,6 +13,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 {
 	public bool AutoDocumentFluentValdation { get; set; } = true;
+	public bool AutoDocumentDataAnnotationValdation { get; set; } = true;
 	public bool AppendRulesToPropertyDescription { get; set; } = true;
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
@@ -25,10 +26,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			DiscoverFluentValidationRules(context, allValidationRules);
 		}
 
-		// Step 2: Discover manual WithValidation rules (these override FluentValidation per property)
+		// Step 2: Discover DataAnnotationValidation rules
+		if (AutoDocumentDataAnnotationValdation)
+		{
+			DiscoverDataAnnotationValidationRules(context, allValidationRules);
+		}
+
+		// Step 3: Discover manual WithValidation rules (these override FluentValidation per property)
 		DiscoverManualValidationRules(context, allValidationRules);
 
-		// Step 3: Apply all collected rules to OpenAPI schemas
+		// Step 4: Apply all collected rules to OpenAPI schemas
 		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
 			Type requestType = kvp.Key;
@@ -38,7 +45,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
-		// Step 4: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
+		// Step 5: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
 		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
 			List<Validation.ValidationRule> rules = kvp.Value.rules;
