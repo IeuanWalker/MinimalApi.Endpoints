@@ -1460,19 +1460,101 @@
 				]
 			},
 			"ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel": {
+				"required": [
+					"allBuiltInStringValidators",
+					"allBuiltInNumberValidators",
+					"requiredString",
+					"requiredInt"
+				],
 				"type": "object",
 				"properties": {
+					"allBuiltInStringValidators": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"allBuiltInNumberValidators": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.Decimal, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					},
+					"requiredString": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"requiredInt": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"stringLength": {
+						"$ref": "#/components/schemas/System.String"
+					},
 					"stringMin": {
 						"$ref": "#/components/schemas/System.String"
+					},
+					"listMin": {
+						"$ref": "#/components/schemas/System.String[]"
 					},
 					"stringMax": {
 						"$ref": "#/components/schemas/System.String"
 					},
-					"stringRange": {
-						"$ref": "#/components/schemas/System.String"
+					"listMax": {
+						"$ref": "#/components/schemas/System.String[]"
+					},
+					"rangeInt": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"rangeDateTime": {
+						"$ref": "#/components/schemas/System.DateTime"
 					},
 					"stringPattern": {
 						"$ref": "#/components/schemas/System.String"
+					},
+					"stringEmail": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"stringPhoneNumber": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"stringUrl": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"actualUri": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Uri"
+							}
+						]
+					},
+					"compare1": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"compare2": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"stringCreditCard": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"fileExtension": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+							}
+						]
 					},
 					"intMin": {
 						"$ref": "#/components/schemas/System.Int32"
@@ -1509,26 +1591,121 @@
 					},
 					"listIntRangeCount": {
 						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+					},
+					"customValidatedProperty": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"customValidationWithDefaultMessage": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"customValidationWithoutDefaultMessage": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"customValidationWithoutDefaultMessageSetManually": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"customValidationWithDefaultMessageOverrideMessage": {
+						"$ref": "#/components/schemas/System.String"
 					}
 				}
 			},
 			"ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.RequestModel": {
 				"required": [
+					"allBuiltInStringValidators",
+					"allBuiltInNumberValidators",
+					"requiredString",
+					"requiredInt",
 					"nestedObject"
 				],
 				"type": "object",
 				"properties": {
+					"allBuiltInStringValidators": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.String"
+							}
+						]
+					},
+					"allBuiltInNumberValidators": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Nullable`1[[System.Decimal, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+							}
+						]
+					},
+					"requiredString": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"requiredInt": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"stringLength": {
+						"$ref": "#/components/schemas/System.String"
+					},
 					"stringMin": {
 						"$ref": "#/components/schemas/System.String"
+					},
+					"listMin": {
+						"$ref": "#/components/schemas/System.String[]"
 					},
 					"stringMax": {
 						"$ref": "#/components/schemas/System.String"
 					},
-					"stringRange": {
-						"$ref": "#/components/schemas/System.String"
+					"listMax": {
+						"$ref": "#/components/schemas/System.String[]"
+					},
+					"rangeInt": {
+						"$ref": "#/components/schemas/System.Int32"
+					},
+					"rangeDateTime": {
+						"$ref": "#/components/schemas/System.DateTime"
 					},
 					"stringPattern": {
 						"$ref": "#/components/schemas/System.String"
+					},
+					"stringEmail": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"stringPhoneNumber": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"stringUrl": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"actualUri": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/System.Uri"
+							}
+						]
+					},
+					"compare1": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"compare2": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"stringCreditCard": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"fileExtension": {
+						"oneOf": [
+							{
+								"nullable": true
+							},
+							{
+								"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+							}
+						]
 					},
 					"intMin": {
 						"$ref": "#/components/schemas/System.Int32"
@@ -1565,6 +1742,12 @@
 					},
 					"listIntRangeCount": {
 						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+					},
+					"customValidatedProperty": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"throwsCustomValidationProperty": {
+						"$ref": "#/components/schemas/System.String"
 					},
 					"nestedObject": {
 						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
@@ -1578,6 +1761,18 @@
 								"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
 							}
 						]
+					},
+					"customValidationWithDefaultMessage": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"customValidationWithoutDefaultMessage": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"customValidationWithoutDefaultMessageSetManually": {
+						"$ref": "#/components/schemas/System.String"
+					},
+					"customValidationWithDefaultMessageOverrideMessage": {
+						"$ref": "#/components/schemas/System.String"
 					}
 				}
 			},
@@ -2356,7 +2551,8 @@
 			},
 			"Microsoft.AspNetCore.Http.IFormFile": {
 				"type": "string",
-				"format": "binary"
+				"format": "binary",
+				"nullable": true
 			},
 			"Microsoft.AspNetCore.Http.IFormFileCollection": {
 				"type": "array",
@@ -2392,6 +2588,8 @@
 				}
 			},
 			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+				"maxItems": 10,
+				"minItems": 0,
 				"type": "array",
 				"items": {
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
@@ -2516,6 +2714,10 @@
 				"items": {
 					"$ref": "#/components/schemas/System.String"
 				}
+			},
+			"System.Uri": {
+				"type": "string",
+				"format": "uri"
 			}
 		}
 	},
