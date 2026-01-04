@@ -39,9 +39,17 @@ public sealed class PropertyValidationBuilder<TRequest, TProperty>
 	/// <exception cref="ArgumentNullException">Thrown if no validation rule exists with an error message equal to <paramref name="oldRule"/>.</exception>
 	public PropertyValidationBuilder<TRequest, TProperty> Alter(string oldRule, string newRule)
 	{
-		// TODO: Throw exception if oldRule doesnt exist
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(oldRule, nameof(oldRule));
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(newRule, nameof(newRule));
 
-		throw new NotImplementedException();
+		ValidationRule? rule = _rules.FirstOrDefault(r => r.ErrorMessage == oldRule);
+		if (rule is null)
+		{
+			throw new ArgumentException($"No validation rule exists with error message: '{oldRule}'", nameof(oldRule));
+		}
+
+		rule.ErrorMessage = newRule;
+		return this;
 	}
 
 	/// <summary>
@@ -49,24 +57,35 @@ public sealed class PropertyValidationBuilder<TRequest, TProperty>
 	/// </summary>
 	/// <param name="rule">The name of the validation rule to remove. Cannot be null or empty.</param>
 	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
-	/// <exception cref="NotImplementedException">The method is not implemented.</exception>
+	/// <exception cref="ArgumentException">Thrown if no validation rule exists with an error message equal to <paramref name="rule"/>.</exception>
 	public PropertyValidationBuilder<TRequest, TProperty> Remove(string rule)
 	{
-		// TODO: Throw exception if rule doesnt exist
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(rule, nameof(rule));
 
-		throw new NotImplementedException();
+		ValidationRule? ruleToRemove = _rules.FirstOrDefault(r => r.ErrorMessage == rule);
+		if (ruleToRemove is null)
+		{
+			throw new ArgumentException($"No validation rule exists with error message: '{rule}'", nameof(rule));
+		}
+
+		_rules.Remove(ruleToRemove);
+		return this;
 	}
 
 	/// <summary>
 	/// Removes all validation rules from the property validation builder.
 	/// </summary>
 	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
-	/// <exception cref="NotImplementedException">Thrown in all cases. This method is not yet implemented.</exception>
+	/// <exception cref="InvalidOperationException">Thrown if there are no validation rules to remove.</exception>
 	public PropertyValidationBuilder<TRequest, TProperty> RemoveAll()
 	{
-		// TODO: Throw exception if rules is empty
+		if (_rules.Count == 0)
+		{
+			throw new InvalidOperationException("No validation rules exist to remove.");
+		}
 
-		throw new NotImplementedException();
+		_rules.Clear();
+		return this;
 	}
 
 	/// <summary>
