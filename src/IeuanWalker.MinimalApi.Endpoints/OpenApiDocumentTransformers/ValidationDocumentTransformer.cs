@@ -170,15 +170,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ParameterInfo[] parameters = handlerMethod.GetParameters();
 
 			// Try to find a parameter that matches one of our request types
-			foreach (ParameterInfo param in parameters)
-			{
-				Type paramType = param.ParameterType;
+			Type? matchingParamType = parameters
+				.Select(param => param.ParameterType)
+				.FirstOrDefault(paramType => allValidationRules.ContainsKey(paramType));
 
-				// Check if this parameter type is one we have validation rules for
-				if (allValidationRules.ContainsKey(paramType))
+			if (matchingParamType is not null)
+			{
+				// Only set the mapping if this route pattern hasn't been mapped yet
+				// This prevents collisions when multiple endpoints share the same route pattern
+				if (!mapping.ContainsKey(routePattern))
 				{
-					mapping[routePattern] = paramType;
-					break; // Found the request type for this endpoint
+					mapping[routePattern] = matchingParamType;
 				}
 			}
 		}
@@ -202,23 +204,15 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			}
 
 			// Check if this path matches the current request type we're processing
-			// Convert OpenAPI path format to route pattern (e.g., "/api/v1/todos/{id}" -> "/api/v1/todos/{id}")
+			// Use the OpenAPI path as the pattern that will be compared against endpoint route patterns
 			string pathPattern = pathItem.Key;
 
 			// Try to find matching endpoint in our mapping
 			// We need to check if this path belongs to an endpoint that uses this request type
-			Type? pathRequestType = null;
-			foreach (KeyValuePair<string, Type> mapping in endpointToRequestType)
-			{
-				// Match path patterns - handle different formats
-				// OpenAPI paths use {param} while route patterns might use {param}
-				// Also handle version prefixes like /v1/
-				if (PathsMatch(pathPattern, mapping.Key))
-				{
-					pathRequestType = mapping.Value;
-					break;
-				}
-			}
+			Type? pathRequestType = endpointToRequestType
+				.Where(mapping => PathsMatch(pathPattern, mapping.Key))
+				.Select(mapping => mapping.Value)
+				.FirstOrDefault();
 
 			// Skip this path if it doesn't belong to the current request type
 			if (pathRequestType is null || pathRequestType != requestType)
@@ -340,13 +334,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Check for version parameter matching (e.g., "v1" matches "v{version:apiversion}")
 			// This handles the case where OpenAPI has "v1" but route pattern has "v{version:apiVersion}"
-			if (routeSeg.StartsWith("v{") && routeSeg.Contains("version") && routeSeg.EndsWith('}'))
+			if (routeSeg.StartsWith("v{") && routeSeg.Contains("version") && routeSeg.EndsWith('}') &&
+				openApiSeg.StartsWith('v') && openApiSeg.Length > 1 && char.IsDigit(openApiSeg[1]))
 			{
 				// OpenAPI segment should be something like "v1", "v2", etc.
-				if (openApiSeg.StartsWith('v') && openApiSeg.Length > 1 && char.IsDigit(openApiSeg[1]))
-				{
-					continue; // Version placeholder matches versioned path
-				}
+				continue; // Version placeholder matches versioned path
 			}
 
 			// No match

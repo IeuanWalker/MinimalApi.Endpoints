@@ -57,28 +57,20 @@ public class ValidationParameterIsolationTests : IClassFixture<ExampleApiWebAppl
 
 		if (opA.TryGetProperty("parameters", out JsonElement paramsA))
 		{
-			foreach (JsonElement param in paramsA.EnumerateArray())
-			{
-				if (param.TryGetProperty("name", out JsonElement nameElem) && 
-				    nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
-				{
-					paramA = param;
-					break;
-				}
-			}
+			paramA = paramsA.EnumerateArray()
+				.Where(param => param.TryGetProperty("name", out JsonElement nameElem) && 
+				                nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
+				.Cast<JsonElement?>()
+				.FirstOrDefault();
 		}
 
 		if (opB.TryGetProperty("parameters", out JsonElement paramsB))
 		{
-			foreach (JsonElement param in paramsB.EnumerateArray())
-			{
-				if (param.TryGetProperty("name", out JsonElement nameElem) && 
-				    nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
-				{
-					paramB = param;
-					break;
-				}
-			}
+			paramB = paramsB.EnumerateArray()
+				.Where(param => param.TryGetProperty("name", out JsonElement nameElem) && 
+				                nameElem.GetString()?.Equals("name", StringComparison.OrdinalIgnoreCase) == true)
+				.Cast<JsonElement?>()
+				.FirstOrDefault();
 		}
 
 		paramA.HasValue.ShouldBeTrue("Name parameter should exist in Endpoint A");
