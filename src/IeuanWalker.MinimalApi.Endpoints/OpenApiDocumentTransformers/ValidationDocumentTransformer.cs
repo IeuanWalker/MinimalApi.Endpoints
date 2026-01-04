@@ -185,7 +185,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			else if (matchingParamType is not null && mapping.ContainsKey(routePattern))
 			{
 				// Log a warning when a collision is detected
-				ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
+				ILogger logger = context.ApplicationServices.GetService<ILogger<ValidationDocumentTransformer>>() ?? NullLogger<ValidationDocumentTransformer>.Instance;
 				Type existingType = mapping[routePattern];
 				if (existingType != matchingParamType)
 				{
