@@ -46,28 +46,13 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Step 5: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
-		// NOTE: Only apply FluentValidation rules to parameters, not DataAnnotations rules.
-		// DataAnnotations are primarily used for request body models and shouldn't be applied
-		// to query parameters to avoid rule collisions between different types with same property names.
 		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
 			Type requestType = kvp.Key;
 			List<Validation.ValidationRule> rules = kvp.Value.rules;
 			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
 
-			// Skip DataAnnotations types (marked with [ValidatableType]) for parameter validation
-			// to prevent rules from body models being incorrectly applied to query parameters
-#pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-			bool isDataAnnotationsType = requestType.GetCustomAttribute<Microsoft.Extensions.Validation.ValidatableTypeAttribute>() is not null;
-#pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
-			if (isDataAnnotationsType)
-			{
-				// Skip applying DataAnnotations validation rules to query/path parameters
-				continue;
-			}
-
-			ApplyValidationToParameters(document, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
+			ApplyValidationToParameters(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
 		return Task.CompletedTask;
@@ -141,11 +126,45 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static void ApplyValidationToParameters(OpenApiDocument document, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
 		if (document.Paths is null || rules.Count == 0)
 		{
 			return;
+		}
+
+		// Get the schema name for the request type to match against operations
+		string requestTypeSchemaName = requestType.FullName ?? requestType.Name;
+
+		// Extract meaningful parts from the type's full name to match against URL paths
+		// Example: ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.RequestModel
+		// We want to extract: Validation, Get, FluentValidation, From, Query
+		List<string> typeNameParts = [];
+		if (requestType.FullName is not null)
+		{
+			string[] parts = requestType.FullName.Split('.');
+			foreach (string part in parts)
+			{
+				// Skip common prefixes
+				if (part.Equals("ExampleApi", StringComparison.OrdinalIgnoreCase) ||
+					part.Equals("Endpoints", StringComparison.OrdinalIgnoreCase) ||
+					part.Equals("RequestModel", StringComparison.OrdinalIgnoreCase) ||
+					part.Equals("ResponseModel", StringComparison.OrdinalIgnoreCase))
+				{
+					continue;
+				}
+
+				// Split PascalCase/camelCase into separate words
+				// E.g., "GetFluentValidationFromQuery" -> ["Get", "Fluent", "Validation", "From", "Query"]
+				string[] subParts = System.Text.RegularExpressions.Regex.Split(part, @"(?<!^)(?=[A-Z])");
+				foreach (string subPart in subParts)
+				{
+					if (!string.IsNullOrEmpty(subPart) && subPart.Length > 2) // Ignore very short parts like "V1"
+					{
+						typeNameParts.Add(subPart);
+					}
+				}
+			}
 		}
 
 		// Iterate through all paths and operations
@@ -160,6 +179,81 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				if (operation.Value.Parameters is null || operation.Value.Parameters.Count == 0)
 				{
+					continue;
+				}
+
+				// Check if this operation uses the request type
+				// Strategy 1: Check if the operation's request body schema matches the request type
+				bool operationUsesRequestType = false;
+
+				if (operation.Value.RequestBody?.Content is not null)
+				{
+					foreach (KeyValuePair<string, OpenApiMediaType> content in operation.Value.RequestBody.Content)
+					{
+						if (content.Value.Schema is OpenApiSchemaReference schemaRef)
+						{
+							if (schemaRef.Reference?.Id == requestTypeSchemaName)
+							{
+								operationUsesRequestType = true;
+								break;
+							}
+						}
+					}
+				}
+
+				// Strategy 2: For operations with query/path parameters only (no request body),
+				// match based on the URL path containing parts of the type's namespace
+				// This handles [AsParameters] scenarios where the type's properties become parameters
+				if (!operationUsesRequestType && operation.Value.RequestBody is null && typeNameParts.Count > 0)
+				{
+					string path = pathItem.Key;
+					
+					// Check if the path contains significant parts of the type's namespace
+					// We check for matches and also verify they appear in a reasonable order
+					List<string> matchedParts = [];
+					foreach (string typePart in typeNameParts)
+					{
+						if (path.Contains(typePart, StringComparison.OrdinalIgnoreCase))
+						{
+							matchedParts.Add(typePart);
+						}
+					}
+
+					// To avoid false positives, we need:
+					// 1. At least 3 matching parts, OR
+					// 2. At least 2 matching parts where one is NOT just "Validation" (which is too generic)
+					bool hasStrongMatch = false;
+					if (matchedParts.Count >= 3)
+					{
+						hasStrongMatch = true;
+					}
+					else if (matchedParts.Count >= 2)
+					{
+						// Check if we have at least one specific (non-generic) matching part
+						bool hasSpecificPart = matchedParts.Any(p => 
+							!p.Equals("Validation", StringComparison.OrdinalIgnoreCase) &&
+							!p.Equals("Api", StringComparison.OrdinalIgnoreCase) &&
+							!p.Equals("Get", StringComparison.OrdinalIgnoreCase) &&
+							!p.Equals("Post", StringComparison.OrdinalIgnoreCase) &&
+							!p.Equals("Put", StringComparison.OrdinalIgnoreCase) &&
+							!p.Equals("Delete", StringComparison.OrdinalIgnoreCase) &&
+							!p.Equals("From", StringComparison.OrdinalIgnoreCase));
+						
+						if (hasSpecificPart)
+						{
+							hasStrongMatch = true;
+						}
+					}
+
+					if (hasStrongMatch)
+					{
+						operationUsesRequestType = true;
+					}
+				}
+
+				if (!operationUsesRequestType)
+				{
+					// This operation doesn't use this request type, skip it
 					continue;
 				}
 
