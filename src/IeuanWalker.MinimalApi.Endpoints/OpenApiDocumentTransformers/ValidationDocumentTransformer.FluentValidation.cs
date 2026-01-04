@@ -196,7 +196,7 @@ partial class ValidationDocumentTransformer
 							if (logger.IsEnabled(LogLevel.Warning))
 							{
 #pragma warning disable CA1873 // Avoid potentially expensive logging
-								LogVagueErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+								LogVagueErrorMessageFluentValidation(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
 #pragma warning restore CA1873 // Avoid potentially expensive logging
 							}
 						}
@@ -300,7 +300,7 @@ partial class ValidationDocumentTransformer
 				// Check for MemberToCompare first (property comparisons like x => x.MaxValue)
 				PropertyInfo? memberProp = comparisonValidator.GetType().GetProperty(nameof(IComparisonValidator.MemberToCompare));
 				object? memberValue = memberProp?.GetValue(comparisonValidator);
-				
+
 				if (memberValue is not null)
 				{
 					// MemberToCompare is a MemberInfo (typically PropertyInfo or FieldInfo)
@@ -312,7 +312,7 @@ partial class ValidationDocumentTransformer
 						MemberInfo memberInfo => memberInfo.Name,
 						_ => memberValue.ToString() ?? string.Empty
 					};
-					
+
 					// For property comparisons, replace {ComparisonValue} with the property name
 					message = message.Replace("{ComparisonValue}", memberName);
 				}
@@ -603,7 +603,7 @@ partial class ValidationDocumentTransformer
 	static partial void LogExceptionWhileObtainingValidatorErrorMessage(ILogger logger, string propertyName, string validatorType, Exception exception);
 
 	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to propery {PropertyName} from the object {ValidatorType}. Consider using .WithMessage().")]
-	static partial void LogVagueErrorMessage(ILogger logger, string validatorType, string propertyName);
+	static partial void LogVagueErrorMessageFluentValidation(ILogger logger, string validatorType, string propertyName);
 
 	/// <summary>
 	/// Extracts both the enum type and the property type from a FluentValidation validator

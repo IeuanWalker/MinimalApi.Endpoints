@@ -1,14 +1,20 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 partial class ValidationDocumentTransformer
 {
-	static void DiscoverDataAnnotationValidationRules(Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
+	static void DiscoverDataAnnotationValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
 		// Get all loaded assemblies
 		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+		// Get logger from DI if available
+		ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
 
 		// Keep track of types we've already processed to avoid infinite recursion
 		HashSet<Type> processedTypes = [];
@@ -41,7 +47,7 @@ partial class ValidationDocumentTransformer
 					}
 
 					// Process this type and any nested types recursively
-					ProcessTypeRecursively(type, allValidationRules, processedTypes);
+					ProcessTypeRecursively(type, allValidationRules, processedTypes, logger);
 				}
 			}
 			catch (ReflectionTypeLoadException)
@@ -52,7 +58,7 @@ partial class ValidationDocumentTransformer
 		}
 	}
 
-	static void ProcessTypeRecursively(Type type, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, HashSet<Type> processedTypes)
+	static void ProcessTypeRecursively(Type type, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, HashSet<Type> processedTypes, ILogger logger)
 	{
 		// Avoid processing the same type multiple times
 		if (processedTypes.Contains(type))
@@ -63,7 +69,7 @@ partial class ValidationDocumentTransformer
 		processedTypes.Add(type);
 
 		// Extract validation rules from this type
-		List<Validation.ValidationRule> rules = ExtractDataAnnotationRules(type);
+		List<Validation.ValidationRule> rules = ExtractDataAnnotationRules(type, logger);
 
 		if (rules.Count > 0)
 		{
@@ -106,8 +112,8 @@ partial class ValidationDocumentTransformer
 			}
 
 			// Skip primitive types, system types, and types we've already processed
-			if (actualType.IsPrimitive || 
-				actualType == typeof(string) || 
+			if (actualType.IsPrimitive ||
+				actualType == typeof(string) ||
 				actualType == typeof(decimal) ||
 				actualType == typeof(DateTime) ||
 				actualType == typeof(DateTimeOffset) ||
@@ -128,12 +134,12 @@ partial class ValidationDocumentTransformer
 			if (hasValidationAttributes)
 			{
 				// Recursively process this nested type
-				ProcessTypeRecursively(actualType, allValidationRules, processedTypes);
+				ProcessTypeRecursively(actualType, allValidationRules, processedTypes, logger);
 			}
 		}
 	}
 
-	static List<Validation.ValidationRule> ExtractDataAnnotationRules(Type type)
+	static List<Validation.ValidationRule> ExtractDataAnnotationRules(Type type, ILogger logger)
 	{
 		List<Validation.ValidationRule> rules = [];
 
@@ -147,7 +153,7 @@ partial class ValidationDocumentTransformer
 
 			foreach (ValidationAttribute attribute in validationAttributes)
 			{
-				Validation.ValidationRule? rule = ConvertDataAnnotationToValidationRule(property.Name, property.PropertyType, attribute);
+				Validation.ValidationRule? rule = ConvertDataAnnotationToValidationRule(property.Name, type, attribute, logger);
 				if (rule is not null)
 				{
 					rules.Add(rule);
@@ -158,7 +164,7 @@ partial class ValidationDocumentTransformer
 		return rules;
 	}
 
-	static Validation.ValidationRule? ConvertDataAnnotationToValidationRule(string propertyName, Type propertyType, ValidationAttribute attribute)
+	static Validation.ValidationRule? ConvertDataAnnotationToValidationRule(string propertyName, Type propertyParent, ValidationAttribute attribute, ILogger logger)
 	{
 		// Map DataAnnotation attributes to internal ValidationRule types
 		return attribute switch
@@ -180,7 +186,7 @@ partial class ValidationDocumentTransformer
 				minLength: null,
 				maxLength: maxLength.Length),
 
-			RangeAttribute range => CreateRangeRuleFromAttribute(propertyName, propertyType, range),
+			RangeAttribute range => CreateRangeRuleFromAttribute(propertyName, propertyParent, range),
 
 			RegularExpressionAttribute regex => new Validation.PatternRule(propertyName, regex.Pattern),
 
@@ -194,20 +200,18 @@ partial class ValidationDocumentTransformer
 
 			CompareAttribute compare => new Validation.CustomRule<object>(propertyName, $"Must match {compare.OtherProperty}"),
 
-			FileExtensionsAttribute fileExtensions => new Validation.CustomRule<object>(
-				propertyName,
-				GetFormattedErrorMessage(fileExtensions, propertyName, $"Must be a file with extension: {fileExtensions.Extensions}") ?? $"Must be a file with extension: {fileExtensions.Extensions}"),
+			FileExtensionsAttribute fileExtensions => new Validation.CustomRule<object>(propertyName, $"Must be a file with extension: {fileExtensions.Extensions}"),
 
 			CustomValidationAttribute customValidation => new Validation.CustomRule<object>(
 				propertyName,
-				GetFormattedErrorMessage(customValidation, propertyName, "Custom validation failed") ?? "Custom validation failed"),
+				GetFormattedErrorMessage(customValidation, logger, propertyParent, propertyName, "Custom validation failed") ?? "Custom validation failed"),
 
 			// For any other custom ValidationAttribute subclass
-			_ => CreateCustomRuleFromValidationAttribute(propertyName, attribute)
+			_ => CreateCustomRuleFromValidationAttribute(propertyName, propertyParent, attribute, logger)
 		};
 	}
 
-	static string? GetFormattedErrorMessage(ValidationAttribute attribute, string propertyName, string? defaultMessage = null)
+	static string? GetFormattedErrorMessage(ValidationAttribute attribute, ILogger logger, Type propertyValidator, string propertyName, string? defaultMessage = null)
 	{
 		// If a custom error message is set, use it
 		if (!string.IsNullOrEmpty(attribute.ErrorMessage))
@@ -230,6 +234,10 @@ partial class ValidationDocumentTransformer
 #pragma warning disable CA1031 // Do not catch general exception types
 		catch
 		{
+			// Log a warning when we have to fall back to a generic message
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 			// If formatting fails, use the default message
 			return defaultMessage;
 		}
@@ -284,7 +292,7 @@ partial class ValidationDocumentTransformer
 			propertyName, $"Must be between {range.Minimum} and {range.Maximum}");
 	}
 
-	static Validation.CustomRule<object>? CreateCustomRuleFromValidationAttribute(string propertyName, ValidationAttribute attribute)
+	static Validation.CustomRule<object>? CreateCustomRuleFromValidationAttribute(string propertyName, Type propertyValidator, ValidationAttribute attribute, ILogger logger)
 	{
 		// For custom ValidationAttribute subclasses, we need to get the error message
 		// The error message might be set in the ErrorMessage property, or might be generated
@@ -299,11 +307,22 @@ partial class ValidationDocumentTransformer
 			{
 				// FormatErrorMessage needs a display name, we'll use the property name
 				errorMessage = attribute.FormatErrorMessage(propertyName);
+
+				if (errorMessage.Equals($"The field {propertyName} is invalid."))
+				{
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+					LogVagueErrorMessageDataAnnotation(logger, propertyValidator.FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
+				}
 			}
 #pragma warning disable CA1031 // Do not catch general exception types
 			catch
 			{
 				// If FormatErrorMessage fails, use a default message
+				// Log a warning when we have to fall back to a generic message
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+				LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 				errorMessage = $"{propertyName} validation failed";
 			}
 #pragma warning restore CA1031 // Do not catch general exception types
@@ -312,9 +331,16 @@ partial class ValidationDocumentTransformer
 		// If the error message is still empty or null, use a default
 		if (string.IsNullOrEmpty(errorMessage))
 		{
+#pragma warning disable CA1873 // Avoid potentially expensive logging
+			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 			errorMessage = $"{propertyName} validation failed";
 		}
 
 		return new Validation.CustomRule<object>(propertyName, errorMessage);
 	}
+
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to propery {PropertyName} from the object {ValidatorType}. Consider manually setting the error message.")]
+	static partial void LogVagueErrorMessageDataAnnotation(ILogger logger, string validatorType, string propertyName);
+
 }
