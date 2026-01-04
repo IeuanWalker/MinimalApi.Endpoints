@@ -554,6 +554,7 @@
 				"tags": [
 					"Validation"
 				],
+				"summary": "FluentValidationFromQuery",
 				"operationId": "get_ValidationFluentValidationFromQuery_14",
 				"parameters": [
 					{
@@ -796,12 +797,13 @@
 				"tags": [
 					"Validation"
 				],
+				"summary": "DataAnnotationsFromBody",
 				"operationId": "post_ValidationDataValidation_15",
 				"requestBody": {
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataValidation.RequestModel"
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.RequestModel"
 							}
 						}
 					}
@@ -818,6 +820,7 @@
 				"tags": [
 					"Validation"
 				],
+				"summary": "FluentValidationFromBody",
 				"operationId": "post_ValidationFluentValidation_16",
 				"requestBody": {
 					"content": {
@@ -847,6 +850,7 @@
 				"tags": [
 					"Validation"
 				],
+				"summary": "FluentValidationFromForm",
 				"operationId": "post_ValidationFluentValidationFromForm_17",
 				"requestBody": {
 					"content": {
@@ -882,6 +886,7 @@
 				"tags": [
 					"Validation"
 				],
+				"summary": "ManualWithValidation",
 				"operationId": "post_ValidationWithValidation_18",
 				"requestBody": {
 					"content": {
@@ -895,6 +900,42 @@
 				"responses": {
 					"200": {
 						"description": "OK"
+					}
+				}
+			}
+		},
+		"/api/v1/validation/WithValidation/AlterAndRemove": {
+			"post": {
+				"tags": [
+					"Validation"
+				],
+				"summary": "WithValidationAlterAndRemove",
+				"operationId": "post_ValidationWithValidationAlterAndRemove_19",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidationAlterRemove.RequestModel"
+							}
+						},
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidationAlterRemove.RequestModel"
+							}
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -1418,7 +1459,7 @@
 					"Failure"
 				]
 			},
-			"ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel": {
+			"ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel": {
 				"type": "object",
 				"properties": {
 					"stringMin": {
@@ -1471,7 +1512,7 @@
 					}
 				}
 			},
-			"ExampleApi.Endpoints.Validation.PostDataValidation.RequestModel": {
+			"ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.RequestModel": {
 				"required": [
 					"nestedObject"
 				],
@@ -1526,7 +1567,7 @@
 						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 					},
 					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel"
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
 					},
 					"listNestedObject": {
 						"oneOf": [
@@ -1534,7 +1575,7 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+								"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
 							}
 						]
 					}
@@ -2115,6 +2156,7 @@
 			},
 			"ExampleApi.Endpoints.Validation.PostWithValidation.RequestModel": {
 				"required": [
+					"allRules",
 					"nestedObject"
 				],
 				"type": "object",
@@ -2176,6 +2218,18 @@
 					"listIntRangeCount": {
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
+					"allRules": {
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"maxLength": 100,
+						"minLength": 10,
+						"pattern": "^[a-zA-Z0-9]+$",
+						"type": "string",
+						"description": "Custom description\n\nValidation rules:\n- Is required\n- Must be 10 characters or more\n- Must be 100 characters or fewer\n- Must be at least 10 characters and less than 100 characters\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid URL\n- Custom rule\n- Must be > 10\n- Must be >= 11\n- Must be < 100\n- Must be <= 100\n- Must be >= 10 and <= 100",
+						"format": "uri"
+					},
 					"nestedObject": {
 						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
 					},
@@ -2188,6 +2242,27 @@
 								"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
 							}
 						]
+					}
+				}
+			},
+			"ExampleApi.Endpoints.Validation.PostWithValidationAlterRemove.RequestModel": {
+				"type": "object",
+				"properties": {
+					"alter": {
+						"minLength": 10,
+						"pattern": "^[a-zA-Z0-9]+$",
+						"type": "string",
+						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be 10 characters or more"
+					},
+					"remove1": {
+						"maxLength": 100,
+						"minLength": 10,
+						"pattern": "^[a-zA-Z0-9]+$",
+						"type": "string",
+						"description": "Validation rules:\n- Must be 10 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$"
+					},
+					"removeAll": {
+						"$ref": "#/components/schemas/System.String"
 					}
 				}
 			},
@@ -2317,10 +2392,10 @@
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
 				}
 			},
-			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
 				"type": "array",
 				"items": {
-					"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel"
+					"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
 				}
 			},
 			"System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {

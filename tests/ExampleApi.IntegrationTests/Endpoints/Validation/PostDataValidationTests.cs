@@ -1,6 +1,6 @@
 using System.Net;
 using System.Net.Http.Json;
-using ExampleApi.Endpoints.Validation.PostDataValidation;
+using ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Validation;
 
@@ -36,7 +36,7 @@ public class PostDataValidationTests : IClassFixture<ExampleApiWebApplicationFac
 			ListIntMinCount = [1],
 			ListIntMaxCount = [],
 			ListIntRangeCount = [1],
-			NestedObject = new ExampleApi.Endpoints.Validation.PostDataValidation.NestedObjectModel
+			NestedObject = new NestedObjectModel
 			{
 				StringMin = "abc",
 				StringMax = "ok",

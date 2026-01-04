@@ -26,6 +26,8 @@ public class RequestModel
 	public List<int> ListIntMaxCount { get; set; } = [];
 	public List<int> ListIntRangeCount { get; set; } = [];
 
+	public required string AllRules { get; set; }
+
 	public required NestedObjectModel NestedObject { get; set; }
 	public List<NestedObjectModel>? ListNestedObject { get; set; }
 }

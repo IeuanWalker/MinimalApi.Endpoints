@@ -42,6 +42,22 @@ public class PostWithValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 				config.Property(x => x.ListIntMaxCount).Custom("Must contain at most 10 items.");
 				config.Property(x => x.ListIntRangeCount).Custom("Must contain between 1 and 10 items.");
 
+				config.Property(x => x.AllRules)
+					.Description("Custom description")
+					.Required()
+					.MinLength(10)
+					.MaxLength(100)
+					.Length(10, 100)
+					.Pattern(@"^[a-zA-Z0-9]+$")
+					.Email()
+					.Url()
+					.Custom("Custom rule")
+					.GreaterThan(10)
+					.GreaterThanOrEqual(11)
+					.LessThan(100)
+					.LessThanOrEqual(100)
+					.Between(10, 100);
+
 				// Nested object validation
 				config.Property(x => x.NestedObject).Required();
 

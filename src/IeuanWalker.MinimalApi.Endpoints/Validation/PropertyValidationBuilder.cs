@@ -3,7 +3,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 /// <summary>
 /// Fluent builder for configuring validation rules for a specific property
 /// </summary>
-public class PropertyValidationBuilder<TRequest, TProperty>
+public sealed class PropertyValidationBuilder<TRequest, TProperty>
 {
 	readonly string _propertyName;
 	readonly List<ValidationRule> _rules = [];
@@ -11,85 +11,62 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 
 	internal PropertyValidationBuilder(string propertyName)
 	{
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(propertyName, nameof(propertyName));
+
 		_propertyName = propertyName;
 	}
 
-	/// <summary>
-	/// Requires the property to have a non-null value
-	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> Required(string? errorMessage = null)
+	internal IEnumerable<ValidationRule> Build()
 	{
-		_rules.Add(new RequiredRule(_propertyName, errorMessage));
-		return this;
-	}
-
-	/// <summary>
-	/// Requires string to have at least the specified minimum length
-	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> MinLength(int min, string? errorMessage = null)
-	{
-		_rules.Add(new StringLengthRule(_propertyName, minLength: min, maxLength: null, errorMessage));
-		return this;
-	}
-
-	/// <summary>
-	/// Requires string to not exceed the specified maximum length
-	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> MaxLength(int max, string? errorMessage = null)
-	{
-		_rules.Add(new StringLengthRule(_propertyName, minLength: null, maxLength: max, errorMessage));
-		return this;
-	}
-
-	/// <summary>
-	/// Requires string length to be between min and max (inclusive)
-	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> Length(int min, int max, string? errorMessage = null)
-	{
-		_rules.Add(new StringLengthRule(_propertyName, minLength: min, maxLength: max, errorMessage)
+		// Apply the per-property AppendRulesToPropertyDescription setting to all rules
+		if (_appendRulesToPropertyDescription.HasValue)
 		{
-			MinLength = min,
-			MaxLength = max
-		});
-		return this;
+			return _rules.Select(rule => rule with
+			{
+				AppendRuleToPropertyDescription = _appendRulesToPropertyDescription.Value
+			});
+		}
+
+		return _rules;
 	}
 
 	/// <summary>
-	/// Requires string to match the specified regex pattern
+	/// Replaces the error message of an existing validation rule with a new message.
 	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> Pattern(string regex, string? errorMessage = null)
+	/// <param name="oldRule">The error message of the validation rule to be replaced. Must match an existing rule's error message.</param>
+	/// <param name="newRule">The new error message to assign to the specified validation rule.</param>
+	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
+	/// <exception cref="ArgumentNullException">Thrown if no validation rule exists with an error message equal to <paramref name="oldRule"/>.</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> Alter(string oldRule, string newRule)
 	{
-		_rules.Add(new PatternRule(_propertyName, regex, errorMessage));
-		return this;
+		// TODO: Throw exception if oldRule doesnt exist
+
+		throw new NotImplementedException();
 	}
 
 	/// <summary>
-	/// Requires string to be a valid email address
+	/// Removes the validation rule with the specified name from the property validation builder.
 	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> Email(string? errorMessage = null)
+	/// <param name="rule">The name of the validation rule to remove. Cannot be null or empty.</param>
+	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
+	/// <exception cref="NotImplementedException">The method is not implemented.</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> Remove(string rule)
 	{
-		_rules.Add(new EmailRule(_propertyName, errorMessage));
-		return this;
+		// TODO: Throw exception if rule doesnt exist
+
+		throw new NotImplementedException();
 	}
 
 	/// <summary>
-	/// Requires string to be a valid URL
+	/// Removes all validation rules from the property validation builder.
 	/// </summary>
-	public PropertyValidationBuilder<TRequest, TProperty> Url(string? errorMessage = null)
+	/// <returns>The current <see cref="PropertyValidationBuilder{TRequest, TProperty}"/> instance for method chaining.</returns>
+	/// <exception cref="NotImplementedException">Thrown in all cases. This method is not yet implemented.</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> RemoveAll()
 	{
-		_rules.Add(new UrlRule(_propertyName, errorMessage));
-		return this;
-	}
+		// TODO: Throw exception if rules is empty
 
-	/// <summary>
-	/// Applies a custom validation note (not represented in OpenAPI schema - use for documentation only)
-	/// </summary>
-	/// <param name="validator">Validator function (not used - kept for API compatibility)</param>
-	/// <param name="errorMessage">Description of the validation rule</param>
-	public PropertyValidationBuilder<TRequest, TProperty> Custom(string errorMessage)
-	{
-		_rules.Add(new CustomRule<TProperty>(_propertyName, errorMessage));
-		return this;
+		throw new NotImplementedException();
 	}
 
 	/// <summary>
@@ -114,124 +91,162 @@ public class PropertyValidationBuilder<TRequest, TProperty>
 		return this;
 	}
 
-	internal IEnumerable<ValidationRule> Build()
+	/// <summary>
+	/// Applies a custom validation note (not represented in OpenAPI schema - use for documentation only)
+	/// </summary>
+	/// <param name="errorMessage">Description of the validation rule</param>
+	public PropertyValidationBuilder<TRequest, TProperty> Custom(string errorMessage)
 	{
-		// Apply the per-property AppendRulesToPropertyDescription setting to all rules
-		if (_appendRulesToPropertyDescription.HasValue)
-		{
-			return _rules.Select(rule => rule with
-			{
-				AppendRuleToPropertyDescription = _appendRulesToPropertyDescription.Value
-			});
-		}
-		return _rules;
+		_rules.Add(new CustomRule<TProperty>(_propertyName, errorMessage));
+		return this;
 	}
-}
 
-/// <summary>
-/// Extension methods for PropertyValidationBuilder with comparable types
-/// </summary>
-public static class PropertyValidationBuilderExtensions
-{
+	/// <summary>
+	/// Requires the property to have a non-null value
+	/// </summary>
+	public PropertyValidationBuilder<TRequest, TProperty> Required(string? errorMessage = null)
+	{
+		_rules.Add(new RequiredRule(_propertyName, errorMessage));
+		return this;
+	}
+
+	// ----------------
+	// String-based rules
+	// ----------------
+
+	/// <summary>
+	/// Requires string length to be between min and max (inclusive)
+	/// </summary>
+	/// <exception cref="ArgumentException">Min must be less than or equal to max</exception>
+	/// <exception cref="ArgumentException">Min must be greater than or equal to 0</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> Length(int min, int max, string? errorMessage = null)
+	{
+		if (min > max)
+		{
+			throw new ArgumentException("Min must be less than or equal to max");
+		}
+
+		if (min < 0)
+		{
+			throw new ArgumentException("Min must be greater than or equal to 0", nameof(min));
+		}
+
+		_rules.Add(new StringLengthRule(_propertyName, min, max, errorMessage));
+		return this;
+	}
+
+	/// <summary>
+	/// Requires string to have at least the specified minimum length
+	/// </summary>
+	/// <exception cref="ArgumentException">Min must be greater than or equal to 0</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> MinLength(int min, string? errorMessage = null)
+	{
+		if (min < 0)
+		{
+			throw new ArgumentException("Min must be greater than or equal to 0", nameof(min));
+		}
+
+		_rules.Add(new StringLengthRule(_propertyName, min, null, errorMessage));
+		return this;
+	}
+
+	/// <summary>
+	/// Requires string to not exceed the specified maximum length
+	/// </summary>
+	/// <exception cref="ArgumentException">Min must be greater than or equal to 0</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> MaxLength(int max, string? errorMessage = null)
+	{
+		if (max < 0)
+		{
+			throw new ArgumentException("Max must be greater than or equal to 0", nameof(max));
+		}
+
+		_rules.Add(new StringLengthRule(_propertyName, null, max, errorMessage));
+		return this;
+	}
+
+	/// <summary>
+	/// Requires string to match the specified regex pattern
+	/// </summary>
+	/// <exception cref="ArgumentNullException">Pattern is null or whitespace</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> Pattern(string regex, string? errorMessage = null)
+	{
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(regex, nameof(regex));
+
+		_rules.Add(new PatternRule(_propertyName, regex, errorMessage));
+		return this;
+	}
+
+	/// <summary>
+	/// Requires string to be a valid email address
+	/// </summary>
+	public PropertyValidationBuilder<TRequest, TProperty> Email(string? errorMessage = null)
+	{
+		_rules.Add(new EmailRule(_propertyName, errorMessage));
+		return this;
+	}
+
+	/// <summary>
+	/// Requires string to be a valid URL
+	/// </summary>
+	public PropertyValidationBuilder<TRequest, TProperty> Url(string? errorMessage = null)
+	{
+		_rules.Add(new UrlRule(_propertyName, errorMessage));
+		return this;
+	}
+
+	// ----------------
+	// Number / range-based rules
+	// ----------------
+
+	/// <summary>
+	/// Requires value to be between min and max (inclusive)
+	/// </summary>
+	/// <exception cref="ArgumentException">Min must be less than or equal to max</exception>
+	public PropertyValidationBuilder<TRequest, TProperty> Between<TValue>(TValue min, TValue max, string? errorMessage = null) where TValue : struct, IComparable<TValue>
+	{
+		if (min.CompareTo(max) > 0)
+		{
+			throw new ArgumentException("Min must be less than or equal to max");
+		}
+
+		_rules.Add(new RangeRule<TValue>(_propertyName, min, max, false, false, errorMessage));
+		return this;
+	}
+
 	/// <summary>
 	/// Requires value to be greater than the specified minimum (exclusive)
 	/// </summary>
-	public static PropertyValidationBuilder<TRequest, TProperty> GreaterThan<TRequest, TProperty>(
-		this PropertyValidationBuilder<TRequest, TProperty> builder,
-		TProperty value,
-		string? errorMessage = null)
-		where TProperty : struct, IComparable<TProperty>
+	public PropertyValidationBuilder<TRequest, TProperty> GreaterThan<TValue>(TValue value, string? errorMessage = null) where TValue : struct, IComparable<TValue>
 	{
-		// Use reflection to access the private members
-		string propertyName = GetPropertyName(builder);
-		List<ValidationRule> rules = GetRules(builder);
-
-		rules.Add(new RangeRule<TProperty>(propertyName, minimum: value, exclusiveMinimum: true, errorMessage: errorMessage));
-		return builder;
+		_rules.Add(new RangeRule<TValue>(_propertyName, value, null, true, false, errorMessage));
+		return this;
 	}
 
 	/// <summary>
 	/// Requires value to be greater than or equal to the specified minimum
 	/// </summary>
-	public static PropertyValidationBuilder<TRequest, TProperty> GreaterThanOrEqual<TRequest, TProperty>(
-		this PropertyValidationBuilder<TRequest, TProperty> builder,
-		TProperty value,
-		string? errorMessage = null)
-		where TProperty : struct, IComparable<TProperty>
+	public PropertyValidationBuilder<TRequest, TProperty> GreaterThanOrEqual<TValue>(TValue value, string? errorMessage = null) where TValue : struct, IComparable<TValue>
 	{
-		string propertyName = GetPropertyName(builder);
-		List<ValidationRule> rules = GetRules(builder);
-
-		rules.Add(new RangeRule<TProperty>(propertyName, minimum: value, exclusiveMinimum: false, errorMessage: errorMessage));
-		return builder;
+		_rules.Add(new RangeRule<TValue>(_propertyName, value, null, false, false, errorMessage));
+		return this;
 	}
 
 	/// <summary>
 	/// Requires value to be less than the specified maximum (exclusive)
 	/// </summary>
-	public static PropertyValidationBuilder<TRequest, TProperty> LessThan<TRequest, TProperty>(
-		this PropertyValidationBuilder<TRequest, TProperty> builder,
-		TProperty value,
-		string? errorMessage = null)
-		where TProperty : struct, IComparable<TProperty>
+	public PropertyValidationBuilder<TRequest, TProperty> LessThan<TValue>(TValue value, string? errorMessage = null) where TValue : struct, IComparable<TValue>
 	{
-		string propertyName = GetPropertyName(builder);
-		List<ValidationRule> rules = GetRules(builder);
-
-		rules.Add(new RangeRule<TProperty>(propertyName, maximum: value, exclusiveMaximum: true, errorMessage: errorMessage));
-		return builder;
+		_rules.Add(new RangeRule<TValue>(_propertyName, null, value, false, true, errorMessage));
+		return this;
 	}
 
 	/// <summary>
 	/// Requires value to be less than or equal to the specified maximum
 	/// </summary>
-	public static PropertyValidationBuilder<TRequest, TProperty> LessThanOrEqual<TRequest, TProperty>(
-		this PropertyValidationBuilder<TRequest, TProperty> builder,
-		TProperty value,
-		string? errorMessage = null)
-		where TProperty : struct, IComparable<TProperty>
+	public PropertyValidationBuilder<TRequest, TProperty> LessThanOrEqual<TValue>(TValue value, string? errorMessage = null) where TValue : struct, IComparable<TValue>
 	{
-		string propertyName = GetPropertyName(builder);
-		List<ValidationRule> rules = GetRules(builder);
-
-		rules.Add(new RangeRule<TProperty>(propertyName, maximum: value, exclusiveMaximum: false, errorMessage: errorMessage));
-		return builder;
-	}
-
-	/// <summary>
-	/// Requires value to be between min and max (inclusive)
-	/// </summary>
-	public static PropertyValidationBuilder<TRequest, TProperty> Between<TRequest, TProperty>(
-		this PropertyValidationBuilder<TRequest, TProperty> builder,
-		TProperty min,
-		TProperty max,
-		string? errorMessage = null)
-		where TProperty : struct, IComparable<TProperty>
-	{
-		string propertyName = GetPropertyName(builder);
-		List<ValidationRule> rules = GetRules(builder);
-
-		rules.Add(new RangeRule<TProperty>(propertyName, minimum: min, maximum: max, errorMessage: errorMessage)
-		{
-			Minimum = min,
-			Maximum = max,
-			ExclusiveMinimum = false,
-			ExclusiveMaximum = false
-		});
-		return builder;
-	}
-
-	static string GetPropertyName<TRequest, TProperty>(PropertyValidationBuilder<TRequest, TProperty> builder)
-	{
-		System.Reflection.FieldInfo? field = typeof(PropertyValidationBuilder<TRequest, TProperty>)
-			.GetField("_propertyName", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-		return (string)(field?.GetValue(builder) ?? throw new InvalidOperationException("Unable to access property name"));
-	}
-
-	static List<ValidationRule> GetRules<TRequest, TProperty>(PropertyValidationBuilder<TRequest, TProperty> builder)
-	{
-		System.Reflection.FieldInfo? field = typeof(PropertyValidationBuilder<TRequest, TProperty>)
-			.GetField("_rules", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-		return (List<ValidationRule>)(field?.GetValue(builder) ?? throw new InvalidOperationException("Unable to access rules"));
+		_rules.Add(new RangeRule<TValue>(_propertyName, null, value, false, false, errorMessage));
+		return this;
 	}
 }
