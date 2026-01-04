@@ -4,6 +4,8 @@ using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
@@ -180,10 +182,23 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				// This prevents collisions when multiple endpoints share the same route pattern
 				mapping[routePattern] = matchingParamType;
 			}
+			else if (matchingParamType is not null && mapping.ContainsKey(routePattern))
+			{
+				// Log a warning when a collision is detected
+				ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
+				Type existingType = mapping[routePattern];
+				if (existingType != matchingParamType)
+				{
+					LogRoutePatternCollision(logger, routePattern, existingType.Name, matchingParamType.Name);
+				}
+			}
 		}
 
 		return mapping;
 	}
+
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Route pattern '{RoutePattern}' is shared by multiple endpoints with different request types. Using validation rules from '{FirstType}', ignoring '{SecondType}'. Consider using different route patterns or HTTP methods to avoid validation rule conflicts.")]
+	static partial void LogRoutePatternCollision(ILogger logger, string routePattern, string firstType, string secondType);
 
 	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, Dictionary<string, Type> endpointToRequestType, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
 	{
@@ -191,6 +206,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			return;
 		}
+
+		// Build a lookup cache for this invocation to optimize repeated PathsMatch calls
+		// This provides O(1) lookup instead of O(M) linear search for each path
+		Dictionary<string, Type?> pathMatchCache = new(StringComparer.OrdinalIgnoreCase);
 
 		// Iterate through all paths and operations
 		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
@@ -204,12 +223,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// Use the OpenAPI path as the pattern that will be compared against endpoint route patterns
 			string pathPattern = pathItem.Key;
 
-			// Try to find matching endpoint in our mapping
-			// We need to check if this path belongs to an endpoint that uses this request type
-			Type? pathRequestType = endpointToRequestType
-				.Where(mapping => PathsMatch(pathPattern, mapping.Key))
-				.Select(mapping => mapping.Value)
-				.FirstOrDefault();
+			// Try to find matching endpoint - use cache to avoid redundant PathsMatch calls
+			if (!pathMatchCache.TryGetValue(pathPattern, out Type? pathRequestType))
+			{
+				// Cache miss - perform the search and cache the result
+				pathRequestType = endpointToRequestType
+					.Where(mapping => PathsMatch(pathPattern, mapping.Key))
+					.Select(mapping => mapping.Value)
+					.FirstOrDefault();
+				
+				pathMatchCache[pathPattern] = pathRequestType;
+			}
 
 			// Skip this path if it doesn't belong to the current request type
 			if (pathRequestType is null || pathRequestType != requestType)
