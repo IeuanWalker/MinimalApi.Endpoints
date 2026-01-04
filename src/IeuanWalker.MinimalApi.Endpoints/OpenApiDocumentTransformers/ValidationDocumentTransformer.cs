@@ -19,6 +19,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
 		Dictionary<Type, (List<Validation.ValidationRule>, bool appendRulesToPropertyDescription)> allValidationRules = [];
+		
+		// HashSet to track which types are from DataAnnotations discovery
+		// (used to limit URL-based parameter matching to only DataAnnotations types)
+		HashSet<Type> dataAnnotationTypes = [];
 
 		// Step 1: Discover FluentValidation rules
 		if (AutoDocumentFluentValdation)
@@ -29,7 +33,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 2: Discover DataAnnotationValidation rules
 		if (AutoDocumentDataAnnotationValdation)
 		{
-			DiscoverDataAnnotationValidationRules(context, allValidationRules);
+			DiscoverDataAnnotationValidationRules(context, allValidationRules, dataAnnotationTypes);
 		}
 
 		// Step 3: Discover manual WithValidation rules (these override FluentValidation per property)
@@ -52,7 +56,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			List<Validation.ValidationRule> rules = kvp.Value.rules;
 			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
 
-			ApplyValidationToParameters(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
+			ApplyValidationToParameters(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription, dataAnnotationTypes);
 		}
 
 		return Task.CompletedTask;
@@ -126,7 +130,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription, HashSet<Type> dataAnnotationTypes)
 	{
 		if (document.Paths is null || rules.Count == 0)
 		{
@@ -135,12 +139,14 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// Get the schema name for the request type to match against operations
 		string requestTypeSchemaName = requestType.FullName ?? requestType.Name;
+		
+		// Check if this is a DataAnnotations type
+		bool isDataAnnotationType = dataAnnotationTypes.Contains(requestType);
 
 		// Extract meaningful parts from the type's full name to match against URL paths
-		// Example: ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.RequestModel
-		// We want to extract: Validation, Get, FluentValidation, From, Query
+		// Only do this for DataAnnotations types - FluentValidation types will only match via request body
 		List<string> typeNameParts = [];
-		if (requestType.FullName is not null)
+		if (isDataAnnotationType && requestType.FullName is not null)
 		{
 			string[] parts = requestType.FullName.Split('.');
 			foreach (string part in parts)
