@@ -334,11 +334,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Check for version parameter matching (e.g., "v1" matches "v{version:apiversion}")
 			// This handles the case where OpenAPI has "v1" but route pattern has "v{version:apiVersion}"
-			if (routeSeg.StartsWith("v{") && routeSeg.Contains("version") && routeSeg.EndsWith('}') &&
-				openApiSeg.StartsWith('v') && openApiSeg.Length > 1 && char.IsDigit(openApiSeg[1]))
+			// Ensure the route segment is a version placeholder and the OpenAPI segment matches the expected format
+			if (routeSeg.StartsWith("v{") && routeSeg.Contains("version", StringComparison.OrdinalIgnoreCase) && routeSeg.EndsWith('}'))
 			{
-				// OpenAPI segment should be something like "v1", "v2", etc.
-				continue; // Version placeholder matches versioned path
+				// OpenAPI segment should be exactly in format "v{digit}+" (e.g., "v1", "v2", "v10")
+				// All characters after 'v' must be digits
+				if (openApiSeg.StartsWith('v') && openApiSeg.Length > 1 && 
+				    openApiSeg[1..].All(char.IsDigit))
+				{
+					continue; // Version placeholder matches versioned path
+				}
 			}
 
 			// No match
