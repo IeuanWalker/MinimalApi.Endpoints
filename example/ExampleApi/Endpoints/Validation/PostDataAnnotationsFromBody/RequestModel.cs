@@ -136,7 +136,7 @@ public class RequestModel
 	[WithoutDefaultErrorMessage]
 	public string CustomValidationWithoutDefaultMessage { get; set; } = string.Empty;
 
-	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manuall")]
+	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manually")]
 	public string CustomValidationWithoutDefaultMessageSetManually { get; set; } = string.Empty;
 
 	[WithDefaultErrorMessage(ErrorMessage = "Override error message")]
@@ -267,7 +267,7 @@ public class NestedObjectModel
 	[WithoutDefaultErrorMessage]
 	public string CustomValidationWithoutDefaultMessage { get; set; } = string.Empty;
 
-	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manuall")]
+	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manually")]
 	public string CustomValidationWithoutDefaultMessageSetManually { get; set; } = string.Empty;
 
 	[WithDefaultErrorMessage(ErrorMessage = "Override error message")]

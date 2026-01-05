@@ -1795,7 +1795,7 @@
 					},
 					"customValidationWithoutDefaultMessageSetManually": {
 						"type": "string",
-						"description": "Validation rules:\n- Setting error message manuall"
+						"description": "Validation rules:\n- Setting error message manually"
 					},
 					"customValidationWithDefaultMessageOverrideMessage": {
 						"type": "string",
@@ -2048,7 +2048,7 @@
 					},
 					"customValidationWithoutDefaultMessageSetManually": {
 						"type": "string",
-						"description": "Validation rules:\n- Setting error message manuall"
+						"description": "Validation rules:\n- Setting error message manually"
 					},
 					"customValidationWithDefaultMessageOverrideMessage": {
 						"type": "string",
