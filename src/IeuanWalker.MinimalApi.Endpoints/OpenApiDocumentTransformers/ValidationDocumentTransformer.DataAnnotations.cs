@@ -167,7 +167,7 @@ partial class ValidationDocumentTransformer
 	{
 		string propertyName = property.Name;
 		bool isCollection = IsCollectionType(property.PropertyType);
-		
+
 		// Map DataAnnotation attributes to internal ValidationRule types
 		return attribute switch
 		{
@@ -220,23 +220,23 @@ partial class ValidationDocumentTransformer
 	{
 		// Get the underlying type if nullable
 		Type actualType = Nullable.GetUnderlyingType(type) ?? type;
-		
+
 		// String is not considered a collection for our purposes
 		if (actualType == typeof(string))
 		{
 			return false;
 		}
-		
+
 		// Check if it's an array or implements IEnumerable
-		return actualType.IsArray || 
-		       (actualType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(actualType));
+		return actualType.IsArray ||
+			   (actualType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(actualType));
 	}
 
 	static Validation.StringLengthRule CreateStringLengthRule(string propertyName, int? minLength, int? maxLength, bool isCollection)
 	{
 		// Generate appropriate error message based on whether it's a collection or string
 		string? errorMessage = null;
-		
+
 		if (minLength.HasValue && maxLength.HasValue)
 		{
 			errorMessage = isCollection
@@ -255,7 +255,7 @@ partial class ValidationDocumentTransformer
 				? $"Must be {maxLength.Value} items or fewer"
 				: $"Must be {maxLength.Value} characters or fewer";
 		}
-		
+
 		return new Validation.StringLengthRule(propertyName, minLength, maxLength, errorMessage);
 	}
 

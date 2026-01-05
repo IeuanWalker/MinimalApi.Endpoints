@@ -22,7 +22,7 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 		// but for most practical tests we expect validation failures.
 		// The purpose is to test OpenAPI documentation, not actual endpoint behavior.
 		// So we're testing that validation IS working by expecting BadRequest for incomplete data.
-		
+
 		RequestModel request = new()
 		{
 			RequiredString = "test",
