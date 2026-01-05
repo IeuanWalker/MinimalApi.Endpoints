@@ -42,7 +42,10 @@ public static class OpenApiExtensions
 	[ExcludeFromCodeCoverage]
 	public static OpenApiOptions AddWithValidatation(this OpenApiOptions options, bool autoDocumentFluentValdation = true, bool appendRulesToPropertyDescription = true)
 	{
-		// Add enum transformer first so enum schemas are enriched before validation processing
+		// Add type transformer first to ensure all property types are correctly documented
+		options.AddDocumentTransformer<TypeDocumentTransformer>();
+
+		// Add enum transformer second so enum schemas are enriched before validation processing
 		options.AddDocumentTransformer<EnumSchemaTransformer>();
 
 		// Add unified validation transformer that handles both FluentValidation and WithValidation
