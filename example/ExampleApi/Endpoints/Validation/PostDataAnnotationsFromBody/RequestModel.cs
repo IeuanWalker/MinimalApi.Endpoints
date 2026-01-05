@@ -9,7 +9,7 @@ namespace ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody;
 public class RequestModel
 {
 	[Required]
-	[StringLength(50, MinimumLength = 3)]
+	[StringLength(maximumLength: 50, MinimumLength = 3)]
 	[MinLength(3)]
 	[MaxLength(100)]
 	[RegularExpression(@"^[a-zA-Z0-9]+$")]

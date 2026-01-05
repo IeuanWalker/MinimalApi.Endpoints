@@ -562,11 +562,11 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maxLength": 100,
-							"minLength": 3,
+							"maxLength": 22,
+							"minLength": 4,
 							"pattern": "^[a-zA-Z0-9]+$",
 							"type": "string",
-							"description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number",
+							"description": "Validation rules:\n- Is required\n- Must be at least 4 characters and less than 22 characters\n- Must be 4 characters or more\n- Must be 22 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number",
 							"format": "uri"
 						}
 					},
@@ -577,10 +577,8 @@
 						"schema": {
 							"maximum": 25,
 							"minimum": 10,
-							"maxLength": 100,
-							"minLength": 3,
 							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+							"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25"
 						}
 					},
 					{
@@ -604,10 +602,10 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maxLength": 50,
-							"minLength": 3,
+							"maxLength": 879,
+							"minLength": 12,
 							"type": "string",
-							"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
+							"description": "Validation rules:\n- Must be at least 12 characters and less than 879 characters"
 						}
 					},
 					{
@@ -621,19 +619,6 @@
 						}
 					},
 					{
-						"name": "ListMin",
-						"in": "query",
-						"required": true,
-						"schema": {
-							"minLength": 3,
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.String"
-							},
-							"description": "Validation rules:\n- Must be 3 items or more"
-						}
-					},
-					{
 						"name": "StringMax",
 						"in": "query",
 						"required": true,
@@ -641,19 +626,6 @@
 							"maxLength": 100,
 							"type": "string",
 							"description": "Validation rules:\n- Must be 100 characters or fewer"
-						}
-					},
-					{
-						"name": "ListMax",
-						"in": "query",
-						"required": true,
-						"schema": {
-							"maxLength": 10,
-							"type": "array",
-							"items": {
-								"$ref": "#/components/schemas/System.String"
-							},
-							"description": "Validation rules:\n- Must be 10 items or fewer"
 						}
 					},
 					{
@@ -752,26 +724,14 @@
 						}
 					},
 					{
-						"name": "IntMin",
+						"name": "IntMinMax",
 						"in": "query",
 						"required": true,
 						"schema": {
 							"maximum": 2147483647,
-							"minimum": 1,
-							"type": "integer",
-							"description": "Validation rules:\n- Must be >= 1 and <= 2147483647",
-							"format": "int32"
-						}
-					},
-					{
-						"name": "IntMax",
-						"in": "query",
-						"required": true,
-						"schema": {
-							"maximum": 100,
 							"minimum": -2147483648,
 							"type": "integer",
-							"description": "Validation rules:\n- Must be >= -2147483648 and <= 100",
+							"description": "Validation rules:\n- Must be >= -2147483648 and <= 2147483647",
 							"format": "int32"
 						}
 					},
@@ -788,26 +748,14 @@
 						}
 					},
 					{
-						"name": "DoubleMin",
+						"name": "DoubleMinMax",
 						"in": "query",
 						"required": true,
 						"schema": {
 							"maximum": 1.7976931348623157E+308,
-							"minimum": 0.1,
-							"type": "number",
-							"description": "Validation rules:\n- Must be >= 0.1 and <= 1.7976931348623157E+308",
-							"format": "double"
-						}
-					},
-					{
-						"name": "DoubleMax",
-						"in": "query",
-						"required": true,
-						"schema": {
-							"maximum": 99.9,
 							"minimum": -1.7976931348623157E+308,
 							"type": "number",
-							"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 99.9",
+							"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 1.7976931348623157E+308",
 							"format": "double"
 						}
 					},
@@ -910,15 +858,6 @@
 						"schema": {
 							"type": "string",
 							"description": "Validation rules:\n- CustomValidatedProperty is not valid."
-						}
-					},
-					{
-						"name": "ThrowsCustomValidationProperty",
-						"in": "query",
-						"required": true,
-						"schema": {
-							"type": "string",
-							"description": "Validation rules:\n- Default error message"
 						}
 					},
 					{

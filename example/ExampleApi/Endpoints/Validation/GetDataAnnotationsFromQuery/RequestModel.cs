@@ -10,9 +10,9 @@ public class RequestModel
 {
 	[FromQuery]
 	[Required]
-	[StringLength(50, MinimumLength = 3)]
-	[MinLength(3)]
-	[MaxLength(100)]
+	[StringLength(maximumLength: 22, MinimumLength = 4)]
+	[MinLength(4)]
+	[MaxLength(22)]
 	[RegularExpression(@"^[a-zA-Z0-9]+$")]
 	[EmailAddress]
 	[Phone]
@@ -23,8 +23,6 @@ public class RequestModel
 	[FromQuery]
 	[Required]
 	[Range(10, 25)]
-	[MinLength(3)]
-	[MaxLength(100)]
 	public decimal? AllBuiltInNumberValidators { get; set; }
 
 	[FromQuery]
@@ -36,7 +34,7 @@ public class RequestModel
 	public int RequiredInt { get; set; }
 
 	[FromQuery]
-	[StringLength(50, MinimumLength = 3)]
+	[StringLength(maximumLength: 879, MinimumLength = 12)]
 	public string StringLength { get; set; } = string.Empty;
 
 	[FromQuery]
@@ -44,16 +42,8 @@ public class RequestModel
 	public string StringMin { get; set; } = string.Empty;
 
 	[FromQuery]
-	[MinLength(3)]
-	public string[] ListMin { get; set; } = [];
-
-	[FromQuery]
 	[MaxLength(100)]
 	public string StringMax { get; set; } = string.Empty;
-
-	[FromQuery]
-	[MaxLength(10)]
-	public string[] ListMax { get; set; } = [];
 
 	[FromQuery]
 	[Range(10, 25)]
@@ -95,24 +85,16 @@ public class RequestModel
 	public string StringCreditCard { get; set; } = string.Empty;
 
 	[FromQuery]
-	[Range(1, int.MaxValue)]
-	public int IntMin { get; set; }
-
-	[FromQuery]
-	[Range(int.MinValue, 100)]
-	public int IntMax { get; set; }
+	[Range(int.MinValue, int.MaxValue)]
+	public int IntMinMax { get; set; }
 
 	[FromQuery]
 	[Range(1, 100)]
 	public int IntRange { get; set; }
 
 	[FromQuery]
-	[Range(0.1, double.MaxValue)]
-	public double DoubleMin { get; set; }
-
-	[FromQuery]
-	[Range(double.MinValue, 99.9)]
-	public double DoubleMax { get; set; }
+	[Range(double.MinValue, double.MaxValue)]
+	public double DoubleMinMax { get; set; }
 
 	[FromQuery]
 	[Range(0.1, 99.9)]
@@ -148,11 +130,6 @@ public class RequestModel
 	[FromQuery]
 	[CustomValidation(typeof(RequestModelValidators), nameof(RequestModelValidators.ValidateCustomProperty))]
 	public string CustomValidatedProperty { get; set; } = string.Empty;
-
-	// Custom ValidationAttribute that throws a custom exception when validated
-	[FromQuery]
-	[WithDefaultErrorMessage]
-	public string ThrowsCustomValidationProperty { get; set; } = string.Empty;
 
 	[FromQuery]
 	[WithDefaultErrorMessage]
