@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5558/"
+      "url": "http://localhost:5566/"
     }
   ],
   "paths": {
@@ -610,13 +610,309 @@
         }
       }
     },
+    "/api/v1/TypeExamples/FromQuery": {
+      "get": {
+        "tags": [
+          "Type Examples"
+        ],
+        "summary": "Type Examples From Query",
+        "description": "Demonstrates all primitive types handled by TypeDocumentTransformer as query parameters: string, int, long, decimal, double, float, bool, DateTime, DateOnly, TimeOnly, Guid, and arrays",
+        "operationId": "get_TypeExamplesFromQuery_14",
+        "parameters": [
+          {
+            "name": "StringValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "NullableStringValue",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IntValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "NullableIntValue",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "LongValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "NullableLongValue",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "DecimalValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "NullableDecimalValue",
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "DoubleValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "NullableDoubleValue",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "FloatValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          {
+            "name": "NullableFloatValue",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          {
+            "name": "BoolValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "NullableBoolValue",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "DateTimeValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "NullableDateTimeValue",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "DateOnlyValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "NullableDateOnlyValue",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "TimeOnlyValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "time"
+            }
+          },
+          {
+            "name": "NullableTimeOnlyValue",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "time"
+            }
+          },
+          {
+            "name": "GuidValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "NullableGuidValue",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "StringArray",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "IntArray",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "DoubleArray",
+            "in": "query",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.GetFromQuery.ResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/TypeExamples/FromBody": {
+      "post": {
+        "tags": [
+          "Type Examples"
+        ],
+        "summary": "Type Examples From Body",
+        "description": "Demonstrates all primitive types handled by TypeDocumentTransformer: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, and nested objects",
+        "operationId": "post_TypeExamplesFromBody_15",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.ResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/TypeExamples/FromForm": {
+      "post": {
+        "tags": [
+          "Type Examples"
+        ],
+        "summary": "Type Examples From Form",
+        "description": "Demonstrates all primitive types handled by TypeDocumentTransformer as form data: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, nested objects, and file uploads (IFormFile, IFormFileCollection)",
+        "operationId": "post_TypeExamplesFromForm_16",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.ResponseModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/validation/DataAnnotations/FromQuery": {
       "get": {
         "tags": [
           "Validation"
         ],
         "summary": "DataAnnotationsFromQuery",
-        "operationId": "get_ValidationDataAnnotationsFromQuery_14",
+        "operationId": "get_ValidationDataAnnotationsFromQuery_17",
         "parameters": [
           {
             "name": "AllBuiltInStringValidators",
@@ -959,7 +1255,7 @@
           "Validation"
         ],
         "summary": "Test Endpoint A with Name property validation",
-        "operationId": "get_ValidationEndpointA_15",
+        "operationId": "get_ValidationEndpointA_18",
         "parameters": [
           {
             "name": "Name",
@@ -992,7 +1288,7 @@
           "Validation"
         ],
         "summary": "Test Endpoint B with Name property validation",
-        "operationId": "get_ValidationEndpointB_16",
+        "operationId": "get_ValidationEndpointB_19",
         "parameters": [
           {
             "name": "Name",
@@ -1025,7 +1321,7 @@
           "Validation"
         ],
         "summary": "FluentValidationFromQuery",
-        "operationId": "get_ValidationFluentValidationFromQuery_17",
+        "operationId": "get_ValidationFluentValidationFromQuery_20",
         "parameters": [
           {
             "name": "StringMin",
@@ -1297,7 +1593,7 @@
           "Validation"
         ],
         "summary": "DataAnnotationsFromBody",
-        "operationId": "post_ValidationDataValidation_18",
+        "operationId": "post_ValidationDataValidation_21",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1320,7 +1616,7 @@
           "Validation"
         ],
         "summary": "FluentValidationFromBody",
-        "operationId": "post_ValidationFluentValidation_19",
+        "operationId": "post_ValidationFluentValidation_22",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1350,7 +1646,7 @@
           "Validation"
         ],
         "summary": "FluentValidationFromForm",
-        "operationId": "post_ValidationFluentValidationFromForm_20",
+        "operationId": "post_ValidationFluentValidationFromForm_23",
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1386,7 +1682,7 @@
           "Validation"
         ],
         "summary": "ManualWithValidation",
-        "operationId": "post_ValidationWithValidation_21",
+        "operationId": "post_ValidationWithValidation_24",
         "requestBody": {
           "content": {
             "application/json": {
@@ -1409,7 +1705,7 @@
           "Validation"
         ],
         "summary": "WithValidationAlterAndRemove",
-        "operationId": "post_ValidationWithValidationAlterAndRemove_22",
+        "operationId": "post_ValidationWithValidationAlterAndRemove_25",
         "requestBody": {
           "content": {
             "multipart/form-data": {
@@ -1663,12 +1959,18 @@
             "format": "binary"
           },
           "readOnlyList1": {
-            "type": "string",
-            "format": "binary"
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
           },
           "readOnlyList2": {
-            "type": "string",
-            "format": "binary"
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
           },
           "fileCollectionList": {
             "type": "string",
@@ -1984,6 +2286,917 @@
           }
         }
       },
+      "ExampleApi.Endpoints.TypeExamples.GetFromQuery.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "providedParametersCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "receivedValues": {
+            "type": "string"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel": {
+        "type": "object",
+        "properties": {
+          "stringValue": {
+            "type": "string"
+          },
+          "nullableStringValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "intValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nullableIntValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int32"
+              }
+            ]
+          },
+          "longValue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nullableLongValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int64"
+              }
+            ]
+          },
+          "shortValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nullableShortValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int32"
+              }
+            ]
+          },
+          "byteValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nullableByteValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int32"
+              }
+            ]
+          },
+          "decimalValue": {
+            "type": "number"
+          },
+          "nullableDecimalValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "doubleValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "nullableDoubleValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "number",
+                "format": "double"
+              }
+            ]
+          },
+          "floatValue": {
+            "type": "number",
+            "format": "float"
+          },
+          "nullableFloatValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "number",
+                "format": "float"
+              }
+            ]
+          },
+          "boolValue": {
+            "type": "boolean"
+          },
+          "nullableBoolValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "dateTimeValue": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nullableDateTimeValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ]
+          },
+          "dateTimeOffsetValue": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nullableDateTimeOffsetValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ]
+          },
+          "dateOnlyValue": {
+            "type": "string",
+            "format": "date"
+          },
+          "nullableDateOnlyValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "date"
+              }
+            ]
+          },
+          "timeOnlyValue": {
+            "type": "string",
+            "format": "time"
+          },
+          "nullableTimeOnlyValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "time"
+              }
+            ]
+          },
+          "guidValue": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nullableGuidValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "uuid"
+              }
+            ]
+          },
+          "stringList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nullableStringList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "intList": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "nullableIntList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              ]
+            }
+          },
+          "doubleList": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "nullableDoubleList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "number",
+                  "format": "double"
+                }
+              ]
+            }
+          },
+          "intArray": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "nullableIntArray": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              ]
+            }
+          },
+          "readOnlyStringList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nullableReadOnlyStringList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "intCollection": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "nullableIntCollection": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              ]
+            }
+          },
+          "singleFile": {
+            "type": "string",
+            "format": "binary"
+          },
+          "readOnlyList1": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "readOnlyList2": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "singleFileNullable": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "binary"
+              }
+            ]
+          },
+          "readOnlyList1Nullable": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string",
+                  "format": "binary"
+                }
+              ]
+            }
+          },
+          "readOnlyList2Nullable": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string",
+                  "format": "binary"
+                }
+              ]
+            }
+          },
+          "fileCollectionList": {
+            "type": "string",
+            "format": "binary"
+          },
+          "nestedObjectValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
+              }
+            ]
+          },
+          "nestedObjectList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ExampleApi.Endpoints.TypeExamples.PostFromBody.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "processedPropertiesCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "value": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel": {
+        "type": "object",
+        "properties": {
+          "stringValue": {
+            "type": "string"
+          },
+          "nullableStringValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "intValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nullableIntValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int32"
+              }
+            ]
+          },
+          "longValue": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "nullableLongValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int64"
+              }
+            ]
+          },
+          "shortValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nullableShortValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int32"
+              }
+            ]
+          },
+          "byteValue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nullableByteValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "integer",
+                "format": "int32"
+              }
+            ]
+          },
+          "decimalValue": {
+            "type": "number"
+          },
+          "nullableDecimalValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "number"
+              }
+            ]
+          },
+          "doubleValue": {
+            "type": "number",
+            "format": "double"
+          },
+          "nullableDoubleValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "number",
+                "format": "double"
+              }
+            ]
+          },
+          "floatValue": {
+            "type": "number",
+            "format": "float"
+          },
+          "nullableFloatValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "number",
+                "format": "float"
+              }
+            ]
+          },
+          "boolValue": {
+            "type": "boolean"
+          },
+          "nullableBoolValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "boolean"
+              }
+            ]
+          },
+          "dateTimeValue": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nullableDateTimeValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ]
+          },
+          "dateTimeOffsetValue": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "nullableDateTimeOffsetValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "date-time"
+              }
+            ]
+          },
+          "dateOnlyValue": {
+            "type": "string",
+            "format": "date"
+          },
+          "nullableDateOnlyValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "date"
+              }
+            ]
+          },
+          "timeOnlyValue": {
+            "type": "string",
+            "format": "time"
+          },
+          "nullableTimeOnlyValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "time"
+              }
+            ]
+          },
+          "guidValue": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nullableGuidValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "uuid"
+              }
+            ]
+          },
+          "stringList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nullableStringList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "intList": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "nullableIntList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              ]
+            }
+          },
+          "doubleList": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          "nullableDoubleList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "number",
+                  "format": "double"
+                }
+              ]
+            }
+          },
+          "intArray": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "nullableIntArray": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              ]
+            }
+          },
+          "readOnlyStringList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "nullableReadOnlyStringList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "intCollection": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "nullableIntCollection": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              ]
+            }
+          },
+          "singleFile": {
+            "type": "string",
+            "format": "binary"
+          },
+          "readOnlyList1": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "readOnlyList2": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "binary"
+            }
+          },
+          "singleFileNullable": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "string",
+                "format": "binary"
+              }
+            ]
+          },
+          "readOnlyList1Nullable": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string",
+                  "format": "binary"
+                }
+              ]
+            }
+          },
+          "readOnlyList2Nullable": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "string",
+                  "format": "binary"
+                }
+              ]
+            }
+          },
+          "fileCollectionList": {
+            "type": "string",
+            "format": "binary"
+          },
+          "nestedObjectValue": {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
+              }
+            ]
+          },
+          "nestedObjectList": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
+                  }
+                }
+              ]
+            }
+          }
+        }
+      },
+      "ExampleApi.Endpoints.TypeExamples.PostFromForm.ResponseModel": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "processedPropertiesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uploadedFilesCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.StatusEnum": {
         "type": "integer",
         "description": "Enum: Success, Failure",
@@ -2184,38 +3397,70 @@
           },
           "listStringMinCount": {
             "minLength": 1,
-            "type": "string",
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Validation rules:\n- Must be 1 items or more"
+            },
             "description": "Validation rules:\n- Must be 1 items or more"
           },
           "listStringMaxCount": {
             "maxLength": 10,
-            "type": "string",
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "type": "string",
+              "description": "Validation rules:\n- Must be 10 items or fewer"
+            },
             "description": "Validation rules:\n- Must be 10 items or fewer"
           },
           "listStringRangeCount": {
             "maxLength": 10,
             "minLength": 1,
-            "type": "string",
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "minLength": 1,
+              "type": "string",
+              "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
+            },
             "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
           },
           "listIntMinCount": {
             "minLength": 1,
-            "type": "integer",
-            "description": "Validation rules:\n- Must be 1 items or more",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "integer",
+              "description": "Validation rules:\n- Must be 1 items or more",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must be 1 items or more"
           },
           "listIntMaxCount": {
             "maxLength": 10,
-            "type": "integer",
-            "description": "Validation rules:\n- Must be 10 items or fewer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "type": "integer",
+              "description": "Validation rules:\n- Must be 10 items or fewer",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must be 10 items or fewer"
           },
           "listIntRangeCount": {
             "maxLength": 10,
             "minLength": 1,
-            "type": "integer",
-            "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "minLength": 1,
+              "type": "integer",
+              "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
           },
           "customValidatedProperty": {
             "type": "string",
@@ -2428,38 +3673,70 @@
           },
           "listStringMinCount": {
             "minLength": 1,
-            "type": "string",
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "string",
+              "description": "Validation rules:\n- Must be 1 items or more"
+            },
             "description": "Validation rules:\n- Must be 1 items or more"
           },
           "listStringMaxCount": {
             "maxLength": 10,
-            "type": "string",
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "type": "string",
+              "description": "Validation rules:\n- Must be 10 items or fewer"
+            },
             "description": "Validation rules:\n- Must be 10 items or fewer"
           },
           "listStringRangeCount": {
             "maxLength": 10,
             "minLength": 1,
-            "type": "string",
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "minLength": 1,
+              "type": "string",
+              "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
+            },
             "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
           },
           "listIntMinCount": {
             "minLength": 1,
-            "type": "integer",
-            "description": "Validation rules:\n- Must be 1 items or more",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "minLength": 1,
+              "type": "integer",
+              "description": "Validation rules:\n- Must be 1 items or more",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must be 1 items or more"
           },
           "listIntMaxCount": {
             "maxLength": 10,
-            "type": "integer",
-            "description": "Validation rules:\n- Must be 10 items or fewer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "type": "integer",
+              "description": "Validation rules:\n- Must be 10 items or fewer",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must be 10 items or fewer"
           },
           "listIntRangeCount": {
             "maxLength": 10,
             "minLength": 1,
-            "type": "integer",
-            "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "maxLength": 10,
+              "minLength": 1,
+              "type": "integer",
+              "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
           },
           "customValidatedProperty": {
             "type": "string",
@@ -2478,17 +3755,23 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "oneOf": [
-              {
-                "nullable": true
-              },
-              {
-                "maxLength": 10,
-                "minLength": 0,
-                "description": "Validation rules:\n- Must be 0 items or more\n- Must be 10 items or fewer",
-                "nullable": true
-              }
-            ]
+            "maxLength": 10,
+            "minLength": 0,
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
+                  }
+                }
+              ]
+            },
+            "description": "Validation rules:\n- Must be 0 items or more\n- Must be 10 items or fewer"
           },
           "customValidationWithDefaultMessage": {
             "type": "string",
@@ -2571,31 +3854,55 @@
             "format": "double"
           },
           "listStringMinCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at least 1 item."
+            },
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at most 10 items."
+            },
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            },
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at least 1 item.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at least 1 item.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listIntMaxCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at most 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at most 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listIntRangeCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain between 1 and 10 items."
           }
         }
       },
@@ -2667,31 +3974,55 @@
             "format": "double"
           },
           "listStringMinCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at least 1 item."
+            },
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at most 10 items."
+            },
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            },
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at least 1 item.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at least 1 item.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listIntMaxCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at most 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at most 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listIntRangeCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "nestedObject": {
             "allOf": [
@@ -2702,17 +4033,20 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "oneOf": [
-              {
-                "nullable": true
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
+                  }
                 }
-              }
-            ]
+              ]
+            }
           },
           "allBuiltInStringValidators": {
             "oneOf": [
@@ -2853,31 +4187,55 @@
             "format": "double"
           },
           "listStringMinCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at least 1 item."
+            },
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at most 10 items."
+            },
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            },
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at least 1 item.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at least 1 item.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listIntMaxCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at most 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at most 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listIntRangeCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain between 1 and 10 items."
           }
         }
       },
@@ -2949,31 +4307,55 @@
             "format": "double"
           },
           "listStringMinCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at least 1 item."
+            },
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at most 10 items."
+            },
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            },
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at least 1 item.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at least 1 item.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listIntMaxCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at most 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at most 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listIntRangeCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "nestedObject": {
             "allOf": [
@@ -2984,17 +4366,20 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "oneOf": [
-              {
-                "nullable": true
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
+                  }
                 }
-              }
-            ]
+              ]
+            }
           },
           "allBuiltInStringValidators": {
             "oneOf": [
@@ -3112,25 +4497,43 @@
             "format": "double"
           },
           "listStringMinCount": {
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "listStringMaxCount": {
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "listStringRangeCount": {
-            "type": "string"
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "listIntMinCount": {
-            "type": "integer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           },
           "listIntMaxCount": {
-            "type": "integer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           },
           "listIntRangeCount": {
-            "type": "integer",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         }
       },
@@ -3193,31 +4596,55 @@
             "format": "double"
           },
           "listStringMinCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at least 1 item."
+            },
             "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listStringMaxCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain at most 10 items."
+            },
             "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listStringRangeCount": {
-            "type": "string",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items."
+            },
             "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "listIntMinCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at least 1 item.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at least 1 item.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at least 1 item."
           },
           "listIntMaxCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain at most 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain at most 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain at most 10 items."
           },
           "listIntRangeCount": {
-            "type": "integer",
-            "description": "Validation rules:\n- Must contain between 1 and 10 items.",
-            "format": "int32"
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "description": "Validation rules:\n- Must contain between 1 and 10 items.",
+              "format": "int32"
+            },
+            "description": "Validation rules:\n- Must contain between 1 and 10 items."
           },
           "allRules": {
             "maximum": 100,
@@ -3240,17 +4667,20 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "oneOf": [
-              {
-                "nullable": true
-              },
-              {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "nullable": true
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
+                  }
                 }
-              }
-            ]
+              ]
+            }
           }
         }
       },
@@ -3381,6 +4811,23 @@
       "System.Boolean": {
         "type": "boolean"
       },
+      "System.Byte": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint8"
+      },
+      "System.Collections.Generic.Dictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "object",
+        "additionalProperties": {
+          "$ref": "#/components/schemas/System.String"
+        }
+      },
+      "System.Collections.Generic.ICollection`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "type": "integer",
+          "format": "int32"
+        }
+      },
       "System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "type": "object",
         "additionalProperties": {
@@ -3400,10 +4847,28 @@
           "format": "binary"
         }
       },
+      "System.Collections.Generic.IReadOnlyList`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
       "System.Collections.Generic.List`1[[ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo"
+        }
+      },
+      "System.Collections.Generic.List`1[[ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
+        }
+      },
+      "System.Collections.Generic.List`1[[ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
         }
       },
       "System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
@@ -3432,6 +4897,13 @@
           "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
         }
       },
+      "System.Collections.Generic.List`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "format": "double"
+        }
+      },
       "System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "type": "array",
         "items": {
@@ -3453,9 +4925,32 @@
         "type": "string",
         "format": "date-time"
       },
+      "System.DateTimeOffset": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Decimal": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+        "format": "double"
+      },
       "System.Double": {
         "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
         "format": "double"
+      },
+      "System.Double[]": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Int16": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int16"
       },
       "System.Int32": {
         "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -3467,6 +4962,10 @@
           "type": "integer",
           "format": "int32"
         }
+      },
+      "System.Int64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int64"
       },
       "System.Nullable`1[[ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
         "type": "integer",
@@ -3515,7 +5014,19 @@
       "System.Nullable`1[[System.Boolean, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "type": "boolean"
       },
+      "System.Nullable`1[[System.Byte, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint8"
+      },
+      "System.Nullable`1[[System.DateOnly, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date"
+      },
       "System.Nullable`1[[System.DateTime, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Nullable`1[[System.DateTimeOffset, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "type": "string",
         "format": "date-time"
       },
@@ -3523,9 +5034,37 @@
         "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
         "format": "double"
       },
+      "System.Nullable`1[[System.Double, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Nullable`1[[System.Guid, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Nullable`1[[System.Int16, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int16"
+      },
       "System.Nullable`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
         "pattern": "^-?(?:0|[1-9]\\d*)$",
         "format": "int32"
+      },
+      "System.Nullable`1[[System.Int64, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int64"
+      },
+      "System.Nullable`1[[System.Single, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "float"
+      },
+      "System.Nullable`1[[System.TimeOnly, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
+        "type": "string",
+        "format": "time"
+      },
+      "System.Single": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "float"
       },
       "System.String": {
         "type": "string"
@@ -3535,6 +5074,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "System.TimeOnly": {
+        "type": "string",
+        "format": "time"
       },
       "System.Uri": {
         "type": "string",
@@ -3554,6 +5097,9 @@
     },
     {
       "name": "Todos"
+    },
+    {
+      "name": "Type Examples"
     },
     {
       "name": "Validation"
