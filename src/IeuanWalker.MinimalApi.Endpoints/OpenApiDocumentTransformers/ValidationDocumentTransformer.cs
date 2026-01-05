@@ -765,10 +765,20 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (originalOpenApiSchema?.Items is not null)
 		{
 			newInlineSchema.Items = InlinePrimitiveTypeReference(originalOpenApiSchema.Items, document);
+			// Ensure type is set to array when Items is present
+			if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+			{
+				newInlineSchema.Type = JsonSchemaType.Array;
+			}
 		}
 		else if (resolvedReferenceSchema?.Items is not null)
 		{
 			newInlineSchema.Items = InlinePrimitiveTypeReference(resolvedReferenceSchema.Items, document);
+			// Ensure type is set to array when Items is present
+			if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+			{
+				newInlineSchema.Type = JsonSchemaType.Array;
+			}
 		}
 		else if (isArrayType && actualSchema is OpenApiSchemaReference arraySchemaRef)
 		{
@@ -788,6 +798,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					// Create a reference to the element type schema (will be inlined if it's a primitive)
 					OpenApiSchemaReference elementRef = new(elementType, document, null);
 					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+					// Ensure type is set to array when Items is set
+					if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+					{
+						newInlineSchema.Type = JsonSchemaType.Array;
+					}
 				}
 			}
 		}
@@ -809,6 +824,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					// Create a reference to the element type schema (will be inlined if it's a primitive)
 					OpenApiSchemaReference elementRef = new(elementType, document, null);
 					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+					// Ensure type is set to array when Items is set
+					if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+					{
+						newInlineSchema.Type = JsonSchemaType.Array;
+					}
 				}
 			}
 		}
