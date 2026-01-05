@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace ExampleApi.Endpoints.TypeExamples.PostFromBody;
+namespace ExampleApi.Endpoints.TypeExamples.PostFromForm;
 
 /// <summary>
-/// Request model demonstrating all primitive types handled by TypeDocumentTransformer
+/// Request model demonstrating all primitive types handled by TypeDocumentTransformer (FromForm)
 /// </summary>
 [ExcludeFromCodeCoverage]
 public class RequestModel
@@ -62,7 +62,7 @@ public class RequestModel
 	public ICollection<int> IntCollection { get; set; } = [];
 	public ICollection<int>? NullableIntCollection { get; set; }
 
-	// IFormFile types (Note: These are typically used with FromForm, not FromBody)
+	// IFormFile types (proper use case for FromForm)
 	public IFormFile SingleFile { get; set; } = null!;
 	public IReadOnlyList<IFormFile> ReadOnlyList1 { get; set; } = [];
 	public IReadOnlyList<IFormFile> ReadOnlyList2 { get; set; } = [];
