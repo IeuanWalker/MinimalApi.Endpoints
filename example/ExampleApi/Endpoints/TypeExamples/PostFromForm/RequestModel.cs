@@ -6,7 +6,13 @@ namespace ExampleApi.Endpoints.TypeExamples.PostFromForm;
 /// Request model demonstrating all primitive types handled by TypeDocumentTransformer (FromForm)
 /// </summary>
 [ExcludeFromCodeCoverage]
-public class RequestModel
+public class RequestModel : BaseTests
+{
+	public required List<BaseTests> NestedTests { get; set; }
+}
+
+[ExcludeFromCodeCoverage]
+public class BaseTests
 {
 	// String types
 	public string StringValue { get; set; } = string.Empty;
@@ -79,6 +85,11 @@ public class RequestModel
 	// Nested object
 	public NestedObject? NestedObjectValue { get; set; }
 	public List<NestedObject>? NestedObjectList { get; set; }
+
+	public Uri[] UriArray { get; set; } = [];
+	public Uri[]? UriArrayNullable { get; set; }
+	public required Uri UriValue { get; set; }
+	public Uri? UriValueNullable { get; set; }
 }
 
 /// <summary>

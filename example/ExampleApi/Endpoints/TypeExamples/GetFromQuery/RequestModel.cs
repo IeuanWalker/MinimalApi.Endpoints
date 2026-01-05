@@ -90,4 +90,13 @@ public class RequestModel
 
 	[FromQuery]
 	public double[]? DoubleArray { get; set; }
+
+	[FromQuery]
+	public Uri[] UriArray { get; set; } = [];
+	[FromQuery]
+	public Uri[]? UriArrayNullable { get; set; }
+	[FromQuery]
+	public required Uri UriValue { get; set; }
+	[FromQuery]
+	public Uri? UriValueNullable { get; set; }
 }
