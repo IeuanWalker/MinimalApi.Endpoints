@@ -9,7 +9,7 @@ namespace ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody;
 public class RequestModel
 {
 	[Required]
-	[StringLength(50, MinimumLength = 3)]
+	[StringLength(maximumLength: 50, MinimumLength = 3)]
 	[MinLength(3)]
 	[MaxLength(100)]
 	[RegularExpression(@"^[a-zA-Z0-9]+$")]
@@ -17,8 +17,6 @@ public class RequestModel
 	[Phone]
 	[Url]
 	[CreditCard]
-	[CustomValidation(typeof(RequestModelValidators), nameof(RequestModelValidators.ValidateCustomProperty))]
-	[WithDefaultErrorMessage]
 	public string? AllBuiltInStringValidators { get; set; }
 
 	[Required]
@@ -138,13 +136,16 @@ public class RequestModel
 	[WithoutDefaultErrorMessage]
 	public string CustomValidationWithoutDefaultMessage { get; set; } = string.Empty;
 
-	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manuall")]
+	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manually")]
 	public string CustomValidationWithoutDefaultMessageSetManually { get; set; } = string.Empty;
 
 	[WithDefaultErrorMessage(ErrorMessage = "Override error message")]
 	public string CustomValidationWithDefaultMessageOverrideMessage { get; set; } = string.Empty;
 }
 
+#pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+[ValidatableType]
+#pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 public class NestedObjectModel
 {
 	[Required]
@@ -266,7 +267,7 @@ public class NestedObjectModel
 	[WithoutDefaultErrorMessage]
 	public string CustomValidationWithoutDefaultMessage { get; set; } = string.Empty;
 
-	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manuall")]
+	[WithoutDefaultErrorMessage(ErrorMessage = "Setting error message manually")]
 	public string CustomValidationWithoutDefaultMessageSetManually { get; set; } = string.Empty;
 
 	[WithDefaultErrorMessage(ErrorMessage = "Override error message")]

@@ -98,30 +98,22 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				requiredProperties.Add(propertyKey);
 			}
 
-			// Check if there are any rules other than RequiredRule and DescriptionRule
-			// If only RequiredRule/DescriptionRule exist, we don't need to modify the schema inline
-			// (RequiredRule is handled by adding to required array, DescriptionRule doesn't apply to nested objects)
-			bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
-
-			// Only create inline schema if there are validation rules other than just Required
-			// This preserves $ref for nested objects that only have Required validation
-			// ALSO preserve $ref for enum types - enum properties should reference the enum schema, not inline it
-			if (hasOtherRules)
+			// Create inline schema for all properties with validation rules (including just Required)
+			// This ensures type information is explicit in the schema rather than relying on references
+			if (propertyRules.Any()
+				&& schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 			{
-				if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
+				// Check if this property is a reference to an enum schema OR has inline enum values
+				// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
+				if (IsEnumSchemaReference(propertySchemaInterface, document) || IsInlineEnumSchema(propertySchemaInterface))
 				{
-					// Check if this property is a reference to an enum schema
-					// Enum schemas should NOT be inlined - we preserve the $ref to maintain clean schema structure
-					if (IsEnumSchemaReference(propertySchemaInterface, document))
-					{
-						// Don't inline enum properties - preserve the $ref
-						// EnumRule validation is redundant since the enum schema itself defines valid values
-						continue;
-					}
-
-					// Create inline schema with all validation constraints for this property
-					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
+					// Don't modify enum properties - preserve the $ref or inline enum info
+					// EnumRule validation is redundant since the enum schema itself defines valid values
+					continue;
 				}
+
+				// Create inline schema with all validation constraints for this property
+				schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
 			}
 		}
 
@@ -129,6 +121,26 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (requiredProperties.Count > 0)
 		{
 			schema.Required = new HashSet<string>(requiredProperties);
+		}
+
+		// Inline primitive type references for ALL properties (including those without validation rules)
+		// This ensures explicit types in OpenAPI documentation instead of requiring clients to resolve $ref links
+		foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
+		{
+			// Skip properties we already processed (they have validation rules)
+			if (rulesByProperty.Any(g => g.Key.ToCamelCase() == property.Key))
+			{
+				continue;
+			}
+
+			// Skip enum properties - preserve the $ref or inline enum info
+			if (IsEnumSchemaReference(property.Value, document) || IsInlineEnumSchema(property.Value))
+			{
+				continue;
+			}
+
+			// Inline primitive type references for better documentation
+			schema.Properties[property.Key] = InlinePrimitiveTypeReference(property.Value, document);
 		}
 	}
 
@@ -235,7 +247,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					.Where(mapping => PathsMatch(pathPattern, mapping.Key))
 					.Select(mapping => mapping.Value)
 					.FirstOrDefault();
-				
+
 				pathMatchCache[pathPattern] = pathRequestType;
 			}
 
@@ -272,6 +284,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					// Match parameter name to property rules (case-insensitive)
 					if (!rulesByProperty.TryGetValue(parameter.Name, out List<Validation.ValidationRule>? propertyRules))
 					{
+						// No validation rules for this parameter, but we should still inline primitive types
+						// for better OpenAPI documentation clarity
+						if (parameter.Schema is not null && !IsEnumSchemaReference(parameter.Schema, document) && !IsInlineEnumSchema(parameter.Schema))
+						{
+							parameter.Schema = InlinePrimitiveTypeReference(parameter.Schema, document);
+						}
 						continue;
 					}
 
@@ -282,24 +300,20 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						parameter.Required = true;
 					}
 
-					// Check if there are any rules other than RequiredRule and DescriptionRule
-					bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
-
-					// Only modify the parameter schema if there are validation rules other than just Required
-					// ALSO preserve $ref for enum types - enum properties should reference the enum schema, not inline it
-					if (hasOtherRules && parameter.Schema is not null)
+					// Create inline schema for all parameters with validation rules (including just Required)
+					// This ensures type information is explicit in the schema rather than relying on references
+					if (propertyRules.Count > 0 && parameter.Schema is not null)
 					{
-						// Check if this parameter is a reference to an enum schema
-						// Enum schemas should NOT be inlined - we preserve the $ref to maintain clean schema structure
-						if (IsEnumSchemaReference(parameter.Schema, document))
+						// Check if this parameter is a reference to an enum schema OR has inline enum values
+						// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
+						if (IsEnumSchemaReference(parameter.Schema, document) || IsInlineEnumSchema(parameter.Schema))
 						{
-							// Don't inline enum properties - preserve the $ref
-							// EnumRule validation is redundant since the enum schema itself defines valid values
+							// Don't modify enum properties - preserve the $ref or inline enum info
 							continue;
 						}
 
 						// Create inline schema with all validation constraints for this parameter
-						parameter.Schema = CreateInlineSchemaWithAllValidation(parameter.Schema, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
+						parameter.Schema = CreateInlineSchemaWithAllValidation(parameter.Schema, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
 					}
 				}
 			}
@@ -361,11 +375,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			// This handles the case where OpenAPI has "v1" but route pattern has "v{version:apiVersion}"
 			// Ensure the route segment is a version placeholder and the OpenAPI segment matches the expected format
 			if (routeSeg.StartsWith("v{") &&
-			    routeSeg.Contains("version", StringComparison.OrdinalIgnoreCase) &&
-			    routeSeg.EndsWith('}') &&
-			    openApiSeg.StartsWith('v') &&
-			    openApiSeg.Length > 1 &&
-			    openApiSeg[1..].All(char.IsDigit))
+				routeSeg.Contains("version", StringComparison.OrdinalIgnoreCase) &&
+				routeSeg.EndsWith('}') &&
+				openApiSeg.StartsWith('v') &&
+				openApiSeg.Length > 1 &&
+				openApiSeg[1..].All(char.IsDigit))
 			{
 				// OpenAPI segment should be exactly in format "v{digit}+" (e.g., "v1", "v2", "v10")
 				// All characters after 'v' must be digits
@@ -379,7 +393,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		return true;
 	}
 
-	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	internal static OpenApiSchema CreateInlineSchemaWithAllValidation(IOpenApiSchema originalSchema, List<Validation.ValidationRule> rules, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription, OpenApiDocument document)
 	{
 		// Check for per-property AppendRulesToPropertyDescription setting (takes precedence over global setting)
 		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRuleToPropertyDescription.HasValue)?.AppendRuleToPropertyDescription;
@@ -392,6 +406,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// We need to preserve this structure when creating the inline schema
 		bool isNullableWrapper = originalOpenApiSchema?.OneOf is not null && originalOpenApiSchema.OneOf.Count > 0;
 		IOpenApiSchema? actualSchema = originalOpenApiSchema;
+		IOpenApiSchema? typeSourceSchema = null; // Schema to extract type info from (may be different from actualSchema)
 
 		if (isNullableWrapper)
 		{
@@ -407,10 +422,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					// Skip minimal schemas that just mark nullability
 					// These typically have no Type set and few/no other properties
-					return schema.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0;
+					// But also look for schemas with maxLength/minLength as those are validation rules
+					return schema.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0 || 
+					       schema.MaxLength.HasValue || schema.MinLength.HasValue ||
+					       schema.Maximum is not null || schema.Minimum is not null;
 				}
 				return false;
 			});
+
+			// Also find any schema reference in the oneOf for type information
+			// (In case actualSchema has validation but type info is in a different oneOf element)
+			typeSourceSchema = originalOpenApiSchema!.OneOf?.FirstOrDefault(s => s is OpenApiSchemaReference);
 
 			// If we found a better schema to work with, update our reference
 			if (actualSchema is not null && actualSchema != originalOpenApiSchema)
@@ -419,16 +441,27 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
+		// If we still don't have an actualSchema but originalSchema is a reference, use it
+		actualSchema ??= originalSchema;
+
 		// If original schema is a reference, we need to get the type from the reference ID
 		JsonSchemaType? referenceType = null;
 		string? referenceFormat = null;
 		bool isNullableReference = false;
+		OpenApiSchema? resolvedReferenceSchema = null;
 
+		// Check actualSchema for reference type info
 		if (actualSchema is OpenApiSchemaReference schemaRef)
 		{
 			string? refId = schemaRef.Reference?.Id;
 			if (refId is not null)
 			{
+				// Try to resolve the reference to get the actual schema
+				if (document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? referencedSchema) == true)
+				{
+					resolvedReferenceSchema = referencedSchema as OpenApiSchema;
+				}
+
 				// Check if this is a nullable reference (System.Nullable`1[[...]])
 				if (refId.Contains("System.Nullable`1"))
 				{
@@ -436,7 +469,18 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					isNullableReference = true;
 				}
 
-				if (refId.Contains("System.String"))
+				// Check for array types (e.g., System.String[], System.Int32[])
+				if (refId.EndsWith("[]"))
+				{
+					referenceType = JsonSchemaType.Array;
+				}
+				else if (refId.Contains("System.Collections.Generic.List`1") ||
+						 refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+						 refId.Contains("System.Collections.Generic.ICollection`1"))
+				{
+					referenceType = JsonSchemaType.Array;
+				}
+				else if (refId.Contains("System.String") && !refId.Contains("[]"))
 				{
 					referenceType = JsonSchemaType.String;
 				}
@@ -467,6 +511,103 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
+		// Also check typeSourceSchema if it's different from actualSchema (for nullable types with validation)
+		if (typeSourceSchema is not null && typeSourceSchema != actualSchema && typeSourceSchema is OpenApiSchemaReference typeSrcRef)
+		{
+			string? refId = typeSrcRef.Reference?.Id;
+			if (refId is not null && !referenceType.HasValue)
+			{
+				// Check for array types in the typeSourceSchema
+				if (refId.EndsWith("[]"))
+				{
+					referenceType = JsonSchemaType.Array;
+				}
+				else if (refId.Contains("System.Collections.Generic.List`1") ||
+						 refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+						 refId.Contains("System.Collections.Generic.ICollection`1"))
+				{
+					referenceType = JsonSchemaType.Array;
+				}
+			}
+		}
+
+
+		// Check if actualSchema is a reference to a custom type (not a System.* primitive)
+		// If so, we should preserve the reference and only add validation description
+		bool isCustomTypeReference = false;
+		OpenApiSchemaReference? customTypeRef = null;
+		if (actualSchema is OpenApiSchemaReference schemaRef2)
+		{
+			string? refId = schemaRef2.Reference?.Id;
+			if (refId is not null && !refId.StartsWith("System."))
+			{
+				// This is a custom type reference - preserve it
+				isCustomTypeReference = true;
+				customTypeRef = schemaRef2;
+			}
+		}
+
+		// For custom type references, preserve the $ref and only add validation description
+		if (isCustomTypeReference && customTypeRef is not null)
+		{
+			// Extract custom description from DescriptionRule if present
+			string? customDescription = rules
+				.OfType<Validation.DescriptionRule>()
+				.FirstOrDefault()?.Description;
+
+			// Collect only applicable rule descriptions (RequiredRule for custom type references)
+			List<string> ruleDescriptions = [];
+			if (effectiveListRulesInDescription)
+			{
+				foreach (Validation.RequiredRule _ in rules.OfType<Validation.RequiredRule>())
+				{
+					ruleDescriptions.Add("Is required");
+				}
+			}
+
+			// Build the complete description
+			List<string> descriptionParts = [];
+
+			if (!string.IsNullOrEmpty(customDescription))
+			{
+				descriptionParts.Add(customDescription);
+			}
+
+			if (appendRulesToPropertyDescription && ruleDescriptions.Count > 0 && effectiveListRulesInDescription)
+			{
+				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Distinct().Select(msg => $"- {msg}"));
+				descriptionParts.Add(rulesSection);
+			}
+
+			// For custom type references, we need to check if it's an enum and enrich with values
+			string? refId2 = customTypeRef.Reference?.Id;
+			if (refId2 is not null
+				&& document.Components?.Schemas?.TryGetValue(refId2, out IOpenApiSchema? referencedSchema2) == true
+				&& referencedSchema2 is OpenApiSchema refSchema
+				&& refSchema.Enum?.Count > 0)
+			{
+				// This is an enum type - create an inline schema with enum values
+				OpenApiSchema enumInlineSchema = new()
+				{
+					Type = refSchema.Type,
+					Format = refSchema.Format,
+					Enum = refSchema.Enum,
+					Extensions = refSchema.Extensions,
+					Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : refSchema.Description
+				};
+				return enumInlineSchema;
+			}
+
+			// Not an enum - just return the reference with updated description
+			// We cannot modify OpenApiSchemaReference, so return a schema with AllOf containing the reference
+			OpenApiSchema refWrapperSchema = new()
+			{
+				AllOf = [customTypeRef],
+				Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : null
+			};
+
+			return refWrapperSchema;
+		}
 
 		// Check if this is a complex object (has AllOf for schema references or has Properties for inline object definitions)
 		// Complex objects should preserve their structure and only add validation descriptions
@@ -525,26 +666,72 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// For simple properties, create a new inline schema with all validation rules
-		// Get the type from the first rule (all rules for same property should have same type)
-		JsonSchemaType? schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
-		string? format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+		// Strategy:
+		// - For array types: prioritize schema type to preserve array structure
+		// - For other types: prioritize validation rules type, then schema type
+		JsonSchemaType? schemaType = null;
+		string? format = null;
 
-		// If no type was determined from rules, try to get it from the original schema or reference
-		if (!schemaType.HasValue)
+		// Check if this is an array type based on resolved schema or reference
+		bool isArrayType = resolvedReferenceSchema?.Type == JsonSchemaType.Array ||
+						   originalOpenApiSchema?.Type == JsonSchemaType.Array ||
+						   referenceType == JsonSchemaType.Array;
+
+		if (isArrayType)
 		{
-			if (originalOpenApiSchema is not null)
+			// For arrays, prioritize schema type to preserve array structure
+			if (originalOpenApiSchema?.Type is not null)
 			{
 				schemaType = originalOpenApiSchema.Type;
-				format ??= originalOpenApiSchema.Format;
+				format = originalOpenApiSchema.Format;
+			}
+			else if (resolvedReferenceSchema?.Type is not null)
+			{
+				schemaType = resolvedReferenceSchema.Type;
+				format = resolvedReferenceSchema.Format;
 			}
 			else if (referenceType.HasValue)
 			{
 				schemaType = referenceType;
-				format ??= referenceFormat;
+				format = referenceFormat;
 			}
 		}
+		else
+		{
+			// For non-array types, get type from validation rules first (original behavior)
+			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+			format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
 
-
+			// If no type from rules, try reference type detection, then schema types
+			// Prioritize referenceType for primitive types (Int32, String, etc.) as it's more reliable
+			if (!schemaType.HasValue)
+			{
+				// First try reference type detection (most reliable for primitives)
+				if (referenceType.HasValue)
+				{
+					schemaType = referenceType;
+					format ??= referenceFormat;
+				}
+				// Then try original schema
+				else if (originalOpenApiSchema?.Type is not null)
+				{
+					schemaType = originalOpenApiSchema.Type;
+					format ??= originalOpenApiSchema.Format;
+				}
+				// Finally try resolved reference schema
+				else if (resolvedReferenceSchema?.Type is not null)
+				{
+					schemaType = resolvedReferenceSchema.Type;
+					format ??= resolvedReferenceSchema.Format;
+				}
+			}
+			
+			// If format still not set, try to get it from all sources
+			if (format is null)
+			{
+				format = referenceFormat ?? resolvedReferenceSchema?.Format ?? originalOpenApiSchema?.Format;
+			}
+		}
 
 		// Create inline schema - set properties after creation to avoid initialization issues
 		OpenApiSchema newInlineSchema = new();
@@ -554,9 +741,104 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			newInlineSchema.Type = schemaType.Value;
 		}
+		// For arrays, ensure type is always set even if schemaType wasn't determined
+		else if (isArrayType)
+		{
+			newInlineSchema.Type = JsonSchemaType.Array;
+		}
+		// Also check if the schema has Items property (indicates array type)
+		// This handles cases where items is present but type wasn't detected
+		else if (originalOpenApiSchema?.Items is not null || resolvedReferenceSchema?.Items is not null)
+		{
+			newInlineSchema.Type = JsonSchemaType.Array;
+		}
+		
 		if (format is not null)
 		{
 			newInlineSchema.Format = format;
+		}
+
+		// Preserve Items for array types from the original or resolved schema
+		// BUT inline primitive type references for better OpenAPI documentation
+		if (originalOpenApiSchema?.Items is not null)
+		{
+			newInlineSchema.Items = InlinePrimitiveTypeReference(originalOpenApiSchema.Items, document);
+			// Ensure type is set to array when Items is present
+			if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+			{
+				newInlineSchema.Type = JsonSchemaType.Array;
+			}
+		}
+		else if (resolvedReferenceSchema?.Items is not null)
+		{
+			newInlineSchema.Items = InlinePrimitiveTypeReference(resolvedReferenceSchema.Items, document);
+			// Ensure type is set to array when Items is present
+			if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+			{
+				newInlineSchema.Type = JsonSchemaType.Array;
+			}
+		}
+		else if (isArrayType && actualSchema is OpenApiSchemaReference arraySchemaRef)
+		{
+			// For List<T> references, extract the element type from the reference ID
+			string? refId = arraySchemaRef.Reference?.Id;
+			if (refId is not null && (refId.Contains("System.Collections.Generic.List`1") ||
+									  refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+									  refId.Contains("System.Collections.Generic.ICollection`1")))
+			{
+				// Extract the element type from the generic parameter
+				// Format: System.Collections.Generic.List`1[[ElementType, Assembly, ...]]
+				int startIdx = refId.IndexOf("[[");
+				int endIdx = refId.IndexOf(',', startIdx);
+				if (startIdx >= 0 && endIdx > startIdx)
+				{
+					string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
+					// Create a reference to the element type schema (will be inlined if it's a primitive)
+					OpenApiSchemaReference elementRef = new(elementType, document, null);
+					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+					// Ensure type is set to array when Items is set
+					if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+					{
+						newInlineSchema.Type = JsonSchemaType.Array;
+					}
+				}
+			}
+		}
+		else if (isArrayType && typeSourceSchema is OpenApiSchemaReference typeSrcRef2)
+		{
+			// Handle case where type info is in a different oneOf element than actualSchema
+			// (e.g., nullable List<T> with validation rules)
+			string? refId = typeSrcRef2.Reference?.Id;
+			if (refId is not null && (refId.Contains("System.Collections.Generic.List`1") ||
+									  refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+									  refId.Contains("System.Collections.Generic.ICollection`1")))
+			{
+				// Extract the element type from the generic parameter
+				int startIdx = refId.IndexOf("[[");
+				int endIdx = refId.IndexOf(',', startIdx);
+				if (startIdx >= 0 && endIdx > startIdx)
+				{
+					string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
+					// Create a reference to the element type schema (will be inlined if it's a primitive)
+					OpenApiSchemaReference elementRef = new(elementType, document, null);
+					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+					// Ensure type is set to array when Items is set
+					if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
+					{
+						newInlineSchema.Type = JsonSchemaType.Array;
+					}
+				}
+			}
+		}
+
+		// Preserve Enum values from the original or resolved schema (for enum types)
+		if (originalOpenApiSchema?.Enum is not null && originalOpenApiSchema.Enum.Count > 0)
+		{
+			newInlineSchema.Enum = originalOpenApiSchema.Enum;
+		}
+		else if (resolvedReferenceSchema?.Enum is not null && resolvedReferenceSchema.Enum.Count > 0)
+		{
+			newInlineSchema.Enum = resolvedReferenceSchema.Enum;
 		}
 
 		// Extract custom description from DescriptionRule if present
@@ -642,6 +924,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// If the original schema was nullable (oneOf wrapper), recreate that structure
 		if (isNullableWrapper && !isNullableReference)
 		{
+			// Remove the nullable extension from the inline schema if present
+			// since nullability is now expressed through the oneOf structure
+			if (newInlineSchema.Extensions?.ContainsKey("nullable") == true)
+			{
+				newInlineSchema.Extensions.Remove("nullable");
+				if (newInlineSchema.Extensions.Count == 0)
+				{
+					newInlineSchema.Extensions = null;
+				}
+			}
+
 			// Wrap the inline schema in a oneOf with a nullable option
 			// The nullable option is represented as an empty schema with the "nullable" extension set to true
 			// This matches ASP.NET Core's built-in behavior for nullable types
@@ -706,65 +999,125 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			case Validation.RangeRule<int> intRangeRule:
 				if (intRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = intRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = intRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (intRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = intRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = intRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (intRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = intRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = intRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (intRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = intRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = intRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<decimal> decimalRangeRule:
 				if (decimalRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = decimalRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = decimalRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (decimalRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = decimalRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = decimalRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (decimalRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = decimalRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = decimalRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (decimalRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = decimalRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = decimalRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<double> doubleRangeRule:
 				if (doubleRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = doubleRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = doubleRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (doubleRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = doubleRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = doubleRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (doubleRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = doubleRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = doubleRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (doubleRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = doubleRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = doubleRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<float> floatRangeRule:
 				if (floatRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = floatRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = floatRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (floatRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = floatRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = floatRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (floatRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = floatRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = floatRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (floatRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = floatRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = floatRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<long> longRangeRule:
 				if (longRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = longRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = longRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (longRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = longRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = longRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (longRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = longRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = longRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (longRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = longRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = longRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
@@ -778,7 +1131,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		return rule switch
 		{
-			Validation.StringLengthRule => JsonSchemaType.String,
+			// StringLengthRule can apply to both strings and arrays (collections)
+			// Return null to let the schema type be determined from the property's actual type
+			Validation.StringLengthRule => null,
 			Validation.PatternRule => JsonSchemaType.String,
 			Validation.EmailRule => JsonSchemaType.String,
 			Validation.UrlRule => JsonSchemaType.String,
@@ -989,5 +1344,107 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		return false;
+	}
+
+	static bool IsInlineEnumSchema(IOpenApiSchema schema)
+	{
+		// Check if this is an inline enum schema (has Enum property with values)
+		if (schema is OpenApiSchema openApiSchema)
+		{
+			// Inline enum schemas have the Enum property set with valid values
+			if (openApiSchema.Enum is not null && openApiSchema.Enum.Count > 0)
+			{
+				return true;
+			}
+
+			// Also check if there's a oneOf pattern (nullable enum)
+			if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+			{
+				// Check if any of the oneOf schemas is an inline enum
+				return openApiSchema.OneOf.Any(IsInlineEnumSchema);
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>
+	/// Converts primitive type references (like System.Int32, System.String) to inline schemas
+	/// with explicit type and format information. This improves OpenAPI documentation by making
+	/// types explicit instead of requiring clients to resolve $ref links.
+	/// </summary>
+	static IOpenApiSchema InlinePrimitiveTypeReference(IOpenApiSchema itemSchema, OpenApiDocument document)
+	{
+		// If not a reference, return as-is
+		if (itemSchema is not OpenApiSchemaReference schemaRef)
+		{
+			return itemSchema;
+		}
+
+		string? refId = schemaRef.Reference?.Id;
+		if (string.IsNullOrEmpty(refId))
+		{
+			return itemSchema;
+		}
+
+		// Only inline primitive system types, not custom types
+		if (!refId.StartsWith("System."))
+		{
+			return itemSchema;
+		}
+
+		// Create inline schema for primitive types
+		OpenApiSchema inlineSchema = new();
+
+		if (refId.Contains("System.String") && !refId.Contains("[]"))
+		{
+			inlineSchema.Type = JsonSchemaType.String;
+		}
+		else if (refId.Contains("System.Int32"))
+		{
+			inlineSchema.Type = JsonSchemaType.Integer;
+			inlineSchema.Format = "int32";
+		}
+		else if (refId.Contains("System.Int64"))
+		{
+			inlineSchema.Type = JsonSchemaType.Integer;
+			inlineSchema.Format = "int64";
+		}
+		else if (refId.Contains("System.Decimal"))
+		{
+			inlineSchema.Type = JsonSchemaType.Number;
+			// decimal doesn't have a standard format, leave null
+		}
+		else if (refId.Contains("System.Double"))
+		{
+			inlineSchema.Type = JsonSchemaType.Number;
+			inlineSchema.Format = "double";
+		}
+		else if (refId.Contains("System.Single"))
+		{
+			inlineSchema.Type = JsonSchemaType.Number;
+			inlineSchema.Format = "float";
+		}
+		else if (refId.Contains("System.Boolean"))
+		{
+			inlineSchema.Type = JsonSchemaType.Boolean;
+		}
+		else if (refId.Contains("System.DateTime") || refId.Contains("System.DateTimeOffset"))
+		{
+			inlineSchema.Type = JsonSchemaType.String;
+			inlineSchema.Format = "date-time";
+		}
+		else if (refId.Contains("System.Guid"))
+		{
+			inlineSchema.Type = JsonSchemaType.String;
+			inlineSchema.Format = "uuid";
+		}
+		else
+		{
+			// For other types (non-primitives), keep the reference
+			return itemSchema;
+		}
+
+		return inlineSchema;
 	}
 }

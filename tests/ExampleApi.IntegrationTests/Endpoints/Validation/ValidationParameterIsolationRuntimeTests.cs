@@ -1,5 +1,3 @@
-using ExampleApi.IntegrationTests.Infrastructure;
-using Shouldly;
 using System.Net;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Validation;

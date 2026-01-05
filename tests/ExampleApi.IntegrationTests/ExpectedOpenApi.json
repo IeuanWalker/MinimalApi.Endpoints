@@ -96,6 +96,7 @@
 						"schema": {
 							"type": "integer",
 							"description": "Enum: Low, Medium, High, Critical",
+							"format": "int32",
 							"enum": [
 								0,
 								1,
@@ -122,6 +123,7 @@
 						"schema": {
 							"type": "integer",
 							"description": "Enum: Low, Medium, High, Critical",
+							"format": "int32",
 							"enum": [
 								0,
 								1,
@@ -549,13 +551,375 @@
 				}
 			}
 		},
+		"/api/v1/validation/DataAnnotations/FromQuery": {
+			"get": {
+				"tags": [
+					"Validation"
+				],
+				"summary": "DataAnnotationsFromQuery",
+				"operationId": "get_ValidationDataAnnotationsFromQuery_14",
+				"parameters": [
+					{
+						"name": "AllBuiltInStringValidators",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 22,
+							"minLength": 4,
+							"pattern": "^[a-zA-Z0-9]+$",
+							"type": "string",
+							"description": "Validation rules:\n- Is required\n- Must be at least 4 characters and less than 22 characters\n- Must be 4 characters or more\n- Must be 22 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number",
+							"format": "uri"
+						}
+					},
+					{
+						"name": "AllBuiltInNumberValidators",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 25,
+							"minimum": 10,
+							"type": "number",
+							"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25",
+							"format": "double"
+						}
+					},
+					{
+						"name": "RequiredString",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Is required"
+						}
+					},
+					{
+						"name": "RequiredInt",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"description": "Validation rules:\n- Is required",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "StringLength",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 879,
+							"minLength": 12,
+							"type": "string",
+							"description": "Validation rules:\n- Must be at least 12 characters and less than 879 characters"
+						}
+					},
+					{
+						"name": "StringMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 3,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 3 characters or more"
+						}
+					},
+					{
+						"name": "StringMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 100,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 100 characters or fewer"
+						}
+					},
+					{
+						"name": "RangeInt",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 25,
+							"minimum": 10,
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= 10 and <= 25",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "RangeDateTime",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be between 1996-06-08 and 2026-01-04",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "StringPattern",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"pattern": "^[a-zA-Z0-9]+$",
+							"type": "string",
+							"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
+						}
+					},
+					{
+						"name": "StringEmail",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid email address",
+							"format": "email"
+						}
+					},
+					{
+						"name": "StringPhoneNumber",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid phone number"
+						}
+					},
+					{
+						"name": "StringUrl",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid URL",
+							"format": "uri"
+						}
+					},
+					{
+						"name": "ActualUri",
+						"in": "query",
+						"schema": {
+							"$ref": "#/components/schemas/System.Uri"
+						}
+					},
+					{
+						"name": "Compare1",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must match Compare2"
+						}
+					},
+					{
+						"name": "Compare2",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must match Compare1"
+						}
+					},
+					{
+						"name": "StringCreditCard",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid credit card number"
+						}
+					},
+					{
+						"name": "IntMinMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 2147483647,
+							"minimum": -2147483648,
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= -2147483648 and <= 2147483647",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "IntRange",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 100,
+							"minimum": 1,
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= 1 and <= 100",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "DoubleMinMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 1.7976931348623157E+308,
+							"minimum": -1.7976931348623157E+308,
+							"type": "number",
+							"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 1.7976931348623157E+308",
+							"format": "double"
+						}
+					},
+					{
+						"name": "DoubleRange",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 99.9,
+							"minimum": 0.1,
+							"type": "number",
+							"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
+							"format": "double"
+						}
+					},
+					{
+						"name": "ListStringMinCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more"
+						}
+					},
+					{
+						"name": "ListStringMaxCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "Validation rules:\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "ListStringRangeCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "ListIntMinCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more"
+						}
+					},
+					{
+						"name": "ListIntMaxCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"description": "Validation rules:\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "ListIntRangeCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "CustomValidatedProperty",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- CustomValidatedProperty is not valid."
+						}
+					},
+					{
+						"name": "CustomValidationWithDefaultMessage",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Default error message"
+						}
+					},
+					{
+						"name": "CustomValidationWithoutDefaultMessage",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- The field CustomValidationWithoutDefaultMessage is invalid."
+						}
+					},
+					{
+						"name": "CustomValidationWithoutDefaultMessageSetManually",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Setting error message manually"
+						}
+					},
+					{
+						"name": "CustomValidationWithDefaultMessageOverrideMessage",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Override error message"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK"
+					}
+				}
+			}
+		},
 		"/api/v1/validation/EndpointA": {
 			"get": {
 				"tags": [
 					"Validation"
 				],
 				"summary": "Test Endpoint A with Name property validation",
-				"operationId": "get_ValidationEndpointA_14",
+				"operationId": "get_ValidationEndpointA_15",
 				"parameters": [
 					{
 						"name": "Name",
@@ -588,7 +952,7 @@
 					"Validation"
 				],
 				"summary": "Test Endpoint B with Name property validation",
-				"operationId": "get_ValidationEndpointB_15",
+				"operationId": "get_ValidationEndpointB_16",
 				"parameters": [
 					{
 						"name": "Name",
@@ -621,7 +985,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromQuery",
-				"operationId": "get_ValidationFluentValidationFromQuery_16",
+				"operationId": "get_ValidationFluentValidationFromQuery_17",
 				"parameters": [
 					{
 						"name": "StringMin",
@@ -669,8 +1033,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"minimum": false,
-							"exclusiveMinimum": true,
+							"minimum": 1,
 							"type": "integer",
 							"description": "Validation rules:\n- Must be >= 1",
 							"format": "int32"
@@ -681,8 +1044,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
+							"maximum": 100,
 							"type": "integer",
 							"description": "Validation rules:\n- Must be <= 100",
 							"format": "int32"
@@ -693,10 +1055,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
-							"minimum": false,
-							"exclusiveMinimum": true,
+							"maximum": 100,
+							"minimum": 1,
 							"type": "integer",
 							"description": "Validation rules:\n- Must be >= 1 and <= 100",
 							"format": "int32"
@@ -707,8 +1067,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"minimum": false,
-							"exclusiveMinimum": true,
+							"minimum": 0.1,
 							"type": "number",
 							"description": "Validation rules:\n- Must be >= 0.1",
 							"format": "double"
@@ -719,8 +1078,7 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
+							"maximum": 99.9,
 							"type": "number",
 							"description": "Validation rules:\n- Must be <= 99.9",
 							"format": "double"
@@ -731,10 +1089,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
-							"exclusiveMaximum": true,
-							"minimum": false,
-							"exclusiveMinimum": true,
+							"maximum": 99.9,
+							"minimum": 0.1,
 							"type": "number",
 							"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 							"format": "double"
@@ -745,6 +1101,10 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
 							"description": "Validation rules:\n- Must contain at least 1 item."
 						}
 					},
@@ -753,6 +1113,10 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
 							"description": "Validation rules:\n- Must contain at most 10 items."
 						}
 					},
@@ -761,6 +1125,10 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"type": "array",
+							"items": {
+								"type": "string"
+							},
 							"description": "Validation rules:\n- Must contain between 1 and 10 items."
 						}
 					},
@@ -769,6 +1137,11 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							},
 							"description": "Validation rules:\n- Must contain at least 1 item."
 						}
 					},
@@ -777,6 +1150,11 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							},
 							"description": "Validation rules:\n- Must contain at most 10 items."
 						}
 					},
@@ -785,6 +1163,11 @@
 						"in": "query",
 						"required": true,
 						"schema": {
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							},
 							"description": "Validation rules:\n- Must contain between 1 and 10 items."
 						}
 					},
@@ -806,12 +1189,13 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": false,
+							"maximum": 100,
 							"exclusiveMaximum": true,
-							"minimum": false,
+							"minimum": 0,
 							"exclusiveMinimum": true,
 							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found.",
+							"format": "double"
 						}
 					},
 					{
@@ -819,7 +1203,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/System.Int32"
+							"type": "integer",
+							"format": "int32"
 						}
 					},
 					{
@@ -827,7 +1212,8 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/System.Int32"
+							"type": "integer",
+							"format": "int32"
 						}
 					},
 					{
@@ -848,7 +1234,17 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
+							"type": "integer",
+							"description": "Enum: Success, Failure",
+							"format": "int32",
+							"enum": [
+								0,
+								1
+							],
+							"x-enum-varnames": [
+								"Success",
+								"Failure"
+							]
 						}
 					},
 					{
@@ -880,7 +1276,7 @@
 					"Validation"
 				],
 				"summary": "DataAnnotationsFromBody",
-				"operationId": "post_ValidationDataValidation_17",
+				"operationId": "post_ValidationDataValidation_18",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -903,7 +1299,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromBody",
-				"operationId": "post_ValidationFluentValidation_18",
+				"operationId": "post_ValidationFluentValidation_19",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -933,7 +1329,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromForm",
-				"operationId": "post_ValidationFluentValidationFromForm_19",
+				"operationId": "post_ValidationFluentValidationFromForm_20",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -969,7 +1365,7 @@
 					"Validation"
 				],
 				"summary": "ManualWithValidation",
-				"operationId": "post_ValidationWithValidation_20",
+				"operationId": "post_ValidationWithValidation_21",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -992,7 +1388,7 @@
 					"Validation"
 				],
 				"summary": "WithValidationAlterAndRemove",
-				"operationId": "post_ValidationWithValidationAlterAndRemove_21",
+				"operationId": "post_ValidationWithValidationAlterAndRemove_22",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -1140,6 +1536,7 @@
 					"enumAsInt": {
 						"type": "integer",
 						"description": "Enum: Low, Medium, High, Critical",
+						"format": "int32",
 						"enum": [
 							0,
 							1,
@@ -1489,13 +1886,18 @@
 				"type": "object",
 				"properties": {
 					"title": {
-						"$ref": "#/components/schemas/System.String"
+						"maxLength": 200,
+						"minLength": 1,
+						"type": "string",
+						"description": "Validation rules:\n- Is required\n- Must be at least 1 characters and less than 200 characters"
 					},
 					"description": {
-						"$ref": "#/components/schemas/System.String"
+						"maxLength": 1000,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 1000 characters or fewer"
 					},
 					"isCompleted": {
-						"$ref": "#/components/schemas/System.Boolean"
+						"type": "boolean"
 					}
 				}
 			},
@@ -1556,7 +1958,12 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/System.String"
+								"maxLength": 100,
+								"minLength": 3,
+								"pattern": "^[a-zA-Z0-9]+$",
+								"type": "string",
+								"description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number\n- AllBuiltInStringValidators is not valid.\n- Default error message",
+								"format": "uri"
 							}
 						]
 					},
@@ -1566,48 +1973,86 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.Decimal, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+								"maximum": 25,
+								"minimum": 10,
+								"maxLength": 100,
+								"minLength": 3,
+								"type": "number",
+								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
 							}
 						]
 					},
 					"requiredString": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Is required"
 					},
 					"requiredInt": {
-						"$ref": "#/components/schemas/System.Int32"
+						"type": "integer",
+						"description": "Validation rules:\n- Is required",
+						"format": "int32"
 					},
 					"stringLength": {
-						"$ref": "#/components/schemas/System.String"
+						"maxLength": 50,
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
 					},
 					"stringMin": {
-						"$ref": "#/components/schemas/System.String"
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 3 characters or more"
 					},
 					"listMin": {
-						"$ref": "#/components/schemas/System.String[]"
+						"minLength": 3,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 3 items or more"
 					},
 					"stringMax": {
-						"$ref": "#/components/schemas/System.String"
+						"maxLength": 100,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 100 characters or fewer"
 					},
 					"listMax": {
-						"$ref": "#/components/schemas/System.String[]"
+						"maxLength": 10,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 10 items or fewer"
 					},
 					"rangeInt": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 25,
+						"minimum": 10,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 10 and <= 25",
+						"format": "int32"
 					},
 					"rangeDateTime": {
-						"$ref": "#/components/schemas/System.DateTime"
+						"type": "string",
+						"description": "Validation rules:\n- Must be between 1996-06-08 and 2026-01-04",
+						"format": "date-time"
 					},
 					"stringPattern": {
-						"$ref": "#/components/schemas/System.String"
+						"pattern": "^[a-zA-Z0-9]+$",
+						"type": "string",
+						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"stringEmail": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid email address",
+						"format": "email"
 					},
 					"stringPhoneNumber": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid phone number"
 					},
 					"stringUrl": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid URL",
+						"format": "uri"
 					},
 					"actualUri": {
 						"oneOf": [
@@ -1620,13 +2065,16 @@
 						]
 					},
 					"compare1": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must match Compare2"
 					},
 					"compare2": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must match Compare1"
 					},
 					"stringCreditCard": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid credit card number"
 					},
 					"fileExtension": {
 						"oneOf": [
@@ -1634,60 +2082,125 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
+								"nullable": true
 							}
 						]
 					},
 					"intMin": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 2147483647,
+						"minimum": 1,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 2147483647",
+						"format": "int32"
 					},
 					"intMax": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 100,
+						"minimum": -2147483648,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= -2147483648 and <= 100",
+						"format": "int32"
 					},
 					"intRange": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 100,
+						"minimum": 1,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 100",
+						"format": "int32"
 					},
 					"doubleMin": {
-						"$ref": "#/components/schemas/System.Double"
+						"maximum": 1.7976931348623157E+308,
+						"minimum": 0.1,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 1.7976931348623157E+308",
+						"format": "double"
 					},
 					"doubleMax": {
-						"$ref": "#/components/schemas/System.Double"
+						"maximum": 99.9,
+						"minimum": -1.7976931348623157E+308,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 99.9",
+						"format": "double"
 					},
 					"doubleRange": {
-						"$ref": "#/components/schemas/System.Double"
+						"maximum": 99.9,
+						"minimum": 0.1,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
+						"format": "double"
 					},
 					"listStringMinCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more"
 					},
 					"listStringMaxCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 10 items or fewer"
 					},
 					"listStringRangeCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
 					},
 					"listIntMinCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more"
 					},
 					"listIntMaxCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
+						"description": "Validation rules:\n- Must be 10 items or fewer"
 					},
 					"listIntRangeCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
 					},
 					"customValidatedProperty": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- CustomValidatedProperty is not valid."
 					},
 					"customValidationWithDefaultMessage": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Default error message"
 					},
 					"customValidationWithoutDefaultMessage": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- The field CustomValidationWithoutDefaultMessage is invalid."
 					},
 					"customValidationWithoutDefaultMessageSetManually": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Setting error message manually"
 					},
 					"customValidationWithDefaultMessageOverrideMessage": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Override error message"
 					}
 				}
 			},
@@ -1707,7 +2220,12 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/System.String"
+								"maxLength": 100,
+								"minLength": 3,
+								"pattern": "^[a-zA-Z0-9]+$",
+								"type": "string",
+								"description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number",
+								"format": "uri"
 							}
 						]
 					},
@@ -1717,48 +2235,86 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/System.Nullable`1[[System.Decimal, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+								"maximum": 25,
+								"minimum": 10,
+								"maxLength": 100,
+								"minLength": 3,
+								"type": "number",
+								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
 							}
 						]
 					},
 					"requiredString": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Is required"
 					},
 					"requiredInt": {
-						"$ref": "#/components/schemas/System.Int32"
+						"type": "integer",
+						"description": "Validation rules:\n- Is required",
+						"format": "int32"
 					},
 					"stringLength": {
-						"$ref": "#/components/schemas/System.String"
+						"maxLength": 50,
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
 					},
 					"stringMin": {
-						"$ref": "#/components/schemas/System.String"
+						"minLength": 3,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 3 characters or more"
 					},
 					"listMin": {
-						"$ref": "#/components/schemas/System.String[]"
+						"minLength": 3,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 3 items or more"
 					},
 					"stringMax": {
-						"$ref": "#/components/schemas/System.String"
+						"maxLength": 100,
+						"type": "string",
+						"description": "Validation rules:\n- Must be 100 characters or fewer"
 					},
 					"listMax": {
-						"$ref": "#/components/schemas/System.String[]"
+						"maxLength": 10,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 10 items or fewer"
 					},
 					"rangeInt": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 25,
+						"minimum": 10,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 10 and <= 25",
+						"format": "int32"
 					},
 					"rangeDateTime": {
-						"$ref": "#/components/schemas/System.DateTime"
+						"type": "string",
+						"description": "Validation rules:\n- Must be between 1996-06-08 and 2026-01-04",
+						"format": "date-time"
 					},
 					"stringPattern": {
-						"$ref": "#/components/schemas/System.String"
+						"pattern": "^[a-zA-Z0-9]+$",
+						"type": "string",
+						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"stringEmail": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid email address",
+						"format": "email"
 					},
 					"stringPhoneNumber": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid phone number"
 					},
 					"stringUrl": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid URL",
+						"format": "uri"
 					},
 					"actualUri": {
 						"oneOf": [
@@ -1771,13 +2327,16 @@
 						]
 					},
 					"compare1": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must match Compare2"
 					},
 					"compare2": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must match Compare1"
 					},
 					"stringCreditCard": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Must be a valid credit card number"
 					},
 					"fileExtension": {
 						"oneOf": [
@@ -1785,54 +2344,121 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
+								"nullable": true
 							}
 						]
 					},
 					"intMin": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 2147483647,
+						"minimum": 1,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 2147483647",
+						"format": "int32"
 					},
 					"intMax": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 100,
+						"minimum": -2147483648,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= -2147483648 and <= 100",
+						"format": "int32"
 					},
 					"intRange": {
-						"$ref": "#/components/schemas/System.Int32"
+						"maximum": 100,
+						"minimum": 1,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 100",
+						"format": "int32"
 					},
 					"doubleMin": {
-						"$ref": "#/components/schemas/System.Double"
+						"maximum": 1.7976931348623157E+308,
+						"minimum": 0.1,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 1.7976931348623157E+308",
+						"format": "double"
 					},
 					"doubleMax": {
-						"$ref": "#/components/schemas/System.Double"
+						"maximum": 99.9,
+						"minimum": -1.7976931348623157E+308,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 99.9",
+						"format": "double"
 					},
 					"doubleRange": {
-						"$ref": "#/components/schemas/System.Double"
+						"maximum": 99.9,
+						"minimum": 0.1,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
+						"format": "double"
 					},
 					"listStringMinCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more"
 					},
 					"listStringMaxCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 10 items or fewer"
 					},
 					"listStringRangeCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
 					},
 					"listIntMinCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more"
 					},
 					"listIntMaxCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
+						"description": "Validation rules:\n- Must be 10 items or fewer"
 					},
 					"listIntRangeCount": {
-						"$ref": "#/components/schemas/System.Collections.Generic.List`1[[System.Int32, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
+						"maxLength": 10,
+						"minLength": 1,
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
+						"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
 					},
 					"customValidatedProperty": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- CustomValidatedProperty is not valid."
 					},
 					"throwsCustomValidationProperty": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Default error message"
 					},
 					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
+							}
+						],
+						"description": "Validation rules:\n- Required"
 					},
 					"listNestedObject": {
 						"oneOf": [
@@ -1840,21 +2466,31 @@
 								"nullable": true
 							},
 							{
-								"$ref": "#/components/schemas/System.Collections.Generic.List`1[[ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"
+								"maxLength": 10,
+								"minLength": 0,
+								"type": "array",
+								"items": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
+								},
+								"description": "Validation rules:\n- Must be 0 items or more\n- Must be 10 items or fewer"
 							}
 						]
 					},
 					"customValidationWithDefaultMessage": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Default error message"
 					},
 					"customValidationWithoutDefaultMessage": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- The field CustomValidationWithoutDefaultMessage is invalid."
 					},
 					"customValidationWithoutDefaultMessageSetManually": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Setting error message manually"
 					},
 					"customValidationWithDefaultMessageOverrideMessage": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string",
+						"description": "Validation rules:\n- Override error message"
 					}
 				}
 			},
@@ -1883,67 +2519,86 @@
 						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"intMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1",
 						"format": "int32"
 					},
 					"intMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 100,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be <= 100",
 						"format": "int32"
 					},
 					"intRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 100,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1 and <= 100",
 						"format": "int32"
 					},
 					"doubleMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1",
 						"format": "double"
 					},
 					"doubleMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 99.9,
 						"type": "number",
 						"description": "Validation rules:\n- Must be <= 99.9",
 						"format": "double"
 					},
 					"doubleRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 99.9,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 						"format": "double"
 					},
 					"listStringMinCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listStringMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listStringRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"listIntMinCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listIntMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listIntRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					}
 				}
@@ -1978,71 +2633,95 @@
 						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"intMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1",
 						"format": "int32"
 					},
 					"intMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 100,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be <= 100",
 						"format": "int32"
 					},
 					"intRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 100,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1 and <= 100",
 						"format": "int32"
 					},
 					"doubleMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1",
 						"format": "double"
 					},
 					"doubleMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 99.9,
 						"type": "number",
 						"description": "Validation rules:\n- Must be <= 99.9",
 						"format": "double"
 					},
 					"doubleRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 99.9,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 						"format": "double"
 					},
 					"listStringMinCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listStringMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listStringRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"listIntMinCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listIntMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listIntRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
+							}
+						],
+						"description": "Validation rules:\n- Required"
 					},
 					"listNestedObject": {
 						"oneOf": [
@@ -2075,9 +2754,9 @@
 								"nullable": true
 							},
 							{
-								"maximum": false,
+								"maximum": 100,
 								"exclusiveMaximum": true,
-								"minimum": false,
+								"minimum": 0,
 								"exclusiveMinimum": true,
 								"type": "number",
 								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
@@ -2085,10 +2764,12 @@
 						]
 					},
 					"maxNumberTest": {
-						"$ref": "#/components/schemas/System.Int32"
+						"type": "integer",
+						"format": "int32"
 					},
 					"minNumberTest": {
-						"$ref": "#/components/schemas/System.Int32"
+						"type": "integer",
+						"format": "int32"
 					},
 					"enumStringValidator": {
 						"type": "string",
@@ -2099,7 +2780,17 @@
 						]
 					},
 					"enumIntValidator": {
-						"description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
+						"type": "integer",
+						"description": "Enum: Success, Failure",
+						"format": "int32",
+						"enum": [
+							0,
+							1
+						],
+						"x-enum-varnames": [
+							"Success",
+							"Failure"
+						]
 					},
 					"enumTest": {
 						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum"
@@ -2143,67 +2834,86 @@
 						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"intMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1",
 						"format": "int32"
 					},
 					"intMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 100,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be <= 100",
 						"format": "int32"
 					},
 					"intRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 100,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1 and <= 100",
 						"format": "int32"
 					},
 					"doubleMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1",
 						"format": "double"
 					},
 					"doubleMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 99.9,
 						"type": "number",
 						"description": "Validation rules:\n- Must be <= 99.9",
 						"format": "double"
 					},
 					"doubleRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 99.9,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 						"format": "double"
 					},
 					"listStringMinCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listStringMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listStringRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"listIntMinCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listIntMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listIntRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					}
 				}
@@ -2238,71 +2948,95 @@
 						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"intMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1",
 						"format": "int32"
 					},
 					"intMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 100,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be <= 100",
 						"format": "int32"
 					},
 					"intRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 100,
+						"minimum": 1,
 						"type": "integer",
 						"description": "Validation rules:\n- Must be >= 1 and <= 100",
 						"format": "int32"
 					},
 					"doubleMin": {
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1",
 						"format": "double"
 					},
 					"doubleMax": {
-						"maximum": false,
-						"exclusiveMaximum": true,
+						"maximum": 99.9,
 						"type": "number",
 						"description": "Validation rules:\n- Must be <= 99.9",
 						"format": "double"
 					},
 					"doubleRange": {
-						"maximum": false,
-						"exclusiveMaximum": true,
-						"minimum": false,
-						"exclusiveMinimum": true,
+						"maximum": 99.9,
+						"minimum": 0.1,
 						"type": "number",
 						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 						"format": "double"
 					},
 					"listStringMinCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listStringMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listStringRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"listIntMinCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listIntMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listIntRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
+							}
+						],
+						"description": "Validation rules:\n- Required"
 					},
 					"listNestedObject": {
 						"oneOf": [
@@ -2335,9 +3069,9 @@
 								"nullable": true
 							},
 							{
-								"maximum": false,
+								"maximum": 100,
 								"exclusiveMaximum": true,
-								"minimum": false,
+								"minimum": 0,
 								"exclusiveMinimum": true,
 								"type": "number",
 								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
@@ -2345,10 +3079,12 @@
 						]
 					},
 					"maxNumberTest": {
-						"$ref": "#/components/schemas/System.Int32"
+						"type": "integer",
+						"format": "int32"
 					},
 					"minNumberTest": {
-						"$ref": "#/components/schemas/System.Int32"
+						"type": "integer",
+						"format": "int32"
 					},
 					"enumStringValidator": {
 						"type": "string",
@@ -2359,7 +3095,17 @@
 						]
 					},
 					"enumIntValidator": {
-						"description": "Validation rules:\n- EnumIntValidator has a range of values which does not include '{value}'."
+						"type": "integer",
+						"description": "Enum: Success, Failure",
+						"format": "int32",
+						"enum": [
+							0,
+							1
+						],
+						"x-enum-varnames": [
+							"Success",
+							"Failure"
+						]
 					},
 					"enumTest": {
 						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.StatusEnum"
@@ -2460,45 +3206,84 @@
 						"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"intMin": {
-						"description": "Validation rules:\n- Must be >= 1"
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1",
+						"format": "int32"
 					},
 					"intMax": {
-						"description": "Validation rules:\n- Must be <= 100"
+						"type": "integer",
+						"description": "Validation rules:\n- Must be <= 100",
+						"format": "int32"
 					},
 					"intRange": {
-						"description": "Validation rules:\n- Must be between 1 and 100"
+						"type": "integer",
+						"description": "Validation rules:\n- Must be between 1 and 100",
+						"format": "int32"
 					},
 					"doubleMin": {
-						"description": "Validation rules:\n- Must be >= 0.1"
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1",
+						"format": "double"
 					},
 					"doubleMax": {
-						"description": "Validation rules:\n- Must be <= 99.9"
+						"type": "number",
+						"description": "Validation rules:\n- Must be <= 99.9",
+						"format": "double"
 					},
 					"doubleRange": {
-						"description": "Validation rules:\n- Must be between 0.1 and 99.9"
+						"type": "number",
+						"description": "Validation rules:\n- Must be between 0.1 and 99.9",
+						"format": "double"
 					},
 					"listStringMinCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listStringMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listStringRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"listIntMinCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at least 1 item."
 					},
 					"listIntMaxCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain at most 10 items."
 					},
 					"listIntRangeCount": {
+						"type": "array",
+						"items": {
+							"type": "integer",
+							"format": "int32"
+						},
 						"description": "Validation rules:\n- Must contain between 1 and 10 items."
 					},
 					"allRules": {
-						"maximum": false,
+						"maximum": 100,
 						"exclusiveMaximum": true,
-						"minimum": false,
+						"minimum": 10,
 						"exclusiveMinimum": true,
 						"maxLength": 100,
 						"minLength": 10,
@@ -2508,7 +3293,12 @@
 						"format": "uri"
 					},
 					"nestedObject": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
+						"allOf": [
+							{
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
+							}
+						],
+						"description": "Validation rules:\n- Required"
 					},
 					"listNestedObject": {
 						"oneOf": [
@@ -2538,7 +3328,7 @@
 						"description": "Validation rules:\n- Must be 10 characters or more\n- Must match pattern: ^[a-zA-Z0-9]+$"
 					},
 					"removeAll": {
-						"$ref": "#/components/schemas/System.String"
+						"type": "string"
 					}
 				}
 			},
