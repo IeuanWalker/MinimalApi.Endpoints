@@ -926,6 +926,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// If the original schema was nullable (oneOf wrapper), recreate that structure
 		if (isNullableWrapper && !isNullableReference)
 		{
+			// Remove the nullable extension from the inline schema if present
+			// since nullability is now expressed through the oneOf structure
+			if (newInlineSchema.Extensions?.ContainsKey("nullable") == true)
+			{
+				newInlineSchema.Extensions.Remove("nullable");
+				if (newInlineSchema.Extensions.Count == 0)
+				{
+					newInlineSchema.Extensions = null;
+				}
+			}
+
 			// Wrap the inline schema in a oneOf with a nullable option
 			// The nullable option is represented as an empty schema with the "nullable" extension set to true
 			// This matches ASP.NET Core's built-in behavior for nullable types

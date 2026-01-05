@@ -2074,7 +2074,8 @@
                 "nullable": true
               },
               {
-                "description": "Validation rules:\n- Must be a file with extension: jpg,png"
+                "description": "Validation rules:\n- Must be a file with extension: jpg,png",
+                "nullable": true
               }
             ]
           },
@@ -2335,7 +2336,8 @@
                 "nullable": true
               },
               {
-                "description": "Validation rules:\n- Must be a file with extension: jpg,png"
+                "description": "Validation rules:\n- Must be a file with extension: jpg,png",
+                "nullable": true
               }
             ]
           },
