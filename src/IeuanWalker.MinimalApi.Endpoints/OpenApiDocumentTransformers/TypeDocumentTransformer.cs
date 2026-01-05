@@ -1,6 +1,5 @@
 using System.Reflection;
 using System.Text.Json.Nodes;
-using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Routing;
@@ -67,7 +66,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					// Get the property's actual .NET type if possible
 					PropertyInfo? propertyInfo = schemaType?.GetProperty(property.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-					
+
 					schema.Properties[property.Key] = FixSchemaType(property.Value, document, propertyInfo?.PropertyType);
 				}
 			}
@@ -152,7 +151,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			// Only unwrap if the innermost items are a reference to a complex type (not a primitive or another array)
 			if (itemsSchema.Items is OpenApiSchemaReference ||
-				(itemsSchema.Items is OpenApiSchema innerSchema && 
+				(itemsSchema.Items is OpenApiSchema innerSchema &&
 				 innerSchema.Type == JsonSchemaType.Object))
 			{
 				// This is likely an incorrectly double-wrapped array - unwrap it
@@ -202,14 +201,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Check if this is an array with items that have oneOf for nullable
-		if (openApiSchema.Type == JsonSchemaType.Array && 
-			openApiSchema.Items is OpenApiSchema itemsSchema && 
-			itemsSchema.OneOf is not null && 
+		if (openApiSchema.Type == JsonSchemaType.Array &&
+			openApiSchema.Items is OpenApiSchema itemsSchema &&
+			itemsSchema.OneOf is not null &&
 			itemsSchema.OneOf.Count == 2)
 		{
 			// Check if one of the oneOf elements is just a nullable marker (no type set)
 			IOpenApiSchema? typeSchema = null;
-			
+
 			foreach (IOpenApiSchema oneOfSchema in itemsSchema.OneOf)
 			{
 				if (oneOfSchema is OpenApiSchema os && os.Type.HasValue && os.Type != JsonSchemaType.Null)
@@ -218,7 +217,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					break;
 				}
 			}
-			
+
 			// If we found a type schema, this is a nullable array - restructure it
 			if (typeSchema is not null)
 			{
@@ -228,7 +227,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					Type = JsonSchemaType.Array,
 					Items = typeSchema
 				};
-				
+
 				// Wrap the array in oneOf for nullable
 				OpenApiSchema nullableArraySchema = new()
 				{
@@ -258,35 +257,35 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			Type actualType = Nullable.GetUnderlyingType(actualPropertyType) ?? actualPropertyType;
 			bool isNullable = Nullable.GetUnderlyingType(actualPropertyType) is not null;
-			
+
 			// Check if this is an array or collection type
-			bool isArrayOrCollection = actualType.IsArray || 
+			bool isArrayOrCollection = actualType.IsArray ||
 				(actualType.IsGenericType && (
 					actualType.GetGenericTypeDefinition() == typeof(List<>) ||
 					actualType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
 					actualType.GetGenericTypeDefinition() == typeof(ICollection<>) ||
 					actualType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
 					actualType.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>)));
-			
+
 			if (isArrayOrCollection)
 			{
 				// Check if the schema already represents a nullable collection properly (for reference types like List<T>?)
 				// If it has oneOf with a nullable marker and either an array or a collection reference, skip our processing
 				if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count == 2)
 				{
-					bool hasNullableMarker = openApiSchema.OneOf.Any(s => 
+					bool hasNullableMarker = openApiSchema.OneOf.Any(s =>
 						s is OpenApiSchema os && !os.Type.HasValue);
-					bool hasArray = openApiSchema.OneOf.Any(s => 
+					bool hasArray = openApiSchema.OneOf.Any(s =>
 						s is OpenApiSchema os && os.Type == JsonSchemaType.Array);
-					bool hasCollectionRef = openApiSchema.OneOf.Any(s => 
-						s is OpenApiSchemaReference sr && sr.Reference?.Id is not null && 
+					bool hasCollectionRef = openApiSchema.OneOf.Any(s =>
+						s is OpenApiSchemaReference sr && sr.Reference?.Id is not null &&
 						(sr.Reference.Id.Contains("System.Collections.Generic.List") ||
 						 sr.Reference.Id.Contains("System.Collections.Generic.IEnumerable") ||
 						 sr.Reference.Id.Contains("System.Collections.Generic.ICollection") ||
 						 sr.Reference.Id.Contains("System.Collections.Generic.IReadOnlyList") ||
 						 sr.Reference.Id.Contains("System.Collections.Generic.IReadOnlyCollection") ||
 						 sr.Reference.Id.Contains("[]")));
-					
+
 					if (hasNullableMarker && (hasArray || hasCollectionRef))
 					{
 						// This is already a nullable array/collection
@@ -295,7 +294,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 						return schema;
 					}
 				}
-				
+
 				// Case 1: Schema doesn't have type: array yet, needs wrapping
 				// But only wrap if this is truly an element type, not a complex structure
 				if (openApiSchema.Type != JsonSchemaType.Array && openApiSchema.Items is null)
@@ -306,11 +305,11 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 						// This is a complex object schema, not an element type - don't wrap
 						return openApiSchema;
 					}
-					
+
 					// The current schema represents the element type
 					// Check if it has a oneOf wrapper (this would be wrong for array element types)
 					IOpenApiSchema itemsSchema = openApiSchema;
-					
+
 					// If the schema has oneOf for nullable, unwrap it since the array itself is nullable, not the elements
 					if (isNullable && openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
 					{
@@ -322,14 +321,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 							itemsSchema = nonNullableSchema;
 						}
 					}
-					
+
 					// Create array schema with the corrected items schema
 					OpenApiSchema arraySchema = new()
 					{
 						Type = JsonSchemaType.Array,
 						Items = itemsSchema
 					};
-					
+
 					// For nullable arrays/collections, wrap in oneOf
 					if (isNullable)
 					{
@@ -349,7 +348,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 						};
 						return nullableArraySchema;
 					}
-					
+
 					return arraySchema;
 				}
 				// Case 2: Schema already has type: array - check if items have wrong nullable structure
@@ -357,14 +356,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				else if (openApiSchema.Type == JsonSchemaType.Array)
 				{
 					IOpenApiSchema? items = openApiSchema.Items;
-					
+
 					// Check if items have a oneOf for nullable - this indicates the array is nullable, not the items
 					if (items is OpenApiSchema itemsSchema && itemsSchema.OneOf is not null && itemsSchema.OneOf.Count == 2)
 					{
 						// Check if one of the oneOf elements is just a nullable marker (has no type set)
 						IOpenApiSchema? nullableMarker = null;
 						IOpenApiSchema? typeSchema = null;
-						
+
 						foreach (IOpenApiSchema oneOfSchema in itemsSchema.OneOf)
 						{
 							if (oneOfSchema is OpenApiSchema os)
@@ -380,7 +379,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 								}
 							}
 						}
-						
+
 						// If we found both a nullable marker and a type schema, this is a nullable array
 						if (nullableMarker is not null && typeSchema is not null)
 						{
@@ -390,7 +389,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 								Type = JsonSchemaType.Array,
 								Items = typeSchema
 							};
-							
+
 							// Wrap the array in oneOf for nullable
 							OpenApiSchema nullableArraySchema = new()
 							{
@@ -1109,13 +1108,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					// Check if this is a nullable marker - it should have no type, items, properties, or $ref
 					// It's essentially an empty schema, possibly with just the nullable extension
-					bool isNullableMarker = !os.Type.HasValue && 
-											os.Items is null && 
+					bool isNullableMarker = !os.Type.HasValue &&
+											os.Items is null &&
 											(os.Properties is null || os.Properties.Count == 0) &&
 											os.AllOf is null &&
 											os.AnyOf is null &&
 											os.OneOf is null;
-					
+
 					if (isNullableMarker)
 					{
 						nullableMarker = os;
