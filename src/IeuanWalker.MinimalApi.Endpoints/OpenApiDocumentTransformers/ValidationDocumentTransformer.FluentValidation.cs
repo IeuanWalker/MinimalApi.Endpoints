@@ -596,7 +596,7 @@ partial class ValidationDocumentTransformer
 		};
 	}
 
-	[LoggerMessage(Level = LogLevel.Warning, Message = "Unable to determine custom error message for validator '{ValidatorType}' on property '{PropertyName}'.Falling back to generic message.")]
+	[LoggerMessage(Level = LogLevel.Warning, Message = "Unable to determine custom error message for validator '{ValidatorType}' on property '{PropertyName}'. Falling back to generic message.")]
 	static partial void LogUnableToDetermineCustomErrorMessage(ILogger logger, string validatorType, string propertyName);
 
 	[LoggerMessage(Level = LogLevel.Warning, Message = "Exception while obtaining validator error message for property '{PropertyName}' using validator '{ValidatorType}'. Using generic message.")]

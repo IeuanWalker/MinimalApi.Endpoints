@@ -86,11 +86,9 @@ partial class ValidationDocumentTransformer
 		// Get all properties to find nested objects
 		PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-		foreach (PropertyInfo property in properties)
+		foreach (Type actualType in properties.Select(p =>
 		{
-			Type propertyType = property.PropertyType;
-
-			// Get the actual type if it's nullable
+			Type propertyType = p.PropertyType;
 			Type actualType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
 
 			// Check if it's a collection type
@@ -111,6 +109,10 @@ partial class ValidationDocumentTransformer
 				}
 			}
 
+			return actualType;
+		})
+		.Where(actualType =>
+		{
 			// Skip primitive types, system types, and types we've already processed
 			if (actualType.IsPrimitive ||
 				actualType == typeof(string) ||
@@ -123,19 +125,16 @@ partial class ValidationDocumentTransformer
 				actualType.Namespace?.StartsWith("Microsoft.") == true ||
 				processedTypes.Contains(actualType))
 			{
-				continue;
+				return false;
 			}
 
 			// Check if this is a complex type with validation attributes
-			// (it doesn't need [ValidatableType] if it's a nested object)
 			PropertyInfo[] nestedProperties = actualType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-			bool hasValidationAttributes = nestedProperties.Any(p => p.GetCustomAttributes<ValidationAttribute>(inherit: true).Any());
-
-			if (hasValidationAttributes)
-			{
-				// Recursively process this nested type
-				ProcessTypeRecursively(actualType, allValidationRules, processedTypes, logger);
-			}
+			return nestedProperties.Any(np => np.GetCustomAttributes<ValidationAttribute>(inherit: true).Any());
+		}))
+		{
+			// Recursively process this nested type
+			ProcessTypeRecursively(actualType, allValidationRules, processedTypes, logger);
 		}
 	}
 
@@ -153,7 +152,7 @@ partial class ValidationDocumentTransformer
 
 			foreach (ValidationAttribute attribute in validationAttributes)
 			{
-				Validation.ValidationRule? rule = ConvertDataAnnotationToValidationRule(property.Name, type, attribute, logger);
+				Validation.ValidationRule? rule = ConvertDataAnnotationToValidationRule(property, type, attribute, logger);
 				if (rule is not null)
 				{
 					rules.Add(rule);
@@ -164,8 +163,10 @@ partial class ValidationDocumentTransformer
 		return rules;
 	}
 
-	static Validation.ValidationRule? ConvertDataAnnotationToValidationRule(string propertyName, Type propertyParent, ValidationAttribute attribute, ILogger logger)
+	static Validation.ValidationRule? ConvertDataAnnotationToValidationRule(PropertyInfo property, Type propertyParent, ValidationAttribute attribute, ILogger logger)
 	{
+		string propertyName = property.Name;
+		
 		// Map DataAnnotation attributes to internal ValidationRule types
 		return attribute switch
 		{
@@ -186,7 +187,7 @@ partial class ValidationDocumentTransformer
 				minLength: null,
 				maxLength: maxLength.Length),
 
-			RangeAttribute range => CreateRangeRuleFromAttribute(propertyName, propertyParent, range),
+			RangeAttribute range => CreateRangeRuleFromAttribute(propertyName, property.PropertyType, range),
 
 			RegularExpressionAttribute regex => new Validation.PatternRule(propertyName, regex.Pattern),
 

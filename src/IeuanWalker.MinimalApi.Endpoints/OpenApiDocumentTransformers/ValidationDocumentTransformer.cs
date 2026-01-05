@@ -265,13 +265,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					foreach (KeyValuePair<string, OpenApiMediaType> content in operation.Value.RequestBody.Content)
 					{
-						if (content.Value.Schema is OpenApiSchemaReference schemaRef)
+						if (content.Value.Schema is OpenApiSchemaReference schemaRef &&
+							schemaRef.Reference?.Id == requestTypeSchemaName)
 						{
-							if (schemaRef.Reference?.Id == requestTypeSchemaName)
-							{
-								shouldApplyValidation = true;
-								break;
-							}
+							shouldApplyValidation = true;
+							break;
 						}
 					}
 				}
