@@ -807,12 +807,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
-		// Ensure array type is explicitly set if we have items but no type
-		if (newInlineSchema.Items is not null && !newInlineSchema.Type.HasValue)
-		{
-			newInlineSchema.Type = JsonSchemaType.Array;
-		}
-
 		// Preserve Enum values from the original or resolved schema (for enum types)
 		if (originalOpenApiSchema?.Enum is not null && originalOpenApiSchema.Enum.Count > 0)
 		{
