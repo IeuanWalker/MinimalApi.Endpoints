@@ -266,6 +266,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					// Match parameter name to property rules (case-insensitive)
 					if (!rulesByProperty.TryGetValue(parameter.Name, out List<Validation.ValidationRule>? propertyRules))
 					{
+						// No validation rules for this parameter, but we should still inline primitive types
+						// for better OpenAPI documentation clarity
+						if (parameter.Schema is not null && !IsEnumSchemaReference(parameter.Schema, document) && !IsInlineEnumSchema(parameter.Schema))
+						{
+							parameter.Schema = InlinePrimitiveTypeReference(parameter.Schema, document);
+						}
 						continue;
 					}
 
@@ -382,6 +388,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// We need to preserve this structure when creating the inline schema
 		bool isNullableWrapper = originalOpenApiSchema?.OneOf is not null && originalOpenApiSchema.OneOf.Count > 0;
 		IOpenApiSchema? actualSchema = originalOpenApiSchema;
+		IOpenApiSchema? typeSourceSchema = null; // Schema to extract type info from (may be different from actualSchema)
 
 		if (isNullableWrapper)
 		{
@@ -405,6 +412,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				return false;
 			});
 
+			// Also find any schema reference in the oneOf for type information
+			// (In case actualSchema has validation but type info is in a different oneOf element)
+			typeSourceSchema = originalOpenApiSchema!.OneOf?.FirstOrDefault(s => s is OpenApiSchemaReference);
+
 			// If we found a better schema to work with, update our reference
 			if (actualSchema is not null && actualSchema != originalOpenApiSchema)
 			{
@@ -421,6 +432,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		bool isNullableReference = false;
 		OpenApiSchema? resolvedReferenceSchema = null;
 
+		// Check actualSchema for reference type info
 		if (actualSchema is OpenApiSchemaReference schemaRef)
 		{
 			string? refId = schemaRef.Reference?.Id;
@@ -477,6 +489,26 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					referenceType = JsonSchemaType.String;
 					referenceFormat = "uuid";
+				}
+			}
+		}
+
+		// Also check typeSourceSchema if it's different from actualSchema (for nullable types with validation)
+		if (typeSourceSchema is not null && typeSourceSchema != actualSchema && typeSourceSchema is OpenApiSchemaReference typeSrcRef)
+		{
+			string? refId = typeSrcRef.Reference?.Id;
+			if (refId is not null && !referenceType.HasValue)
+			{
+				// Check for array types in the typeSourceSchema
+				if (refId.EndsWith("[]"))
+				{
+					referenceType = JsonSchemaType.Array;
+				}
+				else if (refId.Contains("System.Collections.Generic.List`1") ||
+						 refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+						 refId.Contains("System.Collections.Generic.ICollection`1"))
+				{
+					referenceType = JsonSchemaType.Array;
 				}
 			}
 		}
@@ -628,6 +660,48 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		else if (resolvedReferenceSchema?.Items is not null)
 		{
 			newInlineSchema.Items = InlinePrimitiveTypeReference(resolvedReferenceSchema.Items, document);
+		}
+		else if (isArrayType && actualSchema is OpenApiSchemaReference arraySchemaRef)
+		{
+			// For List<T> references, extract the element type from the reference ID
+			string? refId = arraySchemaRef.Reference?.Id;
+			if (refId is not null && (refId.Contains("System.Collections.Generic.List`1") ||
+									  refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+									  refId.Contains("System.Collections.Generic.ICollection`1")))
+			{
+				// Extract the element type from the generic parameter
+				// Format: System.Collections.Generic.List`1[[ElementType, Assembly, ...]]
+				int startIdx = refId.IndexOf("[[");
+				int endIdx = refId.IndexOf(',', startIdx);
+				if (startIdx >= 0 && endIdx > startIdx)
+				{
+					string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
+					// Create a reference to the element type schema (will be inlined if it's a primitive)
+					OpenApiSchemaReference elementRef = new(elementType, document, null);
+					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+				}
+			}
+		}
+		else if (isArrayType && typeSourceSchema is OpenApiSchemaReference typeSrcRef2)
+		{
+			// Handle case where type info is in a different oneOf element than actualSchema
+			// (e.g., nullable List<T> with validation rules)
+			string? refId = typeSrcRef2.Reference?.Id;
+			if (refId is not null && (refId.Contains("System.Collections.Generic.List`1") ||
+									  refId.Contains("System.Collections.Generic.IEnumerable`1") ||
+									  refId.Contains("System.Collections.Generic.ICollection`1")))
+			{
+				// Extract the element type from the generic parameter
+				int startIdx = refId.IndexOf("[[");
+				int endIdx = refId.IndexOf(',', startIdx);
+				if (startIdx >= 0 && endIdx > startIdx)
+				{
+					string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
+					// Create a reference to the element type schema (will be inlined if it's a primitive)
+					OpenApiSchemaReference elementRef = new(elementType, document, null);
+					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+				}
+			}
 		}
 
 		// Preserve Enum values from the original or resolved schema (for enum types)
