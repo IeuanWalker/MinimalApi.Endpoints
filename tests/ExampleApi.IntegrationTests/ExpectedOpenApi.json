@@ -2578,13 +2578,13 @@
           "nullableStringList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -2598,14 +2598,14 @@
           "nullableIntList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "integer",
                   "format": "int32"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -2619,14 +2619,14 @@
           "nullableDoubleList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "number",
                   "format": "double"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -2640,14 +2640,14 @@
           "nullableIntArray": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "integer",
                   "format": "int32"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -2660,13 +2660,13 @@
           "nullableReadOnlyStringList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -2680,14 +2680,14 @@
           "nullableIntCollection": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "integer",
                   "format": "int32"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -2723,28 +2723,28 @@
           "readOnlyList1Nullable": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string",
                   "format": "binary"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
           "readOnlyList2Nullable": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string",
                   "format": "binary"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -2765,13 +2765,13 @@
           "nestedObjectList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           }
@@ -3021,13 +3021,13 @@
           "nullableStringList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -3041,14 +3041,14 @@
           "nullableIntList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "integer",
                   "format": "int32"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -3062,14 +3062,14 @@
           "nullableDoubleList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "number",
                   "format": "double"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -3083,14 +3083,14 @@
           "nullableIntArray": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "integer",
                   "format": "int32"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -3103,13 +3103,13 @@
           "nullableReadOnlyStringList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -3123,14 +3123,14 @@
           "nullableIntCollection": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "integer",
                   "format": "int32"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -3166,28 +3166,28 @@
           "readOnlyList1Nullable": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string",
                   "format": "binary"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
           "readOnlyList2Nullable": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "type": "string",
                   "format": "binary"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -3208,13 +3208,13 @@
           "nestedObjectList": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           }
@@ -4071,13 +4071,13 @@
           "listNestedObject": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -4401,13 +4401,13 @@
           "listNestedObject": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           },
@@ -4699,13 +4699,13 @@
           "listNestedObject": {
             "oneOf": [
               {
-                "nullable": true
-              },
-              {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
                 }
+              },
+              {
+                "nullable": true
               }
             ]
           }

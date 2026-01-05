@@ -231,14 +231,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					OneOf =
 					[
+						correctedArraySchema,
 						new OpenApiSchema
 						{
 							Extensions = new Dictionary<string, IOpenApiExtension>
 							{
 								["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
 							}
-						},
-						correctedArraySchema
+						}
 					]
 				};
 				return nullableArraySchema;
