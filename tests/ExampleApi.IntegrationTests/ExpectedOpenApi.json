@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5153/"
+      "url": "http://localhost:5678/"
     }
   ],
   "paths": {
@@ -89,10 +89,10 @@
             "in": "query",
             "schema": {
               "oneOf": [
+                { },
                 {
                   "nullable": true
-                },
-                { }
+                }
               ]
             }
           },
