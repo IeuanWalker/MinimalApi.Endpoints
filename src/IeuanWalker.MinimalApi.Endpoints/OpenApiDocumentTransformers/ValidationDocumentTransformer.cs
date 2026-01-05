@@ -124,6 +124,26 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			schema.Required = new HashSet<string>(requiredProperties);
 		}
+
+		// Inline primitive type references for ALL properties (including those without validation rules)
+		// This ensures explicit types in OpenAPI documentation instead of requiring clients to resolve $ref links
+		foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
+		{
+			// Skip properties we already processed (they have validation rules)
+			if (rulesByProperty.Any(g => g.Key.ToCamelCase() == property.Key))
+			{
+				continue;
+			}
+
+			// Skip enum properties - preserve the $ref or inline enum info
+			if (IsEnumSchemaReference(property.Value, document) || IsInlineEnumSchema(property.Value))
+			{
+				continue;
+			}
+
+			// Inline primitive type references for better documentation
+			schema.Properties[property.Key] = InlinePrimitiveTypeReference(property.Value, document);
+		}
 	}
 
 	/// <summary>
