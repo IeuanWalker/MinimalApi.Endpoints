@@ -25,7 +25,7 @@ public class GetTypeExamplesFromQueryEndpoint : IEndpoint<RequestModel, Response
 
 	public Task<ResponseModel> Handle(RequestModel request, CancellationToken ct)
 	{
-		Dictionary<string, string> receivedValues = new();
+		Dictionary<string, string> receivedValues = [];
 		int count = 0;
 
 		// Track which parameters were provided

@@ -27,38 +27,165 @@ public class PostTypeExamplesFromBodyEndpoint : IEndpoint<RequestModel, Response
 	{
 		// Count non-null properties to demonstrate the endpoint is working
 		int count = 0;
-		if (!string.IsNullOrEmpty(request.StringValue)) count++;
-		if (request.NullableStringValue != null) count++;
-		if (request.IntValue != 0) count++;
-		if (request.NullableIntValue.HasValue) count++;
-		if (request.LongValue != 0) count++;
-		if (request.NullableLongValue.HasValue) count++;
-		if (request.DoubleValue != 0) count++;
-		if (request.NullableDoubleValue.HasValue) count++;
-		if (request.FloatValue != 0) count++;
-		if (request.NullableFloatValue.HasValue) count++;
-		if (request.DecimalValue != 0) count++;
-		if (request.NullableDecimalValue.HasValue) count++;
-		if (request.BoolValue) count++;
-		if (request.NullableBoolValue.HasValue) count++;
-		if (request.DateTimeValue != default) count++;
-		if (request.NullableDateTimeValue.HasValue) count++;
-		if (request.GuidValue != default) count++;
-		if (request.NullableGuidValue.HasValue) count++;
-		if (request.StringList.Count > 0) count++;
-		if (request.NullableStringList?.Count > 0) count++;
-		if (request.IntList.Count > 0) count++;
-		if (request.NullableIntList?.Count > 0) count++;
-		if (request.DoubleList.Count > 0) count++;
-		if (request.NullableDoubleList?.Count > 0) count++;
-		if (request.IntArray.Length > 0) count++;
-		if (request.NullableIntArray?.Length > 0) count++;
-		if (request.ReadOnlyStringList.Count > 0) count++;
-		if (request.NullableReadOnlyStringList?.Count > 0) count++;
-		if (request.IntCollection.Count > 0) count++;
-		if (request.NullableIntCollection?.Count > 0) count++;
-		if (request.NestedObjectValue != null) count++;
-		if (request.NestedObjectList?.Count > 0) count++;
+		if (!string.IsNullOrEmpty(request.StringValue))
+		{
+			count++;
+		}
+
+		if (request.NullableStringValue != null)
+		{
+			count++;
+		}
+
+		if (request.IntValue != 0)
+		{
+			count++;
+		}
+
+		if (request.NullableIntValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.LongValue != 0)
+		{
+			count++;
+		}
+
+		if (request.NullableLongValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.DoubleValue != 0)
+		{
+			count++;
+		}
+
+		if (request.NullableDoubleValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.FloatValue != 0)
+		{
+			count++;
+		}
+
+		if (request.NullableFloatValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.DecimalValue != 0)
+		{
+			count++;
+		}
+
+		if (request.NullableDecimalValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.BoolValue)
+		{
+			count++;
+		}
+
+		if (request.NullableBoolValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.DateTimeValue != default)
+		{
+			count++;
+		}
+
+		if (request.NullableDateTimeValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.GuidValue != default)
+		{
+			count++;
+		}
+
+		if (request.NullableGuidValue.HasValue)
+		{
+			count++;
+		}
+
+		if (request.StringList.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.NullableStringList?.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.IntList.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.NullableIntList?.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.DoubleList.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.NullableDoubleList?.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.IntArray.Length > 0)
+		{
+			count++;
+		}
+
+		if (request.NullableIntArray?.Length > 0)
+		{
+			count++;
+		}
+
+		if (request.ReadOnlyStringList.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.NullableReadOnlyStringList?.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.IntCollection.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.NullableIntCollection?.Count > 0)
+		{
+			count++;
+		}
+
+		if (request.NestedObjectValue != null)
+		{
+			count++;
+		}
+
+		if (request.NestedObjectList?.Count > 0)
+		{
+			count++;
+		}
 
 		ResponseModel response = new()
 		{
