@@ -16,7 +16,7 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 	}
 
 	[Fact]
-	public async Task PostDataAnnotations_WithValidData_ReturnsOk()
+	public async Task PostDataAnnotations_WithAllBuiltInStringValidators_ReturnsBadRequest()
 	{
 		// Note: This endpoint is configured with all validation attributes as examples,
 		// but for most practical tests we expect validation failures.
