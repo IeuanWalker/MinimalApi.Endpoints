@@ -397,7 +397,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					// Skip minimal schemas that just mark nullability
 					// These typically have no Type set and few/no other properties
-					return schema.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0;
+					// But also look for schemas with maxLength/minLength as those are validation rules
+					return schema.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0 || 
+					       schema.MaxLength.HasValue || schema.MinLength.HasValue ||
+					       schema.Maximum is not null || schema.Minimum is not null;
 				}
 				return false;
 			});
@@ -617,13 +620,14 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Preserve Items for array types from the original or resolved schema
+		// BUT inline primitive type references for better OpenAPI documentation
 		if (originalOpenApiSchema?.Items is not null)
 		{
-			newInlineSchema.Items = originalOpenApiSchema.Items;
+			newInlineSchema.Items = InlinePrimitiveTypeReference(originalOpenApiSchema.Items, document);
 		}
 		else if (resolvedReferenceSchema?.Items is not null)
 		{
-			newInlineSchema.Items = resolvedReferenceSchema.Items;
+			newInlineSchema.Items = InlinePrimitiveTypeReference(resolvedReferenceSchema.Items, document);
 		}
 
 		// Preserve Enum values from the original or resolved schema (for enum types)
@@ -1150,5 +1154,85 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		return false;
+	}
+
+	/// <summary>
+	/// Converts primitive type references (like System.Int32, System.String) to inline schemas
+	/// with explicit type and format information. This improves OpenAPI documentation by making
+	/// types explicit instead of requiring clients to resolve $ref links.
+	/// </summary>
+	static IOpenApiSchema InlinePrimitiveTypeReference(IOpenApiSchema itemSchema, OpenApiDocument document)
+	{
+		// If not a reference, return as-is
+		if (itemSchema is not OpenApiSchemaReference schemaRef)
+		{
+			return itemSchema;
+		}
+
+		string? refId = schemaRef.Reference?.Id;
+		if (string.IsNullOrEmpty(refId))
+		{
+			return itemSchema;
+		}
+
+		// Only inline primitive system types, not custom types
+		if (!refId.StartsWith("System."))
+		{
+			return itemSchema;
+		}
+
+		// Create inline schema for primitive types
+		OpenApiSchema inlineSchema = new();
+
+		if (refId.Contains("System.String") && !refId.Contains("[]"))
+		{
+			inlineSchema.Type = JsonSchemaType.String;
+		}
+		else if (refId.Contains("System.Int32"))
+		{
+			inlineSchema.Type = JsonSchemaType.Integer;
+			inlineSchema.Format = "int32";
+		}
+		else if (refId.Contains("System.Int64"))
+		{
+			inlineSchema.Type = JsonSchemaType.Integer;
+			inlineSchema.Format = "int64";
+		}
+		else if (refId.Contains("System.Decimal"))
+		{
+			inlineSchema.Type = JsonSchemaType.Number;
+			// decimal doesn't have a standard format, leave null
+		}
+		else if (refId.Contains("System.Double"))
+		{
+			inlineSchema.Type = JsonSchemaType.Number;
+			inlineSchema.Format = "double";
+		}
+		else if (refId.Contains("System.Single"))
+		{
+			inlineSchema.Type = JsonSchemaType.Number;
+			inlineSchema.Format = "float";
+		}
+		else if (refId.Contains("System.Boolean"))
+		{
+			inlineSchema.Type = JsonSchemaType.Boolean;
+		}
+		else if (refId.Contains("System.DateTime") || refId.Contains("System.DateTimeOffset"))
+		{
+			inlineSchema.Type = JsonSchemaType.String;
+			inlineSchema.Format = "date-time";
+		}
+		else if (refId.Contains("System.Guid"))
+		{
+			inlineSchema.Type = JsonSchemaType.String;
+			inlineSchema.Format = "uuid";
+		}
+		else
+		{
+			// For other types (non-primitives), keep the reference
+			return itemSchema;
+		}
+
+		return inlineSchema;
 	}
 }
