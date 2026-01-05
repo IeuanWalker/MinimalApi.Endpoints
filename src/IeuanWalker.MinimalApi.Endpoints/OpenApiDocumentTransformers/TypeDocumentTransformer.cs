@@ -36,6 +36,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 5: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
+		// Step 6: Reorder all oneOf structures to have type first, nullable marker second
+		ReorderOneOfStructures(document);
+
 		return Task.CompletedTask;
 	}
 
@@ -1064,5 +1067,105 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		return true;
+	}
+
+	static void ReorderOneOfStructures(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		// Process each schema in the document
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		{
+			ReorderOneOfInIOpenApiSchema(schemaEntry.Value);
+		}
+	}
+
+	static void ReorderOneOfInIOpenApiSchema(IOpenApiSchema iSchema)
+	{
+		if (iSchema is OpenApiSchema schema)
+		{
+			ReorderOneOfInSchema(schema);
+		}
+	}
+
+	static void ReorderOneOfInSchema(OpenApiSchema schema)
+	{
+		// Reorder oneOf if present (type first, nullable marker second)
+		if (schema.OneOf is not null && schema.OneOf.Count == 2)
+		{
+			// Find the nullable marker and the type schema
+			IOpenApiSchema? nullableMarker = null;
+			IOpenApiSchema? typeSchema = null;
+			int nullableIndex = -1;
+			int typeIndex = -1;
+
+			for (int i = 0; i < schema.OneOf.Count; i++)
+			{
+				IOpenApiSchema oneOfSchema = schema.OneOf[i];
+				if (oneOfSchema is OpenApiSchema os)
+				{
+					// Check if this is a nullable marker - it should have no type, items, properties, or $ref
+					// It's essentially an empty schema, possibly with just the nullable extension
+					bool isNullableMarker = !os.Type.HasValue && 
+											os.Items is null && 
+											(os.Properties is null || os.Properties.Count == 0) &&
+											os.AllOf is null &&
+											os.AnyOf is null &&
+											os.OneOf is null;
+					
+					if (isNullableMarker)
+					{
+						nullableMarker = os;
+						nullableIndex = i;
+					}
+					else
+					{
+						typeSchema = os;
+						typeIndex = i;
+					}
+				}
+				else if (oneOfSchema is OpenApiSchemaReference)
+				{
+					typeSchema = oneOfSchema;
+					typeIndex = i;
+				}
+			}
+
+			// If we found both and nullable is first, swap them
+			if (nullableMarker is not null && typeSchema is not null && nullableIndex < typeIndex)
+			{
+				schema.OneOf[nullableIndex] = typeSchema;
+				schema.OneOf[typeIndex] = nullableMarker;
+			}
+		}
+
+		// Recursively process properties
+		if (schema.Properties is not null && schema.Properties.Count > 0)
+		{
+			List<string> propertyKeys = schema.Properties.Keys.ToList();
+			foreach (string key in propertyKeys)
+			{
+				IOpenApiSchema propertySchema = schema.Properties[key];
+				ReorderOneOfInIOpenApiSchema(propertySchema);
+			}
+		}
+
+		// Recursively process array items
+		if (schema.Items is not null)
+		{
+			ReorderOneOfInIOpenApiSchema(schema.Items);
+		}
+
+		// Recursively process oneOf schemas
+		if (schema.OneOf is not null)
+		{
+			foreach (IOpenApiSchema oneOfSchema in schema.OneOf)
+			{
+				ReorderOneOfInIOpenApiSchema(oneOfSchema);
+			}
+		}
 	}
 }
