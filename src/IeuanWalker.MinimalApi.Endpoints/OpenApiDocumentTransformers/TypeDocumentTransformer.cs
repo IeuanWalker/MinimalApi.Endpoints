@@ -481,8 +481,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
-		System.IO.File.AppendAllText("/tmp/type_debug.log", $"[FixParameterTypes] Starting parameter type fixing\n");
-
 		// Build a lookup cache for path matching
 		Dictionary<string, Type?> pathMatchCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -514,8 +512,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					continue;
 				}
 
-				System.IO.File.AppendAllText("/tmp/type_debug.log", $"[FixParameterTypes] Processing path {pathPattern} with {operation.Value.Parameters.Count} parameters\n");
-
 				// Process each parameter
 				foreach (OpenApiParameter parameter in operation.Value.Parameters.Cast<OpenApiParameter>())
 				{
@@ -523,8 +519,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					{
 						continue;
 					}
-
-					System.IO.File.AppendAllText("/tmp/type_debug.log", $"[FixParameterTypes] Fixing parameter: {parameter.Name}\n");
 
 					// Fix the parameter schema type
 					parameter.Schema = FixParameterSchemaType(parameter.Schema, parameter.Name, pathRequestType);
@@ -542,20 +536,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			if (property is not null)
 			{
 				return CreateSchemaFromType(property.PropertyType);
-			}
-		}
-
-		// Log schema type for debugging
-		if (parameterName.Contains("Array", StringComparison.OrdinalIgnoreCase))
-		{
-			System.IO.File.AppendAllText("/tmp/type_debug.log", $"[FixParameterSchemaType] Parameter '{parameterName}': schema type = {schema.GetType().Name}\n");
-			if (schema is OpenApiSchema os)
-			{
-				System.IO.File.AppendAllText("/tmp/type_debug.log", $"  - OpenApiSchema.Type = {os.Type}\n");
-			}
-			else if (schema is OpenApiSchemaReference osr)
-			{
-				System.IO.File.AppendAllText("/tmp/type_debug.log", $"  - OpenApiSchemaReference.Reference.Id = {osr.Reference?.Id}\n");
 			}
 		}
 
@@ -863,8 +843,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return schemaRef;
 		}
 
-		Console.WriteLine($"[InlinePrimitiveTypeReferenceForParameter] RefId: {refId}");
-
 		// Only inline primitive system types
 		if (!refId.StartsWith("System."))
 		{
@@ -873,7 +851,17 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 		OpenApiSchema inlineSchema = new();
 
-		if (refId.Contains("System.String"))
+		// Handle array types FIRST (e.g., System.String[], System.Int32[])
+		// This must come before individual type checks to avoid matching System.String when we have System.String[]
+		if (refId.EndsWith("[]"))
+		{
+			inlineSchema.Type = JsonSchemaType.Array;
+			// Extract element type from the array reference
+			string elementRefId = refId[..^2]; // Remove "[]"
+			OpenApiSchemaReference elementRef = new(elementRefId, null, null);
+			inlineSchema.Items = InlinePrimitiveTypeReferenceForParameter(elementRef);
+		}
+		else if (refId.Contains("System.String"))
 		{
 			inlineSchema.Type = JsonSchemaType.String;
 		}
@@ -935,19 +923,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			inlineSchema.Type = JsonSchemaType.String;
 			inlineSchema.Format = "uuid";
 		}
-		// Handle array types (e.g., System.String[], System.Int32[])
-		else if (refId.EndsWith("[]"))
-		{
-			Console.WriteLine($"[InlinePrimitiveTypeReferenceForParameter] Found array type: {refId}");
-			inlineSchema.Type = JsonSchemaType.Array;
-			// Extract element type from the array reference
-			string elementRefId = refId[..^2]; // Remove "[]"
-			OpenApiSchemaReference elementRef = new(elementRefId, null, null);
-			inlineSchema.Items = InlinePrimitiveTypeReferenceForParameter(elementRef);
-		}
 		else
 		{
-			Console.WriteLine($"[InlinePrimitiveTypeReferenceForParameter] Unhandled type: {refId}");
 			return schemaRef;
 		}
 

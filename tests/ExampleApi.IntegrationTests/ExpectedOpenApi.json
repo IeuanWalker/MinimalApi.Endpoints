@@ -804,23 +804,32 @@
             "name": "StringArray",
             "in": "query",
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           {
             "name": "IntArray",
             "in": "query",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              }
             }
           },
           {
             "name": "DoubleArray",
             "in": "query",
             "schema": {
-              "type": "number",
-              "format": "double"
+              "type": "array",
+              "items": {
+                "type": "number",
+                "format": "double"
+              }
             }
           }
         ],
@@ -1137,7 +1146,10 @@
             "required": true,
             "schema": {
               "minLength": 1,
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
               "description": "Validation rules:\n- Must be 1 items or more"
             }
           },
@@ -1147,7 +1159,10 @@
             "required": true,
             "schema": {
               "maxLength": 10,
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
               "description": "Validation rules:\n- Must be 10 items or fewer"
             }
           },
@@ -1158,7 +1173,10 @@
             "schema": {
               "maxLength": 10,
               "minLength": 1,
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
               "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
             }
           },
@@ -1168,9 +1186,12 @@
             "required": true,
             "schema": {
               "minLength": 1,
-              "type": "integer",
-              "description": "Validation rules:\n- Must be 1 items or more",
-              "format": "int32"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "description": "Validation rules:\n- Must be 1 items or more"
             }
           },
           {
@@ -1179,9 +1200,12 @@
             "required": true,
             "schema": {
               "maxLength": 10,
-              "type": "integer",
-              "description": "Validation rules:\n- Must be 10 items or fewer",
-              "format": "int32"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "description": "Validation rules:\n- Must be 10 items or fewer"
             }
           },
           {
@@ -1191,9 +1215,12 @@
             "schema": {
               "maxLength": 10,
               "minLength": 1,
-              "type": "integer",
-              "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer",
-              "format": "int32"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
             }
           },
           {
@@ -1437,7 +1464,10 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
               "description": "Validation rules:\n- Must contain at least 1 item."
             }
           },
@@ -1446,7 +1476,10 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
               "description": "Validation rules:\n- Must contain at most 10 items."
             }
           },
@@ -1455,7 +1488,10 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
               "description": "Validation rules:\n- Must contain between 1 and 10 items."
             }
           },
@@ -1464,9 +1500,12 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "description": "Validation rules:\n- Must contain at least 1 item.",
-              "format": "int32"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "description": "Validation rules:\n- Must contain at least 1 item."
             }
           },
           {
@@ -1474,9 +1513,12 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "description": "Validation rules:\n- Must contain at most 10 items.",
-              "format": "int32"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "description": "Validation rules:\n- Must contain at most 10 items."
             }
           },
           {
@@ -1484,9 +1526,12 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "description": "Validation rules:\n- Must contain between 1 and 10 items.",
-              "format": "int32"
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "description": "Validation rules:\n- Must contain between 1 and 10 items."
             }
           },
           {
