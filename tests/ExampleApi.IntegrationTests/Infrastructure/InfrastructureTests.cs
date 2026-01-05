@@ -33,8 +33,6 @@ public partial class InfrastructureTests : IClassFixture<ExampleApiWebApplicatio
 
 		string actualContent = await response.Content.ReadAsStringAsync();
 
-		Debugger.Break();
-
 		actualContent.ShouldNotBeNullOrWhiteSpace();
 
 		// Load expected OpenAPI JSON

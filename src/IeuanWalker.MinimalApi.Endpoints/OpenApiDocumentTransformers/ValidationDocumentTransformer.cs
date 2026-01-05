@@ -98,15 +98,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				requiredProperties.Add(propertyKey);
 			}
 
-			// Check if there are any rules other than RequiredRule and DescriptionRule
-			// If only RequiredRule/DescriptionRule exist, we don't need to modify the schema inline
-			// (RequiredRule is handled by adding to required array, DescriptionRule doesn't apply to nested objects)
-			bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
-
-			// Only create inline schema if there are validation rules other than just Required
-			// This preserves $ref for nested objects that only have Required validation
-			// ALSO preserve $ref for enum types - enum properties should reference the enum schema, not inline it
-			if (hasOtherRules)
+			// Create inline schema for all properties with validation rules (including just Required)
+			// This ensures type information is explicit in the schema rather than relying on references
+			if (propertyRules.Any())
 			{
 				if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 				{
@@ -282,11 +276,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						parameter.Required = true;
 					}
 
-					// Check if there are any rules other than RequiredRule and DescriptionRule
-					bool hasOtherRules = propertyRules.Any(r => r is not Validation.RequiredRule and not Validation.DescriptionRule);
-
-					// Only modify the parameter schema if there are validation rules other than just Required
-					if (hasOtherRules && parameter.Schema is not null)
+					// Create inline schema for all parameters with validation rules (including just Required)
+					// This ensures type information is explicit in the schema rather than relying on references
+					if (propertyRules.Count > 0 && parameter.Schema is not null)
 					{
 						// Check if this parameter is a reference to an enum schema OR has inline enum values
 						// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
@@ -580,29 +572,36 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
 			format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
 
-			// If no type from rules, try original schema or reference
+			// If no type from rules, try reference type detection, then schema types
+			// Prioritize referenceType for primitive types (Int32, String, etc.) as it's more reliable
 			if (!schemaType.HasValue)
 			{
-				if (originalOpenApiSchema?.Type is not null)
+				// First try reference type detection (most reliable for primitives)
+				if (referenceType.HasValue)
+				{
+					schemaType = referenceType;
+					format ??= referenceFormat;
+				}
+				// Then try original schema
+				else if (originalOpenApiSchema?.Type is not null)
 				{
 					schemaType = originalOpenApiSchema.Type;
 					format ??= originalOpenApiSchema.Format;
 				}
+				// Finally try resolved reference schema
 				else if (resolvedReferenceSchema?.Type is not null)
 				{
 					schemaType = resolvedReferenceSchema.Type;
 					format ??= resolvedReferenceSchema.Format;
 				}
-				else if (referenceType.HasValue)
-				{
-					schemaType = referenceType;
-					format ??= referenceFormat;
-				}
+			}
+			
+			// If format still not set, try to get it from all sources
+			if (format is null)
+			{
+				format = referenceFormat ?? resolvedReferenceSchema?.Format ?? originalOpenApiSchema?.Format;
 			}
 		}
-
-		// If format wasn't set yet, try to get it from original schema
-		format ??= originalOpenApiSchema?.Format;
 
 		// Create inline schema - set properties after creation to avoid initialization issues
 		OpenApiSchema newInlineSchema = new();
@@ -916,7 +915,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		return rule switch
 		{
-			Validation.StringLengthRule => JsonSchemaType.String,
+			// StringLengthRule can apply to both strings and arrays (collections)
+			// Return null to let the schema type be determined from the property's actual type
+			Validation.StringLengthRule => null,
 			Validation.PatternRule => JsonSchemaType.String,
 			Validation.EmailRule => JsonSchemaType.String,
 			Validation.UrlRule => JsonSchemaType.String,
