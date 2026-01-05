@@ -100,22 +100,20 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Create inline schema for all properties with validation rules (including just Required)
 			// This ensures type information is explicit in the schema rather than relying on references
-			if (propertyRules.Any())
+			if (propertyRules.Any()
+				&& schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
 			{
-				if (schema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchemaInterface))
+				// Check if this property is a reference to an enum schema OR has inline enum values
+				// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
+				if (IsEnumSchemaReference(propertySchemaInterface, document) || IsInlineEnumSchema(propertySchemaInterface))
 				{
-					// Check if this property is a reference to an enum schema OR has inline enum values
-					// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
-					if (IsEnumSchemaReference(propertySchemaInterface, document) || IsInlineEnumSchema(propertySchemaInterface))
-					{
-						// Don't modify enum properties - preserve the $ref or inline enum info
-						// EnumRule validation is redundant since the enum schema itself defines valid values
-						continue;
-					}
-
-					// Create inline schema with all validation constraints for this property
-					schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
+					// Don't modify enum properties - preserve the $ref or inline enum info
+					// EnumRule validation is redundant since the enum schema itself defines valid values
+					continue;
 				}
+
+				// Create inline schema with all validation constraints for this property
+				schema.Properties[propertyKey] = CreateInlineSchemaWithAllValidation(propertySchemaInterface, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
 			}
 		}
 
@@ -583,21 +581,21 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 			// For custom type references, we need to check if it's an enum and enrich with values
 			string? refId2 = customTypeRef.Reference?.Id;
-			if (refId2 is not null && document.Components?.Schemas?.TryGetValue(refId2, out IOpenApiSchema? referencedSchema2) == true)
+			if (refId2 is not null
+				&& document.Components?.Schemas?.TryGetValue(refId2, out IOpenApiSchema? referencedSchema2) == true
+				&& referencedSchema2 is OpenApiSchema refSchema
+				&& refSchema.Enum?.Count > 0)
 			{
-				if (referencedSchema2 is OpenApiSchema refSchema && refSchema.Enum?.Count > 0)
+				// This is an enum type - create an inline schema with enum values
+				OpenApiSchema enumInlineSchema = new()
 				{
-					// This is an enum type - create an inline schema with enum values
-					OpenApiSchema enumInlineSchema = new()
-					{
-						Type = refSchema.Type,
-						Format = refSchema.Format,
-						Enum = refSchema.Enum,
-						Extensions = refSchema.Extensions,
-						Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : refSchema.Description
-					};
-					return enumInlineSchema;
-				}
+					Type = refSchema.Type,
+					Format = refSchema.Format,
+					Enum = refSchema.Enum,
+					Extensions = refSchema.Extensions,
+					Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : refSchema.Description
+				};
+				return enumInlineSchema;
 			}
 
 			// Not an enum - just return the reference with updated description
