@@ -166,26 +166,30 @@ partial class ValidationDocumentTransformer
 	static Validation.ValidationRule? ConvertDataAnnotationToValidationRule(PropertyInfo property, Type propertyParent, ValidationAttribute attribute, ILogger logger)
 	{
 		string propertyName = property.Name;
+		bool isCollection = IsCollectionType(property.PropertyType);
 		
 		// Map DataAnnotation attributes to internal ValidationRule types
 		return attribute switch
 		{
 			RequiredAttribute => new Validation.RequiredRule(propertyName),
 
-			StringLengthAttribute stringLength => new Validation.StringLengthRule(
+			StringLengthAttribute stringLength => CreateStringLengthRule(
 				propertyName,
 				minLength: stringLength.MinimumLength > 0 ? stringLength.MinimumLength : null,
-				maxLength: stringLength.MaximumLength),
+				maxLength: stringLength.MaximumLength,
+				isCollection),
 
-			MinLengthAttribute minLength => new Validation.StringLengthRule(
+			MinLengthAttribute minLength => CreateStringLengthRule(
 				propertyName,
 				minLength: minLength.Length,
-				maxLength: null),
+				maxLength: null,
+				isCollection),
 
-			MaxLengthAttribute maxLength => new Validation.StringLengthRule(
+			MaxLengthAttribute maxLength => CreateStringLengthRule(
 				propertyName,
 				minLength: null,
-				maxLength: maxLength.Length),
+				maxLength: maxLength.Length,
+				isCollection),
 
 			RangeAttribute range => CreateRangeRuleFromAttribute(propertyName, property.PropertyType, range),
 
@@ -210,6 +214,49 @@ partial class ValidationDocumentTransformer
 			// For any other custom ValidationAttribute subclass
 			_ => CreateCustomRuleFromValidationAttribute(propertyName, propertyParent, attribute, logger)
 		};
+	}
+
+	static bool IsCollectionType(Type type)
+	{
+		// Get the underlying type if nullable
+		Type actualType = Nullable.GetUnderlyingType(type) ?? type;
+		
+		// String is not considered a collection for our purposes
+		if (actualType == typeof(string))
+		{
+			return false;
+		}
+		
+		// Check if it's an array or implements IEnumerable
+		return actualType.IsArray || 
+		       (actualType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(actualType));
+	}
+
+	static Validation.StringLengthRule CreateStringLengthRule(string propertyName, int? minLength, int? maxLength, bool isCollection)
+	{
+		// Generate appropriate error message based on whether it's a collection or string
+		string? errorMessage = null;
+		
+		if (minLength.HasValue && maxLength.HasValue)
+		{
+			errorMessage = isCollection
+				? $"Must be at least {minLength.Value} items and less than {maxLength.Value} items"
+				: $"Must be at least {minLength.Value} characters and less than {maxLength.Value} characters";
+		}
+		else if (minLength.HasValue)
+		{
+			errorMessage = isCollection
+				? $"Must be {minLength.Value} items or more"
+				: $"Must be {minLength.Value} characters or more";
+		}
+		else if (maxLength.HasValue)
+		{
+			errorMessage = isCollection
+				? $"Must be {maxLength.Value} items or fewer"
+				: $"Must be {maxLength.Value} characters or fewer";
+		}
+		
+		return new Validation.StringLengthRule(propertyName, minLength, maxLength, errorMessage);
 	}
 
 	static string? GetFormattedErrorMessage(ValidationAttribute attribute, ILogger logger, Type propertyValidator, string propertyName, string? defaultMessage = null)

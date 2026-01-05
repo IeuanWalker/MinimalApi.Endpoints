@@ -33,7 +33,7 @@ public partial class InfrastructureTests : IClassFixture<ExampleApiWebApplicatio
 
 		string actualContent = await response.Content.ReadAsStringAsync();
 
-		Debugger.Break();
+		//Debugger.Break();
 
 		actualContent.ShouldNotBeNullOrWhiteSpace();
 

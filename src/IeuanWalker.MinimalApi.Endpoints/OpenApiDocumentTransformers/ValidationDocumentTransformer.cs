@@ -819,65 +819,125 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			case Validation.RangeRule<int> intRangeRule:
 				if (intRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = intRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = intRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (intRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = intRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = intRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (intRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = intRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = intRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (intRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = intRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = intRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<decimal> decimalRangeRule:
 				if (decimalRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = decimalRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = decimalRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (decimalRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = decimalRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = decimalRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (decimalRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = decimalRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = decimalRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (decimalRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = decimalRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = decimalRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<double> doubleRangeRule:
 				if (doubleRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = doubleRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = doubleRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (doubleRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = doubleRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = doubleRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (doubleRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = doubleRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = doubleRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (doubleRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = doubleRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = doubleRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<float> floatRangeRule:
 				if (floatRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = floatRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = floatRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (floatRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = floatRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = floatRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (floatRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = floatRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = floatRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (floatRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = floatRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = floatRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
 			case Validation.RangeRule<long> longRangeRule:
 				if (longRangeRule.Minimum.HasValue)
 				{
-					schema.Minimum = longRangeRule.Minimum.Value.ToString();
-					schema.ExclusiveMinimum = longRangeRule.ExclusiveMinimum.ToString().ToLowerInvariant();
+					if (longRangeRule.ExclusiveMinimum)
+					{
+						schema.ExclusiveMinimum = longRangeRule.Minimum.Value.ToString();
+					}
+					else
+					{
+						schema.Minimum = longRangeRule.Minimum.Value.ToString();
+					}
 				}
 				if (longRangeRule.Maximum.HasValue)
 				{
-					schema.Maximum = longRangeRule.Maximum.Value.ToString();
-					schema.ExclusiveMaximum = longRangeRule.ExclusiveMaximum.ToString().ToLowerInvariant();
+					if (longRangeRule.ExclusiveMaximum)
+					{
+						schema.ExclusiveMaximum = longRangeRule.Maximum.Value.ToString();
+					}
+					else
+					{
+						schema.Maximum = longRangeRule.Maximum.Value.ToString();
+					}
 				}
 				break;
 
