@@ -27,10 +27,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 2: Fix nullable array structures (arrays with nullable items should be nullable arrays instead)
 		FixNullableArrays(document);
 
-		// Step 3: Build endpoint-to-request-type mapping
+		// Step 3: Fix double-wrapped arrays (defensive cleanup)
+		FixDoubleWrappedArrays(document);
+
+		// Step 4: Build endpoint-to-request-type mapping
 		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context, document);
 
-		// Step 4: Fix parameter types (query/path parameters)
+		// Step 5: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
 		return Task.CompletedTask;
@@ -101,6 +104,91 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				}
 			}
 		}
+	}
+
+	static void FixDoubleWrappedArrays(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		// Process each schema in the document
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		{
+			if (schemaEntry.Value is not OpenApiSchema schema)
+			{
+				continue;
+			}
+
+			// Fix properties that might have double-wrapped arrays
+			if (schema.Properties is not null && schema.Properties.Count > 0)
+			{
+				foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
+				{
+					schema.Properties[property.Key] = UnwrapDoubleArrays(property.Value);
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema UnwrapDoubleArrays(IOpenApiSchema schema)
+	{
+		if (schema is not OpenApiSchema openApiSchema)
+		{
+			return schema;
+		}
+
+		// Check if this is an array with items that are also an array
+		// BUT only unwrap if the inner array's items are a reference to a non-array type (not a primitive array type)
+		// This prevents unwrapping legitimate nested arrays like int[][] or List<List<T>>
+		if (openApiSchema.Type == JsonSchemaType.Array &&
+			openApiSchema.Items is OpenApiSchema itemsSchema &&
+			itemsSchema.Type == JsonSchemaType.Array &&
+			itemsSchema.Items is not null)
+		{
+			// Only unwrap if the innermost items are a reference to a complex type (not a primitive or another array)
+			if (itemsSchema.Items is OpenApiSchemaReference ||
+				(itemsSchema.Items is OpenApiSchema innerSchema && 
+				 innerSchema.Type == JsonSchemaType.Object))
+			{
+				// This is likely an incorrectly double-wrapped array - unwrap it
+				return new OpenApiSchema
+				{
+					Type = JsonSchemaType.Array,
+					Items = itemsSchema.Items
+				};
+			}
+		}
+
+		// Check if this is a oneOf with an array that has double-wrapped items
+		if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+		{
+			for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+			{
+				if (openApiSchema.OneOf[i] is OpenApiSchema oneOfSchema &&
+					oneOfSchema.Type == JsonSchemaType.Array &&
+					oneOfSchema.Items is OpenApiSchema itemsSchema2 &&
+					itemsSchema2.Type == JsonSchemaType.Array &&
+					itemsSchema2.Items is not null)
+				{
+					// Only unwrap if the innermost items are a reference to a complex type (not a primitive or another array)
+					if (itemsSchema2.Items is OpenApiSchemaReference ||
+						(itemsSchema2.Items is OpenApiSchema innerSchema &&
+						 innerSchema.Type == JsonSchemaType.Object))
+					{
+						// This oneOf element has an incorrectly double-wrapped array - unwrap it
+						openApiSchema.OneOf[i] = new OpenApiSchema
+						{
+							Type = JsonSchemaType.Array,
+							Items = itemsSchema2.Items
+						};
+					}
+				}
+			}
+		}
+
+		return schema;
 	}
 
 	static IOpenApiSchema FixNullableArraySchema(IOpenApiSchema schema)
@@ -198,9 +286,10 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					
 					if (hasNullableMarker && (hasArray || hasCollectionRef))
 					{
-						// This is already a nullable array/collection, don't wrap again
-						// But let the framework resolve the collection reference naturally
-						return openApiSchema;
+						// This is already a nullable array/collection
+						// Don't wrap it again, but let the normal oneOf processing below handle inlining
+						// We just need to skip the array wrapping logic for this case
+						return schema;
 					}
 				}
 				

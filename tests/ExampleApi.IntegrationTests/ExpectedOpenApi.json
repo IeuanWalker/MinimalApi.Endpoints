@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5573/"
+      "url": "http://localhost:5153/"
     }
   ],
   "paths": {
@@ -2725,10 +2725,7 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
-                  }
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
                 }
               }
             ]
@@ -3171,10 +3168,7 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
-                  }
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
                 }
               }
             ]
@@ -3764,10 +3758,7 @@
                 "minLength": 0,
                 "type": "array",
                 "items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
-                  }
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
                 },
                 "description": "Validation rules:\n- Must be 0 items or more\n- Must be 10 items or fewer"
               }
@@ -4040,10 +4031,7 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
-                  }
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
                 }
               }
             ]
@@ -4373,10 +4361,7 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
-                  }
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
                 }
               }
             ]
@@ -4674,10 +4659,7 @@
               {
                 "type": "array",
                 "items": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
-                  }
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
                 }
               }
             ]
