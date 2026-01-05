@@ -252,41 +252,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					continue;
 				}
 
-				// For RequestAsParameters endpoints, we rely on path matching to confirm this is the right request type
-				// For traditional endpoints with request body, we can double-check the schema reference
-				// If we've matched the path to this request type, apply the validation rules to parameters
-				bool shouldApplyValidation = false;
-
-				// Get the schema name for the request type
-				string requestTypeSchemaName = requestType.FullName ?? requestType.Name;
-
-				// Check if this operation has a request body that references our request type
-				if (operation.Value.RequestBody?.Content is not null)
-				{
-					foreach (KeyValuePair<string, OpenApiMediaType> content in operation.Value.RequestBody.Content)
-					{
-						if (content.Value.Schema is OpenApiSchemaReference schemaRef &&
-							schemaRef.Reference?.Id == requestTypeSchemaName)
-						{
-							shouldApplyValidation = true;
-							break;
-						}
-					}
-				}
-				else
-				{
-					// No request body - this is likely a RequestAsParameters endpoint
-					// We already matched the path to the request type via pathRequestType,
-					// so we should apply validation rules to the parameters
-					shouldApplyValidation = true;
-				}
-
-				if (!shouldApplyValidation)
-				{
-					// This operation doesn't use this request type, skip it
-					continue;
-				}
-
 				// Group rules by property name for easier lookup
 				// NOTE: HTTP query/path parameter names are case-insensitive in ASP.NET/OpenAPI.
 				// Validation rules are keyed by C# property names (usually PascalCase), while
