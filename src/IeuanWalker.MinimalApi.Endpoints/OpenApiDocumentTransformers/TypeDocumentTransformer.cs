@@ -48,19 +48,25 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
+			// Try to find the .NET type for this schema
+			Type? schemaType = FindTypeForSchema(schemaEntry.Key);
+
 			// Fix properties in this schema
 			if (schema.Properties is not null && schema.Properties.Count > 0)
 			{
 				foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
 				{
-					schema.Properties[property.Key] = FixSchemaType(property.Value, document);
+					// Get the property's actual .NET type if possible
+					PropertyInfo? propertyInfo = schemaType?.GetProperty(property.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+					
+					schema.Properties[property.Key] = FixSchemaType(property.Value, document, propertyInfo?.PropertyType);
 				}
 			}
 
 			// Fix array item types
 			if (schema.Items is not null)
 			{
-				schema.Items = FixSchemaType(schema.Items, document);
+				schema.Items = FixSchemaType(schema.Items, document, null);
 			}
 
 			// Fix the schema itself (for primitives defined at the schema level)
@@ -68,8 +74,114 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static IOpenApiSchema FixSchemaType(IOpenApiSchema schema, OpenApiDocument document)
+	static IOpenApiSchema FixSchemaType(IOpenApiSchema schema, OpenApiDocument document, Type? actualPropertyType = null)
 	{
+		// If we know the actual property type and it's an array/collection, ensure the schema reflects that
+		if (actualPropertyType is not null && schema is OpenApiSchema openApiSchema)
+		{
+			Type actualType = Nullable.GetUnderlyingType(actualPropertyType) ?? actualPropertyType;
+			bool isNullable = Nullable.GetUnderlyingType(actualPropertyType) is not null;
+			
+			// Check if this is an array or collection type
+			bool isArrayOrCollection = actualType.IsArray || 
+				(actualType.IsGenericType && (
+					actualType.GetGenericTypeDefinition() == typeof(List<>) ||
+					actualType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
+					actualType.GetGenericTypeDefinition() == typeof(ICollection<>) ||
+					actualType.GetGenericTypeDefinition() == typeof(IReadOnlyList<>) ||
+					actualType.GetGenericTypeDefinition() == typeof(IReadOnlyCollection<>)));
+			
+			if (isArrayOrCollection)
+			{
+				// Case 1: Schema doesn't have type: array yet, needs wrapping
+				if (openApiSchema.Type != JsonSchemaType.Array && openApiSchema.Items is null)
+				{
+					// The current schema represents the element type
+					// Check if it has a oneOf wrapper (this would be wrong for array element types)
+					IOpenApiSchema itemsSchema = openApiSchema;
+					
+					// If the schema has oneOf for nullable, unwrap it since the array itself is nullable, not the elements
+					if (isNullable && openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+					{
+						// Find the non-nullable schema in the oneOf
+						IOpenApiSchema? nonNullableSchema = openApiSchema.OneOf
+							.FirstOrDefault(s => s is OpenApiSchema os && os.Extensions is not null && !os.Extensions.ContainsKey("nullable"));
+						if (nonNullableSchema is not null)
+						{
+							itemsSchema = nonNullableSchema;
+						}
+					}
+					
+					// Create array schema with the corrected items schema
+					OpenApiSchema arraySchema = new()
+					{
+						Type = JsonSchemaType.Array,
+						Items = itemsSchema
+					};
+					
+					// For nullable arrays/collections, wrap in oneOf
+					if (isNullable)
+					{
+						OpenApiSchema nullableArraySchema = new()
+						{
+							OneOf =
+							[
+								new OpenApiSchema
+								{
+									Extensions = new Dictionary<string, IOpenApiExtension>
+									{
+										["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
+									}
+								},
+								arraySchema
+							]
+						};
+						return nullableArraySchema;
+					}
+					
+					return arraySchema;
+				}
+				// Case 2: Schema already has type: array, but items might have wrong nullable structure for nullable arrays
+				else if (openApiSchema.Type == JsonSchemaType.Array && isNullable && openApiSchema.Items is OpenApiSchema itemsSchema)
+				{
+					// Check if items have a oneOf for nullable (wrong - elements shouldn't be nullable for List<T>?)
+					if (itemsSchema.OneOf is not null && itemsSchema.OneOf.Count > 0)
+					{
+						// Find the non-nullable schema in the items oneOf
+						IOpenApiSchema? nonNullableItemSchema = itemsSchema.OneOf
+							.FirstOrDefault(s => s is OpenApiSchema os && (os.Extensions is null || !os.Extensions.ContainsKey("nullable")));
+						
+						if (nonNullableItemSchema is not null)
+						{
+							// Create new array with corrected items
+							OpenApiSchema correctedArraySchema = new()
+							{
+								Type = JsonSchemaType.Array,
+								Items = nonNullableItemSchema
+							};
+							
+							// Wrap the array in oneOf for nullable
+							OpenApiSchema nullableArraySchema = new()
+							{
+								OneOf =
+								[
+									new OpenApiSchema
+									{
+										Extensions = new Dictionary<string, IOpenApiExtension>
+										{
+											["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
+										}
+									},
+									correctedArraySchema
+								]
+							};
+							return nullableArraySchema;
+						}
+					}
+				}
+			}
+		}
+
 		// Handle OpenApiSchemaReference - inline primitive types
 		if (schema is OpenApiSchemaReference schemaRef)
 		{
@@ -77,34 +189,34 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Handle OpenApiSchema - fix type information
-		if (schema is OpenApiSchema openApiSchema)
+		if (schema is OpenApiSchema openApiSchemaToFix)
 		{
 			// Fix oneOf patterns (nullable types)
-			if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+			if (openApiSchemaToFix.OneOf is not null && openApiSchemaToFix.OneOf.Count > 0)
 			{
 				// Fix each schema in oneOf
-				for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+				for (int i = 0; i < openApiSchemaToFix.OneOf.Count; i++)
 				{
-					openApiSchema.OneOf[i] = FixSchemaType(openApiSchema.OneOf[i], document);
+					openApiSchemaToFix.OneOf[i] = FixSchemaType(openApiSchemaToFix.OneOf[i], document, null);
 				}
 			}
 
 			// Fix array item types
-			if (openApiSchema.Items is not null)
+			if (openApiSchemaToFix.Items is not null)
 			{
-				openApiSchema.Items = FixSchemaType(openApiSchema.Items, document);
+				openApiSchemaToFix.Items = FixSchemaType(openApiSchemaToFix.Items, document, null);
 			}
 
 			// Fix nested properties
-			if (openApiSchema.Properties is not null && openApiSchema.Properties.Count > 0)
+			if (openApiSchemaToFix.Properties is not null && openApiSchemaToFix.Properties.Count > 0)
 			{
-				foreach (KeyValuePair<string, IOpenApiSchema> property in openApiSchema.Properties.ToList())
+				foreach (KeyValuePair<string, IOpenApiSchema> property in openApiSchemaToFix.Properties.ToList())
 				{
-					openApiSchema.Properties[property.Key] = FixSchemaType(property.Value, document);
+					openApiSchemaToFix.Properties[property.Key] = FixSchemaType(property.Value, document, null);
 				}
 			}
 
-			return openApiSchema;
+			return openApiSchemaToFix;
 		}
 
 		return schema;
