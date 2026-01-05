@@ -534,6 +534,83 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 
+		// Check if actualSchema is a reference to a custom type (not a System.* primitive)
+		// If so, we should preserve the reference and only add validation description
+		bool isCustomTypeReference = false;
+		OpenApiSchemaReference? customTypeRef = null;
+		if (actualSchema is OpenApiSchemaReference schemaRef2)
+		{
+			string? refId = schemaRef2.Reference?.Id;
+			if (refId is not null && !refId.StartsWith("System."))
+			{
+				// This is a custom type reference - preserve it
+				isCustomTypeReference = true;
+				customTypeRef = schemaRef2;
+			}
+		}
+
+		// For custom type references, preserve the $ref and only add validation description
+		if (isCustomTypeReference && customTypeRef is not null)
+		{
+			// Extract custom description from DescriptionRule if present
+			string? customDescription = rules
+				.OfType<Validation.DescriptionRule>()
+				.FirstOrDefault()?.Description;
+
+			// Collect only applicable rule descriptions (RequiredRule for custom type references)
+			List<string> ruleDescriptions = [];
+			if (effectiveListRulesInDescription)
+			{
+				foreach (Validation.RequiredRule _ in rules.OfType<Validation.RequiredRule>())
+				{
+					ruleDescriptions.Add("Is required");
+				}
+			}
+
+			// Build the complete description
+			List<string> descriptionParts = [];
+
+			if (!string.IsNullOrEmpty(customDescription))
+			{
+				descriptionParts.Add(customDescription);
+			}
+
+			if (appendRulesToPropertyDescription && ruleDescriptions.Count > 0 && effectiveListRulesInDescription)
+			{
+				string rulesSection = "Validation rules:\n" + string.Join("\n", ruleDescriptions.Distinct().Select(msg => $"- {msg}"));
+				descriptionParts.Add(rulesSection);
+			}
+
+			// For custom type references, we need to check if it's an enum and enrich with values
+			string? refId2 = customTypeRef.Reference?.Id;
+			if (refId2 is not null && document.Components?.Schemas?.TryGetValue(refId2, out IOpenApiSchema? referencedSchema2) == true)
+			{
+				if (referencedSchema2 is OpenApiSchema refSchema && refSchema.Enum?.Count > 0)
+				{
+					// This is an enum type - create an inline schema with enum values
+					OpenApiSchema enumInlineSchema = new()
+					{
+						Type = refSchema.Type,
+						Format = refSchema.Format,
+						Enum = refSchema.Enum,
+						Extensions = refSchema.Extensions,
+						Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : refSchema.Description
+					};
+					return enumInlineSchema;
+				}
+			}
+
+			// Not an enum - just return the reference with updated description
+			// We cannot modify OpenApiSchemaReference, so return a schema with AllOf containing the reference
+			OpenApiSchema refWrapperSchema = new()
+			{
+				AllOf = [customTypeRef],
+				Description = descriptionParts.Count > 0 ? string.Join("\n\n", descriptionParts) : null
+			};
+
+			return refWrapperSchema;
+		}
+
 		// Check if this is a complex object (has AllOf for schema references or has Properties for inline object definitions)
 		// Complex objects should preserve their structure and only add validation descriptions
 		bool isComplexObject = (originalOpenApiSchema?.AllOf?.Count > 0) ||
@@ -666,6 +743,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			newInlineSchema.Type = schemaType.Value;
 		}
+		// For arrays, ensure type is always set even if schemaType wasn't determined
+		else if (isArrayType)
+		{
+			newInlineSchema.Type = JsonSchemaType.Array;
+		}
+		
 		if (format is not null)
 		{
 			newInlineSchema.Format = format;
@@ -722,6 +805,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
 				}
 			}
+		}
+
+		// Ensure array type is explicitly set if we have items but no type
+		if (newInlineSchema.Items is not null && !newInlineSchema.Type.HasValue)
+		{
+			newInlineSchema.Type = JsonSchemaType.Array;
 		}
 
 		// Preserve Enum values from the original or resolved schema (for enum types)
