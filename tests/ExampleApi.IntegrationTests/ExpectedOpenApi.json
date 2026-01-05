@@ -549,13 +549,429 @@
 				}
 			}
 		},
+		"/api/v1/validation/DataAnnotations/FromQuery": {
+			"get": {
+				"tags": [
+					"Validation"
+				],
+				"summary": "DataAnnotationsFromQuery",
+				"operationId": "get_ValidationDataAnnotationsFromQuery_14",
+				"parameters": [
+					{
+						"name": "AllBuiltInStringValidators",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 100,
+							"minLength": 3,
+							"pattern": "^[a-zA-Z0-9]+$",
+							"type": "string",
+							"description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number",
+							"format": "uri"
+						}
+					},
+					{
+						"name": "AllBuiltInNumberValidators",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 25,
+							"minimum": 10,
+							"maxLength": 100,
+							"minLength": 3,
+							"type": "number",
+							"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+						}
+					},
+					{
+						"name": "RequiredString",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.String"
+						}
+					},
+					{
+						"name": "RequiredInt",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Int32"
+						}
+					},
+					{
+						"name": "StringLength",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 50,
+							"minLength": 3,
+							"type": "string",
+							"description": "Validation rules:\n- Must be at least 3 characters and less than 50 characters"
+						}
+					},
+					{
+						"name": "StringMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 3,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 3 characters or more"
+						}
+					},
+					{
+						"name": "ListMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 3,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.String"
+							},
+							"description": "Validation rules:\n- Must be 3 items or more"
+						}
+					},
+					{
+						"name": "StringMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 100,
+							"type": "string",
+							"description": "Validation rules:\n- Must be 100 characters or fewer"
+						}
+					},
+					{
+						"name": "ListMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.String"
+							},
+							"description": "Validation rules:\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "RangeInt",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 25,
+							"minimum": 10,
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= 10 and <= 25",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "RangeDateTime",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be between 1996-06-08 and 2026-01-04",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "StringPattern",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"pattern": "^[a-zA-Z0-9]+$",
+							"type": "string",
+							"description": "Validation rules:\n- Must match pattern: ^[a-zA-Z0-9]+$"
+						}
+					},
+					{
+						"name": "StringEmail",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid email address",
+							"format": "email"
+						}
+					},
+					{
+						"name": "StringPhoneNumber",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid phone number"
+						}
+					},
+					{
+						"name": "StringUrl",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid URL",
+							"format": "uri"
+						}
+					},
+					{
+						"name": "ActualUri",
+						"in": "query",
+						"schema": {
+							"$ref": "#/components/schemas/System.Uri"
+						}
+					},
+					{
+						"name": "Compare1",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must match Compare2"
+						}
+					},
+					{
+						"name": "Compare2",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must match Compare1"
+						}
+					},
+					{
+						"name": "StringCreditCard",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Must be a valid credit card number"
+						}
+					},
+					{
+						"name": "IntMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 2147483647,
+							"minimum": 1,
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= 1 and <= 2147483647",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "IntMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 100,
+							"minimum": -2147483648,
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= -2147483648 and <= 100",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "IntRange",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 100,
+							"minimum": 1,
+							"type": "integer",
+							"description": "Validation rules:\n- Must be >= 1 and <= 100",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "DoubleMin",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 1.7976931348623157E+308,
+							"minimum": 0.1,
+							"type": "number",
+							"description": "Validation rules:\n- Must be >= 0.1 and <= 1.7976931348623157E+308",
+							"format": "double"
+						}
+					},
+					{
+						"name": "DoubleMax",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 99.9,
+							"minimum": -1.7976931348623157E+308,
+							"type": "number",
+							"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 99.9",
+							"format": "double"
+						}
+					},
+					{
+						"name": "DoubleRange",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maximum": 99.9,
+							"minimum": 0.1,
+							"type": "number",
+							"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
+							"format": "double"
+						}
+					},
+					{
+						"name": "ListStringMinCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.String"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more"
+						}
+					},
+					{
+						"name": "ListStringMaxCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.String"
+							},
+							"description": "Validation rules:\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "ListStringRangeCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.String"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "ListIntMinCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.Int32"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more"
+						}
+					},
+					{
+						"name": "ListIntMaxCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.Int32"
+							},
+							"description": "Validation rules:\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "ListIntRangeCount",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"maxLength": 10,
+							"minLength": 1,
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.Int32"
+							},
+							"description": "Validation rules:\n- Must be 1 items or more\n- Must be 10 items or fewer"
+						}
+					},
+					{
+						"name": "CustomValidatedProperty",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- CustomValidatedProperty is not valid."
+						}
+					},
+					{
+						"name": "ThrowsCustomValidationProperty",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Default error message"
+						}
+					},
+					{
+						"name": "CustomValidationWithDefaultMessage",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Default error message"
+						}
+					},
+					{
+						"name": "CustomValidationWithoutDefaultMessage",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- The field CustomValidationWithoutDefaultMessage is invalid."
+						}
+					},
+					{
+						"name": "CustomValidationWithoutDefaultMessageSetManually",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Setting error message manually"
+						}
+					},
+					{
+						"name": "CustomValidationWithDefaultMessageOverrideMessage",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "Validation rules:\n- Override error message"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "OK"
+					}
+				}
+			}
+		},
 		"/api/v1/validation/EndpointA": {
 			"get": {
 				"tags": [
 					"Validation"
 				],
 				"summary": "Test Endpoint A with Name property validation",
-				"operationId": "get_ValidationEndpointA_14",
+				"operationId": "get_ValidationEndpointA_15",
 				"parameters": [
 					{
 						"name": "Name",
@@ -588,7 +1004,7 @@
 					"Validation"
 				],
 				"summary": "Test Endpoint B with Name property validation",
-				"operationId": "get_ValidationEndpointB_15",
+				"operationId": "get_ValidationEndpointB_16",
 				"parameters": [
 					{
 						"name": "Name",
@@ -621,7 +1037,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromQuery",
-				"operationId": "get_ValidationFluentValidationFromQuery_16",
+				"operationId": "get_ValidationFluentValidationFromQuery_17",
 				"parameters": [
 					{
 						"name": "StringMin",
@@ -897,7 +1313,7 @@
 					"Validation"
 				],
 				"summary": "DataAnnotationsFromBody",
-				"operationId": "post_ValidationDataValidation_17",
+				"operationId": "post_ValidationDataValidation_18",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -920,7 +1336,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromBody",
-				"operationId": "post_ValidationFluentValidation_18",
+				"operationId": "post_ValidationFluentValidation_19",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -950,7 +1366,7 @@
 					"Validation"
 				],
 				"summary": "FluentValidationFromForm",
-				"operationId": "post_ValidationFluentValidationFromForm_19",
+				"operationId": "post_ValidationFluentValidationFromForm_20",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -986,7 +1402,7 @@
 					"Validation"
 				],
 				"summary": "ManualWithValidation",
-				"operationId": "post_ValidationWithValidation_20",
+				"operationId": "post_ValidationWithValidation_21",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -1009,7 +1425,7 @@
 					"Validation"
 				],
 				"summary": "WithValidationAlterAndRemove",
-				"operationId": "post_ValidationWithValidationAlterAndRemove_21",
+				"operationId": "post_ValidationWithValidationAlterAndRemove_22",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
