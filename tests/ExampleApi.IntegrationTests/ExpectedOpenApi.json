@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5566/"
+      "url": "http://localhost:5573/"
     }
   ],
   "paths": {
@@ -2531,17 +2531,17 @@
             }
           },
           "nullableStringList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string"
                 }
-              ]
-            }
+              }
+            ]
           },
           "intList": {
             "type": "array",
@@ -2551,18 +2551,18 @@
             }
           },
           "nullableIntList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "integer",
                   "format": "int32"
                 }
-              ]
-            }
+              }
+            ]
           },
           "doubleList": {
             "type": "array",
@@ -2572,18 +2572,18 @@
             }
           },
           "nullableDoubleList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "number",
                   "format": "double"
                 }
-              ]
-            }
+              }
+            ]
           },
           "intArray": {
             "type": "array",
@@ -2593,18 +2593,18 @@
             }
           },
           "nullableIntArray": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "integer",
                   "format": "int32"
                 }
-              ]
-            }
+              }
+            ]
           },
           "readOnlyStringList": {
             "type": "array",
@@ -2613,17 +2613,17 @@
             }
           },
           "nullableReadOnlyStringList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string"
                 }
-              ]
-            }
+              }
+            ]
           },
           "intCollection": {
             "type": "array",
@@ -2633,18 +2633,18 @@
             }
           },
           "nullableIntCollection": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "integer",
                   "format": "int32"
                 }
-              ]
-            }
+              }
+            ]
           },
           "singleFile": {
             "type": "string",
@@ -2676,32 +2676,32 @@
             ]
           },
           "readOnlyList1Nullable": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string",
                   "format": "binary"
                 }
-              ]
-            }
+              }
+            ]
           },
           "readOnlyList2Nullable": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string",
                   "format": "binary"
                 }
-              ]
-            }
+              }
+            ]
           },
           "fileCollectionList": {
             "type": "string",
@@ -2718,20 +2718,20 @@
             ]
           },
           "nestedObjectList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
                   }
                 }
-              ]
-            }
+              }
+            ]
           }
         }
       },
@@ -2977,17 +2977,17 @@
             }
           },
           "nullableStringList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string"
                 }
-              ]
-            }
+              }
+            ]
           },
           "intList": {
             "type": "array",
@@ -2997,18 +2997,18 @@
             }
           },
           "nullableIntList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "integer",
                   "format": "int32"
                 }
-              ]
-            }
+              }
+            ]
           },
           "doubleList": {
             "type": "array",
@@ -3018,18 +3018,18 @@
             }
           },
           "nullableDoubleList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "number",
                   "format": "double"
                 }
-              ]
-            }
+              }
+            ]
           },
           "intArray": {
             "type": "array",
@@ -3039,18 +3039,18 @@
             }
           },
           "nullableIntArray": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "integer",
                   "format": "int32"
                 }
-              ]
-            }
+              }
+            ]
           },
           "readOnlyStringList": {
             "type": "array",
@@ -3059,17 +3059,17 @@
             }
           },
           "nullableReadOnlyStringList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string"
                 }
-              ]
-            }
+              }
+            ]
           },
           "intCollection": {
             "type": "array",
@@ -3079,18 +3079,18 @@
             }
           },
           "nullableIntCollection": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "integer",
                   "format": "int32"
                 }
-              ]
-            }
+              }
+            ]
           },
           "singleFile": {
             "type": "string",
@@ -3122,32 +3122,32 @@
             ]
           },
           "readOnlyList1Nullable": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string",
                   "format": "binary"
                 }
-              ]
-            }
+              }
+            ]
           },
           "readOnlyList2Nullable": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "string",
                   "format": "binary"
                 }
-              ]
-            }
+              }
+            ]
           },
           "fileCollectionList": {
             "type": "string",
@@ -3164,20 +3164,20 @@
             ]
           },
           "nestedObjectList": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
                   }
                 }
-              ]
-            }
+              }
+            ]
           }
         }
       },
@@ -3755,23 +3755,23 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "maxLength": 10,
-            "minLength": 0,
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "maxLength": 10,
+                "minLength": 0,
+                "type": "array",
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
                   }
-                }
-              ]
-            },
-            "description": "Validation rules:\n- Must be 0 items or more\n- Must be 10 items or fewer"
+                },
+                "description": "Validation rules:\n- Must be 0 items or more\n- Must be 10 items or fewer"
+              }
+            ]
           },
           "customValidationWithDefaultMessage": {
             "type": "string",
@@ -4033,20 +4033,20 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel"
                   }
                 }
-              ]
-            }
+              }
+            ]
           },
           "allBuiltInStringValidators": {
             "oneOf": [
@@ -4366,20 +4366,20 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel"
                   }
                 }
-              ]
-            }
+              }
+            ]
           },
           "allBuiltInStringValidators": {
             "oneOf": [
@@ -4667,20 +4667,20 @@
             "description": "Validation rules:\n- Required"
           },
           "listNestedObject": {
-            "type": "array",
-            "items": {
-              "oneOf": [
-                {
-                  "nullable": true
-                },
-                {
+            "oneOf": [
+              {
+                "nullable": true
+              },
+              {
+                "type": "array",
+                "items": {
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel"
                   }
                 }
-              ]
-            }
+              }
+            ]
           }
         }
       },

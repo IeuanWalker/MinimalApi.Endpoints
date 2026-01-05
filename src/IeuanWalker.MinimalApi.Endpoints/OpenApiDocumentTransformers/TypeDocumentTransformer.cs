@@ -24,10 +24,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 1: Fix all schema property types
 		FixSchemaPropertyTypes(document);
 
-		// Step 2: Build endpoint-to-request-type mapping
+		// Step 2: Fix nullable array structures (arrays with nullable items should be nullable arrays instead)
+		FixNullableArrays(document);
+
+		// Step 3: Build endpoint-to-request-type mapping
 		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context, document);
 
-		// Step 3: Fix parameter types (query/path parameters)
+		// Step 4: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
 		return Task.CompletedTask;
@@ -72,6 +75,89 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			// Fix the schema itself (for primitives defined at the schema level)
 			FixInlineSchemaType(schema, schemaEntry.Key);
 		}
+	}
+
+	static void FixNullableArrays(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		// Process each schema in the document
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		{
+			if (schemaEntry.Value is not OpenApiSchema schema)
+			{
+				continue;
+			}
+
+			// Fix properties that are nullable arrays
+			if (schema.Properties is not null && schema.Properties.Count > 0)
+			{
+				foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
+				{
+					schema.Properties[property.Key] = FixNullableArraySchema(property.Value);
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema FixNullableArraySchema(IOpenApiSchema schema)
+	{
+		if (schema is not OpenApiSchema openApiSchema)
+		{
+			return schema;
+		}
+
+		// Check if this is an array with items that have oneOf for nullable
+		if (openApiSchema.Type == JsonSchemaType.Array && 
+			openApiSchema.Items is OpenApiSchema itemsSchema && 
+			itemsSchema.OneOf is not null && 
+			itemsSchema.OneOf.Count == 2)
+		{
+			// Check if one of the oneOf elements is just a nullable marker (no type set)
+			IOpenApiSchema? typeSchema = null;
+			
+			foreach (IOpenApiSchema oneOfSchema in itemsSchema.OneOf)
+			{
+				if (oneOfSchema is OpenApiSchema os && os.Type.HasValue && os.Type != JsonSchemaType.Null)
+				{
+					typeSchema = os;
+					break;
+				}
+			}
+			
+			// If we found a type schema, this is a nullable array - restructure it
+			if (typeSchema is not null)
+			{
+				// Create new array with corrected items (non-nullable)
+				OpenApiSchema correctedArraySchema = new()
+				{
+					Type = JsonSchemaType.Array,
+					Items = typeSchema
+				};
+				
+				// Wrap the array in oneOf for nullable
+				OpenApiSchema nullableArraySchema = new()
+				{
+					OneOf =
+					[
+						new OpenApiSchema
+						{
+							Extensions = new Dictionary<string, IOpenApiExtension>
+							{
+								["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
+							}
+						},
+						correctedArraySchema
+					]
+				};
+				return nullableArraySchema;
+			}
+		}
+
+		return schema;
 	}
 
 	static IOpenApiSchema FixSchemaType(IOpenApiSchema schema, OpenApiDocument document, Type? actualPropertyType = null)
@@ -141,23 +227,43 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					
 					return arraySchema;
 				}
-				// Case 2: Schema already has type: array, but items might have wrong nullable structure for nullable arrays
-				else if (openApiSchema.Type == JsonSchemaType.Array && isNullable && openApiSchema.Items is OpenApiSchema itemsSchema)
+				// Case 2: Schema already has type: array - check if items have wrong nullable structure
+				// This handles cases where the framework generates array with nullable items when it should be nullable array
+				else if (openApiSchema.Type == JsonSchemaType.Array)
 				{
-					// Check if items have a oneOf for nullable (wrong - elements shouldn't be nullable for List<T>?)
-					if (itemsSchema.OneOf is not null && itemsSchema.OneOf.Count > 0)
+					IOpenApiSchema? items = openApiSchema.Items;
+					
+					// Check if items have a oneOf for nullable - this indicates the array is nullable, not the items
+					if (items is OpenApiSchema itemsSchema && itemsSchema.OneOf is not null && itemsSchema.OneOf.Count == 2)
 					{
-						// Find the non-nullable schema in the items oneOf
-						IOpenApiSchema? nonNullableItemSchema = itemsSchema.OneOf
-							.FirstOrDefault(s => s is OpenApiSchema os && (os.Extensions is null || !os.Extensions.ContainsKey("nullable")));
+						// Check if one of the oneOf elements is just a nullable marker (has no type set)
+						IOpenApiSchema? nullableMarker = null;
+						IOpenApiSchema? typeSchema = null;
 						
-						if (nonNullableItemSchema is not null)
+						foreach (IOpenApiSchema oneOfSchema in itemsSchema.OneOf)
 						{
-							// Create new array with corrected items
+							if (oneOfSchema is OpenApiSchema os)
+							{
+								// Check if this is a nullable marker (no type, just extensions or nothing)
+								if (!os.Type.HasValue || os.Type == JsonSchemaType.Null)
+								{
+									nullableMarker = os;
+								}
+								else
+								{
+									typeSchema = os;
+								}
+							}
+						}
+						
+						// If we found both a nullable marker and a type schema, this is a nullable array
+						if (nullableMarker is not null && typeSchema is not null)
+						{
+							// Create new array with corrected items (non-nullable)
 							OpenApiSchema correctedArraySchema = new()
 							{
 								Type = JsonSchemaType.Array,
-								Items = nonNullableItemSchema
+								Items = typeSchema
 							};
 							
 							// Wrap the array in oneOf for nullable
