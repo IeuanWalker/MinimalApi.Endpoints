@@ -1601,10 +1601,14 @@
 								"nullable": true
 							},
 							{
+								"maximum": false,
+								"exclusiveMaximum": true,
+								"minimum": false,
+								"exclusiveMinimum": true,
 								"maxLength": 100,
 								"minLength": 3,
-								"type": "string",
-								"description": "Validation rules:\n- Is required\n- Must be between 10 and 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+								"type": "number",
+								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
 							}
 						]
 					},
@@ -1647,7 +1651,12 @@
 						"description": "Validation rules:\n- Must be 10 characters or fewer"
 					},
 					"rangeInt": {
-						"description": "Validation rules:\n- Must be between 10 and 25",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 10 and <= 25",
 						"format": "int32"
 					},
 					"rangeDateTime": {
@@ -1708,27 +1717,57 @@
 						]
 					},
 					"intMin": {
-						"description": "Validation rules:\n- Must be between 1 and 2147483647",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 2147483647",
 						"format": "int32"
 					},
 					"intMax": {
-						"description": "Validation rules:\n- Must be between -2147483648 and 100",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= -2147483648 and <= 100",
 						"format": "int32"
 					},
 					"intRange": {
-						"description": "Validation rules:\n- Must be between 1 and 100",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 100",
 						"format": "int32"
 					},
 					"doubleMin": {
-						"description": "Validation rules:\n- Must be between 0.1 and 1.7976931348623157E+308",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 1.7976931348623157E+308",
 						"format": "double"
 					},
 					"doubleMax": {
-						"description": "Validation rules:\n- Must be between -1.7976931348623157E+308 and 99.9",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 99.9",
 						"format": "double"
 					},
 					"doubleRange": {
-						"description": "Validation rules:\n- Must be between 0.1 and 99.9",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 						"format": "double"
 					},
 					"listStringMinCount": {
@@ -1834,10 +1873,14 @@
 								"nullable": true
 							},
 							{
+								"maximum": false,
+								"exclusiveMaximum": true,
+								"minimum": false,
+								"exclusiveMinimum": true,
 								"maxLength": 100,
 								"minLength": 3,
-								"type": "string",
-								"description": "Validation rules:\n- Is required\n- Must be between 10 and 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+								"type": "number",
+								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
 							}
 						]
 					},
@@ -1880,7 +1923,12 @@
 						"description": "Validation rules:\n- Must be 10 characters or fewer"
 					},
 					"rangeInt": {
-						"description": "Validation rules:\n- Must be between 10 and 25",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 10 and <= 25",
 						"format": "int32"
 					},
 					"rangeDateTime": {
@@ -1941,27 +1989,57 @@
 						]
 					},
 					"intMin": {
-						"description": "Validation rules:\n- Must be between 1 and 2147483647",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 2147483647",
 						"format": "int32"
 					},
 					"intMax": {
-						"description": "Validation rules:\n- Must be between -2147483648 and 100",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= -2147483648 and <= 100",
 						"format": "int32"
 					},
 					"intRange": {
-						"description": "Validation rules:\n- Must be between 1 and 100",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "integer",
+						"description": "Validation rules:\n- Must be >= 1 and <= 100",
 						"format": "int32"
 					},
 					"doubleMin": {
-						"description": "Validation rules:\n- Must be between 0.1 and 1.7976931348623157E+308",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 1.7976931348623157E+308",
 						"format": "double"
 					},
 					"doubleMax": {
-						"description": "Validation rules:\n- Must be between -1.7976931348623157E+308 and 99.9",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= -1.7976931348623157E+308 and <= 99.9",
 						"format": "double"
 					},
 					"doubleRange": {
-						"description": "Validation rules:\n- Must be between 0.1 and 99.9",
+						"maximum": false,
+						"exclusiveMaximum": true,
+						"minimum": false,
+						"exclusiveMinimum": true,
+						"type": "number",
+						"description": "Validation rules:\n- Must be >= 0.1 and <= 99.9",
 						"format": "double"
 					},
 					"listStringMinCount": {
