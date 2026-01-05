@@ -179,9 +179,42 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			
 			if (isArrayOrCollection)
 			{
+				// Check if the schema already represents a nullable collection properly (for reference types like List<T>?)
+				// If it has oneOf with a nullable marker and either an array or a collection reference, skip our processing
+				if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count == 2)
+				{
+					bool hasNullableMarker = openApiSchema.OneOf.Any(s => 
+						s is OpenApiSchema os && !os.Type.HasValue);
+					bool hasArray = openApiSchema.OneOf.Any(s => 
+						s is OpenApiSchema os && os.Type == JsonSchemaType.Array);
+					bool hasCollectionRef = openApiSchema.OneOf.Any(s => 
+						s is OpenApiSchemaReference sr && sr.Reference?.Id is not null && 
+						(sr.Reference.Id.Contains("System.Collections.Generic.List") ||
+						 sr.Reference.Id.Contains("System.Collections.Generic.IEnumerable") ||
+						 sr.Reference.Id.Contains("System.Collections.Generic.ICollection") ||
+						 sr.Reference.Id.Contains("System.Collections.Generic.IReadOnlyList") ||
+						 sr.Reference.Id.Contains("System.Collections.Generic.IReadOnlyCollection") ||
+						 sr.Reference.Id.Contains("[]")));
+					
+					if (hasNullableMarker && (hasArray || hasCollectionRef))
+					{
+						// This is already a nullable array/collection, don't wrap again
+						// But let the framework resolve the collection reference naturally
+						return openApiSchema;
+					}
+				}
+				
 				// Case 1: Schema doesn't have type: array yet, needs wrapping
+				// But only wrap if this is truly an element type, not a complex structure
 				if (openApiSchema.Type != JsonSchemaType.Array && openApiSchema.Items is null)
 				{
+					// Skip wrapping if the schema has properties (it's a complex object, not an element type)
+					if (openApiSchema.Properties is not null && openApiSchema.Properties.Count > 0)
+					{
+						// This is a complex object schema, not an element type - don't wrap
+						return openApiSchema;
+					}
+					
 					// The current schema represents the element type
 					// Check if it has a oneOf wrapper (this would be wrong for array element types)
 					IOpenApiSchema itemsSchema = openApiSchema;
