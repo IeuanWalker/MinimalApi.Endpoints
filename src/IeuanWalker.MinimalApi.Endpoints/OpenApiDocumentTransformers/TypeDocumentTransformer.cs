@@ -318,13 +318,12 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 		else if (actualType.IsEnum)
 		{
-			schema.Type = JsonSchemaType.Integer;
+			// Let the framework handle enum types based on user configuration
+			// (can be integer or string depending on serializer settings)
+			// Don't modify the schema - let the EnumSchemaTransformer handle it
 		}
-		else
-		{
-			// For complex types, use object
-			schema.Type = JsonSchemaType.Object;
-		}
+		// For other complex types, don't override - let the framework handle them
+		// This preserves whatever the framework has already decided for the type
 
 		// Wrap in oneOf for nullable types (except string which is already nullable in JSON)
 		if (isNullable && actualType != typeof(string))

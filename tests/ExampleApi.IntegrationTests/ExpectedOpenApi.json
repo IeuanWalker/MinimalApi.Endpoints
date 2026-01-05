@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5557/"
+      "url": "http://localhost:5558/"
     }
   ],
   "paths": {
@@ -82,9 +82,7 @@
             "name": "PlainEnumWithoutFluentValidation",
             "in": "query",
             "required": true,
-            "schema": {
-              "type": "integer"
-            }
+            "schema": { }
           },
           {
             "name": "NullableEnumWithoutFluentValidation",
@@ -94,9 +92,7 @@
                 {
                   "nullable": true
                 },
-                {
-                  "type": "integer"
-                }
+                { }
               ]
             }
           },
