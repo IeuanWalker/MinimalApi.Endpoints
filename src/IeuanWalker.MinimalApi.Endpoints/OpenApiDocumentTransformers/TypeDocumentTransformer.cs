@@ -375,8 +375,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return schemaRef;
 		}
 
-		// Only inline primitive system types, not custom types
-		if (!refId.StartsWith("System."))
+		// Only inline primitive system types and special ASP.NET types, not custom types
+		if (!refId.StartsWith("System.") && !refId.StartsWith("Microsoft.AspNetCore.Http.") && !refId.Equals("IFormFile", StringComparison.Ordinal) && !refId.Equals("IFormFileCollection", StringComparison.Ordinal))
 		{
 			return schemaRef;
 		}
@@ -446,12 +446,12 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			inlineSchema.Type = JsonSchemaType.String;
 			inlineSchema.Format = "uuid";
 		}
-		else if (refId.Contains("Microsoft.AspNetCore.Http.IFormFile"))
+		else if (refId.Contains("Microsoft.AspNetCore.Http.IFormFile") || refId.Equals("IFormFile", StringComparison.Ordinal))
 		{
 			inlineSchema.Type = JsonSchemaType.String;
 			inlineSchema.Format = "binary";
 		}
-		else if (refId.Contains("Microsoft.AspNetCore.Http.IFormFileCollection"))
+		else if (refId.Contains("Microsoft.AspNetCore.Http.IFormFileCollection") || refId.Equals("IFormFileCollection", StringComparison.Ordinal))
 		{
 			inlineSchema.Type = JsonSchemaType.Array;
 			inlineSchema.Items = new OpenApiSchema
