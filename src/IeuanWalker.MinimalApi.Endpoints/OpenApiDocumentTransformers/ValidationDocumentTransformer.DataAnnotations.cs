@@ -81,6 +81,7 @@ partial class ValidationDocumentTransformer
 			}
 
 			value.rules.AddRange(rules);
+			allValidationRules[type] = value;
 		}
 
 		// Get all properties to find nested objects
