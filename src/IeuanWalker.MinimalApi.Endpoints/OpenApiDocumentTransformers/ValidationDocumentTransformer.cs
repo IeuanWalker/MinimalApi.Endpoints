@@ -748,6 +748,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			newInlineSchema.Type = JsonSchemaType.Array;
 		}
+		// Also check if the schema has Items property (indicates array type)
+		// This handles cases where items is present but type wasn't detected
+		else if (originalOpenApiSchema?.Items is not null || resolvedReferenceSchema?.Items is not null)
+		{
+			newInlineSchema.Type = JsonSchemaType.Array;
+		}
 		
 		if (format is not null)
 		{
