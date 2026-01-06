@@ -5,7 +5,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.Validation;
 /// This interface is implemented by <see cref="ValidationMetadata{TRequest}"/> to allow
 /// the OpenAPI document transformers to access validation configuration without using reflection.
 /// </summary>
-internal interface IValidationMetadata
+interface IValidationMetadata
 {
 	/// <summary>
 	/// Gets the type of the request model being validated.
@@ -23,7 +23,7 @@ internal interface IValidationMetadata
 /// This interface is implemented by <see cref="ValidationConfiguration{TRequest}"/> to allow
 /// the OpenAPI document transformers to access validation rules without using reflection.
 /// </summary>
-internal interface IValidationConfiguration
+interface IValidationConfiguration
 {
 	/// <summary>
 	/// Gets all validation rules for properties.
