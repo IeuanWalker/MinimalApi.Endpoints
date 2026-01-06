@@ -70,16 +70,13 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 							// Check media type encodings (for multipart/form-data with custom headers)
 							if (content.Value.Encoding is not null)
 							{
-								foreach (KeyValuePair<string, OpenApiEncoding> encoding in content.Value.Encoding)
+								foreach (KeyValuePair<string, OpenApiEncoding> encoding in content.Value.Encoding.Where(x => x.Value.Headers is not null))
 								{
-									if (encoding.Value.Headers is not null)
+									foreach (KeyValuePair<string, IOpenApiHeader> header in encoding.Value.Headers?.Where(h => h.Value is OpenApiHeader) ?? [])
 									{
-										foreach (KeyValuePair<string, IOpenApiHeader> header in encoding.Value.Headers.Where(h => h.Value is OpenApiHeader))
+										if (header.Value is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
 										{
-											if (header.Value is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
-											{
-												CollectSchemaReferences(openApiHeader.Schema, usedSchemaIds, document);
-											}
+											CollectSchemaReferences(openApiHeader.Schema, usedSchemaIds, document);
 										}
 									}
 								}
@@ -107,16 +104,13 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 										// Check media type encodings (for multipart/form-data with custom headers)
 										if (content.Value.Encoding is not null)
 										{
-											foreach (KeyValuePair<string, OpenApiEncoding> encoding in content.Value.Encoding)
+											foreach (KeyValuePair<string, OpenApiEncoding> encoding in content.Value.Encoding.Where(x => x.Value.Headers is not null))
 											{
-												if (encoding.Value.Headers is not null)
+												foreach (KeyValuePair<string, IOpenApiHeader> header in encoding.Value.Headers?.Where(h => h.Value is OpenApiHeader) ?? [])
 												{
-													foreach (KeyValuePair<string, IOpenApiHeader> header in encoding.Value.Headers.Where(h => h.Value is OpenApiHeader))
+													if (header.Value is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
 													{
-														if (header.Value is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
-														{
-															CollectSchemaReferences(openApiHeader.Schema, usedSchemaIds, document);
-														}
+														CollectSchemaReferences(openApiHeader.Schema, usedSchemaIds, document);
 													}
 												}
 											}
