@@ -91,15 +91,16 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				// Extract the target schema and property path
 				(string targetSchemaPath, string nestedPropertyName) = ExtractNestedPath(rule.PropertyName);
-				
-				if (!nestedRulesBySchema.ContainsKey(targetSchemaPath))
+
+				if (!nestedRulesBySchema.TryGetValue(targetSchemaPath, out List<Validation.ValidationRule>? value))
 				{
-					nestedRulesBySchema[targetSchemaPath] = [];
+					value = [];
+					nestedRulesBySchema[targetSchemaPath] = value;
 				}
 
 				// Create a new rule with the nested property name
 				Validation.ValidationRule nestedRule = rule with { PropertyName = nestedPropertyName };
-				nestedRulesBySchema[targetSchemaPath].Add(nestedRule);
+				value.Add(nestedRule);
 			}
 			else
 			{
@@ -147,7 +148,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		// Parse the nested path to find the target schema
 		// e.g., "NestedObject" or "ListNestedObject[*]"
-		
+
 		string[] pathParts = nestedPath.Split('.');
 		IOpenApiSchema? currentSchemaInterface = parentSchema;
 
@@ -200,7 +201,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// Now resolve the final schema reference to get the actual schema object
 		OpenApiSchema? targetSchema = ResolveSchemaReference(currentSchemaInterface, document);
-		
+
 		// Apply validation rules to the target schema
 		if (targetSchema is not null)
 		{
@@ -292,10 +293,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		if (requiredProperties.Count > 0)
 		{
 			// Merge with existing required properties if any
-			HashSet<string> allRequired = schema.Required is not null 
-				? new HashSet<string>(schema.Required) 
-				: [];
-			
+			HashSet<string> allRequired = schema.Required is not null ? [.. schema.Required] : [];
+
 			foreach (string prop in requiredProperties)
 			{
 				allRequired.Add(prop);
