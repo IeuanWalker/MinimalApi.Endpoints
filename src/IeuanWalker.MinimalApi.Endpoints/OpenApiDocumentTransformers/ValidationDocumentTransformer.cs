@@ -179,13 +179,18 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				else if (propertySchema is OpenApiSchema oneOfSchema && oneOfSchema.OneOf?.Count > 0)
 				{
 					// Handle nullable arrays wrapped in oneOf
-					foreach (IOpenApiSchema oneOf in oneOfSchema.OneOf)
+					IOpenApiSchema? arraySchemaInOneOf = oneOfSchema.OneOf
+						.OfType<OpenApiSchema>()
+						.Where(s => s.Type == JsonSchemaType.Array && s.Items is not null)
+						.FirstOrDefault();
+
+					if (arraySchemaInOneOf is OpenApiSchema foundArraySchema)
 					{
-						if (oneOf is OpenApiSchema oneOfArraySchema && oneOfArraySchema.Type == JsonSchemaType.Array && oneOfArraySchema.Items is not null)
-						{
-							currentSchemaInterface = oneOfArraySchema.Items;
-							break;
-						}
+						currentSchemaInterface = foundArraySchema.Items;
+					}
+					else
+					{
+						return;
 					}
 				}
 				else
@@ -200,6 +205,11 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Now resolve the final schema reference to get the actual schema object
+		if (currentSchemaInterface is null)
+		{
+			return;
+		}
+
 		OpenApiSchema? targetSchema = ResolveSchemaReference(currentSchemaInterface, document);
 
 		// Apply validation rules to the target schema
