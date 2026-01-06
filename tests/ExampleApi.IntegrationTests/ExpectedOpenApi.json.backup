@@ -123,6 +123,9 @@
             "schema": {
               "oneOf": [
                 {
+                  "nullable": true
+                },
+                {
                   "type": "integer",
                   "description": "Enum: Low, Medium, High, Critical",
                   "format": "int32",
@@ -144,9 +147,6 @@
                     "High": "High priority task",
                     "Critical": "Critical priority task requiring immediate attention"
                   }
-                },
-                {
-                  "nullable": true
                 }
               ]
             }
@@ -1824,10 +1824,10 @@
           "nullableEnum": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum"
               }
             ]
           },
@@ -1837,10 +1837,10 @@
           "nullableEnumWithoutFluentValidation": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum"
               }
             ]
           },
@@ -1863,6 +1863,9 @@
           "nullableEnumAsString": {
             "oneOf": [
               {
+                "nullable": true
+              },
+              {
                 "type": "string",
                 "description": "Enum: Low, Medium, High, Critical",
                 "enum": [
@@ -1877,9 +1880,6 @@
                   "High": "High priority task",
                   "Critical": "Critical priority task requiring immediate attention"
                 }
-              },
-              {
-                "nullable": true
               }
             ]
           },
@@ -1909,6 +1909,9 @@
           "nullableEnumAsInt": {
             "oneOf": [
               {
+                "nullable": true
+              },
+              {
                 "type": "integer",
                 "description": "Enum: Low, Medium, High, Critical",
                 "enum": [
@@ -1929,19 +1932,16 @@
                   "High": "High priority task",
                   "Critical": "Critical priority task requiring immediate attention"
                 }
-              },
-              {
-                "nullable": true
               }
             ]
           },
           "nullableOnlyEnumTest": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.TestEnum"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.TestEnum"
               }
             ]
           }
@@ -2107,11 +2107,11 @@
           "updatedAt": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           }
@@ -2146,11 +2146,11 @@
           "updatedAt": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           }
@@ -2162,30 +2162,30 @@
           "title": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
           "description": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
           "isCompleted": {
             "oneOf": [
               {
-                "type": "boolean"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "boolean"
               }
             ]
           }
@@ -2214,11 +2214,11 @@
           "updatedAt": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           }
@@ -2267,11 +2267,11 @@
           "updatedAt": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           }
@@ -2322,11 +2322,11 @@
           "updatedAt": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           }
@@ -2359,10 +2359,10 @@
           "nullableStringValue": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
@@ -2373,11 +2373,11 @@
           "nullableIntValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -2388,11 +2388,11 @@
           "nullableLongValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int64"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int64"
               }
             ]
           },
@@ -2403,11 +2403,11 @@
           "nullableShortValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -2418,11 +2418,11 @@
           "nullableByteValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -2432,10 +2432,10 @@
           "nullableDecimalValue": {
             "oneOf": [
               {
-                "type": "number"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number"
               }
             ]
           },
@@ -2446,11 +2446,11 @@
           "nullableDoubleValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "double"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "double"
               }
             ]
           },
@@ -2461,11 +2461,11 @@
           "nullableFloatValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "float"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "float"
               }
             ]
           },
@@ -2475,10 +2475,10 @@
           "nullableBoolValue": {
             "oneOf": [
               {
-                "type": "boolean"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "boolean"
               }
             ]
           },
@@ -2489,11 +2489,11 @@
           "nullableDateTimeValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -2504,11 +2504,11 @@
           "nullableDateTimeOffsetValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -2519,11 +2519,11 @@
           "nullableDateOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date"
               }
             ]
           },
@@ -2534,11 +2534,11 @@
           "nullableTimeOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "time"
               }
             ]
           },
@@ -2549,11 +2549,11 @@
           "nullableGuidValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "uuid"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "uuid"
               }
             ]
           },
@@ -2700,11 +2700,11 @@
           "singleFileNullable": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "binary"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "binary"
               }
             ]
           },
@@ -2746,10 +2746,10 @@
           "nestedObjectValue": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
               }
             ]
           },
@@ -2791,10 +2791,10 @@
           "uriValueNullable": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/System.Uri"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/System.Uri"
               }
             ]
           }
@@ -2835,10 +2835,10 @@
           "nullableStringValue": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
@@ -2849,11 +2849,11 @@
           "nullableIntValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -2864,11 +2864,11 @@
           "nullableLongValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int64"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int64"
               }
             ]
           },
@@ -2879,11 +2879,11 @@
           "nullableShortValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -2894,11 +2894,11 @@
           "nullableByteValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -2908,10 +2908,10 @@
           "nullableDecimalValue": {
             "oneOf": [
               {
-                "type": "number"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number"
               }
             ]
           },
@@ -2922,11 +2922,11 @@
           "nullableDoubleValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "double"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "double"
               }
             ]
           },
@@ -2937,11 +2937,11 @@
           "nullableFloatValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "float"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "float"
               }
             ]
           },
@@ -2951,10 +2951,10 @@
           "nullableBoolValue": {
             "oneOf": [
               {
-                "type": "boolean"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "boolean"
               }
             ]
           },
@@ -2965,11 +2965,11 @@
           "nullableDateTimeValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -2980,11 +2980,11 @@
           "nullableDateTimeOffsetValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -2995,11 +2995,11 @@
           "nullableDateOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date"
               }
             ]
           },
@@ -3010,11 +3010,11 @@
           "nullableTimeOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "time"
               }
             ]
           },
@@ -3025,11 +3025,11 @@
           "nullableGuidValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "uuid"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "uuid"
               }
             ]
           },
@@ -3176,11 +3176,11 @@
           "singleFileNullable": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "binary"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "binary"
               }
             ]
           },
@@ -3222,10 +3222,10 @@
           "nestedObjectValue": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
               }
             ]
           },
@@ -3267,10 +3267,10 @@
           "uriValueNullable": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/System.Uri"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/System.Uri"
               }
             ]
           }
@@ -3300,10 +3300,10 @@
           "nullableStringValue": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
@@ -3314,11 +3314,11 @@
           "nullableIntValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -3329,11 +3329,11 @@
           "nullableLongValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int64"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int64"
               }
             ]
           },
@@ -3344,11 +3344,11 @@
           "nullableShortValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -3359,11 +3359,11 @@
           "nullableByteValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -3373,10 +3373,10 @@
           "nullableDecimalValue": {
             "oneOf": [
               {
-                "type": "number"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number"
               }
             ]
           },
@@ -3387,11 +3387,11 @@
           "nullableDoubleValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "double"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "double"
               }
             ]
           },
@@ -3402,11 +3402,11 @@
           "nullableFloatValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "float"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "float"
               }
             ]
           },
@@ -3416,10 +3416,10 @@
           "nullableBoolValue": {
             "oneOf": [
               {
-                "type": "boolean"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "boolean"
               }
             ]
           },
@@ -3430,11 +3430,11 @@
           "nullableDateTimeValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -3445,11 +3445,11 @@
           "nullableDateTimeOffsetValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -3460,11 +3460,11 @@
           "nullableDateOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date"
               }
             ]
           },
@@ -3475,11 +3475,11 @@
           "nullableTimeOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "time"
               }
             ]
           },
@@ -3490,11 +3490,11 @@
           "nullableGuidValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "uuid"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "uuid"
               }
             ]
           },
@@ -3641,11 +3641,11 @@
           "singleFileNullable": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "binary"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "binary"
               }
             ]
           },
@@ -3687,10 +3687,10 @@
           "nestedObjectValue": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
               }
             ]
           },
@@ -3732,10 +3732,10 @@
           "uriValueNullable": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/System.Uri"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/System.Uri"
               }
             ]
           }
@@ -3776,10 +3776,10 @@
           "nullableStringValue": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
@@ -3790,11 +3790,11 @@
           "nullableIntValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -3805,11 +3805,11 @@
           "nullableLongValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int64"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int64"
               }
             ]
           },
@@ -3820,11 +3820,11 @@
           "nullableShortValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -3835,11 +3835,11 @@
           "nullableByteValue": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
@@ -3849,10 +3849,10 @@
           "nullableDecimalValue": {
             "oneOf": [
               {
-                "type": "number"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number"
               }
             ]
           },
@@ -3863,11 +3863,11 @@
           "nullableDoubleValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "double"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "double"
               }
             ]
           },
@@ -3878,11 +3878,11 @@
           "nullableFloatValue": {
             "oneOf": [
               {
-                "type": "number",
-                "format": "float"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "number",
+                "format": "float"
               }
             ]
           },
@@ -3892,10 +3892,10 @@
           "nullableBoolValue": {
             "oneOf": [
               {
-                "type": "boolean"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "boolean"
               }
             ]
           },
@@ -3906,11 +3906,11 @@
           "nullableDateTimeValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -3921,11 +3921,11 @@
           "nullableDateTimeOffsetValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date-time"
               }
             ]
           },
@@ -3936,11 +3936,11 @@
           "nullableDateOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "date"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "date"
               }
             ]
           },
@@ -3951,11 +3951,11 @@
           "nullableTimeOnlyValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "time"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "time"
               }
             ]
           },
@@ -3966,11 +3966,11 @@
           "nullableGuidValue": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "uuid"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "uuid"
               }
             ]
           },
@@ -4117,11 +4117,11 @@
           "singleFileNullable": {
             "oneOf": [
               {
-                "type": "string",
-                "format": "binary"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string",
+                "format": "binary"
               }
             ]
           },
@@ -4163,10 +4163,10 @@
           "nestedObjectValue": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
               }
             ]
           },
@@ -4208,10 +4208,10 @@
           "uriValueNullable": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/System.Uri"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/System.Uri"
               }
             ]
           }
@@ -4257,20 +4257,23 @@
           "allBuiltInStringValidators": {
             "oneOf": [
               {
+                "nullable": true
+              },
+              {
                 "maxLength": 100,
                 "minLength": 3,
                 "pattern": "^[a-zA-Z0-9]+$",
                 "type": "string",
                 "description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number\n- AllBuiltInStringValidators is not valid.\n- Default error message",
                 "format": "uri"
-              },
-              {
-                "nullable": true
               }
             ]
           },
           "allBuiltInNumberValidators": {
             "oneOf": [
+              {
+                "nullable": true
+              },
               {
                 "maximum": 25,
                 "minimum": 10,
@@ -4278,9 +4281,6 @@
                 "minLength": 3,
                 "type": "number",
                 "description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
-              },
-              {
-                "nullable": true
               }
             ]
           },
@@ -4359,10 +4359,10 @@
           "actualUri": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/System.Uri"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/System.Uri"
               }
             ]
           },
@@ -4381,10 +4381,10 @@
           "fileExtension": {
             "oneOf": [
               {
-                "description": "Validation rules:\n- Must be a file with extension: jpg,png",
                 "nullable": true
               },
               {
+                "description": "Validation rules:\n- Must be a file with extension: jpg,png",
                 "nullable": true
               }
             ]
@@ -4533,20 +4533,23 @@
           "allBuiltInStringValidators": {
             "oneOf": [
               {
+                "nullable": true
+              },
+              {
                 "maxLength": 100,
                 "minLength": 3,
                 "pattern": "^[a-zA-Z0-9]+$",
                 "type": "string",
                 "description": "Validation rules:\n- Is required\n- Must be at least 3 characters and less than 50 characters\n- Must be 3 characters or more\n- Must be 100 characters or fewer\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid phone number\n- Must be a valid URL\n- Must be a valid credit card number",
                 "format": "uri"
-              },
-              {
-                "nullable": true
               }
             ]
           },
           "allBuiltInNumberValidators": {
             "oneOf": [
+              {
+                "nullable": true
+              },
               {
                 "maximum": 25,
                 "minimum": 10,
@@ -4554,9 +4557,6 @@
                 "minLength": 3,
                 "type": "number",
                 "description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
-              },
-              {
-                "nullable": true
               }
             ]
           },
@@ -4635,10 +4635,10 @@
           "actualUri": {
             "oneOf": [
               {
-                "$ref": "#/components/schemas/System.Uri"
+                "nullable": true
               },
               {
-                "nullable": true
+                "$ref": "#/components/schemas/System.Uri"
               }
             ]
           },
@@ -4657,10 +4657,10 @@
           "fileExtension": {
             "oneOf": [
               {
-                "description": "Validation rules:\n- Must be a file with extension: jpg,png",
                 "nullable": true
               },
               {
+                "description": "Validation rules:\n- Must be a file with extension: jpg,png",
                 "nullable": true
               }
             ]
@@ -4793,6 +4793,9 @@
           "listNestedObject": {
             "oneOf": [
               {
+                "nullable": true
+              },
+              {
                 "maxLength": 10,
                 "minLength": 0,
                 "type": "array",
@@ -4800,9 +4803,6 @@
                   "$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel"
                 },
                 "description": "Validation rules:\n- Must be 0 items or more\n- Must be 10 items or fewer"
-              },
-              {
-                "nullable": true
               }
             ]
           },
@@ -5081,20 +5081,23 @@
           "allBuiltInStringValidators": {
             "oneOf": [
               {
+                "nullable": true
+              },
+              {
                 "maxLength": 250,
                 "minLength": 2,
                 "pattern": "^[a-zA-Z0-9]+$",
                 "type": "string",
                 "description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Must be at least 2 characters and less than 250 characters\n- Must be 250 characters or fewer\n- Must be 2 characters or more\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid credit card number\n- Must be empty.",
                 "format": "email"
-              },
-              {
-                "nullable": true
               }
             ]
           },
           "allBuiltInNumberValidators": {
             "oneOf": [
+              {
+                "nullable": true
+              },
               {
                 "maximum": 100,
                 "exclusiveMaximum": true,
@@ -5102,9 +5105,6 @@
                 "exclusiveMinimum": true,
                 "type": "number",
                 "description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
-              },
-              {
-                "nullable": true
               }
             ]
           },
@@ -5411,20 +5411,23 @@
           "allBuiltInStringValidators": {
             "oneOf": [
               {
+                "nullable": true
+              },
+              {
                 "maxLength": 250,
                 "minLength": 2,
                 "pattern": "^[a-zA-Z0-9]+$",
                 "type": "string",
                 "description": "Validation rules:\n- Is required\n- Must not be equal to 'TestNotEqual'.\n- Must be equal to 'TestEqual'.\n- Must be at least 2 characters and less than 250 characters\n- Must be 250 characters or fewer\n- Must be 2 characters or more\n- The specified condition was not met for 'AllBuiltInStringValidators'.\n- Must match pattern: ^[a-zA-Z0-9]+$\n- Must be a valid email address\n- Must be a valid credit card number\n- Must be empty.",
                 "format": "email"
-              },
-              {
-                "nullable": true
               }
             ]
           },
           "allBuiltInNumberValidators": {
             "oneOf": [
+              {
+                "nullable": true
+              },
               {
                 "maximum": 100,
                 "exclusiveMaximum": true,
@@ -5432,9 +5435,6 @@
                 "exclusiveMinimum": true,
                 "type": "number",
                 "description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
-              },
-              {
-                "nullable": true
               }
             ]
           },
@@ -5742,10 +5742,10 @@
           "summary": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           }
@@ -5767,51 +5767,51 @@
           "type": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
           "title": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
           "status": {
             "oneOf": [
               {
-                "type": "integer",
-                "format": "int32"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "integer",
+                "format": "int32"
               }
             ]
           },
           "detail": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
           "instance": {
             "oneOf": [
               {
-                "type": "string"
+                "nullable": true
               },
               {
-                "nullable": true
+                "type": "string"
               }
             ]
           },
@@ -6003,6 +6003,93 @@
         "pattern": "^-?(?:0|[1-9]\\d*)$",
         "format": "int64"
       },
+      "ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum": {
+        "type": "integer",
+        "description": "Enum: Low, Medium, High, Critical",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "x-enum-varnames": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "x-enum-descriptions": {
+          "Low": "Low priority task",
+          "Medium": "Medium priority task",
+          "High": "High priority task",
+          "Critical": "Critical priority task requiring immediate attention"
+        }
+      },
+      "ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum": {
+        "type": "integer",
+        "description": "Enum: Low, Medium, High, Critical",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "x-enum-varnames": [
+          "Low",
+          "Medium",
+          "High",
+          "Critical"
+        ],
+        "x-enum-descriptions": {
+          "Low": "Low priority task",
+          "Medium": "Medium priority task",
+          "High": "High priority task",
+          "Critical": "Critical priority task requiring immediate attention"
+        }
+      },
+      "System.Boolean": {
+        "type": "boolean"
+      },
+      "System.Byte": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "uint8"
+      },
+      "System.DateOnly": {
+        "type": "string",
+        "format": "date"
+      },
+      "System.DateTime": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.DateTimeOffset": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "System.Decimal": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+        "format": "double"
+      },
+      "System.Double": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "double"
+      },
+      "System.Guid": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "System.Int16": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int16"
+      },
+      "System.Int32": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int32"
+      },
+      "System.Int64": {
+        "pattern": "^-?(?:0|[1-9]\\d*)$",
+        "format": "int64"
+      },
       "System.Single": {
         "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
         "format": "float"
@@ -6010,6 +6097,10 @@
       "System.TimeOnly": {
         "type": "string",
         "format": "time"
+      },
+      "System.Single": {
+        "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+        "format": "float"
       },
       "System.String": {
         "type": "string"
@@ -6019,6 +6110,10 @@
         "items": {
           "type": "string"
         }
+      },
+      "System.TimeOnly": {
+        "type": "string",
+        "format": "time"
       },
       "System.Uri": {
         "type": "string",
@@ -6033,6 +6128,7 @@
       "ExampleApi.Endpoints.Enum.PostFromBody.TestEnum": {
         "type": "integer",
         "description": "Enum: Test1, Test2",
+        "format": "int32",
         "enum": [
           0,
           1
