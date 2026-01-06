@@ -18,7 +18,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 /// </summary>
 sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 {
-	static readonly object schemaTypeCacheLock = new();
+	static readonly Lock schemaTypeCacheLock = new();
 	static readonly Dictionary<string, Type?> schemaTypeCache = new(StringComparer.Ordinal);
 
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
