@@ -667,8 +667,10 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// For simple properties, create a new inline schema with all validation rules
 		// Strategy:
+		// - TypeDocumentTransformer runs first and sets type/format correctly
+		// - Preserve type/format from TypeDocumentTransformer unless validation rules require specific format overrides
 		// - For array types: prioritize schema type to preserve array structure
-		// - For other types: prioritize validation rules type, then schema type
+		// - For other types: preserve existing type, only override format for validation-specific rules (email, uri)
 		JsonSchemaType? schemaType = null;
 		string? format = null;
 
@@ -679,7 +681,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		if (isArrayType)
 		{
-			// For arrays, prioritize schema type to preserve array structure
+			// For arrays, prioritize schema type to preserve array structure from TypeDocumentTransformer
 			if (originalOpenApiSchema?.Type is not null)
 			{
 				schemaType = originalOpenApiSchema.Type;
@@ -698,38 +700,36 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 		else
 		{
-			// For non-array types, get type from validation rules first (original behavior)
-			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
-			format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
-
-			// If no type from rules, try reference type detection, then schema types
-			// Prioritize referenceType for primitive types (Int32, String, etc.) as it's more reliable
-			if (!schemaType.HasValue)
-			{
-				// First try reference type detection (most reliable for primitives)
-				if (referenceType.HasValue)
-				{
-					schemaType = referenceType;
-					format ??= referenceFormat;
-				}
-				// Then try original schema
-				else if (originalOpenApiSchema?.Type is not null)
-				{
-					schemaType = originalOpenApiSchema.Type;
-					format ??= originalOpenApiSchema.Format;
-				}
-				// Finally try resolved reference schema
-				else if (resolvedReferenceSchema?.Type is not null)
-				{
-					schemaType = resolvedReferenceSchema.Type;
-					format ??= resolvedReferenceSchema.Format;
-				}
-			}
+			// For non-array types, preserve existing type/format from TypeDocumentTransformer
+			// TypeDocumentTransformer runs first, so existing schema types are authoritative
+			// However, validation rules may need to override format for specific cases (EmailRule -> "email", UrlRule -> "uri")
 			
-			// If format still not set, try to get it from all sources
-			if (format is null)
+			// Get format from validation rules (all rules, not just email/url)
+			// Validation rules can provide format information (e.g., RangeRule<int> -> "int32", EnumRule -> "int32")
+			string? validationFormat = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+
+			// Prioritize existing schema type (from TypeDocumentTransformer)
+			if (originalOpenApiSchema?.Type is not null)
 			{
-				format = referenceFormat ?? resolvedReferenceSchema?.Format ?? originalOpenApiSchema?.Format;
+				schemaType = originalOpenApiSchema.Type;
+				// Use validation format if specified, otherwise preserve existing format
+				format = validationFormat ?? originalOpenApiSchema.Format;
+			}
+			else if (resolvedReferenceSchema?.Type is not null)
+			{
+				schemaType = resolvedReferenceSchema.Type;
+				format = validationFormat ?? resolvedReferenceSchema.Format;
+			}
+			else if (referenceType.HasValue)
+			{
+				schemaType = referenceType;
+				format = validationFormat ?? referenceFormat;
+			}
+			else
+			{
+				// Fallback: No existing type found, use validation rules to infer type
+				schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+				format = validationFormat;
 			}
 		}
 
@@ -1205,8 +1205,44 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			Validation.RangeRule<long> => "int64",
 			Validation.RangeRule<float> => "float",
 			Validation.RangeRule<double> => "double",
+			Validation.EnumRule enumRule => GetEnumRuleSchemaFormat(enumRule),
 			_ => null
 		};
+	}
+
+	static string? GetEnumRuleSchemaFormat(Validation.EnumRule enumRule)
+	{
+		// Determine format based on the property type
+		Type propertyType = enumRule.PropertyType;
+
+		// Handle nullable types
+		Type actualType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
+
+		// If property type is int, return int32 format
+		if (actualType == typeof(int))
+		{
+			return "int32";
+		}
+		else if (actualType == typeof(long))
+		{
+			return "int64";
+		}
+		else if (actualType.IsEnum)
+		{
+			// For enum types, determine format based on the enum's underlying type
+			Type underlyingType = Enum.GetUnderlyingType(actualType);
+			if (underlyingType == typeof(int) || underlyingType == typeof(uint))
+			{
+				return "int32";
+			}
+			else if (underlyingType == typeof(long) || underlyingType == typeof(ulong))
+			{
+				return "int64";
+			}
+		}
+
+		// String properties don't have a format
+		return null;
 	}
 
 	static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType)
