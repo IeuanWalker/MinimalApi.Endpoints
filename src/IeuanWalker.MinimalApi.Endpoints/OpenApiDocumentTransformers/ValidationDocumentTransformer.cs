@@ -48,10 +48,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
-		// Step 5: Build a mapping from endpoints to their request types
+		// Step 5: Build a mapping from endpoints to their request types and Apply validation to query/path parameters (for endpoints using RequestAsParameters)
 		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context, allValidationRules);
-
-		// Step 6: Apply validation to query/path parameters (for endpoints using RequestAsParameters)
 		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
 		{
 			Type requestType = kvp.Key;
