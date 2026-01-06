@@ -18,6 +18,9 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 /// </summary>
 sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 {
+	static readonly object schemaTypeCacheLock = new();
+	static readonly Dictionary<string, Type?> schemaTypeCache = new(StringComparer.Ordinal);
+
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
 		// Step 1: Fix all schema property types
@@ -61,7 +64,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Process each schema in the document
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
 		{
 			if (schemaEntry.Value is not OpenApiSchema schema)
 			{
@@ -72,14 +75,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			Type? schemaType = FindTypeForSchema(schemaEntry.Key);
 
 			// Fix properties in this schema
-			if (schema.Properties is not null && schema.Properties.Count > 0)
+			if (schema.Properties?.Count > 0)
 			{
-				foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
+				foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
 				{
 					// Get the property's actual .NET type if possible
-					PropertyInfo? propertyInfo = schemaType?.GetProperty(property.Key, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
+					PropertyInfo? propertyInfo = schemaType?.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
 
-					schema.Properties[property.Key] = FixSchemaType(property.Value, document, propertyInfo?.PropertyType);
+					schema.Properties[propertyName] = FixSchemaType(propertySchema, document, propertyInfo?.PropertyType);
 				}
 			}
 
@@ -102,20 +105,17 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Process each schema in the document
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
 		{
-			if (schemaEntry.Value is not OpenApiSchema schema)
+			if (schemaEntry.Value is not OpenApiSchema schema || schema.Properties is null || schema.Properties.Count == 0)
 			{
 				continue;
 			}
 
 			// Fix properties that are nullable arrays
-			if (schema.Properties is not null && schema.Properties.Count > 0)
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
 			{
-				foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
-				{
-					schema.Properties[property.Key] = FixNullableArraySchema(property.Value);
-				}
+				schema.Properties[propertyName] = FixNullableArraySchema(propertySchema);
 			}
 		}
 	}
@@ -128,20 +128,17 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Process each schema in the document
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
 		{
-			if (schemaEntry.Value is not OpenApiSchema schema)
+			if (schemaEntry.Value is not OpenApiSchema schema || schema.Properties is null || schema.Properties.Count == 0)
 			{
 				continue;
 			}
 
 			// Fix properties that might have double-wrapped arrays
-			if (schema.Properties is not null && schema.Properties.Count > 0)
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
 			{
-				foreach (KeyValuePair<string, IOpenApiSchema> property in schema.Properties.ToList())
-				{
-					schema.Properties[property.Key] = UnwrapDoubleArrays(property.Value);
-				}
+				schema.Properties[propertyName] = UnwrapDoubleArrays(propertySchema);
 			}
 		}
 	}
@@ -434,9 +431,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			// Fix nested properties
 			if (openApiSchemaToFix.Properties is not null && openApiSchemaToFix.Properties.Count > 0)
 			{
-				foreach (KeyValuePair<string, IOpenApiSchema> property in openApiSchemaToFix.Properties.ToList())
+				foreach ((string propertyName, IOpenApiSchema propertySchema) in openApiSchemaToFix.Properties)
 				{
-					openApiSchemaToFix.Properties[property.Key] = FixSchemaType(property.Value, document, null);
+					openApiSchemaToFix.Properties[propertyName] = FixSchemaType(propertySchema, document, null);
 				}
 			}
 
@@ -959,6 +956,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			inlineSchema.Type = JsonSchemaType.String;
 			inlineSchema.Format = "uuid";
 		}
+		// For other types (non-primitives), keep the reference
 		else
 		{
 			return schemaRef;
@@ -1004,8 +1002,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		List<(string nullableSchemaName, string unwrappedSchemaName, OpenApiSchema nullableSchema)> schemasToCreate = [];
 
 		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas
-			.Where(kvp => kvp.Key.StartsWith("System.Nullable`1[[") && kvp.Value is OpenApiSchema)
-			.ToList())
+			.Where(kvp => kvp.Key.StartsWith("System.Nullable`1[[") && kvp.Value is OpenApiSchema))
 		{
 			OpenApiSchema nullableSchema = (OpenApiSchema)schemaEntry.Value;
 
@@ -1047,13 +1044,11 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
 
-		// Get all endpoints
 		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
 		{
 			return mapping;
 		}
 
-		// Collect all request types from schemas
 		HashSet<Type> requestTypes = [];
 		if (document.Components?.Schemas is not null)
 		{
@@ -1076,17 +1071,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			// Look for the handler method in metadata
 			MethodInfo? handlerMethod = routeEndpoint.Metadata.OfType<MethodInfo>().FirstOrDefault();
 			if (handlerMethod is null)
 			{
 				continue;
 			}
 
-			// Get the parameters of the handler method
 			ParameterInfo[] parameters = handlerMethod.GetParameters();
 
-			// Try to find a parameter that matches one of our request types
 			Type? matchingParamType = parameters
 				.Select(param => param.ParameterType)
 				.FirstOrDefault(paramType => requestTypes.Contains(paramType));
@@ -1102,24 +1094,35 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 	static Type? FindTypeForSchema(string schemaName)
 	{
-		// Try to find the type by its full name
 		string typeName = schemaName.Replace('+', '.');
 
-		// Try to load the type from all loaded assemblies
-		return AppDomain.CurrentDomain.GetAssemblies()
+		lock (schemaTypeCacheLock)
+		{
+			if (schemaTypeCache.TryGetValue(typeName, out Type? cachedType))
+			{
+				return cachedType;
+			}
+		}
+
+		Type? resolvedType = AppDomain.CurrentDomain.GetAssemblies()
 			.Select(assembly => assembly.GetType(typeName))
 			.FirstOrDefault(type => type is not null);
+
+		lock (schemaTypeCacheLock)
+		{
+			schemaTypeCache[typeName] = resolvedType;
+		}
+
+		return resolvedType;
 	}
 
 	static bool PathsMatch(string openApiPath, string routePattern)
 	{
-		// Direct match
 		if (string.Equals(openApiPath, routePattern, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;
 		}
 
-		// Normalize both paths for comparison
 		string normalizedOpenApi = openApiPath.Trim('/').ToLowerInvariant();
 		string normalizedRoute = routePattern.Trim('/').ToLowerInvariant();
 
@@ -1128,7 +1131,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return true;
 		}
 
-		// Split by '/' and compare segments
 		string[] openApiSegments = normalizedOpenApi.Split('/');
 		string[] routeSegments = normalizedRoute.Split('/');
 
@@ -1137,26 +1139,22 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return false;
 		}
 
-		// Compare each segment
 		for (int i = 0; i < openApiSegments.Length; i++)
 		{
 			string openApiSeg = openApiSegments[i];
 			string routeSeg = routeSegments[i];
 
-			// Exact match
 			if (openApiSeg == routeSeg)
 			{
 				continue;
 			}
 
-			// Both are parameters (enclosed in {})
 			if (openApiSeg.StartsWith('{') && openApiSeg.EndsWith('}') &&
 				routeSeg.StartsWith('{') && routeSeg.EndsWith('}'))
 			{
 				continue;
 			}
 
-			// Check for version parameter matching
 			if (routeSeg.StartsWith("v{") &&
 				routeSeg.Contains("version", StringComparison.OrdinalIgnoreCase) &&
 				routeSeg.EndsWith('}') &&
@@ -1167,7 +1165,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			// No match
 			return false;
 		}
 
@@ -1182,7 +1179,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Process each schema in the document
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
 		{
 			ReorderOneOfInIOpenApiSchema(schemaEntry.Value);
 		}
@@ -1198,59 +1195,24 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 	static void ReorderOneOfInSchema(OpenApiSchema schema)
 	{
-		// Reorder oneOf if present (type first, nullable marker second)
-		if (schema.OneOf is not null && schema.OneOf.Count == 2)
+		// Reorder oneOf if present (type first, nullable marker second) and unwrap nullable enum references
+		if (schema.OneOf is { Count: 2 })
 		{
-			// Find the nullable marker and the type schema
-			IOpenApiSchema? nullableMarker = null;
-			IOpenApiSchema? typeSchema = null;
-			int nullableIndex = -1;
-			int typeIndex = -1;
+			(IOpenApiSchema? typeSchema, int typeIndex, OpenApiSchema? nullableMarker, int nullableIndex) = ExtractOneOfParts(schema.OneOf);
+			int typeSlot = typeIndex;
 
-			for (int i = 0; i < schema.OneOf.Count; i++)
+			if (typeSchema is not null && nullableMarker is not null)
 			{
-				IOpenApiSchema oneOfSchema = schema.OneOf[i];
-				if (oneOfSchema is OpenApiSchema os)
+				if (typeIndex != 0 || nullableIndex != 1)
 				{
-					// Check if this is a nullable marker
-					// A nullable marker schema has Extensions["nullable"] = true
-					bool isNullableMarker = os.Extensions is not null && os.Extensions.ContainsKey("nullable");
-
-					if (isNullableMarker)
-					{
-						nullableMarker = os;
-						nullableIndex = i;
-					}
-					else
-					{
-						typeSchema = os;
-						typeIndex = i;
-					}
-				}
-				else if (oneOfSchema is OpenApiSchemaReference)
-				{
-					typeSchema = oneOfSchema;
-					typeIndex = i;
+					schema.OneOf = [typeSchema, nullableMarker];
+					typeSlot = 0;
 				}
 			}
 
-			// If we found both and nullable is first, swap them
-			if (nullableMarker is not null && typeSchema is not null && nullableIndex < typeIndex)
+			if (typeSlot >= 0 && schema.OneOf[typeSlot] is OpenApiSchemaReference enumTypeRef)
 			{
-				// Create a new list with the correct order
-				schema.OneOf = [typeSchema, nullableMarker];
-			}
-
-			// Also unwrap System.Nullable<EnumType> references in oneOf
-			if (typeSchema is OpenApiSchemaReference enumTypeRef)
-			{
-				IOpenApiSchema unwrapped = UnwrapNullableEnumReference(enumTypeRef);
-				if (unwrapped != enumTypeRef)
-				{
-					// The reference was unwrapped, update it in the oneOf
-					int actualTypeIndex = nullableMarker is not null && nullableIndex < typeIndex ? nullableIndex : typeIndex;
-					schema.OneOf[actualTypeIndex] = unwrapped;
-				}
+				schema.OneOf[typeSlot] = UnwrapNullableEnumReference(enumTypeRef);
 			}
 		}
 
@@ -1277,5 +1239,32 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				ReorderOneOfInIOpenApiSchema(oneOfSchema);
 			}
 		}
+	}
+
+	static (IOpenApiSchema? typeSchema, int typeIndex, OpenApiSchema? nullableMarker, int nullableIndex) ExtractOneOfParts(IList<IOpenApiSchema> oneOfSchemas)
+	{
+		IOpenApiSchema? typeSchema = null;
+		OpenApiSchema? nullableMarker = null;
+		int typeIndex = -1;
+		int nullableIndex = -1;
+
+		for (int i = 0; i < oneOfSchemas.Count; i++)
+		{
+			IOpenApiSchema candidate = oneOfSchemas[i];
+			if (candidate is OpenApiSchema schemaCandidate && schemaCandidate.Extensions is not null && schemaCandidate.Extensions.ContainsKey("nullable"))
+			{
+				nullableMarker = schemaCandidate;
+				nullableIndex = i;
+				continue;
+			}
+
+			if (typeSchema is null)
+			{
+				typeSchema = candidate;
+				typeIndex = i;
+			}
+		}
+
+		return (typeSchema, typeIndex, nullableMarker, nullableIndex);
 	}
 }
