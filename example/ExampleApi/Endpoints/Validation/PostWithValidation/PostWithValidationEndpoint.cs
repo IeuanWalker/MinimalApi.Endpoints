@@ -68,7 +68,9 @@ public class PostWithValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 				config.Property(x => x.NestedObject.DoubleMax).LessThanOrEqual(1000.0);
 
 				// Array element validation - applies validation to items in the array
-				config.Property(x => x.ListNestedObject![0].StringMin).MinLength(3).Description("Array item string minimum");
+				// Note: Since both NestedObject and ListNestedObject use the same NestedObjectModel schema,
+				// validation rules are merged. To avoid conflicts, we apply non-overlapping rules.
+				config.Property(x => x.ListNestedObject![0].StringPattern).Pattern(@"^[A-Z]+$");
 				config.Property(x => x.ListNestedObject![0].IntMax).LessThan(500);
 			});
 	}

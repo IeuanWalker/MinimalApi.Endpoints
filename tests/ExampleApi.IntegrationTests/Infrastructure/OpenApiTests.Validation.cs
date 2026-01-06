@@ -2141,23 +2141,34 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 			"type": "object",
 			"properties": {
 				"stringMin": {
-					"type": "string"
+					"minLength": 5,
+					"type": "string",
+					"description": "Nested string minimum length\n\nValidation rules:\n- Must be 5 characters or more"
 				},
 				"stringMax": {
-					"type": "string"
+					"maxLength": 100,
+					"type": "string",
+					"description": "Validation rules:\n- Must be 100 characters or fewer"
 				},
 				"stringRange": {
 					"type": "string"
 				},
 				"stringPattern": {
-					"type": "string"
+					"pattern": "^[A-Z]+$",
+					"type": "string",
+					"description": "Validation rules:\n- Must match pattern: ^[A-Z]+$"
 				},
 				"intMin": {
+					"minimum": 10,
 					"type": "integer",
+					"description": "Validation rules:\n- Must be >= 10",
 					"format": "int32"
 				},
 				"intMax": {
+					"maximum": 500,
+					"exclusiveMaximum": true,
 					"type": "integer",
+					"description": "Validation rules:\n- Must be < 500",
 					"format": "int32"
 				},
 				"intRange": {
@@ -2169,7 +2180,9 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 					"format": "double"
 				},
 				"doubleMax": {
+					"maximum": 1000.0,
 					"type": "number",
+					"description": "Validation rules:\n- Must be <= 1000",
 					"format": "double"
 				},
 				"doubleRange": {
