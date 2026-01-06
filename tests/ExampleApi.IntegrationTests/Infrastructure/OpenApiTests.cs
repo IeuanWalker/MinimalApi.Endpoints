@@ -72,8 +72,12 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		// Replace different newline sequences with a single space
 		value = NewLinePattern().Replace(value, string.Empty);
 
-		// Replace encoded plus
+		// Replace encoded characters
 		value = value.Replace("\\u002B", "+", StringComparison.OrdinalIgnoreCase);
+		value = value.Replace("\\u003E", ">", StringComparison.OrdinalIgnoreCase);
+		value = value.Replace("\\u003C", "<", StringComparison.OrdinalIgnoreCase);
+		value = value.Replace("\\u0060", "`", StringComparison.OrdinalIgnoreCase);
+		value = value.Replace("\\u0027", "'", StringComparison.OrdinalIgnoreCase);
 
 		// Remove all whitespace characters (spaces, tabs, newlines)
 		return SpacePattern().Replace(value, string.Empty);

@@ -16,7 +16,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 	}
 
 	static readonly string expectedFileEndpoints = """
-				"/api/v1/FileHandling/ListOfFiles": {
+		"/api/v1/FileHandling/ListOfFiles": {
 			"post": {
 				"tags": [
 					"FileHandling"
