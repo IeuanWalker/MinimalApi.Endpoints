@@ -148,12 +148,8 @@ public class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
-		// Set the type based on the underlying type ONLY if not already set by TypeDocumentTransformer
-		// This preserves the type information from TypeDocumentTransformer which runs first
-		if (!schema.Type.HasValue)
-		{
-			schema.Type = GetJsonSchemaType(underlyingType);
-		}
+		// Set the type based on the underlying type
+		schema.Type = GetJsonSchemaType(underlyingType);
 
 		// Add the enum values array - use JsonNodeExtension for the enum property
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();

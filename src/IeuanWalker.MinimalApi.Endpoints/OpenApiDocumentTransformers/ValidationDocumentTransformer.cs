@@ -667,10 +667,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// For simple properties, create a new inline schema with all validation rules
 		// Strategy:
-		// - TypeDocumentTransformer runs first and sets type/format correctly
-		// - Preserve type/format from TypeDocumentTransformer unless validation rules require specific format overrides
 		// - For array types: prioritize schema type to preserve array structure
-		// - For other types: preserve existing type, only override format for validation-specific rules (email, uri)
+		// - For other types: prioritize validation rules type, then schema type
 		JsonSchemaType? schemaType = null;
 		string? format = null;
 
@@ -681,7 +679,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		if (isArrayType)
 		{
-			// For arrays, prioritize schema type to preserve array structure from TypeDocumentTransformer
+			// For arrays, prioritize schema type to preserve array structure
 			if (originalOpenApiSchema?.Type is not null)
 			{
 				schemaType = originalOpenApiSchema.Type;
@@ -700,36 +698,38 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 		else
 		{
-			// For non-array types, preserve existing type/format from TypeDocumentTransformer
-			// TypeDocumentTransformer runs first, so existing schema types are authoritative
-			// However, validation rules may need to override format for specific cases (EmailRule -> "email", UrlRule -> "uri")
-			
-			// Get format from validation rules (all rules, not just email/url)
-			// Validation rules can provide format information (e.g., RangeRule<int> -> "int32", EnumRule -> "int32")
-			string? validationFormat = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
+			// For non-array types, get type from validation rules first (original behavior)
+			schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
+			format = rules.Select(GetSchemaFormat).FirstOrDefault(f => f is not null);
 
-			// Prioritize existing schema type (from TypeDocumentTransformer)
-			if (originalOpenApiSchema?.Type is not null)
+			// If no type from rules, try reference type detection, then schema types
+			// Prioritize referenceType for primitive types (Int32, String, etc.) as it's more reliable
+			if (!schemaType.HasValue)
 			{
-				schemaType = originalOpenApiSchema.Type;
-				// Use validation format if specified, otherwise preserve existing format
-				format = validationFormat ?? originalOpenApiSchema.Format;
+				// First try reference type detection (most reliable for primitives)
+				if (referenceType.HasValue)
+				{
+					schemaType = referenceType;
+					format ??= referenceFormat;
+				}
+				// Then try original schema
+				else if (originalOpenApiSchema?.Type is not null)
+				{
+					schemaType = originalOpenApiSchema.Type;
+					format ??= originalOpenApiSchema.Format;
+				}
+				// Finally try resolved reference schema
+				else if (resolvedReferenceSchema?.Type is not null)
+				{
+					schemaType = resolvedReferenceSchema.Type;
+					format ??= resolvedReferenceSchema.Format;
+				}
 			}
-			else if (resolvedReferenceSchema?.Type is not null)
+			
+			// If format still not set, try to get it from all sources
+			if (format is null)
 			{
-				schemaType = resolvedReferenceSchema.Type;
-				format = validationFormat ?? resolvedReferenceSchema.Format;
-			}
-			else if (referenceType.HasValue)
-			{
-				schemaType = referenceType;
-				format = validationFormat ?? referenceFormat;
-			}
-			else
-			{
-				// Fallback: No existing type found, use validation rules to infer type
-				schemaType = rules.Select(GetSchemaType).FirstOrDefault(t => t is not null);
-				format = validationFormat;
+				format = referenceFormat ?? resolvedReferenceSchema?.Format ?? originalOpenApiSchema?.Format;
 			}
 		}
 
@@ -1199,10 +1199,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		return rule switch
 		{
-			// ONLY validation-specific formats that override TypeDocumentTransformer
 			Validation.EmailRule => "email",
 			Validation.UrlRule => "uri",
-			// RangeRule, EnumRule, etc. should NOT set format - TypeDocumentTransformer handles type formats
+			Validation.RangeRule<int> => "int32",
+			Validation.RangeRule<long> => "int64",
+			Validation.RangeRule<float> => "float",
+			Validation.RangeRule<double> => "double",
 			_ => null
 		};
 	}
