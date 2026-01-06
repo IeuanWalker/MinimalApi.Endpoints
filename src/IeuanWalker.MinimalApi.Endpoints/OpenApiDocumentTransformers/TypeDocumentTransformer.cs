@@ -579,7 +579,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return schema;
 	}
 
-	static IOpenApiSchema CreateSchemaFromType(Type type)
+	static OpenApiSchema CreateSchemaFromType(Type type)
 	{
 		// Handle nullable types
 		Type actualType = Nullable.GetUnderlyingType(type) ?? type;
@@ -892,7 +892,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			int endIndex = refId.IndexOf(',', startIndex);
 			if (endIndex > startIndex)
 			{
-				string underlyingTypeFullName = refId.Substring(startIndex, endIndex - startIndex);
+				string underlyingTypeFullName = refId[startIndex..endIndex];
 				// Return a reference to the underlying type instead
 				return new OpenApiSchemaReference(underlyingTypeFullName, null, null);
 			}
@@ -986,7 +986,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return inlineSchema;
 	}
 
-	static IOpenApiSchema UnwrapNullableEnumReference(OpenApiSchemaReference schemaRef)
+	static OpenApiSchemaReference UnwrapNullableEnumReference(OpenApiSchemaReference schemaRef)
 	{
 		string? refId = schemaRef.Reference?.Id;
 		if (string.IsNullOrEmpty(refId))
@@ -1003,7 +1003,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			int endIndex = refId.IndexOf(',', startIndex);
 			if (endIndex > startIndex)
 			{
-				string underlyingTypeFullName = refId.Substring(startIndex, endIndex - startIndex);
+				string underlyingTypeFullName = refId[startIndex..endIndex];
 				// Return a reference to the underlying type instead
 				return new OpenApiSchemaReference(underlyingTypeFullName, null, null);
 			}
@@ -1032,8 +1032,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				int endIndex = schemaEntry.Key.IndexOf(',', startIndex);
 				if (endIndex > startIndex)
 				{
-					string underlyingTypeName = schemaEntry.Key.Substring(startIndex, endIndex - startIndex);
-					
+					string underlyingTypeName = schemaEntry.Key[startIndex..endIndex];
+
 					// Check if the unwrapped schema already exists
 					if (!document.Components.Schemas.ContainsKey(underlyingTypeName))
 					{
@@ -1045,7 +1045,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Create the unwrapped schemas
-		foreach ((string nullableSchemaName, string unwrappedSchemaName, OpenApiSchema nullableSchema) in schemasToCreate)
+		foreach ((string _, string unwrappedSchemaName, OpenApiSchema nullableSchema) in schemasToCreate)
 		{
 			// Create a copy of the nullable schema for the non-nullable version
 			OpenApiSchema unwrappedSchema = new()
@@ -1280,7 +1280,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Recursively process properties
 		if (schema.Properties is not null && schema.Properties.Count > 0)
 		{
-			List<string> propertyKeys = schema.Properties.Keys.ToList();
+			List<string> propertyKeys = [.. schema.Properties.Keys];
 			foreach (string key in propertyKeys)
 			{
 				IOpenApiSchema propertySchema = schema.Properties[key];

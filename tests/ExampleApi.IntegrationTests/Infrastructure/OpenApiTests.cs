@@ -2257,12 +2257,17 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		}
 
 		// Replace different newline sequences with a single space
-		value = Regex.Replace(value, "\r\n|\r|\n", string.Empty);
+		value = NewLinePattern().Replace(value, string.Empty);
 
 		// Replace encoded plus
 		value = value.Replace("\\u002B", "+", StringComparison.OrdinalIgnoreCase);
 
 		// Remove all whitespace characters (spaces, tabs, newlines)
-		return Regex.Replace(value, @"\s+", string.Empty);
+		return SpacePattern().Replace(value, string.Empty);
 	}
+
+	[GeneratedRegex("\r\n|\r|\n")]
+	private static partial Regex NewLinePattern();
+	[GeneratedRegex(@"\s+")]
+	private static partial Regex SpacePattern();
 }
