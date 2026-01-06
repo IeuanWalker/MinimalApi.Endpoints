@@ -69,9 +69,71 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 		return new ValidationConfiguration<TRequest>(allRules, _appendRulesToPropertyDescription, operationsByProperty);
 	}
 
-	static string GetPropertyName<TProperty>(Expression<Func<TRequest, TProperty>> expression) => expression.Body switch
+	static string GetPropertyName<TProperty>(Expression<Func<TRequest, TProperty>> expression)
 	{
-		MemberExpression member => member.Member.Name,
-		_ => throw new ArgumentException("Expression must be a property selector", nameof(expression))
-	};
+		return GetPropertyPath(expression.Body);
+	}
+
+	static string GetPropertyPath(Expression expr)
+	{
+		return expr switch
+		{
+			MemberExpression member => BuildMemberPath(member),
+			MethodCallExpression methodCall when IsArrayIndexer(methodCall) => BuildArrayIndexerPath(methodCall),
+			_ => throw new ArgumentException($"Expression must be a property selector (e.g., x => x.Property) or array indexer (e.g., x => x.Array[0]). Got: {expr.GetType().Name}")
+		};
+	}
+
+	static string BuildMemberPath(MemberExpression member)
+	{
+		List<string> parts = [];
+		Expression? current = member;
+
+		// Walk up the expression tree collecting property names
+		while (current is not null)
+		{
+			if (current is MemberExpression memberExpr)
+			{
+				parts.Insert(0, memberExpr.Member.Name);
+				current = memberExpr.Expression;
+			}
+			else if (current is MethodCallExpression methodCall && IsArrayIndexer(methodCall))
+			{
+				// Hit an array indexer, continue building path through it
+				string indexerPath = BuildArrayIndexerPath(methodCall);
+				parts.Insert(0, indexerPath);
+				break;
+			}
+			else
+			{
+				// Hit the parameter (e.g., x in x => x.Property)
+				break;
+			}
+		}
+
+		if (parts.Count == 0)
+		{
+			throw new ArgumentException("Expression must be a property selector");
+		}
+
+		return string.Join(".", parts);
+	}
+
+	static bool IsArrayIndexer(MethodCallExpression methodCall)
+	{
+		// Check if this is an array/list indexer call (e.g., list[0])
+		return methodCall.Method.Name == "get_Item";
+	}
+
+	static string BuildArrayIndexerPath(MethodCallExpression methodCall)
+	{
+		// For array indexer like x.ListNestedObject[0].StringMin
+		// We mark the path with [*] to indicate array item validation
+		// e.g., "ListNestedObject[*]"
+
+		Expression collectionExpr = methodCall.Object ?? throw new ArgumentException(
+			$"Array indexer expression must have a collection object. Expression: {methodCall}");
+
+		return GetPropertyPath(collectionExpr) + "[*]";
+	}
 }
