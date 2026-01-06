@@ -82,14 +82,18 @@
             "name": "PlainEnumWithoutFluentValidation",
             "in": "query",
             "required": true,
-            "schema": {}
+            "schema": {
+              "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum"
+            }
           },
           {
             "name": "NullableEnumWithoutFluentValidation",
             "in": "query",
             "schema": {
               "oneOf": [
-                {},
+                {
+                  "$ref": "#/components/schemas/ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum"
+                },
                 {
                   "nullable": true
                 }

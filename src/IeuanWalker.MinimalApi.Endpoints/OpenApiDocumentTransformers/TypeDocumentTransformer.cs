@@ -538,7 +538,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			PropertyInfo? property = requestType.GetProperty(parameterName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
 			if (property is not null)
 			{
-				return CreateSchemaFromType(property.PropertyType);
+				// For enum types, keep the existing schema (don't create a new one)
+				// The framework and EnumSchemaTransformer will handle enum documentation
+				Type actualType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+				if (!actualType.IsEnum)
+				{
+					return CreateSchemaFromType(property.PropertyType);
+				}
 			}
 		}
 
@@ -556,7 +562,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return schema;
 	}
 
-	static OpenApiSchema CreateSchemaFromType(Type type)
+	static IOpenApiSchema CreateSchemaFromType(Type type)
 	{
 		// Handle nullable types
 		Type actualType = Nullable.GetUnderlyingType(type) ?? type;
