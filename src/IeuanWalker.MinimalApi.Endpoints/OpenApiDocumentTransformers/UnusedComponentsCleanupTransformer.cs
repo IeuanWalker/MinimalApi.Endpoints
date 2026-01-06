@@ -19,7 +19,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 
 		// Step 1: Find all referenced schema IDs
 		HashSet<string> usedSchemaIds = [];
-		
+
 		// Step 2: Scan all paths and operations for schema references
 		if (document.Paths is not null)
 		{
@@ -94,9 +94,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Step 3: Remove unused schemas
-		List<string> schemasToRemove = document.Components.Schemas.Keys
-			.Where(schemaId => !usedSchemaIds.Contains(schemaId))
-			.ToList();
+		List<string> schemasToRemove = [.. document.Components.Schemas.Keys.Where(schemaId => !usedSchemaIds.Contains(schemaId))];
 
 		foreach (string schemaId in schemasToRemove)
 		{
