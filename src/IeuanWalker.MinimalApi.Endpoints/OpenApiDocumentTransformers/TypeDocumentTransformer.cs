@@ -1107,13 +1107,19 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				if (oneOfSchema is OpenApiSchema os)
 				{
 					// Check if this is a nullable marker - it should have no type, items, properties, or $ref
-					// It's essentially an empty schema, possibly with just the nullable extension
+					// It might have Extensions with ["nullable"] = true
 					bool isNullableMarker = !os.Type.HasValue &&
 											os.Items is null &&
 											(os.Properties is null || os.Properties.Count == 0) &&
 											os.AllOf is null &&
 											os.AnyOf is null &&
 											os.OneOf is null;
+
+					// Also check if it explicitly has the nullable extension
+					if (!isNullableMarker && os.Extensions is not null && os.Extensions.ContainsKey("nullable"))
+					{
+						isNullableMarker = true;
+					}
 
 					if (isNullableMarker)
 					{
