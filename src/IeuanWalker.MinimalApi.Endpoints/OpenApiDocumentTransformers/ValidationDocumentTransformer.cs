@@ -1199,50 +1199,12 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		return rule switch
 		{
+			// ONLY validation-specific formats that override TypeDocumentTransformer
 			Validation.EmailRule => "email",
 			Validation.UrlRule => "uri",
-			Validation.RangeRule<int> => "int32",
-			Validation.RangeRule<long> => "int64",
-			Validation.RangeRule<float> => "float",
-			Validation.RangeRule<double> => "double",
-			Validation.EnumRule enumRule => GetEnumRuleSchemaFormat(enumRule),
+			// RangeRule, EnumRule, etc. should NOT set format - TypeDocumentTransformer handles type formats
 			_ => null
 		};
-	}
-
-	static string? GetEnumRuleSchemaFormat(Validation.EnumRule enumRule)
-	{
-		// Determine format based on the property type
-		Type propertyType = enumRule.PropertyType;
-
-		// Handle nullable types
-		Type actualType = Nullable.GetUnderlyingType(propertyType) ?? propertyType;
-
-		// If property type is int, return int32 format
-		if (actualType == typeof(int))
-		{
-			return "int32";
-		}
-		else if (actualType == typeof(long))
-		{
-			return "int64";
-		}
-		else if (actualType.IsEnum)
-		{
-			// For enum types, determine format based on the enum's underlying type
-			Type underlyingType = Enum.GetUnderlyingType(actualType);
-			if (underlyingType == typeof(int) || underlyingType == typeof(uint))
-			{
-				return "int32";
-			}
-			else if (underlyingType == typeof(long) || underlyingType == typeof(ulong))
-			{
-				return "int64";
-			}
-		}
-
-		// String properties don't have a format
-		return null;
 	}
 
 	static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType)
