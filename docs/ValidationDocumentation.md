@@ -9,6 +9,7 @@ All validation documentation is **OpenAPI-only** - no runtime validation is perf
 
 ## Table of Contents
 
+- [Setup](#setup)
 - [Quick Start](#quick-start)
 - [FluentValidation Auto-Documentation](#fluentvalidation-auto-documentation)
 - [DataAnnotations Auto-Documentation](#dataannotations-auto-documentation)
@@ -18,11 +19,75 @@ All validation documentation is **OpenAPI-only** - no runtime validation is perf
 - [Complete Examples](#complete-examples)
 - [Troubleshooting](#troubleshooting)
 
+## Setup
+
+To enable automatic validation documentation, call `EnhanceRequestProperties()` when configuring OpenAPI:
+
+```csharp
+builder.Services.AddOpenApi(config =>
+{
+    config.EnhanceRequestProperties();
+});
+```
+
+### EnhanceRequestProperties Configuration
+
+The `EnhanceRequestProperties()` method accepts optional parameters to customize behavior:
+
+```csharp
+builder.Services.AddOpenApi(config =>
+{
+    config.EnhanceRequestProperties(
+        autoDocumentFluentValidation: true,           // Default: true
+        appendRulesToPropertyDescription: true        // Default: true
+    );
+});
+```
+
+#### Parameters
+
+**`autoDocumentFluentValidation`** (default: `true`)
+- When `true`: Automatically extracts and documents all FluentValidation rules
+- When `false`: Only FluentValidation rules explicitly overridden with `.WithValidation()` are documented
+- Use `false` if you want complete manual control over which validation rules appear in OpenAPI
+
+**`appendRulesToPropertyDescription`** (default: `true`)
+- When `true`: Adds a "Validation rules:" section listing all validation constraints in property descriptions
+- When `false`: Validation constraints are still applied to the schema (required, minLength, etc.) but not listed in descriptions
+- Use `false` for a cleaner OpenAPI specification when you don't want verbose validation rule listings
+
+**Example - Manual Control Only:**
+```csharp
+builder.Services.AddOpenApi(config =>
+{
+    config.EnhanceRequestProperties(
+        autoDocumentFluentValidation: false,
+        appendRulesToPropertyDescription: false
+    );
+});
+```
+This configuration:
+- Disables automatic FluentValidation discovery
+- Removes validation rule descriptions from properties
+- Still applies schema constraints (required, min/max, etc.)
+- Requires manual `.WithValidation()` calls to document any validation
+
+### What EnhanceRequestProperties Does
+
+This method configures multiple OpenAPI transformers that enhance your API documentation:
+
+1. **Type Transformer** - Sets appropriate primitive types (fixes nullable/non-nullable representation)
+2. **Enum Transformer** - Adds complete enum information (all possible values)
+3. **Validation Transformer** - Documents validation rules from FluentValidation, DataAnnotations, and WithValidation API
+4. **OneOf Reordering** - Ensures proper structure for discriminated unions
+
+Without calling `EnhanceRequestProperties()`, validation documentation features will not be enabled.
+
 ## Quick Start
 
-### Automatic Documentation (No Configuration Required)
+### Automatic Documentation
 
-The library automatically documents validation rules from FluentValidation and DataAnnotations without any configuration:
+Once `EnhanceRequestProperties()` is configured, validation rules are automatically documented:
 
 ```csharp
 // FluentValidation validator
