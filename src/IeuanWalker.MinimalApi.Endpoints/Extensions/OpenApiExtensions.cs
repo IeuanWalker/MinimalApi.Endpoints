@@ -16,33 +16,23 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 public static class OpenApiExtensions
 {
 	/// <summary>
-	/// Explicitly adds support for documenting validation rules in the OpenAPI spec.
-	/// This is OPTIONAL - validation documentation automatically works when you use WithValidation extension method.
-	/// However, calling this method ensures FluentValidation validators are also auto-discovered and documented.
+	/// <para>This enhances OpenAPI documentation for request properties, it does a number of things - </para>
+	/// <para>- Sets the appropiate types</para>
+	/// <para>- Adds in all the enum information</para>
+	/// <para>- Add validation logic (fluent validation, data annotation and manually)</para>
+	/// <para>// TODO: Here is the wiki guide for more info - </para>
 	/// </summary>
-	/// <param name="options">The OpenAPI options</param>
-	/// <returns>The OpenAPI options for method chaining</returns>
-	/// <remarks>
-	/// When you call this method:
-	/// - FluentValidation validators registered in DI are automatically discovered and their rules documented in OpenAPI
-	/// - Manual WithValidation rules take precedence over auto-discovered FluentValidation rules
-	///
-	/// If you don't call this method:
-	/// - WithValidation extension method still works and documents validation rules
-	/// - FluentValidation validators are NOT auto-discovered (you would need to manually duplicate rules with WithValidation)
-	/// </remarks>
-	/// <example>
-	/// <code>
-	/// builder.Services.AddOpenApi(options =>
-	/// {
-	///     options.AddValidationSupport(); // Optional but recommended if using FluentValidation
-	/// });
-	/// </code>
-	/// </example>
+	/// <param name="options"></param>
+	/// <param name="autoDocumentFluentValidation"></param>
+	/// <param name="appendRulesToPropertyDescription"></param>
+	/// <returns></returns>
 	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions AddWithValidatation(this OpenApiOptions options, bool autoDocumentFluentValdation = true, bool appendRulesToPropertyDescription = true)
+	public static OpenApiOptions EnhanceRequestProperties(this OpenApiOptions options, bool autoDocumentFluentValidation = true, bool appendRulesToPropertyDescription = true)
 	{
-		// Add enum transformer first so enum schemas are enriched before validation processing
+		// Add type transformer first to ensure all property types are correctly documented
+		options.AddDocumentTransformer<TypeDocumentTransformer>();
+
+		// Add enum transformer second so enum schemas are enriched before validation processing
 		options.AddDocumentTransformer<EnumSchemaTransformer>();
 
 		// Add unified validation transformer that handles both FluentValidation and WithValidation
@@ -50,12 +40,19 @@ public static class OpenApiExtensions
 		{
 			ValidationDocumentTransformer transformer = new()
 			{
-				AutoDocumentFluentValdation = autoDocumentFluentValdation,
+				AutoDocumentFluentValdation = autoDocumentFluentValidation,
 				AppendRulesToPropertyDescription = appendRulesToPropertyDescription
 			};
 			return transformer.TransformAsync(document, context, ct);
 		});
 
+		// Add final reordering transformer to ensure all oneOf structures are correctly ordered
+		// This runs after all other transformers to catch any oneOf structures created by them
+		options.AddDocumentTransformer((document, context, ct) =>
+		{
+			TypeDocumentTransformer.ReorderAllOneOfStructures(document);
+			return Task.CompletedTask;
+		});
 
 		return options;
 	}
