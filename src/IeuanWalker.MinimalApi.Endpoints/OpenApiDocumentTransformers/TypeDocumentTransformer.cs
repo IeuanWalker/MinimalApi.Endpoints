@@ -41,19 +41,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 6: Ensure unwrapped enum schemas exist (before reordering)
 		EnsureUnwrappedEnumSchemasExist(document);
 
-		// Step 7: Reorder all oneOf structures to have type first, nullable marker second
-		ReorderOneOfStructures(document);
-
 		return Task.CompletedTask;
-	}
-
-	/// <summary>
-	/// Public method to reorder all oneOf structures in the document.
-	/// This can be called as a final pass after all other transformers have run.
-	/// </summary>
-	public static void ReorderAllOneOfStructures(OpenApiDocument document)
-	{
-		ReorderOneOfStructures(document);
 	}
 
 	static void FixSchemaPropertyTypes(OpenApiDocument document)
@@ -1169,20 +1157,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		return true;
-	}
-
-	static void ReorderOneOfStructures(OpenApiDocument document)
-	{
-		if (document.Components?.Schemas is null)
-		{
-			return;
-		}
-
-		// Process each schema in the document
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
-		{
-			ReorderOneOfInIOpenApiSchema(schemaEntry.Value);
-		}
 	}
 
 	static void ReorderOneOfInIOpenApiSchema(IOpenApiSchema iSchema)

@@ -46,13 +46,8 @@ public static class OpenApiExtensions
 			return transformer.TransformAsync(document, context, ct);
 		});
 
-		// Add final reordering transformer to ensure all oneOf structures are correctly ordered
-		// This runs after all other transformers to catch any oneOf structures created by them
-		options.AddDocumentTransformer((document, context, ct) =>
-		{
-			TypeDocumentTransformer.ReorderAllOneOfStructures(document);
-			return Task.CompletedTask;
-		});
+		// Reorder so nullable is last
+		options.AddDocumentTransformer<NullableSchemaReorderTransformer>();
 
 		// Add cleanup transformer as the absolute final step to remove unused component schemas
 		// This removes schemas that are no longer referenced after aggressive inlining and unwrapping
