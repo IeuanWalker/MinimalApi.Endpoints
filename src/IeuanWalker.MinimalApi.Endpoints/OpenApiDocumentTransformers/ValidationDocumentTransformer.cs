@@ -80,6 +80,177 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
+		// Separate rules into top-level and nested rules
+		List<Validation.ValidationRule> topLevelRules = [];
+		Dictionary<string, List<Validation.ValidationRule>> nestedRulesBySchema = [];
+
+		foreach (Validation.ValidationRule rule in rules)
+		{
+			// Check if this is a nested property (contains a dot or array marker)
+			if (rule.PropertyName.Contains('.') || rule.PropertyName.Contains("[*]"))
+			{
+				// Extract the target schema and property path
+				(string targetSchemaPath, string nestedPropertyName) = ExtractNestedPath(rule.PropertyName);
+				
+				if (!nestedRulesBySchema.ContainsKey(targetSchemaPath))
+				{
+					nestedRulesBySchema[targetSchemaPath] = [];
+				}
+
+				// Create a new rule with the nested property name
+				Validation.ValidationRule nestedRule = rule with { PropertyName = nestedPropertyName };
+				nestedRulesBySchema[targetSchemaPath].Add(nestedRule);
+			}
+			else
+			{
+				topLevelRules.Add(rule);
+			}
+		}
+
+		// Apply top-level validation rules
+		ApplyValidationToProperties(schema, topLevelRules, typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
+
+		// Apply nested validation rules to referenced schemas
+		foreach (KeyValuePair<string, List<Validation.ValidationRule>> nestedRules in nestedRulesBySchema)
+		{
+			ApplyNestedValidation(document, schema, nestedRules.Key, nestedRules.Value, typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription);
+		}
+	}
+
+	static (string schemaPath, string propertyName) ExtractNestedPath(string fullPath)
+	{
+		// Handle paths like:
+		// "NestedObject.StringMin" -> ("NestedObject", "StringMin")
+		// "ListNestedObject[*].StringMin" -> ("ListNestedObject[*]", "StringMin")
+		// "NestedObject.DeepNested.Value" -> ("NestedObject.DeepNested", "Value")
+
+		int lastDot = fullPath.LastIndexOf('.');
+		if (lastDot == -1)
+		{
+			// No nested path, shouldn't happen but handle gracefully
+			return (string.Empty, fullPath);
+		}
+
+		string schemaPath = fullPath[..lastDot];
+		string propertyName = fullPath[(lastDot + 1)..];
+
+		return (schemaPath, propertyName);
+	}
+
+	static void ApplyNestedValidation(
+		OpenApiDocument document,
+		OpenApiSchema parentSchema,
+		string nestedPath,
+		List<Validation.ValidationRule> rules,
+		bool typeAppendRulesToPropertyDescription,
+		bool appendRulesToPropertyDescription)
+	{
+		// Parse the nested path to find the target schema
+		// e.g., "NestedObject" or "ListNestedObject[*]"
+		
+		string[] pathParts = nestedPath.Split('.');
+		IOpenApiSchema? currentSchemaInterface = parentSchema;
+
+		foreach (string part in pathParts)
+		{
+			if (currentSchemaInterface is not OpenApiSchema currentSchema || currentSchema.Properties is null)
+			{
+				return;
+			}
+
+			// Check if this part references an array
+			bool isArray = part.EndsWith("[*]");
+			string propertyName = isArray ? part[..^3] : part;
+			string propertyKey = propertyName.ToCamelCase();
+
+			if (!currentSchema.Properties.TryGetValue(propertyKey, out IOpenApiSchema? propertySchema))
+			{
+				return;
+			}
+
+			if (isArray)
+			{
+				// For arrays, navigate to the items schema
+				if (propertySchema is OpenApiSchema arraySchema && arraySchema.Items is not null)
+				{
+					currentSchemaInterface = arraySchema.Items;
+				}
+				else if (propertySchema is OpenApiSchema oneOfSchema && oneOfSchema.OneOf?.Count > 0)
+				{
+					// Handle nullable arrays wrapped in oneOf
+					foreach (IOpenApiSchema oneOf in oneOfSchema.OneOf)
+					{
+						if (oneOf is OpenApiSchema oneOfArraySchema && oneOfArraySchema.Type == JsonSchemaType.Array && oneOfArraySchema.Items is not null)
+						{
+							currentSchemaInterface = oneOfArraySchema.Items;
+							break;
+						}
+					}
+				}
+				else
+				{
+					return;
+				}
+			}
+			else
+			{
+				currentSchemaInterface = propertySchema;
+			}
+		}
+
+		// Now resolve the final schema reference to get the actual schema object
+		OpenApiSchema? targetSchema = ResolveSchemaReference(currentSchemaInterface, document);
+		
+		// Apply validation rules to the target schema
+		if (targetSchema is not null)
+		{
+			ApplyValidationToProperties(targetSchema, rules, typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
+		}
+	}
+
+	static OpenApiSchema? ResolveSchemaReference(IOpenApiSchema schemaInterface, OpenApiDocument document)
+	{
+		// Handle schema references
+		if (schemaInterface is OpenApiSchemaReference schemaRef)
+		{
+			string refId = schemaRef.Reference?.Id ?? string.Empty;
+			if (document.Components?.Schemas is not null &&
+				document.Components.Schemas.TryGetValue(refId, out IOpenApiSchema? referencedSchemaInterface) &&
+				referencedSchemaInterface is OpenApiSchema referencedSchema)
+			{
+				return referencedSchema;
+			}
+			return null;
+		}
+
+		// Handle allOf wrappers (common for required properties)
+		if (schemaInterface is OpenApiSchema schema && schema.AllOf?.Count > 0)
+		{
+			foreach (IOpenApiSchema allOfSchema in schema.AllOf)
+			{
+				OpenApiSchema? resolved = ResolveSchemaReference(allOfSchema, document);
+				if (resolved is not null)
+				{
+					return resolved;
+				}
+			}
+		}
+
+		return schemaInterface as OpenApiSchema;
+	}
+
+	static void ApplyValidationToProperties(
+		OpenApiSchema schema,
+		List<Validation.ValidationRule> rules,
+		bool typeAppendRulesToPropertyDescription,
+		bool appendRulesToPropertyDescription,
+		OpenApiDocument document)
+	{
+		if (schema.Properties is null)
+		{
+			return;
+		}
+
 		// Group rules by property name
 		IEnumerable<IGrouping<string, Validation.ValidationRule>> rulesByProperty = rules.GroupBy(r => r.PropertyName);
 
@@ -120,7 +291,17 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// Set required properties on the schema
 		if (requiredProperties.Count > 0)
 		{
-			schema.Required = new HashSet<string>(requiredProperties);
+			// Merge with existing required properties if any
+			HashSet<string> allRequired = schema.Required is not null 
+				? new HashSet<string>(schema.Required) 
+				: [];
+			
+			foreach (string prop in requiredProperties)
+			{
+				allRequired.Add(prop);
+			}
+
+			schema.Required = allRequired;
 		}
 
 		// Inline primitive type references for ALL properties (including those without validation rules)

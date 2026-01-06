@@ -61,8 +61,15 @@ public class PostWithValidationEndpoint : IEndpointWithoutResponse<RequestModel>
 				// Nested object validation
 				config.Property(x => x.NestedObject).Required();
 
-				// Note: Nested object properties would need their own validation rules
-				// or would be validated by a separate validator for the NestedObjectModel type
+				// Nested object property validation
+				config.Property(x => x.NestedObject.StringMin).MinLength(5).Description("Nested string minimum length");
+				config.Property(x => x.NestedObject.StringMax).MaxLength(100);
+				config.Property(x => x.NestedObject.IntMin).GreaterThanOrEqual(10);
+				config.Property(x => x.NestedObject.DoubleMax).LessThanOrEqual(1000.0);
+
+				// Array element validation - applies validation to items in the array
+				config.Property(x => x.ListNestedObject![0].StringMin).MinLength(3).Description("Array item string minimum");
+				config.Property(x => x.ListNestedObject![0].IntMax).LessThan(500);
 			});
 	}
 
