@@ -723,6 +723,20 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return schemaRef;
 		}
 
+		// Handle System.Nullable<T> - extract the underlying type reference
+		if (refId.StartsWith("System.Nullable`1[["))
+		{
+			// Extract the underlying type from Nullable<T>
+			int startIdx = refId.IndexOf("[[");
+			int endIdx = refId.IndexOf(',', startIdx);
+			if (startIdx >= 0 && endIdx > startIdx)
+			{
+				string underlyingType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
+				// Return a reference to the underlying type (not the Nullable wrapper)
+				return new OpenApiSchemaReference(underlyingType, document, null);
+			}
+		}
+
 		// Only inline primitive system types and special ASP.NET types, not custom types
 		if (!refId.StartsWith("System.") && !refId.StartsWith("Microsoft.AspNetCore.Http.") && !refId.Equals("IFormFile", StringComparison.Ordinal) && !refId.Equals("IFormFileCollection", StringComparison.Ordinal))
 		{
