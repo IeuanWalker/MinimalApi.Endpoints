@@ -260,6 +260,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 			// Check if this is an array or collection type
 			bool isArrayOrCollection = actualType.IsArray ||
+				actualType == typeof(IFormFileCollection) ||
 				(actualType.IsGenericType && (
 					actualType.GetGenericTypeDefinition() == typeof(List<>) ||
 					actualType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
