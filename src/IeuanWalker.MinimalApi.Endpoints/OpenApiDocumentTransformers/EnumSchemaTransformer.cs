@@ -11,7 +11,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 /// This transformer adds the 'enum' array with valid values and 'x-enum-varnames' extension with member names
 /// to provide better API documentation for enums.
 /// </summary>
-public class EnumSchemaTransformer : IOpenApiDocumentTransformer
+sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 {
 	// Cache for type lookups to avoid repeatedly scanning all assemblies
 	static readonly Dictionary<string, Type?> typeCache = [];

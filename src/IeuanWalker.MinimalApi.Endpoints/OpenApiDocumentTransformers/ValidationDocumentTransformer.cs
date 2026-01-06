@@ -140,7 +140,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			}
 
 			// Inline primitive type references for better documentation
-			schema.Properties[property.Key] = InlinePrimitiveTypeReference(property.Value, document);
+			schema.Properties[property.Key] = InlinePrimitiveTypeReference(property.Value);
 		}
 	}
 
@@ -193,7 +193,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			if (mapping.TryGetValue(routePattern, out Type existingType))
+			if (mapping.TryGetValue(routePattern, out Type? existingType))
 			{
 				// Log a warning when a collision is detected
 				if (existingType != matchingParamType)
@@ -288,7 +288,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						// for better OpenAPI documentation clarity
 						if (parameter.Schema is not null && !IsEnumSchemaReference(parameter.Schema, document) && !IsInlineEnumSchema(parameter.Schema))
 						{
-							parameter.Schema = InlinePrimitiveTypeReference(parameter.Schema, document);
+							parameter.Schema = InlinePrimitiveTypeReference(parameter.Schema);
 						}
 						continue;
 					}
@@ -423,9 +423,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					// Skip minimal schemas that just mark nullability
 					// These typically have no Type set and few/no other properties
 					// But also look for schemas with maxLength/minLength as those are validation rules
-					return schema.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0 || 
-					       schema.MaxLength.HasValue || schema.MinLength.HasValue ||
-					       schema.Maximum is not null || schema.Minimum is not null;
+					return schema.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0 ||
+						   schema.MaxLength.HasValue || schema.MinLength.HasValue ||
+						   schema.Maximum is not null || schema.Minimum is not null;
 				}
 				return false;
 			});
@@ -725,12 +725,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					format ??= resolvedReferenceSchema.Format;
 				}
 			}
-			
+
 			// If format still not set, try to get it from all sources
-			if (format is null)
-			{
-				format = referenceFormat ?? resolvedReferenceSchema?.Format ?? originalOpenApiSchema?.Format;
-			}
+			format ??= referenceFormat ?? resolvedReferenceSchema?.Format ?? originalOpenApiSchema?.Format;
 		}
 
 		// Create inline schema - set properties after creation to avoid initialization issues
@@ -752,7 +749,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			newInlineSchema.Type = JsonSchemaType.Array;
 		}
-		
+
 		if (format is not null)
 		{
 			newInlineSchema.Format = format;
@@ -762,7 +759,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		// BUT inline primitive type references for better OpenAPI documentation
 		if (originalOpenApiSchema?.Items is not null)
 		{
-			newInlineSchema.Items = InlinePrimitiveTypeReference(originalOpenApiSchema.Items, document);
+			newInlineSchema.Items = InlinePrimitiveTypeReference(originalOpenApiSchema.Items);
 			// Ensure type is set to array when Items is present
 			if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
 			{
@@ -771,7 +768,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 		}
 		else if (resolvedReferenceSchema?.Items is not null)
 		{
-			newInlineSchema.Items = InlinePrimitiveTypeReference(resolvedReferenceSchema.Items, document);
+			newInlineSchema.Items = InlinePrimitiveTypeReference(resolvedReferenceSchema.Items);
 			// Ensure type is set to array when Items is present
 			if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
 			{
@@ -795,7 +792,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
 					// Create a reference to the element type schema (will be inlined if it's a primitive)
 					OpenApiSchemaReference elementRef = new(elementType, document, null);
-					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef);
 					// Ensure type is set to array when Items is set
 					if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
 					{
@@ -821,7 +818,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
 					// Create a reference to the element type schema (will be inlined if it's a primitive)
 					OpenApiSchemaReference elementRef = new(elementType, document, null);
-					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef, document);
+					newInlineSchema.Items = InlinePrimitiveTypeReference(elementRef);
 					// Ensure type is set to array when Items is set
 					if (!newInlineSchema.Type.HasValue || newInlineSchema.Type == JsonSchemaType.Null)
 					{
@@ -1373,7 +1370,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	/// with explicit type and format information. This improves OpenAPI documentation by making
 	/// types explicit instead of requiring clients to resolve $ref links.
 	/// </summary>
-	static IOpenApiSchema InlinePrimitiveTypeReference(IOpenApiSchema itemSchema, OpenApiDocument document)
+	static IOpenApiSchema InlinePrimitiveTypeReference(IOpenApiSchema itemSchema)
 	{
 		// If not a reference, return as-is
 		if (itemSchema is not OpenApiSchemaReference schemaRef)
