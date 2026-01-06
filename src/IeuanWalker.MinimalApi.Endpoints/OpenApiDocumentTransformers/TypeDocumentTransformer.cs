@@ -35,10 +35,22 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 5: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
-		// Step 6: Reorder all oneOf structures to have type first, nullable marker second
+		// Step 6: Ensure unwrapped enum schemas exist (before reordering)
+		EnsureUnwrappedEnumSchemasExist(document);
+
+		// Step 7: Reorder all oneOf structures to have type first, nullable marker second
 		ReorderOneOfStructures(document);
 
 		return Task.CompletedTask;
+	}
+
+	/// <summary>
+	/// Public method to reorder all oneOf structures in the document.
+	/// This can be called as a final pass after all other transformers have run.
+	/// </summary>
+	public static void ReorderAllOneOfStructures(OpenApiDocument document)
+	{
+		ReorderOneOfStructures(document);
 	}
 
 	static void FixSchemaPropertyTypes(OpenApiDocument document)
@@ -1000,6 +1012,56 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return schemaRef;
 	}
 
+	static void EnsureUnwrappedEnumSchemasExist(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		// Find all System.Nullable<EnumType> schemas and ensure their unwrapped versions exist
+		List<(string nullableSchemaName, string unwrappedSchemaName, OpenApiSchema nullableSchema)> schemasToCreate = [];
+
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		{
+			// Check if this is a System.Nullable<T> schema
+			if (schemaEntry.Key.StartsWith("System.Nullable`1[[") && schemaEntry.Value is OpenApiSchema nullableSchema)
+			{
+				// Extract the underlying type name
+				int startIndex = "System.Nullable`1[[".Length;
+				int endIndex = schemaEntry.Key.IndexOf(',', startIndex);
+				if (endIndex > startIndex)
+				{
+					string underlyingTypeName = schemaEntry.Key.Substring(startIndex, endIndex - startIndex);
+					
+					// Check if the unwrapped schema already exists
+					if (!document.Components.Schemas.ContainsKey(underlyingTypeName))
+					{
+						// Queue for creation (we create them after iteration to avoid collection modification)
+						schemasToCreate.Add((schemaEntry.Key, underlyingTypeName, nullableSchema));
+					}
+				}
+			}
+		}
+
+		// Create the unwrapped schemas
+		foreach ((string nullableSchemaName, string unwrappedSchemaName, OpenApiSchema nullableSchema) in schemasToCreate)
+		{
+			// Create a copy of the nullable schema for the non-nullable version
+			OpenApiSchema unwrappedSchema = new()
+			{
+				Type = nullableSchema.Type,
+				Format = nullableSchema.Format,
+				Description = nullableSchema.Description,
+				Enum = nullableSchema.Enum is not null ? [.. nullableSchema.Enum] : null,
+				Extensions = nullableSchema.Extensions is not null ? new Dictionary<string, IOpenApiExtension>(nullableSchema.Extensions) : null
+			};
+
+			// Add the unwrapped schema to the document
+			document.Components.Schemas[unwrappedSchemaName] = unwrappedSchema;
+		}
+	}
+
 	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)
 	{
 		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
@@ -1173,20 +1235,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				IOpenApiSchema oneOfSchema = schema.OneOf[i];
 				if (oneOfSchema is OpenApiSchema os)
 				{
-					// Check if this is a nullable marker - it should have no type, items, properties, or $ref
-					// It might have Extensions with ["nullable"] = true
-					bool isNullableMarker = !os.Type.HasValue &&
-											os.Items is null &&
-											(os.Properties is null || os.Properties.Count == 0) &&
-											os.AllOf is null &&
-											os.AnyOf is null &&
-											os.OneOf is null;
-
-					// Also check if it explicitly has the nullable extension
-					if (!isNullableMarker && os.Extensions is not null && os.Extensions.ContainsKey("nullable"))
-					{
-						isNullableMarker = true;
-					}
+					// Check if this is a nullable marker
+					// A nullable marker schema has Extensions["nullable"] = true
+					bool isNullableMarker = os.Extensions is not null && os.Extensions.ContainsKey("nullable");
 
 					if (isNullableMarker)
 					{
@@ -1209,8 +1260,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			// If we found both and nullable is first, swap them
 			if (nullableMarker is not null && typeSchema is not null && nullableIndex < typeIndex)
 			{
-				schema.OneOf[nullableIndex] = typeSchema;
-				schema.OneOf[typeIndex] = nullableMarker;
+				// Create a new list with the correct order
+				schema.OneOf = [typeSchema, nullableMarker];
 			}
 
 			// Also unwrap System.Nullable<EnumType> references in oneOf

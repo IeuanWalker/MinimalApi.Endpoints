@@ -59,6 +59,13 @@ public static class OpenApiExtensions
 			return transformer.TransformAsync(document, context, ct);
 		});
 
+		// Add final reordering transformer to ensure all oneOf structures are correctly ordered
+		// This runs after all other transformers to catch any oneOf structures created by them
+		options.AddDocumentTransformer((document, context, ct) =>
+		{
+			TypeDocumentTransformer.ReorderAllOneOfStructures(document);
+			return Task.CompletedTask;
+		});
 
 		return options;
 	}
