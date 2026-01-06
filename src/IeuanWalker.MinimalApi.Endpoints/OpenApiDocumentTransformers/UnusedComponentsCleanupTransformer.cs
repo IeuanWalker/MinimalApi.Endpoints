@@ -33,7 +33,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 				// Check parameters at path level
 				if (pathItemValue.Parameters is not null)
 				{
-					foreach (IOpenApiParameter parameter in pathItemValue.Parameters)
+					foreach (IOpenApiParameter parameter in pathItemValue.Parameters.Where(p => p is OpenApiParameter))
 					{
 						if (parameter is OpenApiParameter openApiParameter && openApiParameter.Schema is not null)
 						{
@@ -48,7 +48,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 					// Check operation parameters
 					if (operation.Value.Parameters is not null)
 					{
-						foreach (IOpenApiParameter parameter in operation.Value.Parameters)
+						foreach (IOpenApiParameter parameter in operation.Value.Parameters.Where(p => p is OpenApiParameter))
 						{
 							if (parameter is OpenApiParameter openApiParameter && openApiParameter.Schema is not null)
 							{
@@ -58,15 +58,30 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 					}
 
 					// Check request body
-					if (operation.Value.RequestBody is OpenApiRequestBody requestBody)
+					if (operation.Value.RequestBody is OpenApiRequestBody requestBody && requestBody.Content is not null)
 					{
-						if (requestBody.Content is not null)
+						foreach (KeyValuePair<string, OpenApiMediaType> content in requestBody.Content)
 						{
-							foreach (KeyValuePair<string, OpenApiMediaType> content in requestBody.Content)
+							if (content.Value.Schema is not null)
 							{
-								if (content.Value.Schema is not null)
+								CollectSchemaReferences(content.Value.Schema, usedSchemaIds, document);
+							}
+
+							// Check media type encodings (for multipart/form-data with custom headers)
+							if (content.Value.Encoding is not null)
+							{
+								foreach (KeyValuePair<string, OpenApiEncoding> encoding in content.Value.Encoding)
 								{
-									CollectSchemaReferences(content.Value.Schema, usedSchemaIds, document);
+									if (encoding.Value.Headers is not null)
+									{
+										foreach (KeyValuePair<string, IOpenApiHeader> header in encoding.Value.Headers.Where(h => h.Value is OpenApiHeader))
+										{
+											if (header.Value is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
+											{
+												CollectSchemaReferences(openApiHeader.Schema, usedSchemaIds, document);
+											}
+										}
+									}
 								}
 							}
 						}
@@ -75,15 +90,49 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 					// Check responses
 					if (operation.Value.Responses is not null)
 					{
-						foreach (KeyValuePair<string, IOpenApiResponse> response in operation.Value.Responses)
+						foreach (KeyValuePair<string, IOpenApiResponse> response in operation.Value.Responses.Where(r => r.Value is OpenApiResponse))
 						{
-							if (response.Value is OpenApiResponse responseValue && responseValue.Content is not null)
+							if (response.Value is OpenApiResponse responseValue)
 							{
-								foreach (KeyValuePair<string, OpenApiMediaType> content in responseValue.Content)
+								// Check response content
+								if (responseValue.Content is not null)
 								{
-									if (content.Value.Schema is not null)
+									foreach (KeyValuePair<string, OpenApiMediaType> content in responseValue.Content)
 									{
-										CollectSchemaReferences(content.Value.Schema, usedSchemaIds, document);
+										if (content.Value.Schema is not null)
+										{
+											CollectSchemaReferences(content.Value.Schema, usedSchemaIds, document);
+										}
+
+										// Check media type encodings (for multipart/form-data with custom headers)
+										if (content.Value.Encoding is not null)
+										{
+											foreach (KeyValuePair<string, OpenApiEncoding> encoding in content.Value.Encoding)
+											{
+												if (encoding.Value.Headers is not null)
+												{
+													foreach (KeyValuePair<string, IOpenApiHeader> header in encoding.Value.Headers.Where(h => h.Value is OpenApiHeader))
+													{
+														if (header.Value is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
+														{
+															CollectSchemaReferences(openApiHeader.Schema, usedSchemaIds, document);
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+
+								// Check response headers
+								if (responseValue.Headers is not null)
+								{
+									foreach (KeyValuePair<string, IOpenApiHeader> header in responseValue.Headers.Where(h => h.Value is OpenApiHeader))
+									{
+										if (header.Value is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
+										{
+											CollectSchemaReferences(openApiHeader.Schema, usedSchemaIds, document);
+										}
 									}
 								}
 							}
@@ -113,17 +162,12 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 		if (schema is OpenApiSchemaReference schemaRef)
 		{
 			string? refId = schemaRef.Reference?.Id;
-			if (!string.IsNullOrEmpty(refId))
+			if (!string.IsNullOrEmpty(refId)
+				&& usedSchemaIds.Add(refId)
+				&& document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? referencedSchema) == true)
 			{
-				// Add this reference if we haven't seen it before
-				if (usedSchemaIds.Add(refId))
-				{
-					// Recursively process the referenced schema to find nested references
-					if (document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? referencedSchema) == true)
-					{
-						CollectSchemaReferences(referencedSchema, usedSchemaIds, document);
-					}
-				}
+				// Recursively process the referenced schema to find nested references
+				CollectSchemaReferences(referencedSchema, usedSchemaIds, document);
 			}
 			return;
 		}
@@ -180,6 +224,12 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 		if (openApiSchema.AdditionalProperties is not null)
 		{
 			CollectSchemaReferences(openApiSchema.AdditionalProperties, usedSchemaIds, document);
+		}
+
+		// Check not schema
+		if (openApiSchema.Not is not null)
+		{
+			CollectSchemaReferences(openApiSchema.Not, usedSchemaIds, document);
 		}
 	}
 }
