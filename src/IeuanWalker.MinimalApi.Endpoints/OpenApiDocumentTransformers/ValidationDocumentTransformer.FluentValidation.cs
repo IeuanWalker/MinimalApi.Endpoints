@@ -464,7 +464,7 @@ partial class ValidationDocumentTransformer
 
 		// Check if both bounds are effectively not set (0 for min means no minimum, -1 for max means no maximum)
 		bool hasMinLength = min > 0;
-		bool hasMaxLength = max > 0 && max != int.MaxValue;
+		bool hasMaxLength = max is > 0 and not int.MaxValue;
 
 		if (!hasMinLength && !hasMaxLength)
 		{
