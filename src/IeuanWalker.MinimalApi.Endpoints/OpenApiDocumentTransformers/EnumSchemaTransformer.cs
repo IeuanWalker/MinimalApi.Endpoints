@@ -27,16 +27,13 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		// Process each schema in the document
 		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
 		{
-			string schemaName = schemaEntry.Key;
-			IOpenApiSchema schemaInterface = schemaEntry.Value;
-
-			if (schemaInterface is not OpenApiSchema schema)
+			if (schemaEntry.Value is not OpenApiSchema schema)
 			{
 				continue;
 			}
 
 			// Try to find the corresponding .NET type for this schema
-			Type? foundType = FindTypeForSchema(schemaName);
+			Type? foundType = FindTypeForSchema(schemaEntry.Key);
 			if (foundType is null)
 			{
 				continue;
@@ -114,9 +111,6 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 
 	static void EnrichEnumSchema(OpenApiSchema schema, Type enumType)
 	{
-		// Get the underlying type (usually int, but could be byte, short, long, etc.)
-		Type underlyingType = Enum.GetUnderlyingType(enumType);
-
 		// Get all enum values
 		Array enumValues = Enum.GetValues(enumType);
 		string[] enumNames = Enum.GetNames(enumType);
@@ -148,9 +142,6 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
-		// Set the type based on the underlying type
-		schema.Type = GetJsonSchemaType(underlyingType);
-
 		// Add the enum values array - use JsonNodeExtension for the enum property
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
 		schema.Extensions["enum"] = new JsonNodeExtension(new JsonArray(values.ToArray()));
@@ -175,21 +166,5 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		{
 			schema.Description = $"Enum: {string.Join(", ", varNames)}";
 		}
-	}
-
-	static JsonSchemaType GetJsonSchemaType(Type type)
-	{
-		return Type.GetTypeCode(type) switch
-		{
-			TypeCode.Byte => JsonSchemaType.Integer,
-			TypeCode.SByte => JsonSchemaType.Integer,
-			TypeCode.Int16 => JsonSchemaType.Integer,
-			TypeCode.Int32 => JsonSchemaType.Integer,
-			TypeCode.Int64 => JsonSchemaType.Integer,
-			TypeCode.UInt16 => JsonSchemaType.Integer,
-			TypeCode.UInt32 => JsonSchemaType.Integer,
-			TypeCode.UInt64 => JsonSchemaType.Integer,
-			_ => JsonSchemaType.Integer
-		};
 	}
 }
