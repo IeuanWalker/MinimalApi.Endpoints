@@ -1003,24 +1003,24 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Find all System.Nullable<EnumType> schemas and ensure their unwrapped versions exist
 		List<(string nullableSchemaName, string unwrappedSchemaName, OpenApiSchema nullableSchema)> schemasToCreate = [];
 
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas
+			.Where(kvp => kvp.Key.StartsWith("System.Nullable`1[[") && kvp.Value is OpenApiSchema)
+			.ToList())
 		{
-			// Check if this is a System.Nullable<T> schema
-			if (schemaEntry.Key.StartsWith("System.Nullable`1[[") && schemaEntry.Value is OpenApiSchema nullableSchema)
+			OpenApiSchema nullableSchema = (OpenApiSchema)schemaEntry.Value;
+			
+			// Extract the underlying type name
+			int startIndex = "System.Nullable`1[[".Length;
+			int endIndex = schemaEntry.Key.IndexOf(',', startIndex);
+			if (endIndex > startIndex)
 			{
-				// Extract the underlying type name
-				int startIndex = "System.Nullable`1[[".Length;
-				int endIndex = schemaEntry.Key.IndexOf(',', startIndex);
-				if (endIndex > startIndex)
-				{
-					string underlyingTypeName = schemaEntry.Key[startIndex..endIndex];
+				string underlyingTypeName = schemaEntry.Key[startIndex..endIndex];
 
-					// Check if the unwrapped schema already exists
-					if (!document.Components.Schemas.ContainsKey(underlyingTypeName))
-					{
-						// Queue for creation (we create them after iteration to avoid collection modification)
-						schemasToCreate.Add((schemaEntry.Key, underlyingTypeName, nullableSchema));
-					}
+				// Check if the unwrapped schema already exists
+				if (!document.Components.Schemas.ContainsKey(underlyingTypeName))
+				{
+					// Queue for creation (we create them after iteration to avoid collection modification)
+					schemasToCreate.Add((schemaEntry.Key, underlyingTypeName, nullableSchema));
 				}
 			}
 		}
@@ -1257,10 +1257,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Recursively process properties
 		if (schema.Properties is not null && schema.Properties.Count > 0)
 		{
-			List<string> propertyKeys = [.. schema.Properties.Keys];
-			foreach (string key in propertyKeys)
+			foreach (IOpenApiSchema propertySchema in schema.Properties.Values)
 			{
-				IOpenApiSchema propertySchema = schema.Properties[key];
 				ReorderOneOfInIOpenApiSchema(propertySchema);
 			}
 		}
