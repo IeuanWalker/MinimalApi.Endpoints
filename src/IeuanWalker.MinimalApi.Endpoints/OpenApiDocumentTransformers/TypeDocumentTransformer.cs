@@ -368,7 +368,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 							.OfType<OpenApiSchema>()
 							.Where(os => !os.Type.HasValue || os.Type == JsonSchemaType.Null)
 							.FirstOrDefault();
-						
+
 						IOpenApiSchema? typeSchema = itemsSchema.OneOf
 							.OfType<OpenApiSchema>()
 							.Where(os => os.Type.HasValue && os.Type != JsonSchemaType.Null)
@@ -1008,7 +1008,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			.ToList())
 		{
 			OpenApiSchema nullableSchema = (OpenApiSchema)schemaEntry.Value;
-			
+
 			// Extract the underlying type name
 			int startIndex = "System.Nullable`1[[".Length;
 			int endIndex = schemaEntry.Key.IndexOf(',', startIndex);
