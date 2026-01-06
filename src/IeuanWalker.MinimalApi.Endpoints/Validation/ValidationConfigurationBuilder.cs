@@ -80,7 +80,7 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 		{
 			MemberExpression member => BuildMemberPath(member),
 			MethodCallExpression methodCall when IsArrayIndexer(methodCall) => BuildArrayIndexerPath(methodCall),
-			_ => throw new ArgumentException("Expression must be a property selector or array indexer")
+			_ => throw new ArgumentException($"Expression must be a property selector (e.g., x => x.Property) or array indexer (e.g., x => x.Array[0]). Got: {expr.GetType().Name}")
 		};
 	}
 
@@ -131,7 +131,8 @@ public sealed class ValidationConfigurationBuilder<TRequest>
 		// We mark the path with [*] to indicate array item validation
 		// e.g., "ListNestedObject[*]"
 
-		Expression collectionExpr = methodCall.Object ?? throw new ArgumentException("Array indexer must have an object");
+		Expression collectionExpr = methodCall.Object ?? throw new ArgumentException(
+			$"Array indexer expression must have a collection object. Expression: {methodCall}");
 
 		return GetPropertyPath(collectionExpr) + "[*]";
 	}
