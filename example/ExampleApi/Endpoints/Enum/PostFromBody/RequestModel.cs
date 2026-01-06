@@ -14,6 +14,7 @@ public class RequestModel
 	public string? NullableEnumAsString { get; set; }
 	public int EnumAsInt { get; set; }
 	public int? NullableEnumAsInt { get; set; }
+	public TestEnum? NullableOnlyEnumTest { get; set; }
 }
 
 public enum PriorityEnum
@@ -26,6 +27,12 @@ public enum PriorityEnum
 	High = 2,
 	[Description("Critical priority task requiring immediate attention")]
 	Critical = 3
+}
+
+public enum TestEnum
+{
+	Test1,
+	Test2
 }
 
 public class RequestModelValidator : Validator<RequestModel>
