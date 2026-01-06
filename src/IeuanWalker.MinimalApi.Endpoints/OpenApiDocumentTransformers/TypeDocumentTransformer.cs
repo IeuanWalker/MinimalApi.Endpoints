@@ -545,6 +545,11 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				{
 					return CreateSchemaFromType(property.PropertyType);
 				}
+				// For enum types, unwrap nullable references if present
+				else if (schema is OpenApiSchemaReference enumSchemaRef)
+				{
+					return UnwrapNullableEnumReference(enumSchemaRef);
+				}
 			}
 		}
 
@@ -866,6 +871,21 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return schemaRef;
 		}
 
+		// Check if this is a System.Nullable<T> reference and unwrap it
+		// Pattern: System.Nullable`1[[SomeType, Assembly, ...]]
+		if (refId.StartsWith("System.Nullable`1[["))
+		{
+			// Extract the underlying type from System.Nullable<T>
+			int startIndex = "System.Nullable`1[[".Length;
+			int endIndex = refId.IndexOf(',', startIndex);
+			if (endIndex > startIndex)
+			{
+				string underlyingTypeFullName = refId.Substring(startIndex, endIndex - startIndex);
+				// Return a reference to the underlying type instead
+				return new OpenApiSchemaReference(underlyingTypeFullName, null, null);
+			}
+		}
+
 		// Only inline primitive system types
 		if (!refId.StartsWith("System."))
 		{
@@ -952,6 +972,32 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		return inlineSchema;
+	}
+
+	static IOpenApiSchema UnwrapNullableEnumReference(OpenApiSchemaReference schemaRef)
+	{
+		string? refId = schemaRef.Reference?.Id;
+		if (string.IsNullOrEmpty(refId))
+		{
+			return schemaRef;
+		}
+
+		// Check if this is a System.Nullable<T> reference and unwrap it
+		// Pattern: System.Nullable`1[[SomeType, Assembly, ...]]
+		if (refId.StartsWith("System.Nullable`1[["))
+		{
+			// Extract the underlying type from System.Nullable<T>
+			int startIndex = "System.Nullable`1[[".Length;
+			int endIndex = refId.IndexOf(',', startIndex);
+			if (endIndex > startIndex)
+			{
+				string underlyingTypeFullName = refId.Substring(startIndex, endIndex - startIndex);
+				// Return a reference to the underlying type instead
+				return new OpenApiSchemaReference(underlyingTypeFullName, null, null);
+			}
+		}
+
+		return schemaRef;
 	}
 
 	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)
@@ -1165,6 +1211,18 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			{
 				schema.OneOf[nullableIndex] = typeSchema;
 				schema.OneOf[typeIndex] = nullableMarker;
+			}
+
+			// Also unwrap System.Nullable<EnumType> references in oneOf
+			if (typeSchema is OpenApiSchemaReference enumTypeRef)
+			{
+				IOpenApiSchema unwrapped = UnwrapNullableEnumReference(enumTypeRef);
+				if (unwrapped != enumTypeRef)
+				{
+					// The reference was unwrapped, update it in the oneOf
+					int actualTypeIndex = nullableMarker is not null && nullableIndex < typeIndex ? nullableIndex : typeIndex;
+					schema.OneOf[actualTypeIndex] = unwrapped;
+				}
 			}
 		}
 
