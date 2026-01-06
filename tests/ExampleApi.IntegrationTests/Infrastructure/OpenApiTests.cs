@@ -29,8 +29,6 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 
 		string actualContent = await response.Content.ReadAsStringAsync();
 
-		Debugger.Break();
-
 		actualContent.ShouldNotBeNullOrWhiteSpace();
 
 		// Load expected OpenAPI JSON

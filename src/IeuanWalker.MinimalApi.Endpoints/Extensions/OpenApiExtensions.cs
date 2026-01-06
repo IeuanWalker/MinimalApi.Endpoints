@@ -54,6 +54,10 @@ public static class OpenApiExtensions
 			return Task.CompletedTask;
 		});
 
+		// Add cleanup transformer as the absolute final step to remove unused component schemas
+		// This removes schemas that are no longer referenced after aggressive inlining and unwrapping
+		options.AddDocumentTransformer<UnusedComponentsCleanupTransformer>();
+
 		return options;
 	}
 
