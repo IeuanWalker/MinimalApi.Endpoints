@@ -191,14 +191,11 @@ partial class ValidationDocumentTransformer
 					if (result is string message && !string.IsNullOrEmpty(message))
 					{
 						// Replace placeholders with actual values from the validator
-						if (message.Equals("The specified condition was not met for '{PropertyName}'."))
+						if (message.Equals("The specified condition was not met for '{PropertyName}'.") && logger.IsEnabled(LogLevel.Warning))
 						{
-							if (logger.IsEnabled(LogLevel.Warning))
-							{
 #pragma warning disable CA1873 // Avoid potentially expensive logging
-								LogVagueErrorMessageFluentValidation(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+							LogVagueErrorMessageFluentValidation(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
 #pragma warning restore CA1873 // Avoid potentially expensive logging
-							}
 						}
 
 						if (message.Equals("'{PropertyName}' is not a valid credit card number."))
@@ -414,13 +411,10 @@ partial class ValidationDocumentTransformer
 			if (validatorType.Name.Contains("EnumValidator") || validatorType.Name.Contains("IsEnum"))
 			{
 				// Remove single quotes around property name at the beginning of the message
-				if (message.StartsWith('\'') && message.Contains('\'', StringComparison.Ordinal))
+				int secondQuoteIndex = message.IndexOf('\'', 1);
+				if (message.StartsWith('\'') && message.Contains('\'', StringComparison.Ordinal) && secondQuoteIndex > 0)
 				{
-					int secondQuoteIndex = message.IndexOf('\'', 1);
-					if (secondQuoteIndex > 0)
-					{
-						message = string.Concat(message.AsSpan(1, secondQuoteIndex - 1), message.AsSpan(secondQuoteIndex + 1));
-					}
+					message = string.Concat(message.AsSpan(1, secondQuoteIndex - 1), message.AsSpan(secondQuoteIndex + 1));
 				}
 			}
 		}

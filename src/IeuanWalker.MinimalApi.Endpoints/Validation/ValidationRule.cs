@@ -68,9 +68,9 @@ public sealed record StringLengthRule : ValidationRule
 		{
 			ErrorMessage = $"Must be {MinLength.Value} characters or more";
 		}
-		else if (MaxLength.HasValue)
+		else
 		{
-			ErrorMessage = $"Must be {MaxLength.Value} characters or fewer";
+			ErrorMessage = $"Must be {MaxLength!.Value} characters or fewer";
 		}
 	}
 	/// <summary>
@@ -164,10 +164,10 @@ public sealed record RangeRule<T> : ValidationRule where T : struct, IComparable
 			string minOperator = ExclusiveMinimum ? ">" : ">=";
 			ErrorMessage = $"Must be {minOperator} {Minimum.Value}";
 		}
-		else if (Maximum.HasValue)
+		else
 		{
 			string maxOperator = ExclusiveMaximum ? "<" : "<=";
-			ErrorMessage = $"Must be {maxOperator} {Maximum.Value}";
+			ErrorMessage = $"Must be {maxOperator} {Maximum!.Value}";
 		}
 	}
 	/// <summary>
