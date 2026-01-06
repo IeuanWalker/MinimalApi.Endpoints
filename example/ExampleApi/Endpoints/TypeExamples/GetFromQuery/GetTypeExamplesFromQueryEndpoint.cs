@@ -59,13 +59,13 @@ public class GetTypeExamplesFromQueryEndpoint : IEndpoint<RequestModel, Response
 			count++;
 		}
 
-		if (request.DoubleValue != 0)
+		if (Math.Abs(request.DoubleValue) > double.Epsilon)
 		{
 			receivedValues["doubleValue"] = request.DoubleValue.ToString();
 			count++;
 		}
 
-		if (request.FloatValue != 0)
+		if (Math.Abs(request.FloatValue) > float.Epsilon)
 		{
 			receivedValues["floatValue"] = request.FloatValue.ToString();
 			count++;

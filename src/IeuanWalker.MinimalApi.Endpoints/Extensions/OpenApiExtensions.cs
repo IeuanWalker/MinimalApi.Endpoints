@@ -16,18 +16,18 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 public static class OpenApiExtensions
 {
 	/// <summary>
-	/// <para>This enhances opem api doc for request properties, it does a number of things - </para>
+	/// <para>This enhances OpenAPI documentation for request properties, it does a number of things - </para>
 	/// <para>- Sets the appropiate types</para>
 	/// <para>- Adds in all the enum information</para>
 	/// <para>- Add validation logic (fluent validation, data annotation and manually)</para>
 	/// <para>// TODO: Here is the wiki guide for more info - </para>
 	/// </summary>
 	/// <param name="options"></param>
-	/// <param name="autoDocumentFluentValdation"></param>
+	/// <param name="autoDocumentFluentValidation"></param>
 	/// <param name="appendRulesToPropertyDescription"></param>
 	/// <returns></returns>
 	[ExcludeFromCodeCoverage]
-	public static OpenApiOptions EnhanceRequestProperties(this OpenApiOptions options, bool autoDocumentFluentValdation = true, bool appendRulesToPropertyDescription = true)
+	public static OpenApiOptions EnhanceRequestProperties(this OpenApiOptions options, bool autoDocumentFluentValidation = true, bool appendRulesToPropertyDescription = true)
 	{
 		// Add type transformer first to ensure all property types are correctly documented
 		options.AddDocumentTransformer<TypeDocumentTransformer>();
@@ -40,7 +40,7 @@ public static class OpenApiExtensions
 		{
 			ValidationDocumentTransformer transformer = new()
 			{
-				AutoDocumentFluentValdation = autoDocumentFluentValdation,
+				AutoDocumentFluentValdation = autoDocumentFluentValidation,
 				AppendRulesToPropertyDescription = appendRulesToPropertyDescription
 			};
 			return transformer.TransformAsync(document, context, ct);

@@ -159,20 +159,18 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		if (openApiSchema.Type == JsonSchemaType.Array &&
 			openApiSchema.Items is OpenApiSchema itemsSchema &&
 			itemsSchema.Type == JsonSchemaType.Array &&
-			itemsSchema.Items is not null)
-		{
+			itemsSchema.Items is not null &&
 			// Only unwrap if the innermost items are a reference to a complex type (not a primitive or another array)
-			if (itemsSchema.Items is OpenApiSchemaReference ||
-				(itemsSchema.Items is OpenApiSchema innerSchema &&
-				 innerSchema.Type == JsonSchemaType.Object))
+			(itemsSchema.Items is OpenApiSchemaReference ||
+			(itemsSchema.Items is OpenApiSchema innerSchema &&
+			 innerSchema.Type == JsonSchemaType.Object)))
+		{
+			// This is likely an incorrectly double-wrapped array - unwrap it
+			return new OpenApiSchema
 			{
-				// This is likely an incorrectly double-wrapped array - unwrap it
-				return new OpenApiSchema
-				{
-					Type = JsonSchemaType.Array,
-					Items = itemsSchema.Items
-				};
-			}
+				Type = JsonSchemaType.Array,
+				Items = itemsSchema.Items
+			};
 		}
 
 		// Check if this is a oneOf with an array that has double-wrapped items
@@ -184,20 +182,18 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					oneOfSchema.Type == JsonSchemaType.Array &&
 					oneOfSchema.Items is OpenApiSchema itemsSchema2 &&
 					itemsSchema2.Type == JsonSchemaType.Array &&
-					itemsSchema2.Items is not null)
-				{
+					itemsSchema2.Items is not null &&
 					// Only unwrap if the innermost items are a reference to a complex type (not a primitive or another array)
-					if (itemsSchema2.Items is OpenApiSchemaReference ||
-						(itemsSchema2.Items is OpenApiSchema innerSchema &&
-						 innerSchema.Type == JsonSchemaType.Object))
+					(itemsSchema2.Items is OpenApiSchemaReference ||
+					(itemsSchema2.Items is OpenApiSchema innerSchema2 &&
+					 innerSchema2.Type == JsonSchemaType.Object)))
+				{
+					// This oneOf element has an incorrectly double-wrapped array - unwrap it
+					openApiSchema.OneOf[i] = new OpenApiSchema
 					{
-						// This oneOf element has an incorrectly double-wrapped array - unwrap it
-						openApiSchema.OneOf[i] = new OpenApiSchema
-						{
-							Type = JsonSchemaType.Array,
-							Items = itemsSchema2.Items
-						};
-					}
+						Type = JsonSchemaType.Array,
+						Items = itemsSchema2.Items
+					};
 				}
 			}
 		}
@@ -219,16 +215,10 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			itemsSchema.OneOf.Count == 2)
 		{
 			// Check if one of the oneOf elements is just a nullable marker (no type set)
-			IOpenApiSchema? typeSchema = null;
-
-			foreach (IOpenApiSchema oneOfSchema in itemsSchema.OneOf)
-			{
-				if (oneOfSchema is OpenApiSchema os && os.Type.HasValue && os.Type != JsonSchemaType.Null)
-				{
-					typeSchema = os;
-					break;
-				}
-			}
+			IOpenApiSchema? typeSchema = itemsSchema.OneOf
+				.OfType<OpenApiSchema>()
+				.Where(os => os.Type.HasValue && os.Type != JsonSchemaType.Null)
+				.FirstOrDefault();
 
 			// If we found a type schema, this is a nullable array - restructure it
 			if (typeSchema is not null)
@@ -374,24 +364,15 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					if (items is OpenApiSchema itemsSchema && itemsSchema.OneOf is not null && itemsSchema.OneOf.Count == 2)
 					{
 						// Check if one of the oneOf elements is just a nullable marker (has no type set)
-						IOpenApiSchema? nullableMarker = null;
-						IOpenApiSchema? typeSchema = null;
-
-						foreach (IOpenApiSchema oneOfSchema in itemsSchema.OneOf)
-						{
-							if (oneOfSchema is OpenApiSchema os)
-							{
-								// Check if this is a nullable marker (no type, just extensions or nothing)
-								if (!os.Type.HasValue || os.Type == JsonSchemaType.Null)
-								{
-									nullableMarker = os;
-								}
-								else
-								{
-									typeSchema = os;
-								}
-							}
-						}
+						IOpenApiSchema? nullableMarker = itemsSchema.OneOf
+							.OfType<OpenApiSchema>()
+							.Where(os => !os.Type.HasValue || os.Type == JsonSchemaType.Null)
+							.FirstOrDefault();
+						
+						IOpenApiSchema? typeSchema = itemsSchema.OneOf
+							.OfType<OpenApiSchema>()
+							.Where(os => os.Type.HasValue && os.Type != JsonSchemaType.Null)
+							.FirstOrDefault();
 
 						// If we found both a nullable marker and a type schema, this is a nullable array
 						if (nullableMarker is not null && typeSchema is not null)
@@ -1076,14 +1057,10 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		HashSet<Type> requestTypes = [];
 		if (document.Components?.Schemas is not null)
 		{
-			foreach (string schemaName in document.Components.Schemas.Keys)
-			{
-				Type? type = FindTypeForSchema(schemaName);
-				if (type is not null)
-				{
-					requestTypes.Add(type);
-				}
-			}
+			requestTypes.UnionWith(
+				document.Components.Schemas.Keys
+					.Select(FindTypeForSchema)
+					.OfType<Type>());
 		}
 
 		foreach (Microsoft.AspNetCore.Http.Endpoint endpoint in endpointDataSource.Endpoints)

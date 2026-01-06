@@ -61,7 +61,7 @@ public class PostTypeExamplesFromFormEndpoint : IEndpoint<RequestModel, Response
 			count++;
 		}
 
-		if (request.DoubleValue != 0)
+		if (Math.Abs(request.DoubleValue) > double.Epsilon)
 		{
 			count++;
 		}
@@ -71,7 +71,7 @@ public class PostTypeExamplesFromFormEndpoint : IEndpoint<RequestModel, Response
 			count++;
 		}
 
-		if (request.FloatValue != 0)
+		if (Math.Abs(request.FloatValue) > float.Epsilon)
 		{
 			count++;
 		}
