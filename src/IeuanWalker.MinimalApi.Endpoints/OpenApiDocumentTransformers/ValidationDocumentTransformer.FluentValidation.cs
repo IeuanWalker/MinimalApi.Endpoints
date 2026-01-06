@@ -458,15 +458,20 @@ partial class ValidationDocumentTransformer
 	static Validation.StringLengthRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
 	{
 		// Access Min and Max directly from the interface (no reflection needed)
-		int? min = lengthValidator.Min;
-		int? max = lengthValidator.Max;
+		// Note: FluentValidation uses -1 to indicate no limit
+		int min = lengthValidator.Min;
+		int max = lengthValidator.Max;
 
-		if (min is null && max is null)
+		// Check if both bounds are effectively not set (0 for min means no minimum, -1 for max means no maximum)
+		bool hasMinLength = min > 0;
+		bool hasMaxLength = max > 0 && max != int.MaxValue;
+
+		if (!hasMinLength && !hasMaxLength)
 		{
 			return null;
 		}
 
-		return new Validation.StringLengthRule(propertyName, minLength: min > 0 ? min : null, maxLength: max > 0 ? max : null);
+		return new Validation.StringLengthRule(propertyName, minLength: hasMinLength ? min : null, maxLength: hasMaxLength ? max : null);
 	}
 
 	static Validation.PatternRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)

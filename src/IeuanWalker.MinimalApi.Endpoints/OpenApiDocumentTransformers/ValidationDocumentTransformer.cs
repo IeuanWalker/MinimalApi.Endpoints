@@ -11,13 +11,36 @@ using Microsoft.OpenApi;
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 /// <summary>
-/// OpenAPI document transformer that applies validation rules from both WithValidation and FluentValidation to schemas
+/// OpenAPI document transformer that applies validation rules from both WithValidation and FluentValidation to schemas.
+/// <para>
+/// This transformer runs in the following steps:
+/// <list type="number">
+///   <item>Auto-discover FluentValidation rules (if enabled)</item>
+///   <item>Auto-discover DataAnnotations validation rules (if enabled)</item>
+///   <item>Discover manual validation rules from .WithValidationRules&lt;T&gt;()</item>
+///   <item>Apply collected rules to OpenAPI schemas (request bodies)</item>
+///   <item>Apply collected rules to query/path parameters</item>
+/// </list>
+/// </para>
 /// </summary>
 sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 {
+	/// <summary>
+	/// Gets or sets whether to auto-document FluentValidation rules. Default is true.
+	/// </summary>
 	public bool AutoDocumentFluentValdation { get; set; } = true;
+
+	/// <summary>
+	/// Gets or sets whether to auto-document DataAnnotation validation rules. Default is true.
+	/// </summary>
 	public bool AutoDocumentDataAnnotationValdation { get; set; } = true;
+
+	/// <summary>
+	/// Gets or sets whether to append validation rules to property descriptions in OpenAPI documentation. Default is true.
+	/// </summary>
 	public bool AppendRulesToPropertyDescription { get; set; } = true;
+
+	/// <inheritdoc />
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
 		// Dictionary to track all request types and their validation rules (from both manual and FluentValidation)
