@@ -20,11 +20,11 @@ partial class ValidationDocumentTransformer
 			IValidationConfiguration config = validationMetadata.Configuration;
 			Type requestType = validationMetadata.RequestType;
 
-			(List<ValidationRule> rules, bool appendRulesToPropertyDescription) = allValidationRules.TryGetValue(requestType, out (List<ValidationRule> rules, bool appendRulesToPropertyDescription) value)
-				? value
-				: ([], true);
+			List<ValidationRule> rules = allValidationRules.TryGetValue(requestType, out (List<ValidationRule> rules, bool appendRulesToPropertyDescription) value)
+				? value.rules
+				: [];
 
-			appendRulesToPropertyDescription = config.AppendRulesToPropertyDescription;
+			bool appendRulesToPropertyDescription = config.AppendRulesToPropertyDescription;
 
 			IReadOnlyList<ValidationRule> manualRules = config.Rules;
 			if (manualRules.Count > 0)
