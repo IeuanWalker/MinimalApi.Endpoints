@@ -18,9 +18,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 /// </summary>
 sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 {
-	static readonly Lock schemaTypeCacheLock = new();
-	static readonly Dictionary<string, Type?> schemaTypeCache = new(StringComparer.Ordinal);
-
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
 		// Step 1: Fix all schema property types
@@ -60,7 +57,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			}
 
 			// Try to find the .NET type for this schema
-			Type? schemaType = FindTypeForSchema(schemaEntry.Key);
+			Type? schemaType = SchemaTypeResolver.GetSchemaType(schemaEntry.Key);
 
 			// Fix properties in this schema
 			if (schema.Properties?.Count > 0)
@@ -1042,7 +1039,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		{
 			requestTypes.UnionWith(
 				document.Components.Schemas.Keys
-					.Select(FindTypeForSchema)
+					.Select(SchemaTypeResolver.GetSchemaType)
 					.OfType<Type>());
 		}
 
@@ -1080,32 +1077,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return mapping;
 	}
 
-	static Type? FindTypeForSchema(string schemaName)
-	{
-		string typeName = schemaName.Replace('+', '.');
-
-		lock (schemaTypeCacheLock)
-		{
-			if (schemaTypeCache.TryGetValue(typeName, out Type? cachedType))
-			{
-				return cachedType;
-			}
-		}
-
-		Type? resolvedType = AppDomain.CurrentDomain.GetAssemblies()
-			.Select(assembly => assembly.GetType(typeName))
-			.FirstOrDefault(type => type is not null);
-
-		lock (schemaTypeCacheLock)
-		{
-			schemaTypeCache[typeName] = resolvedType;
-		}
-
-		return resolvedType;
-	}
-
 	static bool PathsMatch(string openApiPath, string routePattern)
-	{
+ {
 		if (string.Equals(openApiPath, routePattern, StringComparison.OrdinalIgnoreCase))
 		{
 			return true;

@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Nodes;
@@ -14,9 +13,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 /// </summary>
 sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 {
-	// Cache for type lookups to avoid repeatedly scanning all assemblies
-	static readonly ConcurrentDictionary<string, Lazy<Type?>> typeCache = new(StringComparer.Ordinal);
-
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
 		if (document.Components?.Schemas is null)
@@ -31,7 +27,7 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			Type? enumType = GetEnumTypeForSchema(schemaEntry.Key);
+			Type? enumType = SchemaTypeResolver.GetEnumType(schemaEntry.Key);
 			if (enumType is null)
 			{
 				continue;
@@ -41,37 +37,6 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		}
 
 		return Task.CompletedTask;
-	}
-
-	static Type? GetEnumTypeForSchema(string schemaName)
-	{
-		Type? foundType = FindTypeForSchema(schemaName);
-		if (foundType is null)
-		{
-			return null;
-		}
-
-		if (foundType.IsEnum)
-		{
-			return foundType;
-		}
-
-		Type? underlyingNullable = Nullable.GetUnderlyingType(foundType);
-		return underlyingNullable?.IsEnum is true ? underlyingNullable : null;
-	}
-
-	static Type? FindTypeForSchema(string schemaName)
-	{
-		return typeCache.GetOrAdd(schemaName, static key => new Lazy<Type?>(() => ResolveTypeForSchemaName(key))).Value;
-	}
-
-	static Type? ResolveTypeForSchemaName(string schemaName)
-	{
-		string typeName = schemaName.Replace('+', '.');
-
-		return AppDomain.CurrentDomain.GetAssemblies()
-			.Select(assembly => assembly.GetType(typeName))
-			.FirstOrDefault(type => type is not null);
 	}
 
 	static void EnrichEnumSchema(OpenApiSchema schema, Type enumType)
