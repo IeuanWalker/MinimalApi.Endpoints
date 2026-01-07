@@ -15,49 +15,36 @@ partial class ValidationDocumentTransformer
 		// FluentValidation validators are registered as IValidator<T>, not IValidator
 		// We need to scan assemblies to find all types that implement IValidator<T>
 		List<IValidator> validators = [];
+		HashSet<Type> discoveredValidatorTypes = [];
 
 		// Get logger from DI if available
 		ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
 
-		// Get all loaded assemblies
-		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-		foreach (Assembly assembly in assemblies)
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 		{
-			// Skip system assemblies
-			if (assembly.FullName?.StartsWith("System.") == true ||
-				assembly.FullName?.StartsWith("Microsoft.") == true ||
-				assembly.FullName?.StartsWith("netstandard") == true)
+			if (!ShouldInspectAssembly(assembly))
 			{
 				continue;
 			}
 
-			try
+			foreach (Type type in GetLoadableTypes(assembly))
 			{
-				// Find all validator types in this assembly
-				Type[] types = assembly.GetTypes();
-				foreach (Type type in types)
+				if (!discoveredValidatorTypes.Add(type))
 				{
-					// Check if this type implements IValidator<T>
-					Type? validatorInterface = type
-						.GetInterfaces()
-						.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>));
-
-					if (validatorInterface is not null && !type.IsAbstract && !type.IsInterface)
-					{
-						// Try to get this validator from DI
-						object? validatorInstance = context.ApplicationServices.GetService(validatorInterface);
-						if (validatorInstance is IValidator validator)
-						{
-							validators.Add(validator);
-						}
-					}
+					continue;
 				}
-			}
-			catch (ReflectionTypeLoadException)
-			{
-				// Skip assemblies that can't be reflected
-				continue;
+
+				if (!TryGetValidatorInterface(type, out Type? validatorInterface))
+				{
+					continue;
+				}
+
+				// Try to get this validator from DI
+				object? validatorInstance = context.ApplicationServices.GetService(validatorInterface);
+				if (validatorInstance is IValidator validator)
+				{
+					validators.Add(validator);
+				}
 			}
 		}
 
@@ -67,7 +54,7 @@ partial class ValidationDocumentTransformer
 			Type? validatedType = validator
 				.GetType()
 				.GetInterfaces()
-				.FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IValidator<>))
+				.FirstOrDefault(IsValidatorInterface)
 				?.GetGenericArguments()
 				.FirstOrDefault();
 
@@ -92,8 +79,65 @@ partial class ValidationDocumentTransformer
 			}
 
 			value.rules.AddRange(rules);
+			allValidationRules[validatedType] = value;
 		}
 	}
+
+	static bool ShouldInspectAssembly(Assembly assembly)
+	{
+		if (assembly.IsDynamic)
+		{
+			return false;
+		}
+
+		string? fullName = assembly.FullName;
+
+		if (string.IsNullOrEmpty(fullName))
+		{
+			return false;
+		}
+
+		return !(fullName.StartsWith("System.", StringComparison.Ordinal) ||
+			fullName.StartsWith("Microsoft.", StringComparison.Ordinal) ||
+			fullName.StartsWith("netstandard", StringComparison.Ordinal));
+	}
+
+	static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+	{
+		try
+		{
+			return assembly.GetTypes();
+		}
+		catch (ReflectionTypeLoadException ex) when (ex.Types is not null)
+		{
+			return ex.Types.Where(type => type is not null).Cast<Type>();
+		}
+#pragma warning disable CA1031 // Do not catch general exception types
+		catch
+		{
+			return Array.Empty<Type>();
+		}
+#pragma warning restore CA1031 // Do not catch general exception types
+	}
+
+	static bool TryGetValidatorInterface(Type type, out Type? validatorInterface)
+	{
+		validatorInterface = null;
+
+		if (type.IsAbstract || type.IsInterface)
+		{
+			return false;
+		}
+
+		validatorInterface = type
+			.GetInterfaces()
+			.FirstOrDefault(IsValidatorInterface);
+
+		return validatorInterface is not null;
+	}
+
+	static bool IsValidatorInterface(Type @interface) =>
+		@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IValidator<>);
 
 	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator, ILogger logger)
 	{
