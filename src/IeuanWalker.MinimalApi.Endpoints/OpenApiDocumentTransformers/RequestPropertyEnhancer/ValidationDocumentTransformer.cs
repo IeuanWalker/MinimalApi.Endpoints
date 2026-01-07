@@ -1,6 +1,4 @@
-using System.ComponentModel;
 using System.Reflection;
-using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using IeuanWalker.MinimalApi.Endpoints.Validation;
@@ -300,7 +298,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			schema.Properties[property.Key] = OpenApiSchemaHelper.InlinePrimitiveTypeReference(property.Value);
+			schema.Properties[property.Key] = property.Value;
 		}
 	}
 
@@ -424,7 +422,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 							!OpenApiSchemaHelper.IsEnumSchemaReference(parameter.Schema, document) &&
 							!OpenApiSchemaHelper.IsInlineEnumSchema(parameter.Schema))
 						{
-							parameter.Schema = OpenApiSchemaHelper.InlinePrimitiveTypeReference(parameter.Schema);
+							parameter.Schema = parameter.Schema;
 						}
 						continue;
 					}

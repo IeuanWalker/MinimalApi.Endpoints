@@ -43,7 +43,7 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		Array enumValues = Enum.GetValues(enumType);
 		string[] enumNames = Enum.GetNames(enumType);
 
-		List<JsonNode> enumJsonValues = [];
+		JsonArray valueArray = [];
 		JsonArray varNamesArray = [];
 		JsonObject? descObj = null;
 
@@ -53,7 +53,7 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			string enumName = enumNames[i];
 
 			long numericValue = Convert.ToInt64(enumValue);
-			enumJsonValues.Add(JsonValue.Create(numericValue)!);
+			valueArray.Add(JsonValue.Create(numericValue)!);
 			varNamesArray.Add(JsonValue.Create(enumName)!);
 
 			FieldInfo? field = enumType.GetField(enumName);
@@ -68,10 +68,8 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
-		// Set the actual OpenAPI enum property (not an extension)
-		schema.Enum = enumJsonValues;
-
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+		schema.Extensions[SchemaConstants.EnumExtension] = new JsonNodeExtension(valueArray);
 		schema.Extensions[SchemaConstants.EnumVarNamesExtension] = new JsonNodeExtension(varNamesArray);
 
 		if (descObj is not null)

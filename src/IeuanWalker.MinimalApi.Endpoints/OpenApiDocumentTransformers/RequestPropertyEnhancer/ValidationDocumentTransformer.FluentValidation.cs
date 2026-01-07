@@ -126,6 +126,7 @@ partial class ValidationDocumentTransformer
 
 	static ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent, ILogger logger)
 	{
+		// TODO: Use type rather than string
 		string validatorTypeName = propertyValidator.GetType().Name;
 		if (validatorTypeName.Contains(nameof(ChildValidatorAdaptor<,>)) || validatorTypeName.Contains("SetValidator"))
 		{
@@ -224,28 +225,26 @@ partial class ValidationDocumentTransformer
 				}
 			}
 
-			string vTypeName = propertyValidator.GetType().Name;
-			if (vTypeName.EndsWith("Validator"))
+			string validatorTypeName = propertyValidator.GetType().Name;
+			if (validatorTypeName.EndsWith("Validator"))
 			{
-				vTypeName = vTypeName[..^9];
+				validatorTypeName = validatorTypeName[..^9];
 			}
-			int backtickIndex = vTypeName.IndexOf('`');
+			int backtickIndex = validatorTypeName.IndexOf('`');
 			if (backtickIndex > 0)
 			{
-				vTypeName = vTypeName[..backtickIndex];
+				validatorTypeName = validatorTypeName[..backtickIndex];
 			}
 
 			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
 
-			return $"{propertyName} {vTypeName} validation";
+			return $"{propertyName} {validatorTypeName} validation";
 		}
-#pragma warning disable CA1031
 		catch (Exception ex)
 		{
 			LogExceptionWhileObtainingValidatorErrorMessage(logger, propertyName, propertyValidator.GetType().FullName ?? string.Empty, ex);
 			return $"{propertyName} custom validation";
 		}
-#pragma warning restore CA1031
 	}
 
 	static string ReplacePlaceholders(string message, string propertyName, IPropertyValidator propertyValidator)
@@ -297,6 +296,34 @@ partial class ValidationDocumentTransformer
 			if (propertyValidator is IRegularExpressionValidator regexValidator && regexValidator.Expression is not null)
 			{
 				message = message.Replace("{RegularExpression}", regexValidator.Expression);
+			}
+
+			Type validatorType = propertyValidator.GetType();
+			if (validatorType.Name.Contains("PrecisionScale") || validatorType.Name.Contains("ScalePrecision"))
+			{
+				// Try multiple property access strategies (public/non-public)
+				// Note: FluentValidation uses "Precision" and "Scale" as property names
+				object? precision = TryGetPropertyOrFieldValue(propertyValidator, "Precision", "ExpectedPrecision", "precision");
+				object? scale = TryGetPropertyOrFieldValue(propertyValidator, "Scale", "ExpectedScale", "scale");
+				object? ignoreTrailing = TryGetPropertyOrFieldValue(propertyValidator, "IgnoreTrailingZeros", "ignoreTrailingZeros");
+
+				if (precision is not null)
+				{
+					message = message.Replace("{ExpectedPrecision}", precision.ToString());
+				}
+				if (scale is not null)
+				{
+					message = message.Replace("{ExpectedScale}", scale.ToString());
+				}
+				if (ignoreTrailing is not null)
+				{
+					message = message.Replace("{IgnoreTrailingZeros}", ignoreTrailing.ToString());
+				}
+
+				// These are dynamic values that can't be determined at design time
+				message = message
+					.Replace("{Digits}", "X")
+					.Replace("{ActualScale}", "Y");
 			}
 		}
 #pragma warning disable CA1031
@@ -420,63 +447,300 @@ partial class ValidationDocumentTransformer
 			}
 		}
 
-		// Handle EnumValidator (used by .IsInEnum())
-		if (validatorTypeName.Contains("EnumValidator"))
+		// For IsEnumName validators (StringEnumValidator) - property type is string
+		FieldInfo? enumNamesField = validatorType.GetField("_enumNames", BindingFlags.NonPublic | BindingFlags.Instance);
+		if (enumNamesField is not null)
 		{
-			// First try to get enum type from generic arguments
-			if (validatorType.IsGenericType)
+			string[]? enumNames = enumNamesField.GetValue(propertyValidator) as string[];
+			if (enumNames is not null && enumNames.Length > 0)
 			{
-				Type[] genericArgs = validatorType.GetGenericArguments();
-
-				// Find the enum type among the generic arguments
-				Type? enumType = null;
-				Type? propertyType = null;
-
-				foreach (Type arg in genericArgs)
-				{
-					if (arg.IsEnum)
-					{
-						enumType = arg;
-					}
-					else if (arg.IsGenericType && arg.GetGenericTypeDefinition() == typeof(Nullable<>))
-					{
-						Type? underlyingType = Nullable.GetUnderlyingType(arg);
-						if (underlyingType?.IsEnum is true)
-						{
-							enumType = underlyingType;
-							propertyType = arg;
-						}
-					}
-					else if (arg == typeof(string) || arg == typeof(int) || arg == typeof(long) || arg == typeof(int?) || arg == typeof(long?))
-					{
-						propertyType = arg;
-					}
-				}
-
+				// Find the enum type by matching the names
+				Type? enumType = FindEnumTypeByNames(enumNames);
 				if (enumType is not null)
 				{
-					propertyType ??= enumType;
-					return (enumType, propertyType);
+					return (enumType, typeof(string));  // Property type is string for IsEnumName
 				}
+			}
+		}
 
-				// Enum type not in generic args, it was likely passed via .IsInEnum(typeof(Enum))
-				// The property type is in the generic args (the second one after the model type)
-				if (genericArgs.Length >= 2)
+		// For IsInEnum validators on int properties (PredicateValidator created by Must())
+		if (validatorType.Name.StartsWith("PredicateValidator"))
+		{
+			// First, try to extract from error message
+			PropertyInfo? errorMessageSource = validatorType.GetProperty("ErrorMessageSource", BindingFlags.Public | BindingFlags.Instance);
+			if (errorMessageSource is not null)
+			{
+				object? messageSource = errorMessageSource.GetValue(propertyValidator);
+				if (messageSource is not null)
 				{
-					propertyType = genericArgs[1]; // Second generic arg is the property type
+					PropertyInfo? messageProperty = messageSource.GetType().GetProperty("Message", BindingFlags.Public | BindingFlags.Instance);
+					if (messageProperty is not null)
+					{
+						string? message = messageProperty.GetValue(messageSource) as string;
+						if (message is not null && (message.Contains("must be a valid value of enum") || message.Contains("must be empty or a valid value of enum")))
+						{
+							Type? enumType = ExtractEnumTypeFromMessage(message);
+							if (enumType is not null)
+							{
+								// Property type is int for IsInEnum on int properties
+								return (enumType, typeof(int));
+							}
+						}
+					}
 				}
+			}
 
-				// Try to get enum type from fields
-				Type? enumTypeFromField = GetEnumTypeFromValidatorFields(propertyValidator, validatorType);
-				if (enumTypeFromField is not null)
+			// Fallback: Try to extract from predicate closure
+			FieldInfo? predicateField = validatorType.GetField("_predicate", BindingFlags.NonPublic | BindingFlags.Instance);
+			if (predicateField is not null)
+			{
+				object? predicate = predicateField.GetValue(propertyValidator);
+				if (predicate is Delegate predicateDelegate)
 				{
-					propertyType ??= typeof(int);
-					return (enumTypeFromField, propertyType);
+					// Recursively search through nested closures
+					Type? enumType = FindEnumTypeInClosure(predicateDelegate.Target);
+					if (enumType is not null)
+					{
+						// Property type is int for IsInEnum on int properties
+						return (enumType, typeof(int));
+					}
 				}
 			}
 		}
 
 		return (null, null);
+	}
+
+	static Type? FindEnumTypeByNames(string[] names)
+	{
+		if (names is null || names.Length == 0)
+		{
+			return null;
+		}
+
+		if (!enumTypeByNamesCacheInitialized)
+		{
+			lock (enumTypeByNamesCacheLock)
+			{
+				if (!enumTypeByNamesCacheInitialized)
+				{
+					enumTypesByNames = new(StringComparer.Ordinal);
+
+					// Build cache: key is the sorted list of enum member names
+					foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+					{
+						try
+						{
+							foreach (Type type in assembly.GetTypes())
+							{
+								if (!type.IsEnum)
+								{
+									continue;
+								}
+
+								string[] typeEnumNames = Enum.GetNames(type);
+								if (typeEnumNames.Length == 0)
+								{
+									continue;
+								}
+
+								string enumKey = CreateKey(typeEnumNames);
+
+								// Keep first occurrence to avoid exceptions on duplicates.
+								if (!enumTypesByNames.ContainsKey(enumKey))
+								{
+									enumTypesByNames[enumKey] = type;
+								}
+							}
+						}
+#pragma warning disable CA1031 // Do not catch general exception types
+						catch
+						{
+							// Skip assemblies that can't be inspected
+							continue;
+						}
+#pragma warning restore CA1031 // Do not catch general exception types
+					}
+
+					enumTypeByNamesCacheInitialized = true;
+				}
+			}
+		}
+
+		if (enumTypesByNames is null)
+		{
+			return null;
+		}
+
+		string key = CreateKey(names);
+		return enumTypesByNames.TryGetValue(key, out Type? matchingType) ? matchingType : null;
+
+		static string CreateKey(string[] values)
+		{
+			// Work on a copy so the original order is not modified.
+			string[] copy = (string[])values.Clone();
+			Array.Sort(copy, StringComparer.Ordinal);
+			return string.Join("|", copy);
+		}
+	}
+
+	static readonly Lock enumTypeCacheLock = new();
+	static Dictionary<string, Type>? enumTypesByName;
+	static volatile bool enumTypeCacheInitialized;
+
+	static readonly Lock enumTypeByNamesCacheLock = new();
+	static Dictionary<string, Type>? enumTypesByNames;
+	static volatile bool enumTypeByNamesCacheInitialized;
+	static Type? FindEnumTypeBySimpleName(string enumTypeName)
+	{
+		if (string.IsNullOrWhiteSpace(enumTypeName))
+		{
+			return null;
+		}
+
+		if (!enumTypeCacheInitialized)
+		{
+			lock (enumTypeCacheLock)
+			{
+				if (!enumTypeCacheInitialized)
+				{
+					enumTypesByName = new(StringComparer.OrdinalIgnoreCase);
+
+					foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+					{
+						try
+						{
+							foreach (Type type in assembly.GetTypes())
+							{
+								if (!type.IsEnum)
+								{
+									continue;
+								}
+
+								// Use simple name as key; keep first occurrence to avoid exceptions on duplicates.
+								if (!enumTypesByName.ContainsKey(type.Name))
+								{
+									enumTypesByName[type.Name] = type;
+								}
+							}
+						}
+#pragma warning disable CA1031 // Do not catch general exception types
+						catch
+						{
+							// Skip assemblies that can't be inspected
+							continue;
+						}
+#pragma warning restore CA1031 // Do not catch general exception types
+					}
+
+					enumTypeCacheInitialized = true;
+				}
+			}
+		}
+
+		if (enumTypesByName is null)
+		{
+			return null;
+		}
+
+		return enumTypesByName.TryGetValue(enumTypeName, out Type? enumType) ? enumType : null;
+	}
+
+	static Type? ExtractEnumTypeFromMessage(string message)
+	{
+		// Extract enum type name from error message like "'{PropertyName}' must be a valid value of enum TodoPriority."
+		// or "'{PropertyName}' must be empty or a valid value of enum TodoPriority."
+		int enumIndex = message.IndexOf("enum ");
+		if (enumIndex < 0)
+		{
+			return null;
+		}
+
+		string afterEnum = message[(enumIndex + 5)..]; // Skip "enum "
+		int dotIndex = afterEnum.IndexOf('.');
+		string enumTypeName = dotIndex > 0 ? afterEnum[..dotIndex].Trim() : afterEnum.Trim();
+
+		// Use cached lookup instead of scanning all assemblies on every call.
+		return FindEnumTypeBySimpleName(enumTypeName);
+	}
+	static Type? FindEnumTypeInClosure(object? target, int maxDepth = 5)
+	{
+		if (target is null || maxDepth <= 0)
+		{
+			return null;
+		}
+
+		FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+		// Check if any field is directly an enum type
+		Type? directEnumType = fields
+			.Select(field => field.GetValue(target))
+			.OfType<Type>()
+			.FirstOrDefault(type => type.IsEnum);
+
+		if (directEnumType is not null)
+		{
+			return directEnumType;
+		}
+
+		// Recursively check delegate closures
+		return fields
+			.Select(field => field.GetValue(target))
+			.OfType<Delegate>()
+			.Where(del => del.Target is not null)
+			.Select(del => FindEnumTypeInClosure(del.Target, maxDepth - 1))
+			.FirstOrDefault(found => found is not null);
+	}
+
+	static object? TryGetPropertyOrFieldValue(object obj, params string[] names)
+	{
+		Type type = obj.GetType();
+
+		// Try properties first (public and non-public)
+		foreach (string name in names)
+		{
+			PropertyInfo? prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+			if (prop is null)
+			{
+				continue;
+			}
+
+			try
+			{
+				return prop.GetValue(obj);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
+			catch
+			{
+				// Continue to next property name
+			}
+#pragma warning restore CA1031
+		}
+
+		// Try fields (public and non-public)
+		foreach (string name in names)
+		{
+			FieldInfo? field = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+			if (field is null)
+			{
+				continue;
+			}
+
+			try
+			{
+				return field.GetValue(obj);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
+			catch
+			{
+				// Continue to next field name
+			}
+#pragma warning restore CA1031
+		}
+
+		return null;
 	}
 
 	static Type? GetEnumTypeFromValidatorFields(IPropertyValidator propertyValidator, Type validatorType)
@@ -491,13 +755,13 @@ partial class ValidationDocumentTransformer
 			if (field is not null)
 			{
 				object? fieldValue = field.GetValue(propertyValidator);
-				
+
 				// Check if the field value is directly a Type
 				if (fieldValue is Type enumType && enumType.IsEnum)
 				{
 					return enumType;
 				}
-				
+
 				// Check if the field value has a Type property (e.g., TypeInfo)
 				if (fieldValue is not null)
 				{
@@ -511,7 +775,7 @@ partial class ValidationDocumentTransformer
 							return extractedType;
 						}
 					}
-					
+
 					// Check if field value has AsType() method (for TypeInfo)
 					MethodInfo? asTypeMethod = fieldValueType.GetMethod("AsType", BindingFlags.Public | BindingFlags.Instance);
 					if (asTypeMethod is not null)

@@ -22,32 +22,6 @@ static class OpenApiSchemaHelper
 	}
 
 	/// <summary>
-	/// Converts primitive type references to inline schemas.
-	/// </summary>
-	/// <param name="schema">The schema to potentially inline.</param>
-	/// <returns>An inlined schema for primitives, or the original schema for non-primitives.</returns>
-	public static IOpenApiSchema InlinePrimitiveTypeReference(IOpenApiSchema schema)
-	{
-		if (schema is not OpenApiSchemaReference schemaRef)
-		{
-			return schema;
-		}
-
-		string? refId = schemaRef.Reference?.Id;
-		if (string.IsNullOrEmpty(refId))
-		{
-			return schema;
-		}
-
-		if (!SchemaConstants.IsSystemType(refId))
-		{
-			return schema;
-		}
-
-		return CreateInlineSchemaFromRefId(refId);
-	}
-
-	/// <summary>
 	/// Converts primitive type references to inline schemas, with document-level resolution.
 	/// </summary>
 	/// <param name="schemaRef">The schema reference to inline.</param>
@@ -359,56 +333,6 @@ static class OpenApiSchemaHelper
 				Format = SchemaConstants.FormatBinary
 			};
 		}
-	}
-
-	static OpenApiSchema CreateInlineSchemaFromRefId(string refId)
-	{
-		OpenApiSchema schema = new();
-
-		if (refId.Contains(SchemaConstants.SystemString) && !refId.Contains(SchemaConstants.ArraySuffix))
-		{
-			schema.Type = JsonSchemaType.String;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt32))
-		{
-			schema.Type = JsonSchemaType.Integer;
-			schema.Format = SchemaConstants.FormatInt32;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt64))
-		{
-			schema.Type = JsonSchemaType.Integer;
-			schema.Format = SchemaConstants.FormatInt64;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDecimal))
-		{
-			schema.Type = JsonSchemaType.Number;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDouble))
-		{
-			schema.Type = JsonSchemaType.Number;
-			schema.Format = SchemaConstants.FormatDouble;
-		}
-		else if (refId.Contains(SchemaConstants.SystemSingle))
-		{
-			schema.Type = JsonSchemaType.Number;
-			schema.Format = SchemaConstants.FormatFloat;
-		}
-		else if (refId.Contains(SchemaConstants.SystemBoolean))
-		{
-			schema.Type = JsonSchemaType.Boolean;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDateTime) || refId.Contains(SchemaConstants.SystemDateTimeOffset))
-		{
-			schema.Type = JsonSchemaType.String;
-			schema.Format = SchemaConstants.FormatDateTime;
-		}
-		else if (refId.Contains(SchemaConstants.SystemGuid))
-		{
-			schema.Type = JsonSchemaType.String;
-			schema.Format = SchemaConstants.FormatUuid;
-		}
-
-		return schema;
 	}
 
 	static OpenApiSchema? CreateInlineSchemaFromRefIdWithCollections(string refId, OpenApiDocument document)

@@ -2,14 +2,8 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
+using IeuanWalker.MinimalApi.Endpoints.Validation;
 using Microsoft.OpenApi;
-using DescriptionRule = IeuanWalker.MinimalApi.Endpoints.Validation.DescriptionRule;
-using EmailRule = IeuanWalker.MinimalApi.Endpoints.Validation.EmailRule;
-using EnumRule = IeuanWalker.MinimalApi.Endpoints.Validation.EnumRule;
-using PatternRule = IeuanWalker.MinimalApi.Endpoints.Validation.PatternRule;
-using RequiredRule = IeuanWalker.MinimalApi.Endpoints.Validation.RequiredRule;
-using StringLengthRule = IeuanWalker.MinimalApi.Endpoints.Validation.StringLengthRule;
-using UrlRule = IeuanWalker.MinimalApi.Endpoints.Validation.UrlRule;
 using ValidationRule = IeuanWalker.MinimalApi.Endpoints.Validation.ValidationRule;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
@@ -391,12 +385,12 @@ partial class ValidationDocumentTransformer
 	{
 		if (originalSchema?.Items is not null)
 		{
-			newSchema.Items = OpenApiSchemaHelper.InlinePrimitiveTypeReference(originalSchema.Items);
+			newSchema.Items = originalSchema.Items;
 			EnsureArrayType(newSchema);
 		}
 		else if (resolvedSchema?.Items is not null)
 		{
-			newSchema.Items = OpenApiSchemaHelper.InlinePrimitiveTypeReference(resolvedSchema.Items);
+			newSchema.Items = resolvedSchema.Items;
 			EnsureArrayType(newSchema);
 		}
 		else if (isArrayType && actualSchema is OpenApiSchemaReference arraySchemaRef)
@@ -422,7 +416,7 @@ partial class ValidationDocumentTransformer
 		{
 			string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
 			OpenApiSchemaReference elementRef = new(elementType, document, null);
-			newSchema.Items = OpenApiSchemaHelper.InlinePrimitiveTypeReference(elementRef);
+			newSchema.Items = elementRef;
 			EnsureArrayType(newSchema);
 		}
 	}
@@ -609,10 +603,9 @@ partial class ValidationDocumentTransformer
 			}
 		}
 
-		// Set the actual OpenAPI enum property
-		schema.Enum = values;
 
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+		schema.Extensions[SchemaConstants.EnumExtension] = new JsonNodeExtension(new JsonArray(values.ToArray()));
 
 		if (!isStringSchema)
 		{

@@ -194,19 +194,19 @@ partial class ValidationDocumentTransformer
 		{
 			RequiredAttribute => new RequiredRule(propertyName),
 
-			StringLengthAttribute stringLength => CreateDataAnnotationStringLengthRule(
+			StringLengthAttribute stringLength => CreateStringLengthRule(
 				propertyName,
 				minLength: stringLength.MinimumLength > 0 ? stringLength.MinimumLength : null,
 				maxLength: stringLength.MaximumLength,
 				isCollection),
 
-			MinLengthAttribute minLength => CreateDataAnnotationStringLengthRule(
+			MinLengthAttribute minLength => CreateStringLengthRule(
 				propertyName,
 				minLength: minLength.Length,
 				maxLength: null,
 				isCollection),
 
-			MaxLengthAttribute maxLength => CreateDataAnnotationStringLengthRule(
+			MaxLengthAttribute maxLength => CreateStringLengthRule(
 				propertyName,
 				minLength: null,
 				maxLength: maxLength.Length,
@@ -249,7 +249,7 @@ partial class ValidationDocumentTransformer
 			   (actualType != typeof(string) && typeof(System.Collections.IEnumerable).IsAssignableFrom(actualType));
 	}
 
-	static StringLengthRule CreateDataAnnotationStringLengthRule(string propertyName, int? minLength, int? maxLength, bool isCollection)
+	static StringLengthRule CreateStringLengthRule(string propertyName, int? minLength, int? maxLength, bool isCollection)
 	{
 		string? errorMessage = null;
 
