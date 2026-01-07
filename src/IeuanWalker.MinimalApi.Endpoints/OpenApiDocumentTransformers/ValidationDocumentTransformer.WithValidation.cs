@@ -14,66 +14,54 @@ partial class ValidationDocumentTransformer
 			return;
 		}
 
-		foreach (object metadata in endpointDataSource.Endpoints
-			.Where(x => x is RouteEndpoint)
-			.SelectMany(x => x.Metadata.GetOrderedMetadata<object>()))
+		foreach (IValidationMetadata validationMetadata in endpointDataSource.Endpoints
+			.OfType<RouteEndpoint>()
+			.SelectMany(endpoint => endpoint.Metadata.GetOrderedMetadata<IValidationMetadata>()))
 		{
-			// Check if this implements our non-generic IValidationMetadata interface
-			if (metadata is not IValidationMetadata validationMetadata)
-			{
-				continue;
-			}
-
 			// Get the configuration and request type through the interface (no reflection needed)
 			IValidationConfiguration config = validationMetadata.Configuration;
 			Type requestType = validationMetadata.RequestType;
 
-			if (!allValidationRules.TryGetValue(requestType, out (List<ValidationRule> rules, bool appendRulesToPropertyDescription) value))
-			{
-				allValidationRules.Add(requestType, ([], true));
-			}
-
-			(List<ValidationRule> rules, bool appendRulesToPropertyDescription) = allValidationRules[requestType];
+			(List<ValidationRule> rules, bool appendRulesToPropertyDescription) = allValidationRules.TryGetValue(requestType, out (List<ValidationRule> rules, bool appendRulesToPropertyDescription) value)
+				? value
+				: ([], true);
 
 			// Get AppendRulesToPropertyDescription setting directly from the interface
 			appendRulesToPropertyDescription = config.AppendRulesToPropertyDescription;
-			allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
 
 			// Get rules directly from the interface
 			IReadOnlyList<ValidationRule> manualRules = config.Rules;
-
-			// Remove auto-discovered rules for properties that have manual rules
-			HashSet<string> manualPropertyNames = [.. manualRules.Select(r => r.PropertyName).Distinct()];
-			rules.RemoveAll(r => manualPropertyNames.Contains(r.PropertyName));
-			rules.AddRange(manualRules);
-
-			allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
+			if (manualRules.Count > 0)
+			{
+				// Remove auto-discovered rules for properties that have manual rules
+				HashSet<string> manualPropertyNames = [.. manualRules.Select(r => r.PropertyName).Distinct()];
+				rules.RemoveAll(r => manualPropertyNames.Contains(r.PropertyName));
+				rules.AddRange(manualRules);
+			}
 
 			// Get operations directly from the interface and apply them
 			IReadOnlyDictionary<string, IReadOnlyList<ValidationRuleOperation>> operationsByProperty = config.OperationsByProperty;
-			if (operationsByProperty.Count == 0)
+			if (operationsByProperty.Count > 0)
 			{
-				continue;
-			}
-
-			// Apply operations for each property
-			foreach (KeyValuePair<string, IReadOnlyList<ValidationRuleOperation>> kvp in operationsByProperty)
-			{
-				string propertyName = kvp.Key;
-				IReadOnlyList<ValidationRuleOperation> operations = kvp.Value;
-
-				// Get all rules for this property
-				List<ValidationRule> propertyRules = [.. rules.Where(r => r.PropertyName == propertyName)];
-
-				// Apply all operations in order
-				foreach (ValidationRuleOperation operation in operations)
+				// Apply operations for each property
+				foreach (KeyValuePair<string, IReadOnlyList<ValidationRuleOperation>> kvp in operationsByProperty)
 				{
-					operation.Apply(propertyRules);
-				}
+					string propertyName = kvp.Key;
+					IReadOnlyList<ValidationRuleOperation> operations = kvp.Value;
 
-				// Replace the rules for this property with the modified ones
-				rules.RemoveAll(r => r.PropertyName == propertyName);
-				rules.AddRange(propertyRules);
+					// Get all rules for this property
+					List<ValidationRule> propertyRules = [.. rules.Where(r => r.PropertyName == propertyName)];
+
+					// Apply all operations in order
+					foreach (ValidationRuleOperation operation in operations)
+					{
+						operation.Apply(propertyRules);
+					}
+
+					// Replace the rules for this property with the modified ones
+					rules.RemoveAll(r => r.PropertyName == propertyName);
+					rules.AddRange(propertyRules);
+				}
 			}
 
 			allValidationRules[requestType] = (rules, appendRulesToPropertyDescription);
