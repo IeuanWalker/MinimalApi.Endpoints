@@ -1,4 +1,4 @@
-namespace IeuanWalker.MinimalApi.Endpoints.Validation;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 
 /// <summary>
 /// Base class for validation rules that define OpenAPI schema constraints
@@ -60,18 +60,9 @@ public sealed record StringLengthRule : ValidationRule
 			return;
 		}
 
-		if (MinLength.HasValue && MaxLength.HasValue)
-		{
-			ErrorMessage = $"Must be at least {MinLength.Value} characters and less than {MaxLength.Value} characters";
-		}
-		else if (MinLength.HasValue)
-		{
-			ErrorMessage = $"Must be {MinLength.Value} characters or more";
-		}
-		else
-		{
-			ErrorMessage = $"Must be {MaxLength!.Value} characters or fewer";
-		}
+		ErrorMessage = MinLength.HasValue && MaxLength.HasValue
+			? $"Must be at least {MinLength.Value} characters and less than {MaxLength.Value} characters"
+			: MinLength.HasValue ? $"Must be {MinLength.Value} characters or more" : $"Must be {MaxLength!.Value} characters or fewer";
 	}
 	/// <summary>
 	/// Minimum allowed length (inclusive)

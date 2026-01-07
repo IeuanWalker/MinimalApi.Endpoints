@@ -1,9 +1,9 @@
-namespace IeuanWalker.MinimalApi.Endpoints.Validation;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 
 /// <summary>
 /// Compiled validation configuration for a request type
 /// </summary>
-public sealed class ValidationConfiguration<TRequest>
+public sealed class ValidationConfiguration<TRequest> : IValidationConfiguration
 {
 	/// <summary>
 	/// All validation rules for properties
@@ -19,6 +19,9 @@ public sealed class ValidationConfiguration<TRequest>
 	/// Operations to apply to validation rules grouped by property name
 	/// </summary>
 	internal IReadOnlyDictionary<string, IReadOnlyList<ValidationRuleOperation>> OperationsByProperty { get; }
+
+	/// <inheritdoc />
+	IReadOnlyDictionary<string, IReadOnlyList<ValidationRuleOperation>> IValidationConfiguration.OperationsByProperty => OperationsByProperty;
 
 	internal ValidationConfiguration(
 		IReadOnlyList<ValidationRule> rules,

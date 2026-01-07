@@ -16,373 +16,381 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 	}
 
 	static readonly string expectedTypeEndpoints = """
-		"/api/v1/TypeExamples/FromQuery": {
-				"get": {
-					"tags": [
-						"Type Examples"
-					],
-					"summary": "Type Examples From Query",
-					"description": "Demonstrates all primitive types handled by TypeDocumentTransformer as query parameters: string, int, long, decimal, double, float, bool, DateTime, DateOnly, TimeOnly, Guid, and arrays",
-					"operationId": "get_TypeExamplesFromQuery_14",
-					"parameters": [
-						{
-							"name": "StringValue",
-							"in": "query",
-							"required": true,
-							"schema": {
+				"/api/v1/TypeExamples/FromQuery": {
+			"get": {
+				"tags": [
+					"Type Examples"
+				],
+				"summary": "Type Examples From Query",
+				"description": "Demonstrates all primitive types handled by TypeDocumentTransformer as query parameters: string, int, long, decimal, double, float, bool, DateTime, DateOnly, TimeOnly, Guid, and arrays",
+				"operationId": "get_TypeExamplesFromQuery_14",
+				"parameters": [
+					{
+						"name": "StringValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "NullableStringValue",
+						"in": "query",
+						"schema": {
+							"type": "string"
+						}
+					},
+					{
+						"name": "IntValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "NullableIntValue",
+						"in": "query",
+						"schema": {
+							"type": "integer",
+							"format": "int32"
+						}
+					},
+					{
+						"name": "LongValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "integer",
+							"format": "int64"
+						}
+					},
+					{
+						"name": "NullableLongValue",
+						"in": "query",
+						"schema": {
+							"type": "integer",
+							"format": "int64"
+						}
+					},
+					{
+						"name": "DecimalValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "NullableDecimalValue",
+						"in": "query",
+						"schema": {
+							"type": "number"
+						}
+					},
+					{
+						"name": "DoubleValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "double"
+						}
+					},
+					{
+						"name": "NullableDoubleValue",
+						"in": "query",
+						"schema": {
+							"type": "number",
+							"format": "double"
+						}
+					},
+					{
+						"name": "FloatValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "number",
+							"format": "float"
+						}
+					},
+					{
+						"name": "NullableFloatValue",
+						"in": "query",
+						"schema": {
+							"type": "number",
+							"format": "float"
+						}
+					},
+					{
+						"name": "BoolValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"name": "NullableBoolValue",
+						"in": "query",
+						"schema": {
+							"type": "boolean"
+						}
+					},
+					{
+						"name": "DateTimeValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "NullableDateTimeValue",
+						"in": "query",
+						"schema": {
+							"type": "string",
+							"format": "date-time"
+						}
+					},
+					{
+						"name": "DateOnlyValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "date"
+						}
+					},
+					{
+						"name": "NullableDateOnlyValue",
+						"in": "query",
+						"schema": {
+							"type": "string",
+							"format": "date"
+						}
+					},
+					{
+						"name": "TimeOnlyValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "time"
+						}
+					},
+					{
+						"name": "NullableTimeOnlyValue",
+						"in": "query",
+						"schema": {
+							"type": "string",
+							"format": "time"
+						}
+					},
+					{
+						"name": "GuidValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "NullableGuidValue",
+						"in": "query",
+						"schema": {
+							"type": "string",
+							"format": "uuid"
+						}
+					},
+					{
+						"name": "StringArray",
+						"in": "query",
+						"schema": {
+							"type": "array",
+							"items": {
 								"type": "string"
 							}
-						},
-						{
-							"name": "NullableStringValue",
-							"in": "query",
-							"schema": {
-								"type": "string"
-							}
-						},
-						{
-							"name": "IntValue",
-							"in": "query",
-							"required": true,
-							"schema": {
+						}
+					},
+					{
+						"name": "IntArray",
+						"in": "query",
+						"schema": {
+							"type": "array",
+							"items": {
 								"type": "integer",
 								"format": "int32"
 							}
-						},
-						{
-							"name": "NullableIntValue",
-							"in": "query",
-							"schema": {
-								"type": "integer",
-								"format": "int32"
-							}
-						},
-						{
-							"name": "LongValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "integer",
-								"format": "int64"
-							}
-						},
-						{
-							"name": "NullableLongValue",
-							"in": "query",
-							"schema": {
-								"type": "integer",
-								"format": "int64"
-							}
-						},
-						{
-							"name": "DecimalValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "number"
-							}
-						},
-						{
-							"name": "NullableDecimalValue",
-							"in": "query",
-							"schema": {
-								"type": "number"
-							}
-						},
-						{
-							"name": "DoubleValue",
-							"in": "query",
-							"required": true,
-							"schema": {
+						}
+					},
+					{
+						"name": "DoubleArray",
+						"in": "query",
+						"schema": {
+							"type": "array",
+							"items": {
 								"type": "number",
 								"format": "double"
 							}
-						},
-						{
-							"name": "NullableDoubleValue",
-							"in": "query",
-							"schema": {
-								"type": "number",
-								"format": "double"
-							}
-						},
-						{
-							"name": "FloatValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "number",
-								"format": "float"
-							}
-						},
-						{
-							"name": "NullableFloatValue",
-							"in": "query",
-							"schema": {
-								"type": "number",
-								"format": "float"
-							}
-						},
-						{
-							"name": "BoolValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "boolean"
-							}
-						},
-						{
-							"name": "NullableBoolValue",
-							"in": "query",
-							"schema": {
-								"type": "boolean"
-							}
-						},
-						{
-							"name": "DateTimeValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "string",
-								"format": "date-time"
-							}
-						},
-						{
-							"name": "NullableDateTimeValue",
-							"in": "query",
-							"schema": {
-								"type": "string",
-								"format": "date-time"
-							}
-						},
-						{
-							"name": "DateOnlyValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "string",
-								"format": "date"
-							}
-						},
-						{
-							"name": "NullableDateOnlyValue",
-							"in": "query",
-							"schema": {
-								"type": "string",
-								"format": "date"
-							}
-						},
-						{
-							"name": "TimeOnlyValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "string",
-								"format": "time"
-							}
-						},
-						{
-							"name": "NullableTimeOnlyValue",
-							"in": "query",
-							"schema": {
-								"type": "string",
-								"format": "time"
-							}
-						},
-						{
-							"name": "GuidValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "string",
-								"format": "uuid"
-							}
-						},
-						{
-							"name": "NullableGuidValue",
-							"in": "query",
-							"schema": {
-								"type": "string",
-								"format": "uuid"
-							}
-						},
-						{
-							"name": "StringArray",
-							"in": "query",
-							"schema": {
-								"type": "array",
-								"items": {
-									"type": "string"
-								}
-							}
-						},
-						{
-							"name": "IntArray",
-							"in": "query",
-							"schema": {
-								"type": "array",
-								"items": {
-									"type": "integer",
-									"format": "int32"
-								}
-							}
-						},
-						{
-							"name": "DoubleArray",
-							"in": "query",
-							"schema": {
-								"type": "array",
-								"items": {
-									"type": "number",
-									"format": "double"
-								}
-							}
-						},
-						{
-							"name": "UriArray",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/System.Uri"
-								}
-							}
-						},
-						{
-							"name": "UriArrayNullable",
-							"in": "query",
-							"schema": {
-								"type": "array",
-								"items": {
-									"$ref": "#/components/schemas/System.Uri"
-								}
-							}
-						},
-						{
-							"name": "UriValue",
-							"in": "query",
-							"required": true,
-							"schema": {
-								"$ref": "#/components/schemas/System.Uri"
-							}
-						},
-						{
-							"name": "UriValueNullable",
-							"in": "query",
-							"schema": {
+						}
+					},
+					{
+						"name": "UriArray",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"type": "array",
+							"items": {
 								"$ref": "#/components/schemas/System.Uri"
 							}
 						}
-					],
-					"responses": {
-						"200": {
-							"description": "OK",
-							"content": {
-								"application/json": {
-									"schema": {
-										"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.GetFromQuery.ResponseModel"
-									}
-								}
+					},
+					{
+						"name": "UriArrayNullable",
+						"in": "query",
+						"schema": {
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.Uri"
 							}
+						}
+					},
+					{
+						"name": "UriValue",
+						"in": "query",
+						"required": true,
+						"schema": {
+							"$ref": "#/components/schemas/System.Uri"
+						}
+					},
+					{
+						"name": "UriValueNullable",
+						"in": "query",
+						"schema": {
+							"$ref": "#/components/schemas/System.Uri"
 						}
 					}
-				}
-			},
-			"/api/v1/TypeExamples/FromBody": {
-				"post": {
-					"tags": [
-						"Type Examples"
-					],
-					"summary": "Type Examples From Body",
-					"description": "Demonstrates all primitive types handled by TypeDocumentTransformer: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, and nested objects",
-					"operationId": "post_TypeExamplesFromBody_15",
-					"requestBody": {
+				],
+				"responses": {
+					"200": {
+						"description": "OK",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel"
-								}
-							}
-						}
-					},
-					"responses": {
-						"200": {
-							"description": "OK",
-							"content": {
-								"application/json": {
-									"schema": {
-										"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.ResponseModel"
-									}
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.GetFromQuery.ResponseModel"
 								}
 							}
 						}
 					}
 				}
-			},
-			"/api/v1/TypeExamples/FromForm": {
-				"post": {
-					"tags": [
-						"Type Examples"
-					],
-					"summary": "Type Examples From Form",
-					"description": "Demonstrates all primitive types handled by TypeDocumentTransformer as form data: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, nested objects, and file uploads (IFormFile, IFormFileCollection)",
-					"operationId": "post_TypeExamplesFromForm_16",
-					"requestBody": {
+			}
+		},
+		"/api/v1/TypeExamples/FromBody": {
+			"post": {
+				"tags": [
+					"Type Examples"
+				],
+				"summary": "Type Examples From Body",
+				"description": "Demonstrates all primitive types handled by TypeDocumentTransformer: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, and nested objects",
+				"operationId": "post_TypeExamplesFromBody_15",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel"
+							}
+						}
+					}
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
 						"content": {
-							"multipart/form-data": {
+							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel"
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.ResponseModel"
 								}
-							},
-							"application/x-www-form-urlencoded": {
-								"schema": {
-									"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel"
-								}
+							}
+						}
+					}
+				}
+			}
+		},
+		"/api/v1/TypeExamples/FromForm": {
+			"post": {
+				"tags": [
+					"Type Examples"
+				],
+				"summary": "Type Examples From Form",
+				"description": "Demonstrates all primitive types handled by TypeDocumentTransformer as form data: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, nested objects, and file uploads (IFormFile, IFormFileCollection)",
+				"operationId": "post_TypeExamplesFromForm_16",
+				"requestBody": {
+					"content": {
+						"multipart/form-data": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel"
 							}
 						},
-						"required": true
+						"application/x-www-form-urlencoded": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel"
+							}
+						}
 					},
-					"responses": {
-						"200": {
-							"description": "OK",
-							"content": {
-								"application/json": {
-									"schema": {
-										"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.ResponseModel"
-									}
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "OK",
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.ResponseModel"
 								}
 							}
 						}
 					}
 				}
-			},
+			}
+		},
 		""";
 
 	static readonly string expectedTypeComponenets = """
-		"ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel": {
+		"ExampleApi.Endpoints.TypeExamples.GetFromQuery.ResponseModel": {
+			"type": "object",
+			"properties": {
+				"message": {
+					"type": "string"
+				},
+				"providedParametersCount": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"receivedValues": {
+					"type": "string"
+				}
+			}
+		},
+		"ExampleApi.Endpoints.TypeExamples.PostFromBody.BaseTests": {
 			"required": [
-				"nestedTests",
 				"uriValue"
 			],
 			"type": "object",
 			"properties": {
-				"nestedTests": {
-					"type": "array",
-					"items": {
-						"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.BaseTests"
-					}
-				},
 				"stringValue": {
 					"type": "string"
 				},
 				"nullableStringValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "string"
 						},
 						{
-							"type": "string"
+							"nullable": true
 						}
 					]
 				},
@@ -393,11 +401,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableIntValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -408,11 +416,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableLongValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int64"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -423,11 +431,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableShortValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -438,11 +446,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableByteValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -452,10 +460,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDecimalValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "number"
 						},
 						{
-							"type": "number"
+							"nullable": true
 						}
 					]
 				},
@@ -466,11 +474,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDoubleValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "number",
 							"format": "double"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -481,11 +489,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableFloatValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "number",
 							"format": "float"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -495,10 +503,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableBoolValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "boolean"
 						},
 						{
-							"type": "boolean"
+							"nullable": true
 						}
 					]
 				},
@@ -509,11 +517,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateTimeValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date-time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -524,11 +532,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateTimeOffsetValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date-time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -539,11 +547,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateOnlyValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -554,11 +562,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableTimeOnlyValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -569,11 +577,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableGuidValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "uuid"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -720,11 +728,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"singleFileNullable": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "binary"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -766,10 +774,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nestedObjectValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
 						},
 						{
-							"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
+							"nullable": true
 						}
 					]
 				},
@@ -811,43 +819,54 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"uriValueNullable": {
 					"oneOf": [
 						{
-							"nullable": true
+							"$ref": "#/components/schemas/System.Uri"
 						},
 						{
-							"$ref": "#/components/schemas/System.Uri"
+							"nullable": true
 						}
 					]
 				}
 			}
 		},
-		"ExampleApi.Endpoints.TypeExamples.PostFromBody.ResponseModel": {
+		"ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject": {
 			"type": "object",
 			"properties": {
-				"message": {
+				"name": {
 					"type": "string"
 				},
-				"processedPropertiesCount": {
+				"value": {
 					"type": "integer",
 					"format": "int32"
+				},
+				"createdAt": {
+					"type": "string",
+					"format": "date-time"
 				}
 			}
 		},
-		"ExampleApi.Endpoints.TypeExamples.PostFromForm.BaseTests": {
+		"ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel": {
 			"required": [
+				"nestedTests",
 				"uriValue"
 			],
 			"type": "object",
 			"properties": {
+				"nestedTests": {
+					"type": "array",
+					"items": {
+						"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.BaseTests"
+					}
+				},
 				"stringValue": {
 					"type": "string"
 				},
 				"nullableStringValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "string"
 						},
 						{
-							"type": "string"
+							"nullable": true
 						}
 					]
 				},
@@ -858,11 +877,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableIntValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -873,11 +892,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableLongValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int64"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -888,11 +907,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableShortValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -903,11 +922,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableByteValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -917,10 +936,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDecimalValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "number"
 						},
 						{
-							"type": "number"
+							"nullable": true
 						}
 					]
 				},
@@ -931,11 +950,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDoubleValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "number",
 							"format": "double"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -946,11 +965,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableFloatValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "number",
 							"format": "float"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -960,10 +979,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableBoolValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "boolean"
 						},
 						{
-							"type": "boolean"
+							"nullable": true
 						}
 					]
 				},
@@ -974,11 +993,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateTimeValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date-time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -989,11 +1008,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateTimeOffsetValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date-time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1004,11 +1023,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateOnlyValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1019,11 +1038,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableTimeOnlyValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1034,11 +1053,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableGuidValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "uuid"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1185,11 +1204,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"singleFileNullable": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "binary"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1231,10 +1250,475 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nestedObjectValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
 						},
 						{
+							"nullable": true
+						}
+					]
+				},
+				"nestedObjectList": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"uriArray": {
+					"type": "array",
+					"items": {
+						"$ref": "#/components/schemas/System.Uri"
+					}
+				},
+				"uriArrayNullable": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"$ref": "#/components/schemas/System.Uri"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"uriValue": {
+					"$ref": "#/components/schemas/System.Uri"
+				},
+				"uriValueNullable": {
+					"oneOf": [
+						{
+							"$ref": "#/components/schemas/System.Uri"
+						},
+						{
+							"nullable": true
+						}
+					]
+				}
+			}
+		},
+		"ExampleApi.Endpoints.TypeExamples.PostFromBody.ResponseModel": {
+			"type": "object",
+			"properties": {
+				"message": {
+					"type": "string"
+				},
+				"processedPropertiesCount": {
+					"type": "integer",
+					"format": "int32"
+				}
+			}
+		},
+		"ExampleApi.Endpoints.TypeExamples.PostFromForm.BaseTests": {
+			"required": [
+				"uriValue"
+			],
+			"type": "object",
+			"properties": {
+				"stringValue": {
+					"type": "string"
+				},
+				"nullableStringValue": {
+					"oneOf": [
+						{
+							"type": "string"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"intValue": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"nullableIntValue": {
+					"oneOf": [
+						{
+							"type": "integer",
+							"format": "int32"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"longValue": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"nullableLongValue": {
+					"oneOf": [
+						{
+							"type": "integer",
+							"format": "int64"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"shortValue": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"nullableShortValue": {
+					"oneOf": [
+						{
+							"type": "integer",
+							"format": "int32"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"byteValue": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"nullableByteValue": {
+					"oneOf": [
+						{
+							"type": "integer",
+							"format": "int32"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"decimalValue": {
+					"type": "number"
+				},
+				"nullableDecimalValue": {
+					"oneOf": [
+						{
+							"type": "number"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"doubleValue": {
+					"type": "number",
+					"format": "double"
+				},
+				"nullableDoubleValue": {
+					"oneOf": [
+						{
+							"type": "number",
+							"format": "double"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"floatValue": {
+					"type": "number",
+					"format": "float"
+				},
+				"nullableFloatValue": {
+					"oneOf": [
+						{
+							"type": "number",
+							"format": "float"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"boolValue": {
+					"type": "boolean"
+				},
+				"nullableBoolValue": {
+					"oneOf": [
+						{
+							"type": "boolean"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"dateTimeValue": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"nullableDateTimeValue": {
+					"oneOf": [
+						{
+							"type": "string",
+							"format": "date-time"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"dateTimeOffsetValue": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"nullableDateTimeOffsetValue": {
+					"oneOf": [
+						{
+							"type": "string",
+							"format": "date-time"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"dateOnlyValue": {
+					"type": "string",
+					"format": "date"
+				},
+				"nullableDateOnlyValue": {
+					"oneOf": [
+						{
+							"type": "string",
+							"format": "date"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"timeOnlyValue": {
+					"type": "string",
+					"format": "time"
+				},
+				"nullableTimeOnlyValue": {
+					"oneOf": [
+						{
+							"type": "string",
+							"format": "time"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"guidValue": {
+					"type": "string",
+					"format": "uuid"
+				},
+				"nullableGuidValue": {
+					"oneOf": [
+						{
+							"type": "string",
+							"format": "uuid"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"stringList": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nullableStringList": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"intList": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"format": "int32"
+					}
+				},
+				"nullableIntList": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"doubleList": {
+					"type": "array",
+					"items": {
+						"type": "number",
+						"format": "double"
+					}
+				},
+				"nullableDoubleList": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "number",
+								"format": "double"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"intArray": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"format": "int32"
+					}
+				},
+				"nullableIntArray": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"readOnlyStringList": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
+				},
+				"nullableReadOnlyStringList": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"intCollection": {
+					"type": "array",
+					"items": {
+						"type": "integer",
+						"format": "int32"
+					}
+				},
+				"nullableIntCollection": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "integer",
+								"format": "int32"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"singleFile": {
+					"type": "string",
+					"format": "binary"
+				},
+				"readOnlyList1": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"format": "binary"
+					}
+				},
+				"readOnlyList2": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"format": "binary"
+					}
+				},
+				"singleFileNullable": {
+					"oneOf": [
+						{
+							"type": "string",
+							"format": "binary"
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"readOnlyList1Nullable": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string",
+								"format": "binary"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"readOnlyList2Nullable": {
+					"oneOf": [
+						{
+							"type": "array",
+							"items": {
+								"type": "string",
+								"format": "binary"
+							}
+						},
+						{
+							"nullable": true
+						}
+					]
+				},
+				"fileCollectionList": {
+					"type": "array",
+					"items": {
+						"type": "string",
+						"format": "binary"
+					}
+				},
+				"nestedObjectValue": {
+					"oneOf": [
+						{
 							"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1276,10 +1760,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"uriValueNullable": {
 					"oneOf": [
 						{
-							"nullable": true
+							"$ref": "#/components/schemas/System.Uri"
 						},
 						{
-							"$ref": "#/components/schemas/System.Uri"
+							"nullable": true
 						}
 					]
 				}
@@ -1320,10 +1804,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableStringValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "string"
 						},
 						{
-							"type": "string"
+							"nullable": true
 						}
 					]
 				},
@@ -1334,11 +1818,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableIntValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1349,11 +1833,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableLongValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int64"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1364,11 +1848,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableShortValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1379,11 +1863,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableByteValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "integer",
 							"format": "int32"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1393,10 +1877,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDecimalValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "number"
 						},
 						{
-							"type": "number"
+							"nullable": true
 						}
 					]
 				},
@@ -1407,11 +1891,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDoubleValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "number",
 							"format": "double"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1422,11 +1906,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableFloatValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "number",
 							"format": "float"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1436,10 +1920,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableBoolValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"type": "boolean"
 						},
 						{
-							"type": "boolean"
+							"nullable": true
 						}
 					]
 				},
@@ -1450,11 +1934,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateTimeValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date-time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1465,11 +1949,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateTimeOffsetValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date-time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1480,11 +1964,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableDateOnlyValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "date"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1495,11 +1979,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableTimeOnlyValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "time"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1510,11 +1994,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nullableGuidValue": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "uuid"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1661,11 +2145,11 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"singleFileNullable": {
 					"oneOf": [
 						{
-							"nullable": true
-						},
-						{
 							"type": "string",
 							"format": "binary"
+						},
+						{
+							"nullable": true
 						}
 					]
 				},
@@ -1707,10 +2191,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"nestedObjectValue": {
 					"oneOf": [
 						{
-							"nullable": true
+							"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
 						},
 						{
-							"$ref": "#/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject"
+							"nullable": true
 						}
 					]
 				},
@@ -1752,10 +2236,10 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"uriValueNullable": {
 					"oneOf": [
 						{
-							"nullable": true
+							"$ref": "#/components/schemas/System.Uri"
 						},
 						{
-							"$ref": "#/components/schemas/System.Uri"
+							"nullable": true
 						}
 					]
 				}

@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace IeuanWalker.MinimalApi.Endpoints.Validation;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 
 /// <summary>
 /// Fluent builder for configuring validation rules for a request type
