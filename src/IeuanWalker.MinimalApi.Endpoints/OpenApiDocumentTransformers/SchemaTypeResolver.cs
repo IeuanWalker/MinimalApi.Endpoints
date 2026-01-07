@@ -1,11 +1,18 @@
 using System.Collections.Concurrent;
+using System.Reflection;
 using System.Threading;
+
+// NOTE: Keep assembly lookup cached to avoid repeated AppDomain scans across transformers.
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 static class SchemaTypeResolver
 {
 	static readonly ConcurrentDictionary<string, Lazy<Type?>> typeCache = new(StringComparer.Ordinal);
+	static readonly Lazy<Assembly[]> assemblies = new(static () => AppDomain.CurrentDomain
+		.GetAssemblies()
+		.Where(a => !a.IsDynamic)
+		.ToArray(), LazyThreadSafetyMode.ExecutionAndPublication);
 
 	public static Type? GetSchemaType(string schemaName)
 	{
@@ -33,7 +40,7 @@ static class SchemaTypeResolver
 	{
 		string typeName = schemaName.Replace('+', '.');
 
-		return AppDomain.CurrentDomain.GetAssemblies()
+		return assemblies.Value
 			.Select(assembly => assembly.GetType(typeName))
 			.FirstOrDefault(type => type is not null);
 	}

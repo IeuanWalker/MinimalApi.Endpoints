@@ -20,7 +20,7 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			return Task.CompletedTask;
 		}
 
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.ToList())
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
 		{
 			if (schemaEntry.Value is not OpenApiSchema schema)
 			{

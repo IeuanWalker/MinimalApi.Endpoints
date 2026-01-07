@@ -17,6 +17,8 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 			return Task.CompletedTask;
 		}
 
+		int totalSchemas = document.Components.Schemas.Count;
+
 		cancellationToken.ThrowIfCancellationRequested();
 
 		HashSet<string> usedSchemaIds = [];
@@ -50,6 +52,11 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 					}
 				}
 			}
+		}
+
+		if (usedSchemaIds.Count == totalSchemas)
+		{
+			return Task.CompletedTask;
 		}
 
 		List<string> schemasToRemove = [.. document.Components.Schemas.Keys.Where(schemaId => !usedSchemaIds.Contains(schemaId))];
