@@ -8,20 +8,59 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
 partial class ValidationDocumentTransformer
 {
+	static readonly object dataAnnotationCacheLock = new();
+	static Dictionary<Type, List<Validation.ValidationRule>>? dataAnnotationRuleCache;
+
 	static void DiscoverDataAnnotationValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
-		// Get all loaded assemblies
-		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
-
-		// Get logger from DI if available
 		ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
 
-		// Keep track of types we've already processed to avoid infinite recursion
+		Dictionary<Type, List<Validation.ValidationRule>> cachedRules = GetCachedDataAnnotationRules(logger);
+
+		foreach (KeyValuePair<Type, List<Validation.ValidationRule>> kvp in cachedRules)
+		{
+			if (kvp.Value.Count == 0)
+			{
+				continue;
+			}
+
+			if (!allValidationRules.TryGetValue(kvp.Key, out (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) value))
+			{
+				value.rules = [];
+				value.appendRulesToPropertyDescription = true;
+			}
+
+			value.rules.AddRange(kvp.Value);
+			allValidationRules[kvp.Key] = value;
+		}
+	}
+
+	static Dictionary<Type, List<Validation.ValidationRule>> GetCachedDataAnnotationRules(ILogger logger)
+	{
+		if (dataAnnotationRuleCache is not null)
+		{
+			return dataAnnotationRuleCache;
+		}
+
+		lock (dataAnnotationCacheLock)
+		{
+			dataAnnotationRuleCache ??= BuildDataAnnotationRuleCache(logger);
+			return dataAnnotationRuleCache;
+		}
+	}
+
+	static Dictionary<Type, List<Validation.ValidationRule>> BuildDataAnnotationRuleCache(ILogger logger)
+	{
+		Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> discoveredValidationRules = [];
 		HashSet<Type> processedTypes = [];
 
-		foreach (Assembly assembly in assemblies)
+		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 		{
-			// Skip system assemblies
+			if (assembly.IsDynamic)
+			{
+				continue;
+			}
+
 			if (assembly.FullName?.StartsWith("System.") == true ||
 				assembly.FullName?.StartsWith("Microsoft.") == true ||
 				assembly.FullName?.StartsWith("netstandard") == true)
@@ -29,33 +68,34 @@ partial class ValidationDocumentTransformer
 				continue;
 			}
 
+			Type[] types;
 			try
 			{
-				// Find all types in this assembly
-				Type[] types = assembly.GetTypes();
-				foreach (Type type in types)
-				{
-					// Check if this type has the [ValidatableType] attribute
-					// This attribute is used to opt-in to DataAnnotations validation in .NET 10
-#pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-					bool hasValidatableTypeAttribute = type.GetCustomAttribute<Microsoft.Extensions.Validation.ValidatableTypeAttribute>() is not null;
-#pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
-
-					if (!hasValidatableTypeAttribute)
-					{
-						continue;
-					}
-
-					// Process this type and any nested types recursively
-					ProcessTypeRecursively(type, allValidationRules, processedTypes, logger);
-				}
+				types = assembly.GetTypes();
 			}
 			catch (ReflectionTypeLoadException)
 			{
-				// Skip assemblies that can't be reflected
 				continue;
 			}
+
+			foreach (Type type in types)
+			{
+#pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+				bool hasValidatableTypeAttribute = type.GetCustomAttribute<Microsoft.Extensions.Validation.ValidatableTypeAttribute>() is not null;
+#pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+				if (!hasValidatableTypeAttribute)
+				{
+					continue;
+				}
+
+				ProcessTypeRecursively(type, discoveredValidationRules, processedTypes, logger);
+			}
 		}
+
+		return discoveredValidationRules
+			.Where(kvp => kvp.Value.rules.Count > 0)
+			.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.rules);
 	}
 
 	static void ProcessTypeRecursively(Type type, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, HashSet<Type> processedTypes, ILogger logger)
