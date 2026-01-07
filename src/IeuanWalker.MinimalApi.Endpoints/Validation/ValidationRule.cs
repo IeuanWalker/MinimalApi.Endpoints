@@ -68,9 +68,9 @@ public sealed record StringLengthRule : ValidationRule
 		{
 			ErrorMessage = $"Must be {MinLength.Value} characters or more";
 		}
-		else if (MaxLength.HasValue)
+		else
 		{
-			ErrorMessage = $"Must be {MaxLength.Value} characters or fewer";
+			ErrorMessage = $"Must be {MaxLength!.Value} characters or fewer";
 		}
 	}
 	/// <summary>

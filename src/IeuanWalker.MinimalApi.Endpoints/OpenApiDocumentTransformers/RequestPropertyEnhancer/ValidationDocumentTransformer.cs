@@ -418,12 +418,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 					if (!rulesByProperty.TryGetValue(parameter.Name, out List<ValidationRule>? propertyRules))
 					{
-						if (parameter.Schema is not null &&
-							!OpenApiSchemaHelper.IsEnumSchemaReference(parameter.Schema, document) &&
-							!OpenApiSchemaHelper.IsInlineEnumSchema(parameter.Schema))
-						{
-							parameter.Schema = parameter.Schema;
-						}
 						continue;
 					}
 
@@ -450,14 +444,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 	static Type? ResolveRequestTypeForPath(string pathPattern, Dictionary<string, Type> endpointToRequestType)
 	{
-		foreach (KeyValuePair<string, Type> mapping in endpointToRequestType)
-		{
-			if (OpenApiPathMatcher.PathsMatch(pathPattern, mapping.Key))
-			{
-				return mapping.Value;
-			}
-		}
-
-		return null;
+		return endpointToRequestType
+			.Where(mapping => OpenApiPathMatcher.PathsMatch(pathPattern, mapping.Key))
+			.Select(mapping => mapping.Value)
+			.FirstOrDefault();
 	}
 }
