@@ -22,7 +22,7 @@ public static class OpenApiExtensions
 	/// <para>This enhances OpenAPI documentation for request properties, it does a number of things - </para>
 	/// <para>- Sets the appropiate types</para>
 	/// <para>- Adds in all the enum information</para>
-	/// <para>- Add validation logic (fluent validation, data annotation and manually)</para>
+	/// <para>- Add validation logic (fluent validation, data annotation and manual rules)</para>
 	/// <para>// TODO: Here is the wiki guide for more info - </para>
 	/// </summary>
 	/// <param name="options"></param>
