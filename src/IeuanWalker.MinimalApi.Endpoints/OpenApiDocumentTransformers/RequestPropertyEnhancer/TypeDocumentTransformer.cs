@@ -35,10 +35,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 5: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
-		// Step 6: Inline primitive type references (System.String, System.String[], etc.) and IFormFile types
+		// Step 6: Inline System.String[] references within component schemas
+		InlineSystemStringArrayInComponents(document);
+
+		// Step 7: Inline primitive type references (System.String, System.String[], etc.) and IFormFile types
 		InlinePrimitiveAndFileTypeReferences(document);
 
-		// Step 7: Ensure unwrapped enum schemas exist (before reordering)
+		// Step 8: Ensure unwrapped enum schemas exist (before reordering)
 		EnsureUnwrappedEnumSchemasExist(document);
 
 		return Task.CompletedTask;
@@ -594,6 +597,145 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 			document.Components.Schemas[unwrappedSchemaName] = unwrappedSchema;
 		}
+	}
+
+	static void InlineSystemStringArrayInComponents(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		// Inline System.String[] references within component schemas
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+		{
+			if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) || schema is null)
+			{
+				continue;
+			}
+
+			// Process properties
+			if (schema.Properties is not null && schema.Properties.Count > 0)
+			{
+				foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
+				{
+					schema.Properties[propertyName] = InlineSystemStringArrayReference(propertySchema);
+				}
+			}
+
+			// Process additionalProperties (this is where IDictionary uses System.String[])
+			if (schema.AdditionalProperties is not null)
+			{
+				schema.AdditionalProperties = InlineSystemStringArrayReference(schema.AdditionalProperties);
+			}
+
+			// Process items
+			if (schema.Items is not null)
+			{
+				schema.Items = InlineSystemStringArrayReference(schema.Items);
+			}
+
+			// Process oneOf
+			if (schema.OneOf is not null && schema.OneOf.Count > 0)
+			{
+				for (int i = 0; i < schema.OneOf.Count; i++)
+				{
+					schema.OneOf[i] = InlineSystemStringArrayReference(schema.OneOf[i]);
+				}
+			}
+
+			// Process allOf
+			if (schema.AllOf is not null && schema.AllOf.Count > 0)
+			{
+				for (int i = 0; i < schema.AllOf.Count; i++)
+				{
+					schema.AllOf[i] = InlineSystemStringArrayReference(schema.AllOf[i]);
+				}
+			}
+
+			// Process anyOf
+			if (schema.AnyOf is not null && schema.AnyOf.Count > 0)
+			{
+				for (int i = 0; i < schema.AnyOf.Count; i++)
+				{
+					schema.AnyOf[i] = InlineSystemStringArrayReference(schema.AnyOf[i]);
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema InlineSystemStringArrayReference(IOpenApiSchema schema)
+	{
+		if (schema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId) && refId.Equals("System.String[]", StringComparison.Ordinal))
+			{
+				// Inline System.String[] as array of strings
+				return new OpenApiSchema
+				{
+					Type = JsonSchemaType.Array,
+					Items = new OpenApiSchema
+					{
+						Type = JsonSchemaType.String
+					}
+				};
+			}
+		}
+
+		// Recursively process nested schemas
+		if (OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) && openApiSchema is not null)
+		{
+			// Process properties
+			if (openApiSchema.Properties is not null && openApiSchema.Properties.Count > 0)
+			{
+				foreach ((string propertyName, IOpenApiSchema propertySchema) in openApiSchema.Properties)
+				{
+					openApiSchema.Properties[propertyName] = InlineSystemStringArrayReference(propertySchema);
+				}
+			}
+
+			// Process additionalProperties
+			if (openApiSchema.AdditionalProperties is not null)
+			{
+				openApiSchema.AdditionalProperties = InlineSystemStringArrayReference(openApiSchema.AdditionalProperties);
+			}
+
+			// Process items
+			if (openApiSchema.Items is not null)
+			{
+				openApiSchema.Items = InlineSystemStringArrayReference(openApiSchema.Items);
+			}
+
+			// Process oneOf
+			if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+			{
+				for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+				{
+					openApiSchema.OneOf[i] = InlineSystemStringArrayReference(openApiSchema.OneOf[i]);
+				}
+			}
+
+			// Process allOf
+			if (openApiSchema.AllOf is not null && openApiSchema.AllOf.Count > 0)
+			{
+				for (int i = 0; i < openApiSchema.AllOf.Count; i++)
+				{
+					openApiSchema.AllOf[i] = InlineSystemStringArrayReference(openApiSchema.AllOf[i]);
+				}
+			}
+
+			// Process anyOf
+			if (openApiSchema.AnyOf is not null && openApiSchema.AnyOf.Count > 0)
+			{
+				for (int i = 0; i < openApiSchema.AnyOf.Count; i++)
+				{
+					openApiSchema.AnyOf[i] = InlineSystemStringArrayReference(openApiSchema.AnyOf[i]);
+				}
+			}
+		}
+
+		return schema;
 	}
 
 	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)

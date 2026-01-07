@@ -5962,19 +5962,16 @@
 			"System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {
 				"type": "object",
 				"additionalProperties": {
-					"$ref": "#/components/schemas/System.String[]"
+					"type": "array",
+					"items": {
+						"type": "string"
+					}
 				}
 			},
 			"System.Collections.Generic.IEnumerable`1[[ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel, ExampleApi, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]": {
 				"type": "array",
 				"items": {
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel"
-				}
-			},
-			"System.String[]": {
-				"type": "array",
-				"items": {
-					"type": "string"
 				}
 			}
 		}
