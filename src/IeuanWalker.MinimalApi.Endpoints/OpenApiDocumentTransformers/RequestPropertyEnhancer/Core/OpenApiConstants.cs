@@ -31,6 +31,7 @@ static class SchemaConstants
 	public const string SystemDateOnly = "System.DateOnly";
 	public const string SystemTimeOnly = "System.TimeOnly";
 	public const string SystemGuid = "System.Guid";
+	public const string SystemUri = "System.Uri";
 
 	// Collection type names
 	public const string ListGenericType = "System.Collections.Generic.List`1";

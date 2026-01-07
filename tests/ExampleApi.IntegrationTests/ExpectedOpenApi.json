@@ -791,7 +791,8 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							}
 						}
 					},
@@ -801,7 +802,8 @@
 						"schema": {
 							"type": "array",
 							"items": {
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							}
 						}
 					},
@@ -810,14 +812,16 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					},
 					{
 						"name": "UriValueNullable",
 						"in": "query",
 						"schema": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					}
 				],
@@ -1051,7 +1055,8 @@
 						"name": "ActualUri",
 						"in": "query",
 						"schema": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					},
 					{
@@ -2783,7 +2788,8 @@
 					"uriArray": {
 						"type": "array",
 						"items": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					},
 					"uriArrayNullable": {
@@ -2791,7 +2797,8 @@
 							{
 								"type": "array",
 								"items": {
-									"$ref": "#/components/schemas/System.Uri"
+									"type": "string",
+									"format": "uri"
 								}
 							},
 							{
@@ -2800,12 +2807,14 @@
 						]
 					},
 					"uriValue": {
-						"$ref": "#/components/schemas/System.Uri"
+						"type": "string",
+						"format": "uri"
 					},
 					"uriValueNullable": {
 						"oneOf": [
 							{
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							},
 							{
 								"nullable": true
@@ -3259,7 +3268,8 @@
 					"uriArray": {
 						"type": "array",
 						"items": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					},
 					"uriArrayNullable": {
@@ -3267,7 +3277,8 @@
 							{
 								"type": "array",
 								"items": {
-									"$ref": "#/components/schemas/System.Uri"
+									"type": "string",
+									"format": "uri"
 								}
 							},
 							{
@@ -3276,12 +3287,14 @@
 						]
 					},
 					"uriValue": {
-						"$ref": "#/components/schemas/System.Uri"
+						"type": "string",
+						"format": "uri"
 					},
 					"uriValueNullable": {
 						"oneOf": [
 							{
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							},
 							{
 								"nullable": true
@@ -3724,7 +3737,8 @@
 					"uriArray": {
 						"type": "array",
 						"items": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					},
 					"uriArrayNullable": {
@@ -3732,7 +3746,8 @@
 							{
 								"type": "array",
 								"items": {
-									"$ref": "#/components/schemas/System.Uri"
+									"type": "string",
+									"format": "uri"
 								}
 							},
 							{
@@ -3741,12 +3756,14 @@
 						]
 					},
 					"uriValue": {
-						"$ref": "#/components/schemas/System.Uri"
+						"type": "string",
+						"format": "uri"
 					},
 					"uriValueNullable": {
 						"oneOf": [
 							{
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							},
 							{
 								"nullable": true
@@ -4200,7 +4217,8 @@
 					"uriArray": {
 						"type": "array",
 						"items": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					},
 					"uriArrayNullable": {
@@ -4208,7 +4226,8 @@
 							{
 								"type": "array",
 								"items": {
-									"$ref": "#/components/schemas/System.Uri"
+									"type": "string",
+									"format": "uri"
 								}
 							},
 							{
@@ -4217,12 +4236,14 @@
 						]
 					},
 					"uriValue": {
-						"$ref": "#/components/schemas/System.Uri"
+						"type": "string",
+						"format": "uri"
 					},
 					"uriValueNullable": {
 						"oneOf": [
 							{
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							},
 							{
 								"nullable": true
@@ -4373,7 +4394,8 @@
 					"actualUri": {
 						"oneOf": [
 							{
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							},
 							{
 								"nullable": true
@@ -4649,7 +4671,8 @@
 					"actualUri": {
 						"oneOf": [
 							{
-								"$ref": "#/components/schemas/System.Uri"
+								"type": "string",
+								"format": "uri"
 							},
 							{
 								"nullable": true
@@ -5881,10 +5904,6 @@
 				"items": {
 					"type": "string"
 				}
-			},
-			"System.Uri": {
-				"type": "string",
-				"format": "uri"
 			}
 		}
 	},

@@ -533,6 +533,11 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			inlineSchema.Type = JsonSchemaType.String;
 			inlineSchema.Format = SchemaConstants.FormatUuid;
 		}
+		else if (refId.Contains(SchemaConstants.SystemUri))
+		{
+			inlineSchema.Type = JsonSchemaType.String;
+			inlineSchema.Format = SchemaConstants.FormatUri;
+		}
 		else
 		{
 			return schemaRef;

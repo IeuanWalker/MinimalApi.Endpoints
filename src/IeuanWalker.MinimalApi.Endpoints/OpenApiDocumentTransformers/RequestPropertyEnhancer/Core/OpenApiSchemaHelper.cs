@@ -319,6 +319,11 @@ static class OpenApiSchemaHelper
 			schema.Type = JsonSchemaType.String;
 			schema.Format = SchemaConstants.FormatUuid;
 		}
+		else if (actualType == typeof(Uri))
+		{
+			schema.Type = JsonSchemaType.String;
+			schema.Format = SchemaConstants.FormatUri;
+		}
 		else if (actualType == typeof(IFormFile))
 		{
 			schema.Type = JsonSchemaType.String;
@@ -395,6 +400,11 @@ static class OpenApiSchemaHelper
 		{
 			schema.Type = JsonSchemaType.String;
 			schema.Format = SchemaConstants.FormatUuid;
+		}
+		else if (refId.Contains(SchemaConstants.SystemUri))
+		{
+			schema.Type = JsonSchemaType.String;
+			schema.Format = SchemaConstants.FormatUri;
 		}
 		else if (refId.Contains(SchemaConstants.IFormFile) || refId.Equals("IFormFile", StringComparison.Ordinal))
 		{
