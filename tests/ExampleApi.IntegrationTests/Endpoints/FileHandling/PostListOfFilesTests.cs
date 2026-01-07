@@ -84,7 +84,8 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		// Arrange
 		using MultipartFormDataContent content = new();
 		// Add a dummy field to make it a valid multipart request
-		content.Add(new StringContent(""), "dummy");
+		using StringContent stringContent = new("");
+		content.Add(stringContent, "dummy");
 
 		// Act
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content);

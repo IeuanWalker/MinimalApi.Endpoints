@@ -1,6 +1,5 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.Generator.Extensions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Helpers;
@@ -65,7 +64,7 @@ static class ValidationHelpers
 	{
 		// Walk up the inheritance chain to find the Validator<T> base class
 		INamedTypeSymbol? current = validatorTypeSymbol.BaseType;
-		while (current != null)
+		while (current is not null)
 		{
 			// Check if this is the Validator<T> base class
 			if (current.IsGenericType && SymbolEqualityComparer.Default.Equals(current.OriginalDefinition, validatorBaseSymbol))

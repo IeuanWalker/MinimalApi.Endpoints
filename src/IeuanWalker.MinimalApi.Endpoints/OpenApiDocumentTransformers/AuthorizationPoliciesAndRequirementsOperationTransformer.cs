@@ -31,7 +31,7 @@ sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApi
 				.Where(requirementText => !string.IsNullOrEmpty(requirementText))
 				.Select(requirementText =>
 				{
-					List<string> requirementTextSplit = requirementText.Split(':').ToList();
+					List<string> requirementTextSplit = [.. requirementText.Split(':')];
 
 					if (requirementTextSplit.Count > 1)
 					{
