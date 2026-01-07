@@ -9,10 +9,20 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 static class SchemaTypeResolver
 {
 	static readonly ConcurrentDictionary<string, Lazy<Type?>> typeCache = new(StringComparer.Ordinal);
-	static readonly Lazy<Assembly[]> assemblies = new(static () => AppDomain.CurrentDomain
-		.GetAssemblies()
-		.Where(a => !a.IsDynamic)
-		.ToArray(), LazyThreadSafetyMode.ExecutionAndPublication);
+	static readonly Lazy<Assembly[]> assemblies = new(static () =>
+	{
+		try
+		{
+			return AppDomain.CurrentDomain
+				.GetAssemblies()
+				.Where(a => !a.IsDynamic)
+				.ToArray();
+		}
+		catch
+		{
+			return Array.Empty<Assembly>();
+		}
+	}, LazyThreadSafetyMode.ExecutionAndPublication);
 
 	public static Type? GetSchemaType(string schemaName)
 	{

@@ -12,12 +12,13 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 {
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
-		if (document.Components?.Schemas is null || document.Components.Schemas.Count == 0)
+		IDictionary<string, IOpenApiSchema>? schemas = document.Components?.Schemas;
+		if (schemas is null || schemas.Count == 0)
 		{
 			return Task.CompletedTask;
 		}
 
-		int totalSchemas = document.Components.Schemas.Count;
+		int totalSchemas = schemas.Count;
 
 		cancellationToken.ThrowIfCancellationRequested();
 
@@ -54,16 +55,16 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
-		if (usedSchemaIds.Count == totalSchemas)
+		if (usedSchemaIds.Count >= totalSchemas)
 		{
 			return Task.CompletedTask;
 		}
 
-		List<string> schemasToRemove = [.. document.Components.Schemas.Keys.Where(schemaId => !usedSchemaIds.Contains(schemaId))];
+		List<string> schemasToRemove = [.. schemas.Keys.Where(schemaId => !usedSchemaIds.Contains(schemaId))];
 
 		foreach (string schemaId in schemasToRemove)
 		{
-			document.Components.Schemas.Remove(schemaId);
+			schemas.Remove(schemaId);
 		}
 
 		return Task.CompletedTask;
