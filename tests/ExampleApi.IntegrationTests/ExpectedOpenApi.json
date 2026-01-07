@@ -236,7 +236,11 @@
 								"type": "object",
 								"properties": {
 									"request": {
-										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFileCollection"
+										"type": "array",
+										"items": {
+											"type": "string",
+											"format": "binary"
+										}
 									}
 								}
 							}
@@ -306,7 +310,8 @@
 								"type": "object",
 								"properties": {
 									"request": {
-										"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.IFormFile"
+										"type": "string",
+										"format": "binary"
 									}
 								}
 							}
@@ -5870,18 +5875,6 @@
 					"errors": {
 						"$ref": "#/components/schemas/System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]"
 					}
-				}
-			},
-			"Microsoft.AspNetCore.Http.IFormFile": {
-				"type": "string",
-				"format": "binary",
-				"nullable": true
-			},
-			"Microsoft.AspNetCore.Http.IFormFileCollection": {
-				"type": "array",
-				"items": {
-					"type": "string",
-					"format": "binary"
 				}
 			},
 			"System.Collections.Generic.IDictionary`2[[System.String, System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e],[System.String[], System.Private.CoreLib, Version=10.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]": {

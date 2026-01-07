@@ -35,7 +35,10 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 5: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
-		// Step 6: Ensure unwrapped enum schemas exist (before reordering)
+		// Step 6: Inline IFormFile and IFormFileCollection references in request bodies
+		InlineFileTypeReferencesInRequestBodies(document);
+
+		// Step 7: Ensure unwrapped enum schemas exist (before reordering)
 		EnsureUnwrappedEnumSchemasExist(document);
 
 		return Task.CompletedTask;
@@ -586,6 +589,122 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 			document.Components.Schemas[unwrappedSchemaName] = unwrappedSchema;
 		}
+	}
+
+	static void InlineFileTypeReferencesInRequestBodies(OpenApiDocument document)
+	{
+		if (document.Paths is null)
+		{
+			return;
+		}
+
+		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
+		{
+			if (pathItem.Value is not OpenApiPathItem pathItemValue)
+			{
+				continue;
+			}
+
+			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
+			{
+				if (operation.Value.RequestBody is null)
+				{
+					continue;
+				}
+
+				IOpenApiRequestBody requestBody = operation.Value.RequestBody;
+				if (requestBody is OpenApiRequestBody openApiRequestBody && openApiRequestBody.Content is not null)
+				{
+					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiRequestBody.Content)
+					{
+						if (contentItem.Value.Schema is null)
+						{
+							continue;
+						}
+
+						contentItem.Value.Schema = InlineFileTypeReferences(contentItem.Value.Schema, document);
+					}
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema InlineFileTypeReferences(IOpenApiSchema schema, OpenApiDocument document)
+	{
+		if (schema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId))
+			{
+				// Check IFormFileCollection FIRST since it contains "IFormFile" in its name
+				if (refId.Contains(SchemaConstants.IFormFileCollection) || refId.Equals("IFormFileCollection", StringComparison.Ordinal))
+				{
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.Array,
+						Items = new OpenApiSchema
+						{
+							Type = JsonSchemaType.String,
+							Format = SchemaConstants.FormatBinary
+						}
+					};
+				}
+				else if (refId.Contains(SchemaConstants.IFormFile) || refId.Equals("IFormFile", StringComparison.Ordinal))
+				{
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.String,
+						Format = SchemaConstants.FormatBinary
+					};
+				}
+			}
+
+			return schemaRef;
+		}
+
+		if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) || openApiSchema is null)
+		{
+			return schema;
+		}
+
+		if (openApiSchema.Properties is not null && openApiSchema.Properties.Count > 0)
+		{
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in openApiSchema.Properties)
+			{
+				openApiSchema.Properties[propertyName] = InlineFileTypeReferences(propertySchema, document);
+			}
+		}
+
+		if (openApiSchema.Items is not null)
+		{
+			openApiSchema.Items = InlineFileTypeReferences(openApiSchema.Items, document);
+		}
+
+		if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+		{
+			for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+			{
+				openApiSchema.OneOf[i] = InlineFileTypeReferences(openApiSchema.OneOf[i], document);
+			}
+		}
+
+		if (openApiSchema.AllOf is not null && openApiSchema.AllOf.Count > 0)
+		{
+			for (int i = 0; i < openApiSchema.AllOf.Count; i++)
+			{
+				openApiSchema.AllOf[i] = InlineFileTypeReferences(openApiSchema.AllOf[i], document);
+			}
+		}
+
+		if (openApiSchema.AnyOf is not null && openApiSchema.AnyOf.Count > 0)
+		{
+			for (int i = 0; i < openApiSchema.AnyOf.Count; i++)
+			{
+				openApiSchema.AnyOf[i] = InlineFileTypeReferences(openApiSchema.AnyOf[i], document);
+			}
+		}
+
+		return openApiSchema;
 	}
 
 	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)
