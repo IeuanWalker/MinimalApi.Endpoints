@@ -426,7 +426,7 @@ partial class ValidationDocumentTransformer
 		}
 		if (endIdx < 0)
 		{
-			endIdx = refId.IndexOf(',', typeStart);
+			endIdx = refId.IndexOf(",", typeStart, StringComparison.Ordinal);
 		}
 		if (endIdx < 0)
 		{
