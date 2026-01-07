@@ -410,11 +410,32 @@ partial class ValidationDocumentTransformer
 			return;
 		}
 
-		int startIdx = refId.IndexOf("[[");// TODO: handle multi-dimensional arrays
-		int endIdx = refId.IndexOf(',', startIdx);
-		if (startIdx >= 0 && endIdx > startIdx)
+		int startIdx = refId.IndexOf("[[", StringComparison.Ordinal);
+		if (startIdx < 0)
 		{
-			string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
+			return;
+		}
+
+		int typeStart = startIdx + 2;
+
+		// Try to find the end of the element type in a way that is robust to multi-dimensional arrays
+		int endIdx = refId.IndexOf("],", typeStart, StringComparison.Ordinal);
+		if (endIdx < 0)
+		{
+			endIdx = refId.IndexOf("]]", typeStart, StringComparison.Ordinal);
+		}
+		if (endIdx < 0)
+		{
+			endIdx = refId.IndexOf(",", typeStart, StringComparison.Ordinal);
+		}
+		if (endIdx < 0)
+		{
+			endIdx = refId.Length;
+		}
+
+		if (endIdx > typeStart)
+		{
+			string elementType = refId.Substring(typeStart, endIdx - typeStart);
 			OpenApiSchemaReference elementRef = new(elementType, document, null);
 			newSchema.Items = elementRef;
 			EnsureArrayType(newSchema);
