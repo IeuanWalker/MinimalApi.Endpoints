@@ -73,14 +73,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 		// Step 5: Build a mapping from endpoints to their request types and Apply validation to query/path parameters (for endpoints using RequestAsParameters)
 		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context, allValidationRules);
-		foreach (KeyValuePair<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> kvp in allValidationRules)
-		{
-			Type requestType = kvp.Key;
-			List<Validation.ValidationRule> rules = kvp.Value.rules;
-			bool typeAppendRulesToPropertyDescription = kvp.Value.appendRulesToPropertyDescription;
-
-			ApplyValidationToParameters(document, requestType, rules, endpointToRequestType, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
-		}
+		ApplyValidationToParameters(document, allValidationRules, endpointToRequestType, AppendRulesToPropertyDescription);
 
 		return Task.CompletedTask;
 	}
@@ -427,9 +420,9 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 	[LoggerMessage(Level = LogLevel.Warning, Message = "Route pattern '{RoutePattern}' is shared by multiple endpoints with different request types. Using validation rules from '{FirstType}', ignoring '{SecondType}'. Consider using different route patterns or HTTP methods to avoid validation rule conflicts.")]
 	static partial void LogRoutePatternCollision(ILogger logger, string routePattern, string firstType, string secondType);
 
-	static void ApplyValidationToParameters(OpenApiDocument document, Type requestType, List<Validation.ValidationRule> rules, Dictionary<string, Type> endpointToRequestType, bool typeAppendRulesToPropertyDescription, bool appendRulesToPropertyDescription)
+	static void ApplyValidationToParameters(OpenApiDocument document, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules, Dictionary<string, Type> endpointToRequestType, bool appendRulesToPropertyDescription)
 	{
-		if (document.Paths is null || rules.Count == 0)
+		if (document.Paths is null || allValidationRules.Count == 0)
 		{
 			return;
 		}
@@ -446,27 +439,30 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			// Check if this path matches the current request type we're processing
-			// Use the OpenAPI path as the pattern that will be compared against endpoint route patterns
 			string pathPattern = pathItem.Key;
 
-			// Try to find matching endpoint - use cache to avoid redundant PathsMatch calls
 			if (!pathMatchCache.TryGetValue(pathPattern, out Type? pathRequestType))
 			{
-				// Cache miss - perform the search and cache the result
-				pathRequestType = endpointToRequestType
-					.Where(mapping => PathsMatch(pathPattern, mapping.Key))
-					.Select(mapping => mapping.Value)
-					.FirstOrDefault();
-
+				pathRequestType = ResolveRequestTypeForPath(pathPattern, endpointToRequestType);
 				pathMatchCache[pathPattern] = pathRequestType;
 			}
 
-			// Skip this path if it doesn't belong to the current request type
-			if (pathRequestType is null || pathRequestType != requestType)
+			if (pathRequestType is null || !allValidationRules.TryGetValue(pathRequestType, out (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) validationInfo))
 			{
 				continue;
 			}
+
+			List<Validation.ValidationRule> rules = validationInfo.rules;
+			if (rules.Count == 0)
+			{
+				continue;
+			}
+
+			bool typeAppendRulesToPropertyDescription = validationInfo.appendRulesToPropertyDescription;
+
+			Dictionary<string, List<Validation.ValidationRule>> rulesByProperty = rules
+				.GroupBy(r => r.PropertyName, StringComparer.OrdinalIgnoreCase)
+				.ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
 
 			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
 			{
@@ -475,16 +471,6 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 					continue;
 				}
 
-				// Group rules by property name for easier lookup
-				// NOTE: HTTP query/path parameter names are case-insensitive in ASP.NET/OpenAPI.
-				// Validation rules are keyed by C# property names (usually PascalCase), while
-				// route/query parameters may be camelCase or lowercase. We use OrdinalIgnoreCase
-				// to reliably match validation rules to parameters regardless of casing.
-				Dictionary<string, List<Validation.ValidationRule>> rulesByProperty = rules
-					.GroupBy(r => r.PropertyName, StringComparer.OrdinalIgnoreCase)
-					.ToDictionary(g => g.Key, g => g.ToList(), StringComparer.OrdinalIgnoreCase);
-
-				// Process each parameter
 				foreach (OpenApiParameter parameter in operation.Value.Parameters.Cast<OpenApiParameter>())
 				{
 					if (string.IsNullOrEmpty(parameter.Name))
@@ -492,11 +478,8 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						continue;
 					}
 
-					// Match parameter name to property rules (case-insensitive)
 					if (!rulesByProperty.TryGetValue(parameter.Name, out List<Validation.ValidationRule>? propertyRules))
 					{
-						// No validation rules for this parameter, but we should still inline primitive types
-						// for better OpenAPI documentation clarity
 						if (parameter.Schema is not null && !IsEnumSchemaReference(parameter.Schema, document) && !IsInlineEnumSchema(parameter.Schema))
 						{
 							parameter.Schema = InlinePrimitiveTypeReference(parameter.Schema);
@@ -504,31 +487,37 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 						continue;
 					}
 
-					// Check if any rule for this property is RequiredRule
 					bool hasRequiredRule = propertyRules.Any(r => r is Validation.RequiredRule);
 					if (hasRequiredRule)
 					{
 						parameter.Required = true;
 					}
 
-					// Create inline schema for all parameters with validation rules (including just Required)
-					// This ensures type information is explicit in the schema rather than relying on references
 					if (propertyRules.Count > 0 && parameter.Schema is not null)
 					{
-						// Check if this parameter is a reference to an enum schema OR has inline enum values
-						// Enum schemas should NOT be modified - we preserve the $ref or inline enum information
 						if (IsEnumSchemaReference(parameter.Schema, document) || IsInlineEnumSchema(parameter.Schema))
 						{
-							// Don't modify enum properties - preserve the $ref or inline enum info
 							continue;
 						}
 
-						// Create inline schema with all validation constraints for this parameter
 						parameter.Schema = CreateInlineSchemaWithAllValidation(parameter.Schema, [.. propertyRules], typeAppendRulesToPropertyDescription, appendRulesToPropertyDescription, document);
 					}
 				}
 			}
 		}
+	}
+
+	static Type? ResolveRequestTypeForPath(string pathPattern, Dictionary<string, Type> endpointToRequestType)
+	{
+		foreach (KeyValuePair<string, Type> mapping in endpointToRequestType)
+		{
+			if (PathsMatch(pathPattern, mapping.Key))
+			{
+				return mapping.Value;
+			}
+		}
+
+		return null;
 	}
 
 	/// <summary>
