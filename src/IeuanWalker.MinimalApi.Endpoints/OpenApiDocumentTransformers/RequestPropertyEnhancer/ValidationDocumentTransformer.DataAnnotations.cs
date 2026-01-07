@@ -10,7 +10,7 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPr
 
 partial class ValidationDocumentTransformer
 {
-	static readonly object dataAnnotationCacheLock = new();
+	static readonly Lock dataAnnotationCacheLock = new();
 	static Dictionary<Type, List<ValidationRule>>? dataAnnotationRuleCache;
 
 	static void DiscoverDataAnnotationValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)

@@ -632,7 +632,7 @@ partial class ValidationDocumentTransformer
 		{
 			schema.Description = $"Enum: {string.Join(", ", varNames)}";
 		}
-		else if (!schema.Description.Contains("Enum:"))
+		else if (!schema.Description?.Contains("Enum:") ?? false)
 		{
 			schema.Description = $"Enum: {string.Join(", ", varNames)}\n\n{schema.Description}";
 		}

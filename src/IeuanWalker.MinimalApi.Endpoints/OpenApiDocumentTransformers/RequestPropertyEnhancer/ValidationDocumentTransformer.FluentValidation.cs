@@ -38,7 +38,7 @@ partial class ValidationDocumentTransformer
 					continue;
 				}
 
-				object? validatorInstance = context.ApplicationServices.GetService(validatorInterface);
+				object? validatorInstance = context.ApplicationServices.GetService(validatorInterface!);
 				if (validatorInstance is IValidator validator)
 				{
 					validators.Add(validator);
@@ -181,7 +181,9 @@ partial class ValidationDocumentTransformer
 					{
 						if (message.Equals("The specified condition was not met for '{PropertyName}'.") && logger.IsEnabled(LogLevel.Warning))
 						{
+#pragma warning disable CA1873 // Avoid potentially expensive logging
 							LogVagueErrorMessageFluentValidation(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 						}
 
 						if (message.Equals("'{PropertyName}' is not a valid credit card number."))
@@ -236,13 +238,19 @@ partial class ValidationDocumentTransformer
 				validatorTypeName = validatorTypeName[..backtickIndex];
 			}
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 
 			return $"{propertyName} {validatorTypeName} validation";
 		}
+#pragma warning disable CA1031 // Do not catch general exception types
 		catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
 		{
+#pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogExceptionWhileObtainingValidatorErrorMessage(logger, propertyName, propertyValidator.GetType().FullName ?? string.Empty, ex);
+#pragma warning restore CA1873 // Avoid potentially expensive logging
 			return $"{propertyName} custom validation";
 		}
 	}

@@ -1,5 +1,4 @@
 using System.Reflection;
-using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
@@ -406,13 +405,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 						continue;
 					}
 
-					parameter.Schema = FixParameterSchemaType(parameter.Schema, parameter.Name, pathRequestType, document);
+					parameter.Schema = FixParameterSchemaType(parameter.Schema, parameter.Name, pathRequestType);
 				}
 			}
 		}
 	}
 
-	static IOpenApiSchema FixParameterSchemaType(IOpenApiSchema schema, string parameterName, Type? requestType, OpenApiDocument document)
+	static IOpenApiSchema FixParameterSchemaType(IOpenApiSchema schema, string parameterName, Type? requestType)
 	{
 		if (requestType is not null)
 		{

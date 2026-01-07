@@ -15,17 +15,14 @@ static class SchemaTypeResolver
 	{
 		try
 		{
-			return AppDomain.CurrentDomain
+			return [.. AppDomain.CurrentDomain
 				.GetAssemblies()
-				.Where(a => !a.IsDynamic)
-				.ToArray();
+				.Where(a => !a.IsDynamic)];
 		}
-#pragma warning disable CA1031 // Do not catch general exception types
 		catch
 		{
 			return [];
 		}
-#pragma warning restore CA1031
 	}, LazyThreadSafetyMode.ExecutionAndPublication);
 
 	/// <summary>
