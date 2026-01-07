@@ -1,10 +1,12 @@
-using System.Collections.Generic;
-using System.Linq;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
-namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
+/// <summary>
+/// Reorders oneOf/anyOf/allOf schema arrays to ensure nullable markers appear last.
+/// </summary>
 sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 {
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
@@ -80,8 +82,12 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 
 			ProcessParameterCollection(pathItem.Parameters, document, visitedSchemas, cancellationToken);
 
-			IEnumerable<OpenApiOperation> operations = pathItem.Operations?.Values ?? Enumerable.Empty<OpenApiOperation>();
-			foreach (OpenApiOperation operation in operations)
+			if (pathItem.Operations is null)
+			{
+				continue;
+			}
+
+			foreach (OpenApiOperation operation in pathItem.Operations.Values)
 			{
 				ProcessParameterCollection(operation.Parameters, document, visitedSchemas, cancellationToken);
 				ProcessRequestBody(operation.RequestBody, document, visitedSchemas, cancellationToken);
@@ -223,7 +229,7 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
-		if (schema is not OpenApiSchema openApiSchema)
+		if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) || openApiSchema is null)
 		{
 			return;
 		}
@@ -328,12 +334,12 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 
 	static bool IsNullableMarker(IOpenApiSchema schema)
 	{
-		if (schema is not OpenApiSchema openApiSchema)
+		if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) || openApiSchema is null)
 		{
 			return false;
 		}
 
-		bool hasNullableExtension = openApiSchema.Extensions?.ContainsKey("nullable") == true;
+		bool hasNullableExtension = openApiSchema.Extensions?.ContainsKey(SchemaConstants.NullableExtension) == true;
 		bool hasTypeInformation = openApiSchema.Type.HasValue;
 		bool hasCompositeChildren = (openApiSchema.AllOf?.Count ?? 0) > 0 || (openApiSchema.OneOf?.Count ?? 0) > 0 || (openApiSchema.AnyOf?.Count ?? 0) > 0;
 		bool hasSchemaMembers = (openApiSchema.Properties?.Count ?? 0) > 0 || openApiSchema.Items is not null || openApiSchema.AdditionalProperties is not null || openApiSchema.Not is not null;

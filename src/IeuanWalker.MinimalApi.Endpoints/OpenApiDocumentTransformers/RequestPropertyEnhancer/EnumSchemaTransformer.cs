@@ -1,15 +1,14 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Nodes;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
-namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
 /// <summary>
 /// Transforms OpenAPI document by enriching enum schemas with value information and member names.
-/// This transformer adds the 'enum' array with valid values and 'x-enum-varnames' extension with member names
-/// to provide better API documentation for enums.
 /// </summary>
 sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 {
@@ -44,7 +43,7 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		Array enumValues = Enum.GetValues(enumType);
 		string[] enumNames = Enum.GetNames(enumType);
 
-		JsonArray valueArray = [];
+		List<JsonNode> enumJsonValues = [];
 		JsonArray varNamesArray = [];
 		JsonObject? descObj = null;
 
@@ -54,7 +53,7 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			string enumName = enumNames[i];
 
 			long numericValue = Convert.ToInt64(enumValue);
-			valueArray.Add(JsonValue.Create(numericValue)!);
+			enumJsonValues.Add(JsonValue.Create(numericValue)!);
 			varNamesArray.Add(JsonValue.Create(enumName)!);
 
 			FieldInfo? field = enumType.GetField(enumName);
@@ -69,13 +68,15 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 			}
 		}
 
+		// Set the actual OpenAPI enum property (not an extension)
+		schema.Enum = enumJsonValues;
+
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-		schema.Extensions["enum"] = new JsonNodeExtension(valueArray);
-		schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(varNamesArray);
+		schema.Extensions[SchemaConstants.EnumVarNamesExtension] = new JsonNodeExtension(varNamesArray);
 
 		if (descObj is not null)
 		{
-			schema.Extensions["x-enum-descriptions"] = new JsonNodeExtension(descObj);
+			schema.Extensions[SchemaConstants.EnumDescriptionsExtension] = new JsonNodeExtension(descObj);
 		}
 
 		if (string.IsNullOrWhiteSpace(schema.Description))
