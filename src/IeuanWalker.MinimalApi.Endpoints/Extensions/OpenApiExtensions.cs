@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 using IeuanWalker.MinimalApi.Endpoints.Validation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +8,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
+
+// Alias to avoid ambiguity with old namespace
+using RPE = IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
@@ -30,28 +34,28 @@ public static class OpenApiExtensions
 	public static OpenApiOptions EnhanceRequestProperties(this OpenApiOptions options, bool autoDocumentFluentValidation = true, bool appendRulesToPropertyDescription = true)
 	{
 		// Add type transformer first to ensure all property types are correctly documented
-		options.AddDocumentTransformer<TypeDocumentTransformer>();
+		options.AddDocumentTransformer<RPE.TypeDocumentTransformer>();
 
 		// Add enum transformer second so enum schemas are enriched before validation processing
-		options.AddDocumentTransformer<EnumSchemaTransformer>();
+		options.AddDocumentTransformer<RPE.EnumSchemaTransformer>();
 
 		// Add unified validation transformer that handles both FluentValidation and WithValidation
 		options.AddDocumentTransformer((document, context, ct) =>
 		{
-			ValidationDocumentTransformer transformer = new()
+			RPE.ValidationDocumentTransformer transformer = new()
 			{
-				AutoDocumentFluentValdation = autoDocumentFluentValidation,
+				AutoDocumentFluentValidation = autoDocumentFluentValidation,
 				AppendRulesToPropertyDescription = appendRulesToPropertyDescription
 			};
 			return transformer.TransformAsync(document, context, ct);
 		});
 
 		// Reorder so nullable is last
-		options.AddDocumentTransformer<NullableSchemaReorderTransformer>();
+		options.AddDocumentTransformer<RPE.NullableSchemaReorderTransformer>();
 
 		// Add cleanup transformer as the absolute final step to remove unused component schemas
 		// This removes schemas that are no longer referenced after aggressive inlining and unwrapping
-		options.AddDocumentTransformer<UnusedComponentsCleanupTransformer>();
+		options.AddDocumentTransformer<RPE.UnusedComponentsCleanupTransformer>();
 
 		return options;
 	}

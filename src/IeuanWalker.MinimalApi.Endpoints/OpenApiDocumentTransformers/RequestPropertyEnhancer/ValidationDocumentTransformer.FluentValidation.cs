@@ -1,33 +1,32 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FluentValidation;
 using FluentValidation.Internal;
 using FluentValidation.Validators;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
+using IeuanWalker.MinimalApi.Endpoints.Validation;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
 partial class ValidationDocumentTransformer
 {
-	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
+	static void DiscoverFluentValidationRules(OpenApiDocumentTransformerContext context, Dictionary<Type, (List<ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
-		// FluentValidation validators are registered as IValidator<T>, not IValidator
-		// We need to scan assemblies to find all types that implement IValidator<T>
 		List<IValidator> validators = [];
 		HashSet<Type> discoveredValidatorTypes = [];
 
-		// Get logger from DI if available
 		ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
 
 		foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
 		{
-			if (!ShouldInspectAssembly(assembly))
+			if (!SchemaTypeResolver.ShouldInspectAssembly(assembly))
 			{
 				continue;
 			}
 
-			foreach (Type type in GetLoadableTypes(assembly))
+			foreach (Type type in SchemaTypeResolver.GetLoadableTypes(assembly))
 			{
 				if (!discoveredValidatorTypes.Add(type))
 				{
@@ -39,8 +38,7 @@ partial class ValidationDocumentTransformer
 					continue;
 				}
 
-				// Try to get this validator from DI
-				object? validatorInstance = context.ApplicationServices.GetService(validatorInterface);
+				object? validatorInstance = context.ApplicationServices.GetService(validatorInterface!);
 				if (validatorInstance is IValidator validator)
 				{
 					validators.Add(validator);
@@ -50,7 +48,6 @@ partial class ValidationDocumentTransformer
 
 		foreach (IValidator validator in validators)
 		{
-			// Find the validated type (T in IValidator<T>)
 			Type? validatedType = validator
 				.GetType()
 				.GetInterfaces()
@@ -63,15 +60,14 @@ partial class ValidationDocumentTransformer
 				continue;
 			}
 
-			// Extract validation rules from the validator
-			List<Validation.ValidationRule> rules = ExtractFluentValidationRules(validator, logger);
+			List<ValidationRule> rules = ExtractFluentValidationRules(validator, logger);
 
 			if (rules.Count <= 0)
 			{
 				continue;
 			}
 
-			if (!allValidationRules.TryGetValue(validatedType, out (List<Validation.ValidationRule> rules, bool appendRulesToPropertyDescription) value))
+			if (!allValidationRules.TryGetValue(validatedType, out (List<ValidationRule> rules, bool appendRulesToPropertyDescription) value))
 			{
 				value.rules = [];
 				value.appendRulesToPropertyDescription = true;
@@ -81,43 +77,6 @@ partial class ValidationDocumentTransformer
 			value.rules.AddRange(rules);
 			allValidationRules[validatedType] = value;
 		}
-	}
-
-	static bool ShouldInspectAssembly(Assembly assembly)
-	{
-		if (assembly.IsDynamic)
-		{
-			return false;
-		}
-
-		string? fullName = assembly.FullName;
-
-		if (string.IsNullOrEmpty(fullName))
-		{
-			return false;
-		}
-
-		return !(fullName.StartsWith("System.", StringComparison.Ordinal) ||
-			fullName.StartsWith("Microsoft.", StringComparison.Ordinal) ||
-			fullName.StartsWith("netstandard", StringComparison.Ordinal));
-	}
-
-	static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
-	{
-		try
-		{
-			return assembly.GetTypes();
-		}
-		catch (ReflectionTypeLoadException ex) when (ex.Types is not null)
-		{
-			return ex.Types.Where(type => type is not null).Cast<Type>();
-		}
-#pragma warning disable CA1031 // Do not catch general exception types
-		catch
-		{
-			return Array.Empty<Type>();
-		}
-#pragma warning restore CA1031 // Do not catch general exception types
 	}
 
 	static bool TryGetValidatorInterface(Type type, out Type? validatorInterface)
@@ -139,25 +98,22 @@ partial class ValidationDocumentTransformer
 	static bool IsValidatorInterface(Type @interface) =>
 		@interface.IsGenericType && @interface.GetGenericTypeDefinition() == typeof(IValidator<>);
 
-	static List<Validation.ValidationRule> ExtractFluentValidationRules(IValidator validator, ILogger logger)
+	static List<ValidationRule> ExtractFluentValidationRules(IValidator validator, ILogger logger)
 	{
-		List<Validation.ValidationRule> rules = [];
+		List<ValidationRule> rules = [];
 
-		// Get the validator descriptor which contains all rules
 		IValidatorDescriptor descriptor = validator.CreateDescriptor();
 
 		foreach (IGrouping<string, (IPropertyValidator Validator, IRuleComponent Options)> memberValidators in descriptor.GetMembersWithValidators())
 		{
 			string propertyName = memberValidators.Key;
 
-			// Each member returns a collection of (IPropertyValidator Validator, IRuleComponent Options) tuples
 			foreach ((IPropertyValidator Validator, IRuleComponent Options) validatorTuple in memberValidators)
 			{
 				IPropertyValidator propertyValidator = validatorTuple.Validator;
 				IRuleComponent ruleComponent = validatorTuple.Options;
 
-				// Convert FluentValidation validators to our ValidationRule format
-				Validation.ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent, logger);
+				ValidationRule? rule = ConvertToValidationRule(propertyName, propertyValidator, ruleComponent, logger);
 				if (rule is not null)
 				{
 					rules.Add(rule);
@@ -168,11 +124,8 @@ partial class ValidationDocumentTransformer
 		return rules;
 	}
 
-	static Validation.ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent, ILogger logger)
+	static ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent, ILogger logger)
 	{
-		// Skip ChildValidatorAdaptor (SetValidator) - nested object validators
-		// These cannot be represented in OpenAPI schema constraints
-		// The nested object's properties will have their own validators that will be processed separately
 		// TODO: Use type rather than string
 		string validatorTypeName = propertyValidator.GetType().Name;
 		if (validatorTypeName.Contains(nameof(ChildValidatorAdaptor<,>)) || validatorTypeName.Contains("SetValidator"))
@@ -180,13 +133,12 @@ partial class ValidationDocumentTransformer
 			return null;
 		}
 
-		// Map FluentValidation validators to our internal ValidationRule types
-		Validation.ValidationRule? rule = propertyValidator switch
+		ValidationRule? rule = propertyValidator switch
 		{
-			INotNullValidator or INotEmptyValidator => new Validation.RequiredRule(propertyName),
+			INotNullValidator or INotEmptyValidator => new RequiredRule(propertyName),
 			ILengthValidator lengthValidator => CreateStringLengthRule(propertyName, lengthValidator),
 			IRegularExpressionValidator regexValidator => CreatePatternRule(propertyName, regexValidator),
-			IEmailValidator => new Validation.EmailRule(propertyName),
+			IEmailValidator => new EmailRule(propertyName),
 			IComparisonValidator comparisonValidator => CreateComparisonRule(propertyName, comparisonValidator),
 			IBetweenValidator betweenValidator => CreateBetweenRule(propertyName, betweenValidator),
 			_ => null
@@ -197,23 +149,18 @@ partial class ValidationDocumentTransformer
 			return rule;
 		}
 
-		// Check if this is an enum validator (IsEnumName for string, IsInEnum for int/enum)
 		(Type? enumType, Type? propertyType) = ExtractEnumAndPropertyTypes(propertyValidator);
 		if (enumType is not null && propertyType is not null)
 		{
 			string enumErrorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, logger);
-			return new Validation.EnumRule(propertyName, enumType, propertyType, enumErrorMessage);
+			return new EnumRule(propertyName, enumType, propertyType, enumErrorMessage);
 		}
 
-		// If we couldn't map to a specific rule type, create a CustomRule with the error message
 		string customErrorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, propertyName, logger);
 		if (!string.IsNullOrEmpty(customErrorMessage))
 		{
-			// Create a CustomRule<object> to hold the unsupported validator's error message
-			rule = new Validation.CustomRule<object>(propertyName, customErrorMessage);
-
+			rule = new CustomRule<object>(propertyName, customErrorMessage);
 			rule.ErrorMessage = rule.ErrorMessage.Replace($"'{propertyName}' m", "M");
-
 			return rule;
 		}
 
@@ -224,8 +171,6 @@ partial class ValidationDocumentTransformer
 	{
 		try
 		{
-			// Strategy 1: Try GetUnformattedErrorMessage() method on RuleComponent
-			// This is the most reliable way to get the custom message set via .WithMessage()
 			MethodInfo? getUnformattedMethod = ruleComponent.GetType().GetMethod(nameof(IRuleComponent.GetUnformattedErrorMessage), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 			if (getUnformattedMethod is not null)
 			{
@@ -234,7 +179,6 @@ partial class ValidationDocumentTransformer
 					object? result = getUnformattedMethod.Invoke(ruleComponent, null);
 					if (result is string message && !string.IsNullOrEmpty(message))
 					{
-						// Replace placeholders with actual values from the validator
 						if (message.Equals("The specified condition was not met for '{PropertyName}'.") && logger.IsEnabled(LogLevel.Warning))
 						{
 #pragma warning disable CA1873 // Avoid potentially expensive logging
@@ -250,34 +194,27 @@ partial class ValidationDocumentTransformer
 						return ReplacePlaceholders(message, propertyName, propertyValidator);
 					}
 				}
-#pragma warning disable CA1031 // Do not catch general exception types
-				catch
-				{
-					// Fall through to next strategy
-				}
-#pragma warning restore CA1031 // Do not catch general exception types
+#pragma warning disable CA1031
+				catch { }
+#pragma warning restore CA1031
 			}
 
-			// Strategy 2: Try to get the error message template from the rule component's ErrorMessageSource
 			PropertyInfo? errorMessageProp = ruleComponent.GetType().GetProperty("ErrorMessageSource");
 			if (errorMessageProp is not null)
 			{
 				object? errorMessageSource = errorMessageProp.GetValue(ruleComponent);
 				if (errorMessageSource is not null)
 				{
-					// Try to get the Message property directly (StaticStringSource)
 					PropertyInfo? messageProp = errorMessageSource.GetType().GetProperty("Message", BindingFlags.Public | BindingFlags.Instance);
 					if (messageProp is not null)
 					{
 						string? message = messageProp.GetValue(errorMessageSource) as string;
 						if (!string.IsNullOrEmpty(message))
 						{
-							// Replace placeholders with actual values
 							return ReplacePlaceholders(message, propertyName, propertyValidator);
 						}
 					}
 
-					// Try private message field
 					FieldInfo? messageField = errorMessageSource.GetType().GetField("message", BindingFlags.NonPublic | BindingFlags.Instance);
 					if (messageField is not null)
 					{
@@ -290,21 +227,17 @@ partial class ValidationDocumentTransformer
 				}
 			}
 
-			// Fallback: try to construct a basic message from the validator type
 			string validatorTypeName = propertyValidator.GetType().Name;
-			// Remove "Validator" suffix if present
 			if (validatorTypeName.EndsWith("Validator"))
 			{
 				validatorTypeName = validatorTypeName[..^9];
 			}
-			// Remove generic type parameters like `2
 			int backtickIndex = validatorTypeName.IndexOf('`');
 			if (backtickIndex > 0)
 			{
 				validatorTypeName = validatorTypeName[..backtickIndex];
 			}
 
-			// Log a warning when we have to fall back to a generic message
 #pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
 #pragma warning restore CA1873 // Avoid potentially expensive logging
@@ -313,43 +246,32 @@ partial class ValidationDocumentTransformer
 		}
 #pragma warning disable CA1031 // Do not catch general exception types
 		catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
 		{
-			// Log the exception and fall back to a generic message
 #pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogExceptionWhileObtainingValidatorErrorMessage(logger, propertyName, propertyValidator.GetType().FullName ?? string.Empty, ex);
 #pragma warning restore CA1873 // Avoid potentially expensive logging
-
-			// If all else fails, return a generic message
 			return $"{propertyName} custom validation";
 		}
-#pragma warning restore CA1031 // Do not catch general exception types
 	}
 
 	static string ReplacePlaceholders(string message, string propertyName, IPropertyValidator propertyValidator)
 	{
-		// Replace common placeholders
 		message = message
 			.Replace("{PropertyName}", propertyName)
 			.Replace("{PropertyValue}", "{value}");
 
-		// Extract and replace validator-specific placeholders
 		try
 		{
-			// For ComparisonValidator (Equal, NotEqual, GreaterThan, LessThan, etc.)
-			// Use direct property access from the interface (no reflection needed)
 			if (propertyValidator is IComparisonValidator comparisonValidator)
 			{
-				// Check for MemberToCompare first (property comparisons like x => x.MaxValue)
 				MemberInfo? memberValue = comparisonValidator.MemberToCompare;
-
 				if (memberValue is not null)
 				{
-					// For property comparisons, replace {ComparisonValue} with the property name
 					message = message.Replace("{ComparisonValue}", memberValue.Name);
 				}
 				else
 				{
-					// For constant value comparisons, use ValueToCompare
 					object? value = comparisonValidator.ValueToCompare;
 					if (value is not null)
 					{
@@ -358,37 +280,32 @@ partial class ValidationDocumentTransformer
 				}
 			}
 
-			// For BetweenValidator - use direct property access (no reflection needed)
 			if (propertyValidator is IBetweenValidator betweenValidator)
 			{
-				object? from = betweenValidator.From;
-				object? to = betweenValidator.To;
-
-				if (from is not null)
+				if (betweenValidator.From is not null)
 				{
-					message = message.Replace("{From}", from.ToString());
+					message = message.Replace("{From}", betweenValidator.From.ToString());
 				}
-				if (to is not null)
+				if (betweenValidator.To is not null)
 				{
-					message = message.Replace("{To}", to.ToString());
+					message = message.Replace("{To}", betweenValidator.To.ToString());
 				}
 			}
 
-			// For LengthValidator - use direct property access (no reflection needed)
 			if (propertyValidator is ILengthValidator lengthValidator)
 			{
-				int min = lengthValidator.Min;
-				int max = lengthValidator.Max;
-
 				message = message
-					.Replace("{MinLength}", min.ToString())
-					.Replace("{min}", min.ToString());
-				message = message
-					.Replace("{MaxLength}", max.ToString())
-					.Replace("{max}", max.ToString());
+					.Replace("{MinLength}", lengthValidator.Min.ToString())
+					.Replace("{min}", lengthValidator.Min.ToString())
+					.Replace("{MaxLength}", lengthValidator.Max.ToString())
+					.Replace("{max}", lengthValidator.Max.ToString());
 			}
 
-			// For PrecisionScale/ScalePrecision Validator
+			if (propertyValidator is IRegularExpressionValidator regexValidator && regexValidator.Expression is not null)
+			{
+				message = message.Replace("{RegularExpression}", regexValidator.Expression);
+			}
+
 			Type validatorType = propertyValidator.GetType();
 			if (validatorType.Name.Contains("PrecisionScale") || validatorType.Name.Contains("ScalePrecision"))
 			{
@@ -416,97 +333,19 @@ partial class ValidationDocumentTransformer
 					.Replace("{Digits}", "X")
 					.Replace("{ActualScale}", "Y");
 			}
-
-			// For regex/pattern validators - use direct property access (no reflection needed)
-			if (propertyValidator is IRegularExpressionValidator regexValidator)
-			{
-				string? expression = regexValidator.Expression;
-				if (expression is not null)
-				{
-					message = message.Replace("{RegularExpression}", expression);
-				}
-			}
-
-			// For enum validators - clean up quotes around property names
-			if (validatorType.Name.Contains("EnumValidator") || validatorType.Name.Contains("IsEnum"))
-			{
-				// Remove single quotes around property name at the beginning of the message
-				int secondQuoteIndex = message.IndexOf('\'', 1);
-				if (message.StartsWith('\'') && message.Contains('\'', StringComparison.Ordinal) && secondQuoteIndex > 0)
-				{
-					message = string.Concat(message.AsSpan(1, secondQuoteIndex - 1), message.AsSpan(secondQuoteIndex + 1));
-				}
-			}
 		}
-#pragma warning disable CA1031 // Do not catch general exception types - we want to fallback gracefully for any reflection errors
-		catch
-		{
-			// If any reflection fails, just return the message as-is with basic replacements
-		}
+#pragma warning disable CA1031
+		catch { }
 #pragma warning restore CA1031
 
 		return message;
 	}
 
-	static object? TryGetPropertyOrFieldValue(object obj, params string[] names)
+	static StringLengthRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
 	{
-		Type type = obj.GetType();
-
-		// Try properties first (public and non-public)
-		foreach (string name in names)
-		{
-			PropertyInfo? prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-			if (prop is null)
-			{
-				continue;
-			}
-
-			try
-			{
-				return prop.GetValue(obj);
-			}
-#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
-			catch
-			{
-				// Continue to next property name
-			}
-#pragma warning restore CA1031
-		}
-
-		// Try fields (public and non-public)
-		foreach (string name in names)
-		{
-			FieldInfo? field = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
-			if (field is null)
-			{
-				continue;
-			}
-
-			try
-			{
-				return field.GetValue(obj);
-			}
-#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
-			catch
-			{
-				// Continue to next field name
-			}
-#pragma warning restore CA1031
-		}
-
-		return null;
-	}
-
-	static Validation.StringLengthRule? CreateStringLengthRule(string propertyName, ILengthValidator lengthValidator)
-	{
-		// Access Min and Max directly from the interface (no reflection needed)
-		// Note: FluentValidation uses -1 to indicate no limit
 		int min = lengthValidator.Min;
 		int max = lengthValidator.Max;
 
-		// Check if both bounds are effectively not set (0 for min means no minimum, -1 for max means no maximum)
 		bool hasMinLength = min > 0;
 		bool hasMaxLength = max is > 0 and not int.MaxValue;
 
@@ -515,45 +354,28 @@ partial class ValidationDocumentTransformer
 			return null;
 		}
 
-		return new Validation.StringLengthRule(propertyName, minLength: hasMinLength ? min : null, maxLength: hasMaxLength ? max : null);
+		return new StringLengthRule(propertyName, minLength: hasMinLength ? min : null, maxLength: hasMaxLength ? max : null);
 	}
 
-	static Validation.PatternRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)
+	static PatternRule? CreatePatternRule(string propertyName, IRegularExpressionValidator regexValidator)
 	{
-		// Access Expression directly from the interface (no reflection needed)
 		string? pattern = regexValidator.Expression;
-
-		if (string.IsNullOrEmpty(pattern))
-		{
-			return null;
-		}
-
-		return new Validation.PatternRule(propertyName, pattern);
+		return string.IsNullOrEmpty(pattern) ? null : new PatternRule(propertyName, pattern);
 	}
 
-	static Validation.ValidationRule? CreateComparisonRule(string propertyName, IComparisonValidator comparisonValidator)
+	static ValidationRule? CreateComparisonRule(string propertyName, IComparisonValidator comparisonValidator)
 	{
-		// Access properties directly from the interface (no reflection needed)
 		object? value = comparisonValidator.ValueToCompare;
 		MemberInfo? memberToCompare = comparisonValidator.MemberToCompare;
 		Comparison comparison = comparisonValidator.Comparison;
 
-		// If MemberToCompare is set (property comparison), we cannot create a RangeRule
-		// because we don't have a compile-time constant value. Return null to let the
-		// error message be handled as a custom rule with proper property name substitution.
-		if (memberToCompare is not null)
-		{
-			return null;
-		}
-
-		if (value is null)
+		if (memberToCompare is not null || value is null)
 		{
 			return null;
 		}
 
 		string comparisonName = comparison.ToString();
 
-		// Create appropriate range rule based on value type
 		return value switch
 		{
 			int intValue => CreateTypedRangeRule(propertyName, intValue, comparisonName),
@@ -565,21 +387,20 @@ partial class ValidationDocumentTransformer
 		};
 	}
 
-	static Validation.RangeRule<T>? CreateTypedRangeRule<T>(string propertyName, T value, string comparisonName) where T : struct, IComparable<T>
+	static RangeRule<T>? CreateTypedRangeRule<T>(string propertyName, T value, string comparisonName) where T : struct, IComparable<T>
 	{
 		return comparisonName switch
 		{
-			"GreaterThan" => new Validation.RangeRule<T>(propertyName, minimum: value, exclusiveMinimum: true),
-			"GreaterThanOrEqual" => new Validation.RangeRule<T>(propertyName, minimum: value, exclusiveMinimum: false),
-			"LessThan" => new Validation.RangeRule<T>(propertyName, maximum: value, exclusiveMaximum: true),
-			"LessThanOrEqual" => new Validation.RangeRule<T>(propertyName, maximum: value, exclusiveMaximum: false),
+			"GreaterThan" => new RangeRule<T>(propertyName, minimum: value, exclusiveMinimum: true),
+			"GreaterThanOrEqual" => new RangeRule<T>(propertyName, minimum: value, exclusiveMinimum: false),
+			"LessThan" => new RangeRule<T>(propertyName, maximum: value, exclusiveMaximum: true),
+			"LessThanOrEqual" => new RangeRule<T>(propertyName, maximum: value, exclusiveMaximum: false),
 			_ => null
 		};
 	}
 
-	static Validation.ValidationRule? CreateBetweenRule(string propertyName, IBetweenValidator betweenValidator)
+	static ValidationRule? CreateBetweenRule(string propertyName, IBetweenValidator betweenValidator)
 	{
-		// Access From and To directly from the interface (no reflection needed)
 		object? from = betweenValidator.From;
 		object? to = betweenValidator.To;
 
@@ -588,14 +409,13 @@ partial class ValidationDocumentTransformer
 			return null;
 		}
 
-		// Create appropriate range rule based on value type
 		return from switch
 		{
-			int intFrom when to is int intTo => new Validation.RangeRule<int>(propertyName, minimum: intFrom, maximum: intTo),
-			long longFrom when to is long longTo => new Validation.RangeRule<long>(propertyName, minimum: longFrom, maximum: longTo),
-			decimal decimalFrom when to is decimal decimalTo => new Validation.RangeRule<decimal>(propertyName, minimum: decimalFrom, maximum: decimalTo),
-			double doubleFrom when to is double doubleTo => new Validation.RangeRule<double>(propertyName, minimum: doubleFrom, maximum: doubleTo),
-			float floatFrom when to is float floatTo => new Validation.RangeRule<float>(propertyName, minimum: floatFrom, maximum: floatTo),
+			int intFrom when to is int intTo => new RangeRule<int>(propertyName, minimum: intFrom, maximum: intTo),
+			long longFrom when to is long longTo => new RangeRule<long>(propertyName, minimum: longFrom, maximum: longTo),
+			decimal decimalFrom when to is decimal decimalTo => new RangeRule<decimal>(propertyName, minimum: decimalFrom, maximum: decimalTo),
+			double doubleFrom when to is double doubleTo => new RangeRule<double>(propertyName, minimum: doubleFrom, maximum: doubleTo),
+			float floatFrom when to is float floatTo => new RangeRule<float>(propertyName, minimum: floatFrom, maximum: floatTo),
 			_ => null
 		};
 	}
@@ -609,64 +429,34 @@ partial class ValidationDocumentTransformer
 	[LoggerMessage(Level = LogLevel.Warning, Message = "Vague error message given to property {PropertyName} from the object {ValidatorType}. Consider using .WithMessage().")]
 	static partial void LogVagueErrorMessageFluentValidation(ILogger logger, string validatorType, string propertyName);
 
-	/// <summary>
-	/// Extracts both the enum type and the property type from a FluentValidation validator
-	/// Returns (enumType, propertyType) where:
-	/// - enumType is the enum type being validated against
-	/// - propertyType is the actual property type (string for IsEnumName, int for IsInEnum, TEnum for IsInEnum on enum)
-	/// </summary>
 	static (Type? enumType, Type? propertyType) ExtractEnumAndPropertyTypes(IPropertyValidator propertyValidator)
 	{
 		Type validatorType = propertyValidator.GetType();
+		string validatorTypeName = validatorType.Name;
 
-		// For built-in FluentValidation EnumValidator (used with .IsInEnum() on enum properties)
-		// This validator is used when calling .IsInEnum() on TEnum or TEnum? properties
-		if (validatorType.Name.Contains("EnumValidator"))
+		// Handle StringEnumValidator (used by .IsEnumName())
+		if (validatorTypeName.Contains("StringEnumValidator") && validatorType.IsGenericType)
 		{
-			// Try to get the enum type from the generic type argument
-			// EnumValidator<TModel, TProperty> where TProperty is the enum type or Nullable<TEnum>
-			if (validatorType.IsGenericType)
+			Type[] genericArgs = validatorType.GetGenericArguments();
+			// StringEnumValidator<T, TEnum> - TEnum is the enum type
+			foreach (Type arg in genericArgs)
 			{
-				Type[] genericArgs = validatorType.GetGenericArguments();
-				// EnumValidator has 2 generic arguments: TModel and TProperty
-				// We need the second one (TProperty)
-				if (genericArgs.Length >= 2)
+				if (arg.IsEnum)
 				{
-					Type propertyType = genericArgs[1];
-
-					// Check if it's directly an enum
-					if (propertyType.IsEnum)
-					{
-						return (propertyType, propertyType);
-					}
-
-					// Check if it's a nullable enum (Nullable<TEnum>)
-					if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-					{
-						Type? underlyingType = Nullable.GetUnderlyingType(propertyType);
-						if (underlyingType is not null && underlyingType.IsEnum)
-						{
-							return (underlyingType, propertyType);  // Return enum type and nullable property type
-						}
-					}
+					return (arg, typeof(string));
 				}
 			}
 
-			// Fallback: Try to infer from _enumType field
-			FieldInfo? enumTypeField = validatorType.GetField("_enumType", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-			if (enumTypeField is not null)
+			// If not found in generic args, try the _enumType field (may be passed via constructor)
+			Type? enumTypeFromField = GetEnumTypeFromValidatorFields(propertyValidator, validatorType);
+			if (enumTypeFromField is not null)
 			{
-				Type? enumType = enumTypeField.GetValue(propertyValidator) as Type;
-				if (enumType is not null && enumType.IsEnum)
-				{
-					// Assume property type is the enum type for built-in EnumValidator
-					return (enumType, enumType);
-				}
+				return (enumTypeFromField, typeof(string));
 			}
 		}
 
 		// For IsEnumName validators (StringEnumValidator) - property type is string
-		FieldInfo? enumNamesField = validatorType.GetField("_enumNames", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		FieldInfo? enumNamesField = validatorType.GetField("_enumNames", BindingFlags.NonPublic | BindingFlags.Instance);
 		if (enumNamesField is not null)
 		{
 			string[]? enumNames = enumNamesField.GetValue(propertyValidator) as string[];
@@ -685,13 +475,13 @@ partial class ValidationDocumentTransformer
 		if (validatorType.Name.StartsWith("PredicateValidator"))
 		{
 			// First, try to extract from error message
-			PropertyInfo? errorMessageSource = validatorType.GetProperty("ErrorMessageSource", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+			PropertyInfo? errorMessageSource = validatorType.GetProperty("ErrorMessageSource", BindingFlags.Public | BindingFlags.Instance);
 			if (errorMessageSource is not null)
 			{
 				object? messageSource = errorMessageSource.GetValue(propertyValidator);
 				if (messageSource is not null)
 				{
-					PropertyInfo? messageProperty = messageSource.GetType().GetProperty("Message", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+					PropertyInfo? messageProperty = messageSource.GetType().GetProperty("Message", BindingFlags.Public | BindingFlags.Instance);
 					if (messageProperty is not null)
 					{
 						string? message = messageProperty.GetValue(messageSource) as string;
@@ -709,7 +499,7 @@ partial class ValidationDocumentTransformer
 			}
 
 			// Fallback: Try to extract from predicate closure
-			FieldInfo? predicateField = validatorType.GetField("_predicate", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+			FieldInfo? predicateField = validatorType.GetField("_predicate", BindingFlags.NonPublic | BindingFlags.Instance);
 			if (predicateField is not null)
 			{
 				object? predicate = predicateField.GetValue(propertyValidator);
@@ -888,7 +678,7 @@ partial class ValidationDocumentTransformer
 			return null;
 		}
 
-		FieldInfo[] fields = target.GetType().GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+		FieldInfo[] fields = target.GetType().GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
 		// Check if any field is directly an enum type
 		Type? directEnumType = fields
@@ -908,5 +698,140 @@ partial class ValidationDocumentTransformer
 			.Where(del => del.Target is not null)
 			.Select(del => FindEnumTypeInClosure(del.Target, maxDepth - 1))
 			.FirstOrDefault(found => found is not null);
+	}
+
+	static object? TryGetPropertyOrFieldValue(object obj, params string[] names)
+	{
+		Type type = obj.GetType();
+
+		// Try properties first (public and non-public)
+		foreach (string name in names)
+		{
+			PropertyInfo? prop = type.GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+			if (prop is null)
+			{
+				continue;
+			}
+
+			try
+			{
+				return prop.GetValue(obj);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
+			catch
+			{
+				// Continue to next property name
+			}
+#pragma warning restore CA1031
+		}
+
+		// Try fields (public and non-public)
+		foreach (string name in names)
+		{
+			FieldInfo? field = type.GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+			if (field is null)
+			{
+				continue;
+			}
+
+			try
+			{
+				return field.GetValue(obj);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types - we want to catch all reflection exceptions
+			catch
+			{
+				// Continue to next field name
+			}
+#pragma warning restore CA1031
+		}
+
+		return null;
+	}
+
+	static Type? GetEnumTypeFromValidatorFields(IPropertyValidator propertyValidator, Type validatorType)
+	{
+		// Try common field names used by FluentValidation validators
+		string[] fieldNames = ["_enumType", "_type", "enumType", "EnumType", "EnumType", "_EnumType", "enumTypeInfo", "_enumTypeInfo"];
+		BindingFlags bindingFlags = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance;
+
+		foreach (string fieldName in fieldNames)
+		{
+			FieldInfo? field = validatorType.GetField(fieldName, bindingFlags);
+			if (field is not null)
+			{
+				object? fieldValue = field.GetValue(propertyValidator);
+
+				// Check if the field value is directly a Type
+				if (fieldValue is Type enumType && enumType.IsEnum)
+				{
+					return enumType;
+				}
+
+				// Check if the field value has a Type property (e.g., TypeInfo)
+				if (fieldValue is not null)
+				{
+					Type fieldValueType = fieldValue.GetType();
+					PropertyInfo? typeProperty = fieldValueType.GetProperty("Type", BindingFlags.Public | BindingFlags.Instance);
+					if (typeProperty is not null)
+					{
+						Type? extractedType = typeProperty.GetValue(fieldValue) as Type;
+						if (extractedType?.IsEnum is true)
+						{
+							return extractedType;
+						}
+					}
+
+					// Check if field value has AsType() method (for TypeInfo)
+					MethodInfo? asTypeMethod = fieldValueType.GetMethod("AsType", BindingFlags.Public | BindingFlags.Instance);
+					if (asTypeMethod is not null)
+					{
+						Type? extractedType = asTypeMethod.Invoke(fieldValue, null) as Type;
+						if (extractedType?.IsEnum is true)
+						{
+							return extractedType;
+						}
+					}
+				}
+			}
+		}
+
+		// Also try properties
+		string[] propNames = ["EnumType", "Type"];
+		foreach (string propName in propNames)
+		{
+			PropertyInfo? prop = validatorType.GetProperty(propName, bindingFlags);
+			if (prop is not null && prop.CanRead)
+			{
+				Type? enumType = prop.GetValue(propertyValidator) as Type;
+				if (enumType?.IsEnum is true)
+				{
+					return enumType;
+				}
+			}
+		}
+
+		// Walk up the type hierarchy to find the field in base classes
+		Type? currentType = validatorType.BaseType;
+		while (currentType is not null && currentType != typeof(object))
+		{
+			foreach (string fieldName in fieldNames)
+			{
+				FieldInfo? field = currentType.GetField(fieldName, bindingFlags | BindingFlags.DeclaredOnly);
+				if (field is not null)
+				{
+					Type? enumType = field.GetValue(propertyValidator) as Type;
+					if (enumType?.IsEnum is true)
+					{
+						return enumType;
+					}
+				}
+			}
+			currentType = currentType.BaseType;
+		}
+
+		return null;
 	}
 }

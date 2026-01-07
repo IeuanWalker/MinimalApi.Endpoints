@@ -1,7 +1,8 @@
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
-namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
 /// <summary>
 /// OpenAPI document transformer that removes unused component schemas from the OpenAPI document.
@@ -219,7 +220,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
-		if (schema is not OpenApiSchema openApiSchema)
+		if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) || openApiSchema is null)
 		{
 			return;
 		}

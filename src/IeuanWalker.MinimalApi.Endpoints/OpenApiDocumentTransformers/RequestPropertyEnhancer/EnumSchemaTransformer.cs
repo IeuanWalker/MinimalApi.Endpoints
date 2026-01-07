@@ -1,15 +1,14 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Nodes;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
-namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
 /// <summary>
 /// Transforms OpenAPI document by enriching enum schemas with value information and member names.
-/// This transformer adds the 'enum' array with valid values and 'x-enum-varnames' extension with member names
-/// to provide better API documentation for enums.
 /// </summary>
 sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 {
@@ -70,12 +69,12 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 		}
 
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-		schema.Extensions["enum"] = new JsonNodeExtension(valueArray);
-		schema.Extensions["x-enum-varnames"] = new JsonNodeExtension(varNamesArray);
+		schema.Extensions[SchemaConstants.EnumExtension] = new JsonNodeExtension(valueArray);
+		schema.Extensions[SchemaConstants.EnumVarNamesExtension] = new JsonNodeExtension(varNamesArray);
 
 		if (descObj is not null)
 		{
-			schema.Extensions["x-enum-descriptions"] = new JsonNodeExtension(descObj);
+			schema.Extensions[SchemaConstants.EnumDescriptionsExtension] = new JsonNodeExtension(descObj);
 		}
 
 		if (string.IsNullOrWhiteSpace(schema.Description))
