@@ -35,8 +35,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 5: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
-		// Step 6: Inline IFormFile and IFormFileCollection references in request bodies
-		InlineFileTypeReferencesInRequestBodies(document);
+		// Step 6: Inline primitive type references (System.String, System.String[], etc.) and IFormFile types
+		InlinePrimitiveAndFileTypeReferences(document);
 
 		// Step 7: Ensure unwrapped enum schemas exist (before reordering)
 		EnsureUnwrappedEnumSchemasExist(document);
@@ -474,10 +474,19 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 		if (refId.EndsWith(SchemaConstants.ArraySuffix))
 		{
-			inlineSchema.Type = JsonSchemaType.Array;
-			string elementRefId = refId[..^2];
-			OpenApiSchemaReference elementRef = new(elementRefId, null, null);
-			inlineSchema.Items = InlinePrimitiveTypeReferenceForParameter(elementRef);
+			// Ensure we have enough characters to remove the suffix
+			if (refId.Length > SchemaConstants.ArraySuffix.Length)
+			{
+				inlineSchema.Type = JsonSchemaType.Array;
+				string elementRefId = refId[..^SchemaConstants.ArraySuffix.Length];
+				OpenApiSchemaReference elementRef = new(elementRefId, null, null);
+				inlineSchema.Items = InlinePrimitiveTypeReferenceForParameter(elementRef);
+			}
+			else
+			{
+				// Fallback: if the string is too short, return as-is
+				return new OpenApiSchema { Type = JsonSchemaType.Array };
+			}
 		}
 		else if (refId.Contains(SchemaConstants.SystemString))
 		{
@@ -541,10 +550,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			inlineSchema.Type = JsonSchemaType.String;
 			inlineSchema.Format = SchemaConstants.FormatUri;
 		}
-		else
-		{
-			return schemaRef;
-		}
 
 		return inlineSchema;
 	}
@@ -591,42 +596,47 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static void InlineFileTypeReferencesInRequestBodies(OpenApiDocument document)
+	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)
 	{
-		if (document.Paths is null)
+		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
+
+		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
 		{
-			return;
+			return mapping;
 		}
 
-		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
+		foreach (Microsoft.AspNetCore.Http.Endpoint endpoint in endpointDataSource.Endpoints)
 		{
-			if (pathItem.Value is not OpenApiPathItem pathItemValue)
+			if (endpoint is not RouteEndpoint routeEndpoint)
 			{
 				continue;
 			}
 
-			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
+			string? routePattern = routeEndpoint.RoutePattern.RawText;
+			if (string.IsNullOrEmpty(routePattern))
 			{
-				if (operation.Value.RequestBody is null)
-				{
-					continue;
-				}
+				continue;
+			}
 
-				IOpenApiRequestBody requestBody = operation.Value.RequestBody;
-				if (requestBody is OpenApiRequestBody openApiRequestBody && openApiRequestBody.Content is not null)
-				{
-					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiRequestBody.Content)
-					{
-						if (contentItem.Value.Schema is null)
-						{
-							continue;
-						}
+			MethodInfo? handlerMethod = routeEndpoint.Metadata.OfType<MethodInfo>().FirstOrDefault();
+			if (handlerMethod is null)
+			{
+				continue;
+			}
 
-						contentItem.Value.Schema = InlineFileTypeReferences(contentItem.Value.Schema, document);
-					}
-				}
+			ParameterInfo[] parameters = handlerMethod.GetParameters();
+
+			Type? requestType = parameters
+				.Select(param => param.ParameterType)
+				.FirstOrDefault(paramType => !paramType.IsPrimitive && paramType != typeof(string) && paramType != typeof(CancellationToken));
+
+			if (requestType is not null && !mapping.ContainsKey(routePattern))
+			{
+				mapping[routePattern] = requestType;
 			}
 		}
+
+		return mapping;
 	}
 
 	static IOpenApiSchema InlineFileTypeReferences(IOpenApiSchema schema, OpenApiDocument document)
@@ -707,55 +717,74 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return openApiSchema;
 	}
 
-	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)
+	static void InlinePrimitiveAndFileTypeReferences(OpenApiDocument document)
 	{
-		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
-
-		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
+		if (document.Paths is null)
 		{
-			return mapping;
+			return;
 		}
 
-		HashSet<Type> requestTypes = [];
-		if (document.Components?.Schemas is not null)
+		// Process all request bodies and response bodies
+		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
 		{
-			requestTypes.UnionWith(
-				document.Components.Schemas.Keys
-					.Select(SchemaTypeResolver.GetSchemaType)
-					.OfType<Type>());
-		}
-
-		foreach (Microsoft.AspNetCore.Http.Endpoint endpoint in endpointDataSource.Endpoints)
-		{
-			if (endpoint is not RouteEndpoint routeEndpoint)
+			if (pathItem.Value is not OpenApiPathItem pathItemValue)
 			{
 				continue;
 			}
 
-			string? routePattern = routeEndpoint.RoutePattern.RawText;
-			if (string.IsNullOrEmpty(routePattern))
+			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
 			{
-				continue;
+				// Process request body - inline IFormFile types
+				if (operation.Value.RequestBody is OpenApiRequestBody openApiRequestBody && openApiRequestBody.Content is not null)
+				{
+					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiRequestBody.Content)
+					{
+						if (contentItem.Value.Schema is not null)
+						{
+							contentItem.Value.Schema = InlineFileTypeReferences(contentItem.Value.Schema, document);
+						}
+					}
+				}
+
+				// Process response bodies - inline simple System.String but not arrays
+				if (operation.Value.Responses is not null)
+				{
+					foreach (KeyValuePair<string, IOpenApiResponse> response in operation.Value.Responses)
+					{
+						if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
+						{
+							foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content)
+							{
+								if (contentItem.Value.Schema is not null)
+								{
+									contentItem.Value.Schema = InlineSimpleSystemTypes(contentItem.Value.Schema);
+								}
+							}
+						}
+					}
+				}
 			}
+		}
+	}
 
-			MethodInfo? handlerMethod = routeEndpoint.Metadata.OfType<MethodInfo>().FirstOrDefault();
-			if (handlerMethod is null)
+	static IOpenApiSchema InlineSimpleSystemTypes(IOpenApiSchema schema)
+	{
+		if (schema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId))
 			{
-				continue;
-			}
-
-			ParameterInfo[] parameters = handlerMethod.GetParameters();
-
-			Type? matchingParamType = parameters
-				.Select(param => param.ParameterType)
-				.FirstOrDefault(paramType => requestTypes.Contains(paramType));
-
-			if (matchingParamType is not null)
-			{
-				mapping[routePattern] = matchingParamType;
+				// Only inline simple System.String, not arrays or complex types
+				if (refId.Equals("System.String", StringComparison.Ordinal))
+				{
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.String
+					};
+				}
 			}
 		}
 
-		return mapping;
+		return schema;
 	}
 }

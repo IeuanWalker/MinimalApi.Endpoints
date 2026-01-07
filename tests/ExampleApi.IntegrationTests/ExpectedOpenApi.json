@@ -559,7 +559,7 @@
 						"content": {
 							"text/html": {
 								"schema": {
-									"$ref": "#/components/schemas/System.String"
+									"type": "string"
 								}
 							}
 						}
@@ -604,8 +604,15 @@
 						"name": "NullableIntValue",
 						"in": "query",
 						"schema": {
-							"type": "integer",
-							"format": "int32"
+							"oneOf": [
+								{
+									"type": "integer",
+									"format": "int32"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -621,8 +628,15 @@
 						"name": "NullableLongValue",
 						"in": "query",
 						"schema": {
-							"type": "integer",
-							"format": "int64"
+							"oneOf": [
+								{
+									"type": "integer",
+									"format": "int64"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -637,7 +651,14 @@
 						"name": "NullableDecimalValue",
 						"in": "query",
 						"schema": {
-							"type": "number"
+							"oneOf": [
+								{
+									"type": "number"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -653,8 +674,15 @@
 						"name": "NullableDoubleValue",
 						"in": "query",
 						"schema": {
-							"type": "number",
-							"format": "double"
+							"oneOf": [
+								{
+									"type": "number",
+									"format": "double"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -670,8 +698,15 @@
 						"name": "NullableFloatValue",
 						"in": "query",
 						"schema": {
-							"type": "number",
-							"format": "float"
+							"oneOf": [
+								{
+									"type": "number",
+									"format": "float"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -686,7 +721,14 @@
 						"name": "NullableBoolValue",
 						"in": "query",
 						"schema": {
-							"type": "boolean"
+							"oneOf": [
+								{
+									"type": "boolean"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -702,8 +744,15 @@
 						"name": "NullableDateTimeValue",
 						"in": "query",
 						"schema": {
-							"type": "string",
-							"format": "date-time"
+							"oneOf": [
+								{
+									"type": "string",
+									"format": "date-time"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -719,8 +768,15 @@
 						"name": "NullableDateOnlyValue",
 						"in": "query",
 						"schema": {
-							"type": "string",
-							"format": "date"
+							"oneOf": [
+								{
+									"type": "string",
+									"format": "date"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -736,8 +792,15 @@
 						"name": "NullableTimeOnlyValue",
 						"in": "query",
 						"schema": {
-							"type": "string",
-							"format": "time"
+							"oneOf": [
+								{
+									"type": "string",
+									"format": "time"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -753,8 +816,15 @@
 						"name": "NullableGuidValue",
 						"in": "query",
 						"schema": {
-							"type": "string",
-							"format": "uuid"
+							"oneOf": [
+								{
+									"type": "string",
+									"format": "uuid"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -938,11 +1008,17 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": 25,
-							"minimum": 10,
-							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25",
-							"format": "double"
+							"oneOf": [
+								{
+									"maximum": 25,
+									"minimum": 10,
+									"type": "number",
+									"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -1551,13 +1627,19 @@
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": 100,
-							"exclusiveMaximum": true,
-							"minimum": 0,
-							"exclusiveMinimum": true,
-							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found.",
-							"format": "double"
+							"oneOf": [
+								{
+									"maximum": 100,
+									"exclusiveMaximum": true,
+									"minimum": 0,
+									"exclusiveMinimum": true,
+									"type": "number",
+									"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -5888,9 +5970,6 @@
 				"items": {
 					"$ref": "#/components/schemas/ExampleApi.Endpoints.FileHandling.PostListOfFiles.ResponseModel"
 				}
-			},
-			"System.String": {
-				"type": "string"
 			},
 			"System.String[]": {
 				"type": "array",
