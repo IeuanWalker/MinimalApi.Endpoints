@@ -1,4 +1,4 @@
-namespace IeuanWalker.MinimalApi.Endpoints.Validation;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 
 /// <summary>
 /// Compiled validation configuration for a request type

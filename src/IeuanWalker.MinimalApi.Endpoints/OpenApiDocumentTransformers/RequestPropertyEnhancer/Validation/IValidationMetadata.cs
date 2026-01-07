@@ -1,4 +1,4 @@
-namespace IeuanWalker.MinimalApi.Endpoints.Validation;
+namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 
 /// <summary>
 /// Non-generic interface for validation metadata to enable access without reflection.

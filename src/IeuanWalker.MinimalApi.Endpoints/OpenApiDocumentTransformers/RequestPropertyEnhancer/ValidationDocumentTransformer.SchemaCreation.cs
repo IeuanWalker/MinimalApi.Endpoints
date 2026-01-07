@@ -2,9 +2,9 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
-using IeuanWalker.MinimalApi.Endpoints.Validation;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 using Microsoft.OpenApi;
-using ValidationRule = IeuanWalker.MinimalApi.Endpoints.Validation.ValidationRule;
+using ValidationRule = IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation.ValidationRule;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
@@ -426,7 +426,7 @@ partial class ValidationDocumentTransformer
 		}
 		if (endIdx < 0)
 		{
-			endIdx = refId.IndexOf(",", typeStart, StringComparison.Ordinal);
+			endIdx = refId.IndexOf(',', typeStart);
 		}
 		if (endIdx < 0)
 		{
@@ -435,7 +435,7 @@ partial class ValidationDocumentTransformer
 
 		if (endIdx > typeStart)
 		{
-			string elementType = refId.Substring(typeStart, endIdx - typeStart);
+			string elementType = refId[typeStart..endIdx];
 			OpenApiSchemaReference elementRef = new(elementType, document, null);
 			newSchema.Items = elementRef;
 			EnsureArrayType(newSchema);
@@ -453,7 +453,7 @@ partial class ValidationDocumentTransformer
 	static bool IsCustomRule(ValidationRule rule)
 	{
 		Type ruleType = rule.GetType();
-		return ruleType.IsGenericType && ruleType.GetGenericTypeDefinition() == typeof(IeuanWalker.MinimalApi.Endpoints.Validation.CustomRule<>);
+		return ruleType.IsGenericType && ruleType.GetGenericTypeDefinition() == typeof(CustomRule<>);
 	}
 
 	static void ApplyRuleToSchema(ValidationRule rule, OpenApiSchema schema)
@@ -486,23 +486,23 @@ partial class ValidationDocumentTransformer
 				schema.Format = SchemaConstants.FormatUri;
 				break;
 
-			case IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<int> intRangeRule:
+			case RangeRule<int> intRangeRule:
 				ApplyRangeRule(schema, intRangeRule);
 				break;
 
-			case IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<decimal> decimalRangeRule:
+			case RangeRule<decimal> decimalRangeRule:
 				ApplyRangeRule(schema, decimalRangeRule);
 				break;
 
-			case IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<double> doubleRangeRule:
+			case RangeRule<double> doubleRangeRule:
 				ApplyRangeRule(schema, doubleRangeRule);
 				break;
 
-			case IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<float> floatRangeRule:
+			case RangeRule<float> floatRangeRule:
 				ApplyRangeRule(schema, floatRangeRule);
 				break;
 
-			case IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<long> longRangeRule:
+			case RangeRule<long> longRangeRule:
 				ApplyRangeRule(schema, longRangeRule);
 				break;
 
@@ -512,7 +512,7 @@ partial class ValidationDocumentTransformer
 		}
 	}
 
-	static void ApplyRangeRule<T>(OpenApiSchema schema, IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<T> rangeRule) where T : struct, IComparable<T>
+	static void ApplyRangeRule<T>(OpenApiSchema schema, RangeRule<T> rangeRule) where T : struct, IComparable<T>
 	{
 		if (rangeRule.Minimum.HasValue)
 		{
@@ -545,8 +545,8 @@ partial class ValidationDocumentTransformer
 			StringLengthRule => null,
 			PatternRule or EmailRule or UrlRule => JsonSchemaType.String,
 			EnumRule enumRule => GetEnumRuleSchemaType(enumRule),
-			IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<int> or IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<long> => JsonSchemaType.Integer,
-			IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<decimal> or IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<double> or IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<float> => JsonSchemaType.Number,
+			RangeRule<int> or RangeRule<long> => JsonSchemaType.Integer,
+			RangeRule<decimal> or RangeRule<double> or RangeRule<float> => JsonSchemaType.Number,
 			_ => null
 		};
 	}
@@ -577,10 +577,10 @@ partial class ValidationDocumentTransformer
 		{
 			EmailRule => SchemaConstants.FormatEmail,
 			UrlRule => SchemaConstants.FormatUri,
-			IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<int> => SchemaConstants.FormatInt32,
-			IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<long> => SchemaConstants.FormatInt64,
-			IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<float> => SchemaConstants.FormatFloat,
-			IeuanWalker.MinimalApi.Endpoints.Validation.RangeRule<double> => SchemaConstants.FormatDouble,
+			RangeRule<int> => SchemaConstants.FormatInt32,
+			RangeRule<long> => SchemaConstants.FormatInt64,
+			RangeRule<float> => SchemaConstants.FormatFloat,
+			RangeRule<double> => SchemaConstants.FormatDouble,
 			_ => null
 		};
 	}

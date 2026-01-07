@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
-using IeuanWalker.MinimalApi.Endpoints.Validation;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

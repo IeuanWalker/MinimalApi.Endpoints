@@ -1,13 +1,13 @@
 using System.Reflection;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
-using IeuanWalker.MinimalApi.Endpoints.Validation;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.OpenApi;
-using ValidationRule = IeuanWalker.MinimalApi.Endpoints.Validation.ValidationRule;
+using ValidationRule = IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation.ValidationRule;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
