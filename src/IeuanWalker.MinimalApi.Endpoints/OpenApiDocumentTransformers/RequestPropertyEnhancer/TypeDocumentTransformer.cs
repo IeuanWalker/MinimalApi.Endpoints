@@ -30,7 +30,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		FixDoubleWrappedArrays(document);
 
 		// Step 4: Build endpoint-to-request-type mapping
-		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context, document);
+		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context);
 
 		// Step 5: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
@@ -738,7 +738,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return schema;
 	}
 
-	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)
+	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context)
 	{
 		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
 
@@ -747,7 +747,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return mapping;
 		}
 
-		foreach (Microsoft.AspNetCore.Http.Endpoint endpoint in endpointDataSource.Endpoints)
+		foreach (Endpoint endpoint in endpointDataSource.Endpoints)
 		{
 			if (endpoint is not RouteEndpoint routeEndpoint)
 			{
