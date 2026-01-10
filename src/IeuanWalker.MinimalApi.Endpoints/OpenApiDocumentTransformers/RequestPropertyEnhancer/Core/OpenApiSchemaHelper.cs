@@ -418,6 +418,37 @@ static class OpenApiSchemaHelper
 		}
 	}
 
+	/// <summary>
+	/// Resolves a reference to a component if it exists, otherwise returns the original object.
+	/// </summary>
+	/// <typeparam name="T">The type of the referenceable object.</typeparam>
+	/// <param name="referenceable">The object that may be a reference.</param>
+	/// <param name="componentSection">The component section to resolve references from.</param>
+	/// <returns>The resolved object if it's a reference and exists in the component section, otherwise the original.</returns>
+	internal static T ResolveReference<T>(T referenceable, IDictionary<string, T>? componentSection) where T : class
+	{
+		if (componentSection is null)
+		{
+			return referenceable;
+		}
+
+		string? referenceId = referenceable switch
+		{
+			OpenApiParameterReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiRequestBodyReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiResponseReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiHeaderReference { Reference.Id: { Length: > 0 } id } => id,
+			_ => null
+		};
+
+		if (referenceId is not null && componentSection.TryGetValue(referenceId, out T? referenced))
+		{
+			return referenced;
+		}
+
+		return referenceable;
+	}
+
 	static bool IsGenericCollection(Type type)
 	{
 		if (!type.IsGenericType)

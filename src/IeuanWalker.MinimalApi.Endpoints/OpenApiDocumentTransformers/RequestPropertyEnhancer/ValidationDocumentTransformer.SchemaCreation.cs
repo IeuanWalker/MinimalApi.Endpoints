@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Reflection;
-using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 using Microsoft.OpenApi;
@@ -53,6 +52,7 @@ partial class ValidationDocumentTransformer
 		bool isNullableReference = false;
 		OpenApiSchema? resolvedReferenceSchema = null;
 
+		// Check if actualSchema is a schema reference and extract type information
 		if (actualSchema is OpenApiSchemaReference schemaRef)
 		{
 			string? refId = schemaRef.Reference?.Id;
@@ -69,7 +69,13 @@ partial class ValidationDocumentTransformer
 					isNullableReference = true;
 				}
 
-				(referenceType, referenceFormat) = DetermineTypeFromRefId(refId);
+				(referenceType, referenceFormat) = OpenApiSchemaHelper.GetTypeAndFormatFromRefId(refId);
+
+				// Also check for custom type reference here to avoid redundant pattern matching
+				if (!SchemaConstants.IsSystemType(refId))
+				{
+					return CreateCustomTypeReferenceSchema(schemaRef, rules, effectiveListRulesInDescription, appendRulesToPropertyDescription, document);
+				}
 			}
 		}
 
@@ -80,23 +86,6 @@ partial class ValidationDocumentTransformer
 			{
 				referenceType = JsonSchemaType.Array;
 			}
-		}
-
-		bool isCustomTypeReference = false;
-		OpenApiSchemaReference? customTypeRef = null;
-		if (actualSchema is OpenApiSchemaReference schemaRef2)
-		{
-			string? refId = schemaRef2.Reference?.Id;
-			if (refId is not null && !SchemaConstants.IsSystemType(refId))
-			{
-				isCustomTypeReference = true;
-				customTypeRef = schemaRef2;
-			}
-		}
-
-		if (isCustomTypeReference && customTypeRef is not null)
-		{
-			return CreateCustomTypeReferenceSchema(customTypeRef, rules, effectiveListRulesInDescription, appendRulesToPropertyDescription, document);
 		}
 
 		bool isComplexObject = (originalOpenApiSchema?.AllOf?.Count > 0) ||
@@ -254,11 +243,6 @@ partial class ValidationDocumentTransformer
 		}
 
 		return newInlineSchema;
-	}
-
-	static (JsonSchemaType? type, string? format) DetermineTypeFromRefId(string refId)
-	{
-		return OpenApiSchemaHelper.GetTypeAndFormatFromRefId(refId);
 	}
 
 	static OpenApiSchema CreateCustomTypeReferenceSchema(OpenApiSchemaReference customTypeRef, List<ValidationRule> rules, bool effectiveListRulesInDescription, bool appendRulesToPropertyDescription, OpenApiDocument document)
