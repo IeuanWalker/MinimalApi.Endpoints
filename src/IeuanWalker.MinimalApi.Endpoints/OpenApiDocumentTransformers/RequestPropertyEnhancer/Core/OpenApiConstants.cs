@@ -40,6 +40,12 @@ static class SchemaConstants
 	public const string IReadOnlyListGenericType = "System.Collections.Generic.IReadOnlyList`1";
 	public const string IReadOnlyCollectionGenericType = "System.Collections.Generic.IReadOnlyCollection`1";
 
+	// Dictionary type names
+	public const string IDictionaryGenericType = "System.Collections.Generic.IDictionary`2";
+	public const string DictionaryGenericType = "System.Collections.Generic.Dictionary`2";
+	public const string IReadOnlyDictionaryGenericType = "System.Collections.Generic.IReadOnlyDictionary`2";
+	public const string ConcurrentDictionaryGenericType = "System.Collections.Concurrent.ConcurrentDictionary`2";
+
 	// ASP.NET Core types
 	public const string IFormFile = "Microsoft.AspNetCore.Http.IFormFile";
 	public const string IFormFileCollection = "Microsoft.AspNetCore.Http.IFormFileCollection";
@@ -82,4 +88,13 @@ static class SchemaConstants
 		refId.Contains(ICollectionGenericType, StringComparison.Ordinal) ||
 		refId.Contains(IReadOnlyListGenericType, StringComparison.Ordinal) ||
 		refId.Contains(IReadOnlyCollectionGenericType, StringComparison.Ordinal);
+
+	/// <summary>
+	/// Checks if a type reference ID represents a dictionary type.
+	/// </summary>
+	public static bool IsDictionaryType(string refId) =>
+		refId.Contains(IDictionaryGenericType, StringComparison.Ordinal) ||
+		refId.Contains(DictionaryGenericType, StringComparison.Ordinal) ||
+		refId.Contains(IReadOnlyDictionaryGenericType, StringComparison.Ordinal) ||
+		refId.Contains(ConcurrentDictionaryGenericType, StringComparison.Ordinal);
 }

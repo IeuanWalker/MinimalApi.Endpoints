@@ -47,7 +47,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 9: Remove unused array component schemas
 		RemoveCollectionComponentSchemas(document);
 
-		// Step 10: Ensure unwrapped enum schemas exist (before reordering)
+		// Step 10: Inline all dictionary references (dictionary types should not be separate components)
+		InlineDictionaryReferences(document);
+
+		// Step 11: Remove unused dictionary component schemas
+		RemoveDictionaryComponentSchemas(document);
+
+		// Step 12: Ensure unwrapped enum schemas exist (before reordering)
 		EnsureUnwrappedEnumSchemasExist(document);
 
 		return Task.CompletedTask;
@@ -1109,6 +1115,189 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Remove collection schemas
+		foreach (string schemaName in schemasToRemove)
+		{
+			document.Components.Schemas.Remove(schemaName);
+		}
+	}
+
+	static void InlineDictionaryReferences(OpenApiDocument document)
+	{
+		if (document.Paths is null)
+		{
+			return;
+		}
+
+		// Inline dictionary references in all paths
+		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
+		{
+			if (pathItem.Value is not OpenApiPathItem pathItemValue)
+			{
+				continue;
+			}
+
+			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
+			{
+				// Inline in request body
+				if (operation.Value.RequestBody is OpenApiRequestBody requestBody && requestBody.Content is not null)
+				{
+					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in requestBody.Content)
+					{
+						if (contentItem.Value.Schema is not null)
+						{
+							contentItem.Value.Schema = InlineDictionarySchema(contentItem.Value.Schema, document);
+						}
+					}
+				}
+
+				// Inline in responses
+				if (operation.Value.Responses is not null)
+				{
+					foreach (KeyValuePair<string, IOpenApiResponse> response in operation.Value.Responses)
+					{
+						if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
+						{
+							foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content)
+							{
+								if (contentItem.Value.Schema is not null)
+								{
+									contentItem.Value.Schema = InlineDictionarySchema(contentItem.Value.Schema, document);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Also inline dictionary references in component schemas
+		if (document.Components?.Schemas is not null)
+		{
+			foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+			{
+				if (OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) && schema is not null)
+				{
+					InlineDictionariesInSchema(schema, document);
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema InlineDictionarySchema(IOpenApiSchema schema, OpenApiDocument document)
+	{
+		// Check if this is a reference to a dictionary schema
+		if (schema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId) && IsDictionarySchemaReference(refId))
+			{
+				// Get the referenced schema
+				if (document.Components?.Schemas is not null && 
+					document.Components.Schemas.TryGetValue(refId, out IOpenApiSchema? dictionarySchema) &&
+					OpenApiSchemaHelper.TryAsOpenApiSchema(dictionarySchema, out OpenApiSchema? openApiDictionarySchema) &&
+					openApiDictionarySchema is not null &&
+					openApiDictionarySchema.AdditionalProperties is not null)
+				{
+					// Return inline dictionary schema
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.Object,
+						AdditionalProperties = openApiDictionarySchema.AdditionalProperties
+					};
+				}
+			}
+		}
+
+		// Recursively process oneOf schemas
+		if (OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) && openApiSchema is not null)
+		{
+			if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+			{
+				for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+				{
+					openApiSchema.OneOf[i] = InlineDictionarySchema(openApiSchema.OneOf[i], document);
+				}
+			}
+		}
+
+		return schema;
+	}
+
+	static void InlineDictionariesInSchema(OpenApiSchema schema, OpenApiDocument document)
+	{
+		// Process properties
+		if (schema.Properties is not null && schema.Properties.Count > 0)
+		{
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
+			{
+				schema.Properties[propertyName] = InlineDictionarySchema(propertySchema, document);
+			}
+		}
+
+		// Process additionalProperties
+		if (schema.AdditionalProperties is not null)
+		{
+			schema.AdditionalProperties = InlineDictionarySchema(schema.AdditionalProperties, document);
+		}
+
+		// Process items
+		if (schema.Items is not null)
+		{
+			schema.Items = InlineDictionarySchema(schema.Items, document);
+		}
+
+		// Process oneOf
+		if (schema.OneOf is not null && schema.OneOf.Count > 0)
+		{
+			for (int i = 0; i < schema.OneOf.Count; i++)
+			{
+				schema.OneOf[i] = InlineDictionarySchema(schema.OneOf[i], document);
+			}
+		}
+
+		// Process allOf
+		if (schema.AllOf is not null && schema.AllOf.Count > 0)
+		{
+			for (int i = 0; i < schema.AllOf.Count; i++)
+			{
+				schema.AllOf[i] = InlineDictionarySchema(schema.AllOf[i], document);
+			}
+		}
+
+		// Process anyOf
+		if (schema.AnyOf is not null && schema.AnyOf.Count > 0)
+		{
+			for (int i = 0; i < schema.AnyOf.Count; i++)
+			{
+				schema.AnyOf[i] = InlineDictionarySchema(schema.AnyOf[i], document);
+			}
+		}
+	}
+
+	static bool IsDictionarySchemaReference(string refId)
+	{
+		return SchemaConstants.IsDictionaryType(refId);
+	}
+
+	static void RemoveDictionaryComponentSchemas(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		// Find all dictionary schemas to remove
+		List<string> schemasToRemove = [];
+
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+		{
+			if (IsDictionarySchemaReference(schemaEntry.Key))
+			{
+				schemasToRemove.Add(schemaEntry.Key);
+			}
+		}
+
+		// Remove dictionary schemas
 		foreach (string schemaName in schemasToRemove)
 		{
 			document.Components.Schemas.Remove(schemaName);
