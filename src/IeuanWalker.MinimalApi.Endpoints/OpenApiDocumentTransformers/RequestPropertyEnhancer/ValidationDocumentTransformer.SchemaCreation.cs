@@ -258,41 +258,7 @@ partial class ValidationDocumentTransformer
 
 	static (JsonSchemaType? type, string? format) DetermineTypeFromRefId(string refId)
 	{
-		if (refId.EndsWith(SchemaConstants.ArraySuffix) || SchemaConstants.IsCollectionType(refId))
-		{
-			return (JsonSchemaType.Array, null);
-		}
-		if (refId.Contains(SchemaConstants.SystemString) && !refId.Contains(SchemaConstants.ArraySuffix))
-		{
-			return (JsonSchemaType.String, null);
-		}
-		if (refId.Contains(SchemaConstants.SystemInt32))
-		{
-			return (JsonSchemaType.Integer, SchemaConstants.FormatInt32);
-		}
-		if (refId.Contains(SchemaConstants.SystemInt64))
-		{
-			return (JsonSchemaType.Integer, SchemaConstants.FormatInt64);
-		}
-		if (refId.Contains(SchemaConstants.SystemDecimal) || refId.Contains(SchemaConstants.SystemDouble) || refId.Contains(SchemaConstants.SystemSingle))
-		{
-			string? fmt = refId.Contains(SchemaConstants.SystemDouble) ? SchemaConstants.FormatDouble :
-						  refId.Contains(SchemaConstants.SystemSingle) ? SchemaConstants.FormatFloat : null;
-			return (JsonSchemaType.Number, fmt);
-		}
-		if (refId.Contains(SchemaConstants.SystemBoolean))
-		{
-			return (JsonSchemaType.Boolean, null);
-		}
-		if (refId.Contains(SchemaConstants.SystemDateTime) || refId.Contains(SchemaConstants.SystemDateTimeOffset))
-		{
-			return (JsonSchemaType.String, SchemaConstants.FormatDateTime);
-		}
-		if (refId.Contains(SchemaConstants.SystemGuid))
-		{
-			return (JsonSchemaType.String, SchemaConstants.FormatUuid);
-		}
-		return (null, null);
+		return OpenApiSchemaHelper.GetTypeAndFormatFromRefId(refId);
 	}
 
 	static OpenApiSchema CreateCustomTypeReferenceSchema(OpenApiSchemaReference customTypeRef, List<ValidationRule> rules, bool effectiveListRulesInDescription, bool appendRulesToPropertyDescription, OpenApiDocument document)
@@ -507,7 +473,8 @@ partial class ValidationDocumentTransformer
 				break;
 
 			case EnumRule enumRule:
-				EnrichSchemaWithEnumValues(schema, enumRule.EnumType);
+				bool isStringSchema = schema.Type == JsonSchemaType.String;
+				OpenApiSchemaHelper.EnrichSchemaWithEnumValues(schema, enumRule.EnumType, forStringSchema: isStringSchema);
 				break;
 		}
 	}
@@ -583,79 +550,5 @@ partial class ValidationDocumentTransformer
 			RangeRule<double> => SchemaConstants.FormatDouble,
 			_ => null
 		};
-	}
-
-	static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType)
-	{
-		Array enumValues = Enum.GetValues(enumType);
-		string[] enumNames = Enum.GetNames(enumType);
-
-		List<JsonNode> values = [];
-		List<string> varNames = [];
-		Dictionary<string, string> descriptions = [];
-
-		bool isStringSchema = schema.Type == JsonSchemaType.String;
-
-		for (int i = 0; i < enumValues.Length; i++)
-		{
-			object enumValue = enumValues.GetValue(i)!;
-			string enumName = enumNames[i];
-
-			if (isStringSchema)
-			{
-				values.Add(JsonValue.Create(enumName)!);
-			}
-			else
-			{
-				long numericValue = Convert.ToInt64(enumValue);
-				values.Add(JsonValue.Create(numericValue)!);
-			}
-
-			varNames.Add(enumName);
-
-			FieldInfo? field = enumType.GetField(enumName);
-			DescriptionAttribute? descriptionAttr = field?.GetCustomAttributes(typeof(DescriptionAttribute), false)
-				.OfType<DescriptionAttribute>()
-				.FirstOrDefault();
-
-			if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
-			{
-				descriptions[enumName] = descriptionAttr.Description;
-			}
-		}
-
-
-		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-		schema.Extensions[SchemaConstants.EnumExtension] = new JsonNodeExtension(new JsonArray(values.ToArray()));
-
-		if (!isStringSchema)
-		{
-			schema.Extensions[SchemaConstants.EnumVarNamesExtension] = new JsonNodeExtension(new JsonArray(varNames.Select(n => JsonValue.Create(n)!).ToArray()));
-		}
-
-		if (descriptions.Count > 0)
-		{
-			JsonObject descObj = [];
-			foreach (KeyValuePair<string, string> kvp in descriptions)
-			{
-				descObj[kvp.Key] = kvp.Value;
-			}
-			schema.Extensions[SchemaConstants.EnumDescriptionsExtension] = new JsonNodeExtension(descObj);
-		}
-
-		// Always set enum description, replacing any validation error messages
-		// Check for common validation error patterns that should be replaced
-		bool shouldReplaceDescription = string.IsNullOrWhiteSpace(schema.Description) ||
-			schema.Description.Contains("has a range of values") ||
-			schema.Description.StartsWith("Validation rules:");
-
-		if (shouldReplaceDescription)
-		{
-			schema.Description = $"Enum: {string.Join(", ", varNames)}";
-		}
-		else if (!schema.Description?.Contains("Enum:") ?? false)
-		{
-			schema.Description = $"Enum: {string.Join(", ", varNames)}\n\n{schema.Description}";
-		}
 	}
 }

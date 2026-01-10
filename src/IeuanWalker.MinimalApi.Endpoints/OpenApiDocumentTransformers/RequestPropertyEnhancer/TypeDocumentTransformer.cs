@@ -23,8 +23,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 1: Fix all schema property types, nullable arrays, and double-wrapped arrays in one pass
 		FixComponentSchemas(document);
 
-		// Step 2: Build endpoint-to-request-type mapping
-		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context);
+		// Step 2: Build endpoint-to-request-type mapping using shared helper
+		Dictionary<string, Type> endpointToRequestType = EndpointRequestTypeMapper.BuildEndpointToRequestTypeMapping(context);
 
 		// Step 3: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
@@ -445,28 +445,10 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			};
 		}
 
-		// Create inline schema for primitive types using a lookup pattern
-		OpenApiSchema? primitiveSchema = CreatePrimitiveSchemaFromRefId(refId);
+		// Create inline schema for primitive types using the shared helper
+		OpenApiSchema? primitiveSchema = OpenApiSchemaHelper.CreatePrimitiveSchemaFromRefId(refId);
 		return primitiveSchema is not null ? primitiveSchema : schemaRef;
 	}
-
-	static OpenApiSchema? CreatePrimitiveSchemaFromRefId(string refId) => refId switch
-	{
-		_ when refId.Contains(SchemaConstants.SystemString) => new OpenApiSchema { Type = JsonSchemaType.String },
-		_ when refId.Contains(SchemaConstants.SystemInt32) => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = SchemaConstants.FormatInt32 },
-		_ when refId.Contains(SchemaConstants.SystemInt64) => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = SchemaConstants.FormatInt64 },
-		_ when refId.Contains(SchemaConstants.SystemInt16) || refId.Contains(SchemaConstants.SystemByte) => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = SchemaConstants.FormatInt32 },
-		_ when refId.Contains(SchemaConstants.SystemDecimal) => new OpenApiSchema { Type = JsonSchemaType.Number },
-		_ when refId.Contains(SchemaConstants.SystemDouble) => new OpenApiSchema { Type = JsonSchemaType.Number, Format = SchemaConstants.FormatDouble },
-		_ when refId.Contains(SchemaConstants.SystemSingle) => new OpenApiSchema { Type = JsonSchemaType.Number, Format = SchemaConstants.FormatFloat },
-		_ when refId.Contains(SchemaConstants.SystemBoolean) => new OpenApiSchema { Type = JsonSchemaType.Boolean },
-		_ when refId.Contains(SchemaConstants.SystemDateTime) || refId.Contains(SchemaConstants.SystemDateTimeOffset) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatDateTime },
-		_ when refId.Contains(SchemaConstants.SystemDateOnly) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatDate },
-		_ when refId.Contains(SchemaConstants.SystemTimeOnly) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatTime },
-		_ when refId.Contains(SchemaConstants.SystemGuid) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatUuid },
-		_ when refId.Contains(SchemaConstants.SystemUri) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatUri },
-		_ => null
-	};
 
 	static void EnsureUnwrappedEnumSchemasExist(OpenApiDocument document)
 	{
@@ -597,49 +579,6 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		return schema;
-	}
-
-	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context)
-	{
-		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
-
-		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
-		{
-			return mapping;
-		}
-
-		foreach (Endpoint endpoint in endpointDataSource.Endpoints)
-		{
-			if (endpoint is not RouteEndpoint routeEndpoint)
-			{
-				continue;
-			}
-
-			string? routePattern = routeEndpoint.RoutePattern.RawText;
-			if (string.IsNullOrEmpty(routePattern))
-			{
-				continue;
-			}
-
-			MethodInfo? handlerMethod = routeEndpoint.Metadata.OfType<MethodInfo>().FirstOrDefault();
-			if (handlerMethod is null)
-			{
-				continue;
-			}
-
-			ParameterInfo[] parameters = handlerMethod.GetParameters();
-
-			Type? requestType = parameters
-				.Select(param => param.ParameterType)
-				.FirstOrDefault(paramType => !paramType.IsPrimitive && paramType != typeof(string) && paramType != typeof(CancellationToken));
-
-			if (requestType is not null && !mapping.ContainsKey(routePattern))
-			{
-				mapping[routePattern] = requestType;
-			}
-		}
-
-		return mapping;
 	}
 
 	static IOpenApiSchema InlineFileTypeReferences(IOpenApiSchema schema, OpenApiDocument document)
