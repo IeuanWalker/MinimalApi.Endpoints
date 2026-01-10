@@ -22,6 +22,57 @@ static class OpenApiSchemaHelper
 	}
 
 	/// <summary>
+	/// Recursively transforms all schema references using the provided transformer function.
+	/// Handles properties, items, additionalProperties, oneOf, allOf, and anyOf.
+	/// </summary>
+	/// <param name="schema">The schema to transform.</param>
+	/// <param name="transformer">Function that transforms each schema reference.</param>
+	public static void TransformSchemaReferences(OpenApiSchema schema, Func<IOpenApiSchema, IOpenApiSchema> transformer)
+	{
+		if (schema.Properties is { Count: > 0 })
+		{
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
+			{
+				schema.Properties[propertyName] = transformer(propertySchema);
+			}
+		}
+
+		if (schema.AdditionalProperties is not null)
+		{
+			schema.AdditionalProperties = transformer(schema.AdditionalProperties);
+		}
+
+		if (schema.Items is not null)
+		{
+			schema.Items = transformer(schema.Items);
+		}
+
+		if (schema.OneOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.OneOf.Count; i++)
+			{
+				schema.OneOf[i] = transformer(schema.OneOf[i]);
+			}
+		}
+
+		if (schema.AllOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.AllOf.Count; i++)
+			{
+				schema.AllOf[i] = transformer(schema.AllOf[i]);
+			}
+		}
+
+		if (schema.AnyOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.AnyOf.Count; i++)
+			{
+				schema.AnyOf[i] = transformer(schema.AnyOf[i]);
+			}
+		}
+	}
+
+	/// <summary>
 	/// Converts primitive type references to inline schemas, with document-level resolution.
 	/// </summary>
 	/// <param name="schemaRef">The schema reference to inline.</param>
