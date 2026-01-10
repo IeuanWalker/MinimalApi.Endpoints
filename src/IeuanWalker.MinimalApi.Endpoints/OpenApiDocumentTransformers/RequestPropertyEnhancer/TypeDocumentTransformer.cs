@@ -41,7 +41,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		// Step 7: Inline primitive type references (System.String, System.String[], etc.) and IFormFile types
 		InlinePrimitiveAndFileTypeReferences(document);
 
-		// Step 8: Ensure unwrapped enum schemas exist (before reordering)
+		// Step 8: Inline all array references (collection types should not be separate components)
+		InlineCollectionReferences(document);
+
+		// Step 9: Remove unused array component schemas
+		RemoveCollectionComponentSchemas(document);
+
+		// Step 10: Ensure unwrapped enum schemas exist (before reordering)
 		EnsureUnwrappedEnumSchemasExist(document);
 
 		return Task.CompletedTask;
@@ -928,5 +934,184 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		return schema;
+	}
+
+	static void InlineCollectionReferences(OpenApiDocument document)
+	{
+		if (document.Paths is null)
+		{
+			return;
+		}
+
+		// Inline collection references in all paths
+		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
+		{
+			if (pathItem.Value is not OpenApiPathItem pathItemValue)
+			{
+				continue;
+			}
+
+			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
+			{
+				// Inline in request body
+				if (operation.Value.RequestBody is OpenApiRequestBody requestBody && requestBody.Content is not null)
+				{
+					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in requestBody.Content)
+					{
+						if (contentItem.Value.Schema is not null)
+						{
+							contentItem.Value.Schema = InlineCollectionSchema(contentItem.Value.Schema, document);
+						}
+					}
+				}
+
+				// Inline in responses
+				if (operation.Value.Responses is not null)
+				{
+					foreach (KeyValuePair<string, IOpenApiResponse> response in operation.Value.Responses)
+					{
+						if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
+						{
+							foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content)
+							{
+								if (contentItem.Value.Schema is not null)
+								{
+									contentItem.Value.Schema = InlineCollectionSchema(contentItem.Value.Schema, document);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Also inline collection references in component schemas
+		if (document.Components?.Schemas is not null)
+		{
+			foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+			{
+				if (OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) && schema is not null)
+				{
+					InlineCollectionsInSchema(schema, document);
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema InlineCollectionSchema(IOpenApiSchema schema, OpenApiDocument document)
+	{
+		// Check if this is a reference to a collection schema
+		if (schema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId) && IsCollectionSchemaReference(refId))
+			{
+				// Get the referenced schema
+				if (document.Components?.Schemas is not null && 
+					document.Components.Schemas.TryGetValue(refId, out IOpenApiSchema? collectionSchema) &&
+					OpenApiSchemaHelper.TryAsOpenApiSchema(collectionSchema, out OpenApiSchema? openApiCollectionSchema) &&
+					openApiCollectionSchema is not null &&
+					openApiCollectionSchema.Items is not null)
+				{
+					// Return inline array schema
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.Array,
+						Items = openApiCollectionSchema.Items
+					};
+				}
+			}
+		}
+
+		// Recursively process oneOf schemas
+		if (OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) && openApiSchema is not null)
+		{
+			if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+			{
+				for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+				{
+					openApiSchema.OneOf[i] = InlineCollectionSchema(openApiSchema.OneOf[i], document);
+				}
+			}
+		}
+
+		return schema;
+	}
+
+	static void InlineCollectionsInSchema(OpenApiSchema schema, OpenApiDocument document)
+	{
+		// Process properties
+		if (schema.Properties is not null && schema.Properties.Count > 0)
+		{
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
+			{
+				schema.Properties[propertyName] = InlineCollectionSchema(propertySchema, document);
+			}
+		}
+
+		// Process items
+		if (schema.Items is not null)
+		{
+			schema.Items = InlineCollectionSchema(schema.Items, document);
+		}
+
+		// Process oneOf
+		if (schema.OneOf is not null && schema.OneOf.Count > 0)
+		{
+			for (int i = 0; i < schema.OneOf.Count; i++)
+			{
+				schema.OneOf[i] = InlineCollectionSchema(schema.OneOf[i], document);
+			}
+		}
+
+		// Process allOf
+		if (schema.AllOf is not null && schema.AllOf.Count > 0)
+		{
+			for (int i = 0; i < schema.AllOf.Count; i++)
+			{
+				schema.AllOf[i] = InlineCollectionSchema(schema.AllOf[i], document);
+			}
+		}
+
+		// Process anyOf
+		if (schema.AnyOf is not null && schema.AnyOf.Count > 0)
+		{
+			for (int i = 0; i < schema.AnyOf.Count; i++)
+			{
+				schema.AnyOf[i] = InlineCollectionSchema(schema.AnyOf[i], document);
+			}
+		}
+	}
+
+	static bool IsCollectionSchemaReference(string refId)
+	{
+		// Check if the reference ID ends with [] or is a collection type
+		return refId.EndsWith(SchemaConstants.ArraySuffix, StringComparison.Ordinal) ||
+			SchemaConstants.IsCollectionType(refId);
+	}
+
+	static void RemoveCollectionComponentSchemas(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		// Find all collection schemas to remove
+		List<string> schemasToRemove = [];
+
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+		{
+			if (IsCollectionSchemaReference(schemaEntry.Key))
+			{
+				schemasToRemove.Add(schemaEntry.Key);
+			}
+		}
+
+		// Remove collection schemas
+		foreach (string schemaName in schemasToRemove)
+		{
+			document.Components.Schemas.Remove(schemaName);
+		}
 	}
 }
