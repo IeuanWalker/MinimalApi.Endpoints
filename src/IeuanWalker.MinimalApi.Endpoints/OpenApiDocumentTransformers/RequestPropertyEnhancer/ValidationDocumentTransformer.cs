@@ -1,11 +1,8 @@
-using System.Reflection;
 using IeuanWalker.MinimalApi.Endpoints.Extensions;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.OpenApi;
 using ValidationRule = IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation.ValidationRule;
 
@@ -67,8 +64,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 			ApplyValidationToSchemas(document, requestType, rules, typeAppendRulesToPropertyDescription, AppendRulesToPropertyDescription);
 		}
 
-		ILogger logger = context.ApplicationServices.GetService(typeof(ILogger<ValidationDocumentTransformer>)) as ILogger ?? NullLogger.Instance;
-		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMappingWithValidation(context, allValidationRules, logger);
+		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMappingWithValidation(context, allValidationRules);
 		ApplyValidationToParameters(document, allValidationRules, endpointToRequestType, AppendRulesToPropertyDescription);
 
 		return Task.CompletedTask;
@@ -305,8 +301,7 @@ sealed partial class ValidationDocumentTransformer : IOpenApiDocumentTransformer
 
 	static Dictionary<string, Type> BuildEndpointToRequestTypeMappingWithValidation(
 		OpenApiDocumentTransformerContext context,
-		Dictionary<Type, (List<ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules,
-		ILogger logger)
+		Dictionary<Type, (List<ValidationRule> rules, bool appendRulesToPropertyDescription)> allValidationRules)
 	{
 		// Use the shared helper with a filter that only includes types with validation rules
 		Dictionary<string, Type> mapping = EndpointRequestTypeMapper.BuildEndpointToRequestTypeMapping(
