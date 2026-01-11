@@ -1,0 +1,88 @@
+﻿using FluentValidation;
+using FluentValidation.Results;
+
+namespace IeuanWalker.MinimalApi.Endpoints.Tests.Extensions;
+
+public class FluentValidationExtensionsTests
+{
+	enum TestEnum
+	{
+		Zero = 0,
+		One = 1
+	}
+
+	class IntModel
+	{
+		public int Value { get; set; }
+	}
+
+	class NullableIntModel
+	{
+		public int? Value { get; set; }
+	}
+
+	class NonEnumValidator : AbstractValidator<IntModel>
+	{
+		public NonEnumValidator()
+		{
+			// Passing a non-enum type should throw in the extension
+			RuleFor(x => x.Value).IsInEnum(typeof(string));
+		}
+	}
+
+	class IntModelValidator : AbstractValidator<IntModel>
+	{
+		public IntModelValidator()
+		{
+			RuleFor(x => x.Value).IsInEnum(typeof(TestEnum));
+		}
+	}
+
+	class NullableIntModelValidator : AbstractValidator<NullableIntModel>
+	{
+		public NullableIntModelValidator()
+		{
+			RuleFor(x => x.Value).IsInEnum(typeof(TestEnum));
+		}
+	}
+
+	[Fact]
+	public void IsInEnum_NonEnumType_ThrowsArgumentException()
+	{
+		Should.Throw<ArgumentException>(() => new NonEnumValidator())
+			.ParamName.ShouldBe("enumType");
+	}
+
+	[Fact]
+	public void IsInEnum_IntValue_ValidAndInvalid()
+	{
+		IntModelValidator validator = new();
+
+		IntModel valid = new() { Value = (int)TestEnum.One };
+		IntModel invalid = new() { Value = 999 };
+
+		ValidationResult resultValid = validator.Validate(valid);
+		resultValid.IsValid.ShouldBeTrue();
+
+		ValidationResult resultInvalid = validator.Validate(invalid);
+		resultInvalid.IsValid.ShouldBeFalse();
+		resultInvalid.Errors.Single().ErrorMessage.ShouldBe("Value must be a valid value of enum TestEnum.");
+	}
+
+	[Fact]
+	public void IsInEnum_NullableIntValue_AllCases()
+	{
+		NullableIntModelValidator validator = new();
+
+		NullableIntModel nullModel = new() { Value = null };
+		NullableIntModel validModel = new() { Value = (int)TestEnum.Zero };
+		NullableIntModel invalidModel = new() { Value = 1234 };
+
+		validator.Validate(nullModel).IsValid.ShouldBeTrue();
+		validator.Validate(validModel).IsValid.ShouldBeTrue();
+
+		ValidationResult invalidResult = validator.Validate(invalidModel);
+		invalidResult.IsValid.ShouldBeFalse();
+		invalidResult.Errors.Single().ErrorMessage.ShouldBe("Value must be empty or a valid value of enum TestEnum.");
+	}
+}
