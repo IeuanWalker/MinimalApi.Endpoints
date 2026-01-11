@@ -197,7 +197,6 @@ public static class OpenApiExtensions
 		/// Note: This does NOT perform runtime validation - it only updates the OpenAPI documentation.
 		/// </summary>
 		/// <typeparam name="TRequest">The type of the request model to validate</typeparam>
-		/// <param name="builder">The route handler builder</param>
 		/// <param name="configure">Action to configure validation rules</param>
 		/// <returns>The route handler builder for method chaining</returns>
 		/// <example>
