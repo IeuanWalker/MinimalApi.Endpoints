@@ -753,7 +753,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 						{
 							if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
 							{
-								foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content.Where(x => x.Value.Schema is not null)
+								foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content.Where(x => x.Value.Schema is not null))
 								{
 									contentItem.Value.Schema = InlineCollectionOrDictionarySchema(contentItem.Value.Schema!, document);
 								}
@@ -894,12 +894,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 		List<string> schemasToRemove = [];
 
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.Where(x => IsCollectionSchemaReference(x.Key) || IsDictionarySchemaReference(x.Key)))
 		{
-			if (IsCollectionSchemaReference(schemaEntry.Key) || IsDictionarySchemaReference(schemaEntry.Key))
-			{
-				schemasToRemove.Add(schemaEntry.Key);
-			}
+			schemasToRemove.Add(schemaEntry.Key);
 		}
 
 		foreach (string schemaName in schemasToRemove)
