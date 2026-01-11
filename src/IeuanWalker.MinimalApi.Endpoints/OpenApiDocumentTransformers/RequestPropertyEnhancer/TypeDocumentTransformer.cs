@@ -704,20 +704,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 	static IOpenApiSchema InlineSimpleSystemTypes(IOpenApiSchema schema)
 	{
-		if (schema is OpenApiSchemaReference schemaRef)
+		// Only inline simple System.String, not arrays or complex types
+		if (schema is OpenApiSchemaReference schemaRef && (schemaRef.Reference?.Id?.Equals("System.String", StringComparison.Ordinal) ?? false))
 		{
-			string? refId = schemaRef.Reference?.Id;
-			if (!string.IsNullOrEmpty(refId))
+			return new OpenApiSchema
 			{
-				// Only inline simple System.String, not arrays or complex types
-				if (refId.Equals("System.String", StringComparison.Ordinal))
-				{
-					return new OpenApiSchema
-					{
-						Type = JsonSchemaType.String
-					};
-				}
-			}
+				Type = JsonSchemaType.String
+			};
 		}
 
 		return schema;
