@@ -73,7 +73,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 
 	static void CollectResponseSchemas(IOpenApiResponse response, HashSet<string> usedSchemaIds, OpenApiDocument document)
 	{
-		IOpenApiResponse resolvedResponse = ResolveReference(response, document.Components?.Responses);
+		IOpenApiResponse resolvedResponse = OpenApiSchemaHelper.ResolveReference(response, document.Components?.Responses);
 
 		if (resolvedResponse is not OpenApiResponse openApiResponse)
 		{
@@ -100,7 +100,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
-		IOpenApiRequestBody resolvedBody = ResolveReference(requestBody, document.Components?.RequestBodies);
+		IOpenApiRequestBody resolvedBody = OpenApiSchemaHelper.ResolveReference(requestBody, document.Components?.RequestBodies);
 
 		if (resolvedBody is not OpenApiRequestBody openApiRequestBody)
 		{
@@ -151,7 +151,7 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
-		IOpenApiHeader resolvedHeader = ResolveReference(header, document.Components?.Headers);
+		IOpenApiHeader resolvedHeader = OpenApiSchemaHelper.ResolveReference(header, document.Components?.Headers);
 
 		if (resolvedHeader is not OpenApiHeader openApiHeader || openApiHeader.Schema is null)
 		{
@@ -170,37 +170,13 @@ sealed class UnusedComponentsCleanupTransformer : IOpenApiDocumentTransformer
 
 		foreach (IOpenApiParameter parameter in parameters)
 		{
-			IOpenApiParameter resolvedParameter = ResolveReference(parameter, document.Components?.Parameters);
+			IOpenApiParameter resolvedParameter = OpenApiSchemaHelper.ResolveReference(parameter, document.Components?.Parameters);
 
 			if (resolvedParameter is OpenApiParameter openApiParameter && openApiParameter.Schema is not null)
 			{
 				CollectSchemaReferences(openApiParameter.Schema, usedSchemaIds, document);
 			}
 		}
-	}
-
-	static T ResolveReference<T>(T referenceable, IDictionary<string, T>? componentSection) where T : class
-	{
-		if (componentSection is null)
-		{
-			return referenceable;
-		}
-
-		string? referenceId = referenceable switch
-		{
-			OpenApiParameterReference { Reference.Id: { Length: > 0 } id } => id,
-			OpenApiRequestBodyReference { Reference.Id: { Length: > 0 } id } => id,
-			OpenApiResponseReference { Reference.Id: { Length: > 0 } id } => id,
-			OpenApiHeaderReference { Reference.Id: { Length: > 0 } id } => id,
-			_ => null
-		};
-
-		if (referenceId is not null && componentSection.TryGetValue(referenceId, out T? referenced))
-		{
-			return referenced;
-		}
-
-		return referenceable;
 	}
 
 	/// <summary>

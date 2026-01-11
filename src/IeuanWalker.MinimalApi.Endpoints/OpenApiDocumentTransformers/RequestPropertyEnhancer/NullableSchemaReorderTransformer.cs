@@ -120,7 +120,7 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 
 	static void ProcessParameter(IOpenApiParameter parameter, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
 	{
-		IOpenApiParameter resolved = ResolveReference(parameter, document.Components?.Parameters);
+		IOpenApiParameter resolved = OpenApiSchemaHelper.ResolveReference(parameter, document.Components?.Parameters);
 
 		if (resolved is not OpenApiParameter openApiParameter || openApiParameter.Schema is null)
 		{
@@ -132,7 +132,7 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 
 	static void ProcessHeader(IOpenApiHeader header, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
 	{
-		IOpenApiHeader resolved = ResolveReference(header, document.Components?.Headers);
+		IOpenApiHeader resolved = OpenApiSchemaHelper.ResolveReference(header, document.Components?.Headers);
 
 		if (resolved is not OpenApiHeader openApiHeader || openApiHeader.Schema is null)
 		{
@@ -149,7 +149,7 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
-		IOpenApiRequestBody resolved = ResolveReference(requestBody, document.Components?.RequestBodies);
+		IOpenApiRequestBody resolved = OpenApiSchemaHelper.ResolveReference(requestBody, document.Components?.RequestBodies);
 
 		if (resolved is not OpenApiRequestBody openApiRequestBody)
 		{
@@ -161,7 +161,7 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 
 	static void ProcessResponse(IOpenApiResponse response, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
 	{
-		IOpenApiResponse resolved = ResolveReference(response, document.Components?.Responses);
+		IOpenApiResponse resolved = OpenApiSchemaHelper.ResolveReference(response, document.Components?.Responses);
 
 		if (resolved is not OpenApiResponse openApiResponse)
 		{
@@ -345,29 +345,5 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 		bool hasSchemaMembers = (openApiSchema.Properties?.Count ?? 0) > 0 || openApiSchema.Items is not null || openApiSchema.AdditionalProperties is not null || openApiSchema.Not is not null;
 
 		return openApiSchema.Type == JsonSchemaType.Null || (hasNullableExtension && !hasTypeInformation && !hasCompositeChildren && !hasSchemaMembers);
-	}
-
-	static T ResolveReference<T>(T referenceable, IDictionary<string, T>? componentSection) where T : class
-	{
-		if (componentSection is null)
-		{
-			return referenceable;
-		}
-
-		string? referenceId = referenceable switch
-		{
-			OpenApiParameterReference { Reference.Id: { Length: > 0 } id } => id,
-			OpenApiRequestBodyReference { Reference.Id: { Length: > 0 } id } => id,
-			OpenApiResponseReference { Reference.Id: { Length: > 0 } id } => id,
-			OpenApiHeaderReference { Reference.Id: { Length: > 0 } id } => id,
-			_ => null
-		};
-
-		if (referenceId is not null && componentSection.TryGetValue(referenceId, out T? referenced))
-		{
-			return referenced;
-		}
-
-		return referenceable;
 	}
 }

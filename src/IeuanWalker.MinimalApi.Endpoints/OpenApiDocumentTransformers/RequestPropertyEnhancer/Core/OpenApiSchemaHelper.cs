@@ -1,3 +1,5 @@
+using System.ComponentModel;
+using System.Reflection;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi;
@@ -19,6 +21,57 @@ static class OpenApiSchemaHelper
 	{
 		openApiSchema = schema as OpenApiSchema;
 		return openApiSchema is not null;
+	}
+
+	/// <summary>
+	/// Recursively transforms all schema references using the provided transformer function.
+	/// Handles properties, items, additionalProperties, oneOf, allOf, and anyOf.
+	/// </summary>
+	/// <param name="schema">The schema to transform.</param>
+	/// <param name="transformer">Function that transforms each schema reference.</param>
+	public static void TransformSchemaReferences(OpenApiSchema schema, Func<IOpenApiSchema, IOpenApiSchema> transformer)
+	{
+		if (schema.Properties is { Count: > 0 })
+		{
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
+			{
+				schema.Properties[propertyName] = transformer(propertySchema);
+			}
+		}
+
+		if (schema.AdditionalProperties is not null)
+		{
+			schema.AdditionalProperties = transformer(schema.AdditionalProperties);
+		}
+
+		if (schema.Items is not null)
+		{
+			schema.Items = transformer(schema.Items);
+		}
+
+		if (schema.OneOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.OneOf.Count; i++)
+			{
+				schema.OneOf[i] = transformer(schema.OneOf[i]);
+			}
+		}
+
+		if (schema.AllOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.AllOf.Count; i++)
+			{
+				schema.AllOf[i] = transformer(schema.AllOf[i]);
+			}
+		}
+
+		if (schema.AnyOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.AnyOf.Count; i++)
+			{
+				schema.AnyOf[i] = transformer(schema.AnyOf[i]);
+			}
+		}
 	}
 
 	/// <summary>
@@ -245,6 +298,157 @@ static class OpenApiSchemaHelper
 		}
 	}
 
+	/// <summary>
+	/// Creates an inline OpenAPI schema for primitive types based on a reference ID string.
+	/// This is the canonical method for primitive type schema creation.
+	/// </summary>
+	/// <param name="refId">The reference ID (e.g., "System.String", "System.Int32").</param>
+	/// <returns>An OpenAPI schema for the primitive type, or null if not a recognized primitive.</returns>
+	public static OpenApiSchema? CreatePrimitiveSchemaFromRefId(string refId) => refId switch
+	{
+		_ when refId.Contains(SchemaConstants.SystemString) && !refId.Contains(SchemaConstants.ArraySuffix) => new OpenApiSchema { Type = JsonSchemaType.String },
+		_ when refId.Contains(SchemaConstants.SystemInt32) => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = SchemaConstants.FormatInt32 },
+		_ when refId.Contains(SchemaConstants.SystemInt64) => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = SchemaConstants.FormatInt64 },
+		_ when refId.Contains(SchemaConstants.SystemInt16) || refId.Contains(SchemaConstants.SystemByte) => new OpenApiSchema { Type = JsonSchemaType.Integer, Format = SchemaConstants.FormatInt32 },
+		_ when refId.Contains(SchemaConstants.SystemDecimal) => new OpenApiSchema { Type = JsonSchemaType.Number },
+		_ when refId.Contains(SchemaConstants.SystemDouble) => new OpenApiSchema { Type = JsonSchemaType.Number, Format = SchemaConstants.FormatDouble },
+		_ when refId.Contains(SchemaConstants.SystemSingle) => new OpenApiSchema { Type = JsonSchemaType.Number, Format = SchemaConstants.FormatFloat },
+		_ when refId.Contains(SchemaConstants.SystemBoolean) => new OpenApiSchema { Type = JsonSchemaType.Boolean },
+		_ when refId.Contains(SchemaConstants.SystemDateTime) || refId.Contains(SchemaConstants.SystemDateTimeOffset) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatDateTime },
+		_ when refId.Contains(SchemaConstants.SystemDateOnly) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatDate },
+		_ when refId.Contains(SchemaConstants.SystemTimeOnly) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatTime },
+		_ when refId.Contains(SchemaConstants.SystemGuid) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatUuid },
+		_ when refId.Contains(SchemaConstants.SystemUri) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatUri },
+		_ when refId.Contains(SchemaConstants.IFormFile) || refId.Equals("IFormFile", StringComparison.Ordinal) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatBinary },
+		_ when refId.Contains(SchemaConstants.IFormFileCollection) || refId.Equals("IFormFileCollection", StringComparison.Ordinal) => new OpenApiSchema
+		{
+			Type = JsonSchemaType.Array,
+			Items = new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatBinary }
+		},
+		_ => null
+	};
+
+	/// <summary>
+	/// Determines the JSON schema type and format from a reference ID.
+	/// This is useful when you need just the type information without creating a full schema.
+	/// </summary>
+	/// <param name="refId">The reference ID (e.g., "System.String", "System.Int32").</param>
+	/// <returns>A tuple containing the JSON schema type and format, or (null, null) if not recognized.</returns>
+	public static (JsonSchemaType? type, string? format) GetTypeAndFormatFromRefId(string refId)
+	{
+		if (refId.EndsWith(SchemaConstants.ArraySuffix) || SchemaConstants.IsCollectionType(refId))
+		{
+			return (JsonSchemaType.Array, null);
+		}
+
+		OpenApiSchema? schema = CreatePrimitiveSchemaFromRefId(refId);
+		return schema is not null ? (schema.Type, schema.Format) : (null, null);
+	}
+
+	/// <summary>
+	/// Enriches an OpenAPI schema with enum values, names, and descriptions.
+	/// This is the canonical method for enum enrichment used by both EnumSchemaTransformer and ValidationDocumentTransformer.
+	/// </summary>
+	/// <param name="schema">The schema to enrich.</param>
+	/// <param name="enumType">The .NET enum type.</param>
+	/// <param name="forStringSchema">If true, enum values are serialized as strings; otherwise as integers.</param>
+	public static void EnrichSchemaWithEnumValues(OpenApiSchema schema, Type enumType, bool forStringSchema = false)
+	{
+		Array enumValues = Enum.GetValues(enumType);
+		string[] enumNames = Enum.GetNames(enumType);
+
+		JsonArray valueArray = [];
+		JsonArray varNamesArray = [];
+		JsonObject? descObj = null;
+
+		for (int i = 0; i < enumValues.Length; i++)
+		{
+			object enumValue = enumValues.GetValue(i)!;
+			string enumName = enumNames[i];
+
+			if (forStringSchema)
+			{
+				valueArray.Add(JsonValue.Create(enumName)!);
+			}
+			else
+			{
+				long numericValue = Convert.ToInt64(enumValue);
+				valueArray.Add(JsonValue.Create(numericValue)!);
+			}
+			varNamesArray.Add(JsonValue.Create(enumName)!);
+
+			FieldInfo? field = enumType.GetField(enumName);
+			DescriptionAttribute? descriptionAttr = field?.GetCustomAttributes(typeof(DescriptionAttribute), false)
+				.OfType<DescriptionAttribute>()
+				.FirstOrDefault();
+
+			if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
+			{
+				descObj ??= [];
+				descObj[enumName] = descriptionAttr.Description;
+			}
+		}
+
+		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+		schema.Extensions[SchemaConstants.EnumExtension] = new JsonNodeExtension(valueArray);
+
+		// Only add varnames for non-string schemas (where values are integers)
+		if (!forStringSchema)
+		{
+			schema.Extensions[SchemaConstants.EnumVarNamesExtension] = new JsonNodeExtension(varNamesArray);
+		}
+
+		if (descObj is not null)
+		{
+			schema.Extensions[SchemaConstants.EnumDescriptionsExtension] = new JsonNodeExtension(descObj);
+		}
+
+		// Set description if not already set or if it contains validation error patterns
+		bool shouldSetDescription = string.IsNullOrWhiteSpace(schema.Description) ||
+			schema.Description.Contains("has a range of values") ||
+			schema.Description.StartsWith("Validation rules:");
+
+		if (shouldSetDescription)
+		{
+			schema.Description = $"Enum: {string.Join(", ", enumNames)}";
+		}
+		else if (!schema.Description?.Contains("Enum:") ?? false)
+		{
+			schema.Description = $"Enum: {string.Join(", ", enumNames)}\n\n{schema.Description}";
+		}
+	}
+
+	/// <summary>
+	/// Resolves a reference to a component if it exists, otherwise returns the original object.
+	/// </summary>
+	/// <typeparam name="T">The type of the referenceable object.</typeparam>
+	/// <param name="referenceable">The object that may be a reference.</param>
+	/// <param name="componentSection">The component section to resolve references from.</param>
+	/// <returns>The resolved object if it's a reference and exists in the component section, otherwise the original.</returns>
+	internal static T ResolveReference<T>(T referenceable, IDictionary<string, T>? componentSection) where T : class
+	{
+		if (componentSection is null)
+		{
+			return referenceable;
+		}
+
+		string? referenceId = referenceable switch
+		{
+			OpenApiParameterReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiRequestBodyReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiResponseReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiHeaderReference { Reference.Id: { Length: > 0 } id } => id,
+			_ => null
+		};
+
+		if (referenceId is not null && componentSection.TryGetValue(referenceId, out T? referenced))
+		{
+			return referenced;
+		}
+
+		return referenceable;
+	}
+
 	static bool IsGenericCollection(Type type)
 	{
 		if (!type.IsGenericType)
@@ -319,6 +523,11 @@ static class OpenApiSchemaHelper
 			schema.Type = JsonSchemaType.String;
 			schema.Format = SchemaConstants.FormatUuid;
 		}
+		else if (actualType == typeof(Uri))
+		{
+			schema.Type = JsonSchemaType.String;
+			schema.Format = SchemaConstants.FormatUri;
+		}
 		else if (actualType == typeof(IFormFile))
 		{
 			schema.Type = JsonSchemaType.String;
@@ -337,103 +546,42 @@ static class OpenApiSchemaHelper
 
 	static OpenApiSchema? CreateInlineSchemaFromRefIdWithCollections(string refId, OpenApiDocument document)
 	{
-		OpenApiSchema schema = new();
+		// First try the primitive schema helper
+		OpenApiSchema? primitiveSchema = CreatePrimitiveSchemaFromRefId(refId);
+		if (primitiveSchema is not null)
+		{
+			return primitiveSchema;
+		}
 
-		if (refId.Contains(SchemaConstants.SystemString) && !refId.Contains(SchemaConstants.ArraySuffix))
+		// Handle array types
+		if (refId.EndsWith(SchemaConstants.ArraySuffix))
 		{
-			schema.Type = JsonSchemaType.String;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt32))
-		{
-			schema.Type = JsonSchemaType.Integer;
-			schema.Format = SchemaConstants.FormatInt32;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt64))
-		{
-			schema.Type = JsonSchemaType.Integer;
-			schema.Format = SchemaConstants.FormatInt64;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt16) || refId.Contains(SchemaConstants.SystemByte))
-		{
-			schema.Type = JsonSchemaType.Integer;
-			schema.Format = SchemaConstants.FormatInt32;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDecimal))
-		{
-			schema.Type = JsonSchemaType.Number;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDouble))
-		{
-			schema.Type = JsonSchemaType.Number;
-			schema.Format = SchemaConstants.FormatDouble;
-		}
-		else if (refId.Contains(SchemaConstants.SystemSingle))
-		{
-			schema.Type = JsonSchemaType.Number;
-			schema.Format = SchemaConstants.FormatFloat;
-		}
-		else if (refId.Contains(SchemaConstants.SystemBoolean))
-		{
-			schema.Type = JsonSchemaType.Boolean;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDateTime) || refId.Contains(SchemaConstants.SystemDateTimeOffset))
-		{
-			schema.Type = JsonSchemaType.String;
-			schema.Format = SchemaConstants.FormatDateTime;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDateOnly))
-		{
-			schema.Type = JsonSchemaType.String;
-			schema.Format = SchemaConstants.FormatDate;
-		}
-		else if (refId.Contains(SchemaConstants.SystemTimeOnly))
-		{
-			schema.Type = JsonSchemaType.String;
-			schema.Format = SchemaConstants.FormatTime;
-		}
-		else if (refId.Contains(SchemaConstants.SystemGuid))
-		{
-			schema.Type = JsonSchemaType.String;
-			schema.Format = SchemaConstants.FormatUuid;
-		}
-		else if (refId.Contains(SchemaConstants.IFormFile) || refId.Equals("IFormFile", StringComparison.Ordinal))
-		{
-			schema.Type = JsonSchemaType.String;
-			schema.Format = SchemaConstants.FormatBinary;
-		}
-		else if (refId.Contains(SchemaConstants.IFormFileCollection) || refId.Equals("IFormFileCollection", StringComparison.Ordinal))
-		{
-			schema.Type = JsonSchemaType.Array;
-			schema.Items = new OpenApiSchema
-			{
-				Type = JsonSchemaType.String,
-				Format = SchemaConstants.FormatBinary
-			};
-		}
-		else if (refId.EndsWith(SchemaConstants.ArraySuffix))
-		{
-			schema.Type = JsonSchemaType.Array;
 			string elementRefId = refId[..^2];
 			OpenApiSchemaReference elementRef = new(elementRefId, document, null);
-			schema.Items = InlinePrimitiveTypeReference(elementRef, document);
+			return new OpenApiSchema
+			{
+				Type = JsonSchemaType.Array,
+				Items = InlinePrimitiveTypeReference(elementRef, document)
+			};
 		}
-		else if (SchemaConstants.IsCollectionType(refId))
+
+		// Handle collection types (List<T>, IEnumerable<T>, etc.)
+		if (SchemaConstants.IsCollectionType(refId))
 		{
-			schema.Type = JsonSchemaType.Array;
 			int startIdx = refId.IndexOf("[[");
 			int endIdx = refId.IndexOf(',', startIdx);
 			if (startIdx >= 0 && endIdx > startIdx)
 			{
 				string elementType = refId.Substring(startIdx + 2, endIdx - startIdx - 2);
 				OpenApiSchemaReference elementRef = new(elementType, document, null);
-				schema.Items = InlinePrimitiveTypeReference(elementRef, document);
+				return new OpenApiSchema
+				{
+					Type = JsonSchemaType.Array,
+					Items = InlinePrimitiveTypeReference(elementRef, document)
+				};
 			}
 		}
-		else
-		{
-			return null;
-		}
 
-		return schema;
+		return null;
 	}
 }

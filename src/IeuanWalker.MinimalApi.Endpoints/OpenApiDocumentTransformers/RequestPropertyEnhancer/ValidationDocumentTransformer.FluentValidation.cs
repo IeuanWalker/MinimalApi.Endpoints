@@ -329,9 +329,7 @@ partial class ValidationDocumentTransformer
 				}
 
 				// These are dynamic values that can't be determined at design time
-				message = message
-					.Replace("{Digits}", "X")
-					.Replace("{ActualScale}", "Y");
+				message = message.Replace("{Digits} digits and {ActualScale} decimals were found.", string.Empty);
 			}
 		}
 #pragma warning disable CA1031

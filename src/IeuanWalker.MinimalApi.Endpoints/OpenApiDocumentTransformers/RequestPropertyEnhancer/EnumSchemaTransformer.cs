@@ -1,6 +1,3 @@
-using System.ComponentModel;
-using System.Reflection;
-using System.Text.Json.Nodes;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -32,54 +29,10 @@ sealed class EnumSchemaTransformer : IOpenApiDocumentTransformer
 				continue;
 			}
 
-			EnrichEnumSchema(schema, enumType);
+			// Use shared enum enrichment method from OpenApiSchemaHelper
+			OpenApiSchemaHelper.EnrichSchemaWithEnumValues(schema, enumType, forStringSchema: false);
 		}
 
 		return Task.CompletedTask;
-	}
-
-	static void EnrichEnumSchema(OpenApiSchema schema, Type enumType)
-	{
-		Array enumValues = Enum.GetValues(enumType);
-		string[] enumNames = Enum.GetNames(enumType);
-
-		JsonArray valueArray = [];
-		JsonArray varNamesArray = [];
-		JsonObject? descObj = null;
-
-		for (int i = 0; i < enumValues.Length; i++)
-		{
-			object enumValue = enumValues.GetValue(i)!;
-			string enumName = enumNames[i];
-
-			long numericValue = Convert.ToInt64(enumValue);
-			valueArray.Add(JsonValue.Create(numericValue)!);
-			varNamesArray.Add(JsonValue.Create(enumName)!);
-
-			FieldInfo? field = enumType.GetField(enumName);
-			DescriptionAttribute? descriptionAttr = field?.GetCustomAttributes(typeof(DescriptionAttribute), false)
-				.OfType<DescriptionAttribute>()
-				.FirstOrDefault();
-
-			if (descriptionAttr is not null && !string.IsNullOrWhiteSpace(descriptionAttr.Description))
-			{
-				descObj ??= [];
-				descObj[enumName] = descriptionAttr.Description;
-			}
-		}
-
-		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-		schema.Extensions[SchemaConstants.EnumExtension] = new JsonNodeExtension(valueArray);
-		schema.Extensions[SchemaConstants.EnumVarNamesExtension] = new JsonNodeExtension(varNamesArray);
-
-		if (descObj is not null)
-		{
-			schema.Extensions[SchemaConstants.EnumDescriptionsExtension] = new JsonNodeExtension(descObj);
-		}
-
-		if (string.IsNullOrWhiteSpace(schema.Description))
-		{
-			schema.Description = $"Enum: {string.Join(", ", enumNames)}";
-		}
 	}
 }

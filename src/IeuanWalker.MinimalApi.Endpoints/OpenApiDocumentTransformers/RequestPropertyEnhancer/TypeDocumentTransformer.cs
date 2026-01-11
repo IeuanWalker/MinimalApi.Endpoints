@@ -2,7 +2,6 @@ using System.Reflection;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
@@ -20,28 +19,35 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 {
 	public Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
-		// Step 1: Fix all schema property types
-		FixSchemaPropertyTypes(document);
+		// Step 1: Fix all schema property types, nullable arrays, and double-wrapped arrays in one pass
+		FixComponentSchemas(document);
 
-		// Step 2: Fix nullable array structures (arrays with nullable items should be nullable arrays instead)
-		FixNullableArrays(document);
+		// Step 2: Build endpoint-to-request-type mapping using shared helper
+		Dictionary<string, Type> endpointToRequestType = EndpointRequestTypeMapper.BuildEndpointToRequestTypeMapping(context);
 
-		// Step 3: Fix double-wrapped arrays (defensive cleanup)
-		FixDoubleWrappedArrays(document);
-
-		// Step 4: Build endpoint-to-request-type mapping
-		Dictionary<string, Type> endpointToRequestType = BuildEndpointToRequestTypeMapping(context, document);
-
-		// Step 5: Fix parameter types (query/path parameters)
+		// Step 3: Fix parameter types (query/path parameters)
 		FixParameterTypes(document, endpointToRequestType);
 
-		// Step 6: Ensure unwrapped enum schemas exist (before reordering)
+		// Step 4: Inline System.String[] references within component schemas
+		InlineSystemStringArrayInComponents(document);
+
+		// Step 5: Inline primitive type references (System.String, System.String[], etc.) and IFormFile types
+		InlinePrimitiveAndFileTypeReferences(document);
+
+		// Step 6: Inline collection and dictionary references, then remove unused component schemas
+		InlineCollectionAndDictionaryReferences(document);
+		RemoveInlinedComponentSchemas(document);
+
+		// Step 7: Ensure unwrapped enum schemas exist (before reordering)
 		EnsureUnwrappedEnumSchemasExist(document);
 
 		return Task.CompletedTask;
 	}
 
-	static void FixSchemaPropertyTypes(OpenApiDocument document)
+	/// <summary>
+	/// Fixes component schema structures in a single pass: property types, nullable arrays, and double-wrapped arrays.
+	/// </summary>
+	static void FixComponentSchemas(OpenApiDocument document)
 	{
 		if (document.Components?.Schemas is null)
 		{
@@ -57,69 +63,27 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 			Type? schemaType = SchemaTypeResolver.GetSchemaType(schemaEntry.Key);
 
+			// Fix property types, nullable arrays, and double-wrapped arrays
 			if (schema.Properties?.Count > 0)
 			{
 				foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
 				{
 					PropertyInfo? propertyInfo = schemaType?.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-					schema.Properties[propertyName] = FixSchemaType(propertySchema, document, propertyInfo?.PropertyType);
+					IOpenApiSchema fixedSchema = FixSchemaType(propertySchema, document, propertyInfo?.PropertyType);
+					fixedSchema = FixNullableArraySchema(fixedSchema);
+					fixedSchema = UnwrapDoubleArrays(fixedSchema);
+					schema.Properties[propertyName] = fixedSchema;
 				}
 			}
 
+			// Fix array items
 			if (schema.Items is not null)
 			{
 				schema.Items = FixSchemaType(schema.Items, document, null);
 			}
 
+			// Fix inline schema type (IFormFile etc.)
 			FixInlineSchemaType(schema, schemaEntry.Key);
-		}
-	}
-
-	static void FixNullableArrays(OpenApiDocument document)
-	{
-		if (document.Components?.Schemas is null)
-		{
-			return;
-		}
-
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
-		{
-			if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) ||
-				schema is null ||
-				schema.Properties is null ||
-				schema.Properties.Count == 0)
-			{
-				continue;
-			}
-
-			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
-			{
-				schema.Properties[propertyName] = FixNullableArraySchema(propertySchema);
-			}
-		}
-	}
-
-	static void FixDoubleWrappedArrays(OpenApiDocument document)
-	{
-		if (document.Components?.Schemas is null)
-		{
-			return;
-		}
-
-		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
-		{
-			if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) ||
-				schema is null ||
-				schema.Properties is null ||
-				schema.Properties.Count == 0)
-			{
-				continue;
-			}
-
-			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
-			{
-				schema.Properties[propertyName] = UnwrapDoubleArrays(propertySchema);
-			}
 		}
 	}
 
@@ -451,6 +415,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return schemaRef;
 		}
 
+		// Unwrap nullable type references to underlying type
 		if (refId.StartsWith(SchemaConstants.NullableTypePrefix + "[["))
 		{
 			int startIndex = (SchemaConstants.NullableTypePrefix + "[[").Length;
@@ -467,78 +432,21 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return schemaRef;
 		}
 
-		OpenApiSchema inlineSchema = new();
-
-		if (refId.EndsWith(SchemaConstants.ArraySuffix))
+		// Handle array types
+		if (refId.EndsWith(SchemaConstants.ArraySuffix) && refId.Length > SchemaConstants.ArraySuffix.Length)
 		{
-			inlineSchema.Type = JsonSchemaType.Array;
-			string elementRefId = refId[..^2];
+			string elementRefId = refId[..^SchemaConstants.ArraySuffix.Length];
 			OpenApiSchemaReference elementRef = new(elementRefId, null, null);
-			inlineSchema.Items = InlinePrimitiveTypeReferenceForParameter(elementRef);
-		}
-		else if (refId.Contains(SchemaConstants.SystemString))
-		{
-			inlineSchema.Type = JsonSchemaType.String;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt32))
-		{
-			inlineSchema.Type = JsonSchemaType.Integer;
-			inlineSchema.Format = SchemaConstants.FormatInt32;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt64))
-		{
-			inlineSchema.Type = JsonSchemaType.Integer;
-			inlineSchema.Format = SchemaConstants.FormatInt64;
-		}
-		else if (refId.Contains(SchemaConstants.SystemInt16) || refId.Contains(SchemaConstants.SystemByte))
-		{
-			inlineSchema.Type = JsonSchemaType.Integer;
-			inlineSchema.Format = SchemaConstants.FormatInt32;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDecimal))
-		{
-			inlineSchema.Type = JsonSchemaType.Number;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDouble))
-		{
-			inlineSchema.Type = JsonSchemaType.Number;
-			inlineSchema.Format = SchemaConstants.FormatDouble;
-		}
-		else if (refId.Contains(SchemaConstants.SystemSingle))
-		{
-			inlineSchema.Type = JsonSchemaType.Number;
-			inlineSchema.Format = SchemaConstants.FormatFloat;
-		}
-		else if (refId.Contains(SchemaConstants.SystemBoolean))
-		{
-			inlineSchema.Type = JsonSchemaType.Boolean;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDateTime) || refId.Contains(SchemaConstants.SystemDateTimeOffset))
-		{
-			inlineSchema.Type = JsonSchemaType.String;
-			inlineSchema.Format = SchemaConstants.FormatDateTime;
-		}
-		else if (refId.Contains(SchemaConstants.SystemDateOnly))
-		{
-			inlineSchema.Type = JsonSchemaType.String;
-			inlineSchema.Format = SchemaConstants.FormatDate;
-		}
-		else if (refId.Contains(SchemaConstants.SystemTimeOnly))
-		{
-			inlineSchema.Type = JsonSchemaType.String;
-			inlineSchema.Format = SchemaConstants.FormatTime;
-		}
-		else if (refId.Contains(SchemaConstants.SystemGuid))
-		{
-			inlineSchema.Type = JsonSchemaType.String;
-			inlineSchema.Format = SchemaConstants.FormatUuid;
-		}
-		else
-		{
-			return schemaRef;
+			return new OpenApiSchema
+			{
+				Type = JsonSchemaType.Array,
+				Items = InlinePrimitiveTypeReferenceForParameter(elementRef)
+			};
 		}
 
-		return inlineSchema;
+		// Create inline schema for primitive types using the shared helper
+		OpenApiSchema? primitiveSchema = OpenApiSchemaHelper.CreatePrimitiveSchemaFromRefId(refId);
+		return primitiveSchema is not null ? primitiveSchema : schemaRef;
 	}
 
 	static void EnsureUnwrappedEnumSchemasExist(OpenApiDocument document)
@@ -583,55 +491,409 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 	}
 
-	static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, OpenApiDocument document)
+	static void InlineSystemStringArrayInComponents(OpenApiDocument document)
 	{
-		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
-
-		if (context.ApplicationServices.GetService(typeof(EndpointDataSource)) is not EndpointDataSource endpointDataSource)
+		if (document.Components?.Schemas is null)
 		{
-			return mapping;
+			return;
 		}
 
-		HashSet<Type> requestTypes = [];
+		// Inline System.String[] references within component schemas
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+		{
+			if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) || schema is null)
+			{
+				continue;
+			}
+
+			// Process properties
+			if (schema.Properties is not null && schema.Properties.Count > 0)
+			{
+				foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
+				{
+					schema.Properties[propertyName] = InlineSystemStringArrayReference(propertySchema);
+				}
+			}
+
+			// Process additionalProperties (this is where IDictionary uses System.String[])
+			if (schema.AdditionalProperties is not null)
+			{
+				schema.AdditionalProperties = InlineSystemStringArrayReference(schema.AdditionalProperties);
+			}
+
+			// Process items
+			if (schema.Items is not null)
+			{
+				schema.Items = InlineSystemStringArrayReference(schema.Items);
+			}
+
+			// Process oneOf
+			if (schema.OneOf is not null && schema.OneOf.Count > 0)
+			{
+				for (int i = 0; i < schema.OneOf.Count; i++)
+				{
+					schema.OneOf[i] = InlineSystemStringArrayReference(schema.OneOf[i]);
+				}
+			}
+
+			// Process allOf
+			if (schema.AllOf is not null && schema.AllOf.Count > 0)
+			{
+				for (int i = 0; i < schema.AllOf.Count; i++)
+				{
+					schema.AllOf[i] = InlineSystemStringArrayReference(schema.AllOf[i]);
+				}
+			}
+
+			// Process anyOf
+			if (schema.AnyOf is not null && schema.AnyOf.Count > 0)
+			{
+				for (int i = 0; i < schema.AnyOf.Count; i++)
+				{
+					schema.AnyOf[i] = InlineSystemStringArrayReference(schema.AnyOf[i]);
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema InlineSystemStringArrayReference(IOpenApiSchema schema)
+	{
+		if (schema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId) && refId.Equals("System.String[]", StringComparison.Ordinal))
+			{
+				return new OpenApiSchema
+				{
+					Type = JsonSchemaType.Array,
+					Items = new OpenApiSchema { Type = JsonSchemaType.String }
+				};
+			}
+		}
+
+		// Recursively process nested schemas
+		if (OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) && openApiSchema is not null)
+		{
+			OpenApiSchemaHelper.TransformSchemaReferences(openApiSchema, InlineSystemStringArrayReference);
+		}
+
+		return schema;
+	}
+
+	static IOpenApiSchema InlineFileTypeReferences(IOpenApiSchema schema, OpenApiDocument document)
+	{
+		if (schema is OpenApiSchemaReference schemaRef)
+		{
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId))
+			{
+				// Check IFormFileCollection FIRST since it contains "IFormFile" in its name
+				if (refId.Contains(SchemaConstants.IFormFileCollection) || refId.Equals("IFormFileCollection", StringComparison.Ordinal))
+				{
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.Array,
+						Items = new OpenApiSchema
+						{
+							Type = JsonSchemaType.String,
+							Format = SchemaConstants.FormatBinary
+						}
+					};
+				}
+				else if (refId.Contains(SchemaConstants.IFormFile) || refId.Equals("IFormFile", StringComparison.Ordinal))
+				{
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.String,
+						Format = SchemaConstants.FormatBinary
+					};
+				}
+			}
+
+			return schemaRef;
+		}
+
+		if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) || openApiSchema is null)
+		{
+			return schema;
+		}
+
+		if (openApiSchema.Properties is not null && openApiSchema.Properties.Count > 0)
+		{
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in openApiSchema.Properties)
+			{
+				openApiSchema.Properties[propertyName] = InlineFileTypeReferences(propertySchema, document);
+			}
+		}
+
+		if (openApiSchema.Items is not null)
+		{
+			openApiSchema.Items = InlineFileTypeReferences(openApiSchema.Items, document);
+		}
+
+		if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
+		{
+			for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+			{
+				openApiSchema.OneOf[i] = InlineFileTypeReferences(openApiSchema.OneOf[i], document);
+			}
+		}
+
+		if (openApiSchema.AllOf is not null && openApiSchema.AllOf.Count > 0)
+		{
+			for (int i = 0; i < openApiSchema.AllOf.Count; i++)
+			{
+				openApiSchema.AllOf[i] = InlineFileTypeReferences(openApiSchema.AllOf[i], document);
+			}
+		}
+
+		if (openApiSchema.AnyOf is not null && openApiSchema.AnyOf.Count > 0)
+		{
+			for (int i = 0; i < openApiSchema.AnyOf.Count; i++)
+			{
+				openApiSchema.AnyOf[i] = InlineFileTypeReferences(openApiSchema.AnyOf[i], document);
+			}
+		}
+
+		return openApiSchema;
+	}
+
+	static void InlinePrimitiveAndFileTypeReferences(OpenApiDocument document)
+	{
+		if (document.Paths is null)
+		{
+			return;
+		}
+
+		// Process all request bodies and response bodies
+		foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
+		{
+			if (pathItem.Value is not OpenApiPathItem pathItemValue)
+			{
+				continue;
+			}
+
+			foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
+			{
+				// Process request body - inline IFormFile types
+				if (operation.Value.RequestBody is OpenApiRequestBody openApiRequestBody && openApiRequestBody.Content is not null)
+				{
+					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiRequestBody.Content.Where(x => x.Value.Schema is not null))
+					{
+						contentItem.Value.Schema = InlineFileTypeReferences(contentItem.Value.Schema!, document);
+					}
+				}
+
+				// Process response bodies - inline simple System.String but not arrays
+				if (operation.Value.Responses is not null)
+				{
+					foreach (KeyValuePair<string, IOpenApiResponse> response in operation.Value.Responses)
+					{
+						if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
+						{
+							foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content.Where(x => x.Value.Schema is not null))
+							{
+								contentItem.Value.Schema = InlineSimpleSystemTypes(contentItem.Value.Schema!);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	static IOpenApiSchema InlineSimpleSystemTypes(IOpenApiSchema schema)
+	{
+		// Only inline simple System.String, not arrays or complex types
+		if (schema is OpenApiSchemaReference schemaRef && (schemaRef.Reference?.Id?.Equals("System.String", StringComparison.Ordinal) ?? false))
+		{
+			return new OpenApiSchema
+			{
+				Type = JsonSchemaType.String
+			};
+		}
+
+		return schema;
+	}
+
+	static void InlineCollectionAndDictionaryReferences(OpenApiDocument document)
+	{
+		// Inline references in all paths (collections and dictionaries in single pass)
+		if (document.Paths is not null)
+		{
+			foreach (KeyValuePair<string, IOpenApiPathItem> pathItem in document.Paths)
+			{
+				if (pathItem.Value is not OpenApiPathItem pathItemValue)
+				{
+					continue;
+				}
+
+				foreach (KeyValuePair<HttpMethod, OpenApiOperation> operation in pathItemValue.Operations ?? [])
+				{
+					// Inline in request body
+					if (operation.Value.RequestBody is OpenApiRequestBody requestBody && requestBody.Content is not null)
+					{
+						foreach (KeyValuePair<string, OpenApiMediaType> contentItem in requestBody.Content.Where(x => x.Value.Schema is not null))
+						{
+							contentItem.Value.Schema = InlineCollectionOrDictionarySchema(contentItem.Value.Schema!, document);
+						}
+					}
+
+					// Inline in responses
+					if (operation.Value.Responses is not null)
+					{
+						foreach (KeyValuePair<string, IOpenApiResponse> response in operation.Value.Responses)
+						{
+							if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
+							{
+								foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content.Where(x => x.Value.Schema is not null))
+								{
+									contentItem.Value.Schema = InlineCollectionOrDictionarySchema(contentItem.Value.Schema!, document);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Also inline references in component schemas
 		if (document.Components?.Schemas is not null)
 		{
-			requestTypes.UnionWith(
-				document.Components.Schemas.Keys
-					.Select(SchemaTypeResolver.GetSchemaType)
-					.OfType<Type>());
+			foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
+			{
+				if (OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) && schema is not null)
+				{
+					InlineCollectionsAndDictionariesInSchema(schema, document);
+				}
+			}
 		}
+	}
 
-		foreach (Microsoft.AspNetCore.Http.Endpoint endpoint in endpointDataSource.Endpoints)
+	static IOpenApiSchema InlineCollectionOrDictionarySchema(IOpenApiSchema schema, OpenApiDocument document)
+	{
+		// Check if this is a reference to a collection or dictionary schema
+		if (schema is OpenApiSchemaReference schemaRef)
 		{
-			if (endpoint is not RouteEndpoint routeEndpoint)
+			string? refId = schemaRef.Reference?.Id;
+			if (!string.IsNullOrEmpty(refId))
 			{
-				continue;
-			}
+				// Check for collection reference
+				if (IsCollectionSchemaReference(refId) &&
+					document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? collectionSchema) == true &&
+					OpenApiSchemaHelper.TryAsOpenApiSchema(collectionSchema, out OpenApiSchema? openApiCollectionSchema) &&
+					openApiCollectionSchema?.Items is not null)
+				{
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.Array,
+						Items = openApiCollectionSchema.Items
+					};
+				}
 
-			string? routePattern = routeEndpoint.RoutePattern.RawText;
-			if (string.IsNullOrEmpty(routePattern))
-			{
-				continue;
-			}
-
-			MethodInfo? handlerMethod = routeEndpoint.Metadata.OfType<MethodInfo>().FirstOrDefault();
-			if (handlerMethod is null)
-			{
-				continue;
-			}
-
-			ParameterInfo[] parameters = handlerMethod.GetParameters();
-
-			Type? matchingParamType = parameters
-				.Select(param => param.ParameterType)
-				.FirstOrDefault(paramType => requestTypes.Contains(paramType));
-
-			if (matchingParamType is not null)
-			{
-				mapping[routePattern] = matchingParamType;
+				// Check for dictionary reference
+				if (IsDictionarySchemaReference(refId) &&
+					document.Components?.Schemas?.TryGetValue(refId, out IOpenApiSchema? dictionarySchema) == true &&
+					OpenApiSchemaHelper.TryAsOpenApiSchema(dictionarySchema, out OpenApiSchema? openApiDictionarySchema) &&
+					openApiDictionarySchema?.AdditionalProperties is not null)
+				{
+					return new OpenApiSchema
+					{
+						Type = JsonSchemaType.Object,
+						AdditionalProperties = openApiDictionarySchema.AdditionalProperties
+					};
+				}
 			}
 		}
 
-		return mapping;
+		// Recursively process oneOf schemas
+		if (OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) &&
+			openApiSchema is not null &&
+			openApiSchema.OneOf is { Count: > 0 })
+		{
+			for (int i = 0; i < openApiSchema.OneOf.Count; i++)
+			{
+				openApiSchema.OneOf[i] = InlineCollectionOrDictionarySchema(openApiSchema.OneOf[i], document);
+			}
+		}
+
+		return schema;
+	}
+
+	static void InlineCollectionsAndDictionariesInSchema(OpenApiSchema schema, OpenApiDocument document)
+	{
+		// Process properties
+		if (schema.Properties is { Count: > 0 })
+		{
+			foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
+			{
+				schema.Properties[propertyName] = InlineCollectionOrDictionarySchema(propertySchema, document);
+			}
+		}
+
+		// Process additionalProperties
+		if (schema.AdditionalProperties is not null)
+		{
+			schema.AdditionalProperties = InlineCollectionOrDictionarySchema(schema.AdditionalProperties, document);
+		}
+
+		// Process items
+		if (schema.Items is not null)
+		{
+			schema.Items = InlineCollectionOrDictionarySchema(schema.Items, document);
+		}
+
+		// Process oneOf
+		if (schema.OneOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.OneOf.Count; i++)
+			{
+				schema.OneOf[i] = InlineCollectionOrDictionarySchema(schema.OneOf[i], document);
+			}
+		}
+
+		// Process allOf
+		if (schema.AllOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.AllOf.Count; i++)
+			{
+				schema.AllOf[i] = InlineCollectionOrDictionarySchema(schema.AllOf[i], document);
+			}
+		}
+
+		// Process anyOf
+		if (schema.AnyOf is { Count: > 0 })
+		{
+			for (int i = 0; i < schema.AnyOf.Count; i++)
+			{
+				schema.AnyOf[i] = InlineCollectionOrDictionarySchema(schema.AnyOf[i], document);
+			}
+		}
+	}
+
+	static bool IsCollectionSchemaReference(string refId) =>
+		refId.EndsWith(SchemaConstants.ArraySuffix, StringComparison.Ordinal) || SchemaConstants.IsCollectionType(refId);
+
+	static bool IsDictionarySchemaReference(string refId) =>
+		SchemaConstants.IsDictionaryType(refId);
+
+	static void RemoveInlinedComponentSchemas(OpenApiDocument document)
+	{
+		if (document.Components?.Schemas is null)
+		{
+			return;
+		}
+
+		List<string> schemasToRemove = [];
+
+		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas.Where(x => IsCollectionSchemaReference(x.Key) || IsDictionarySchemaReference(x.Key)))
+		{
+			schemasToRemove.Add(schemaEntry.Key);
+		}
+
+		foreach (string schemaName in schemasToRemove)
+		{
+			document.Components.Schemas.Remove(schemaName);
+		}
 	}
 }

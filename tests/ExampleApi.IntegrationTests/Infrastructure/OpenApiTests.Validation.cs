@@ -42,11 +42,17 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": 25,
-							"minimum": 10,
-							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25",
-							"format": "double"
+							"oneOf": [
+								{
+									"maximum": 25,
+									"minimum": 10,
+									"type": "number",
+									"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25"
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -164,7 +170,8 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 						"name": "ActualUri",
 						"in": "query",
 						"schema": {
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						}
 					},
 					{
@@ -654,13 +661,19 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 						"in": "query",
 						"required": true,
 						"schema": {
-							"maximum": 100,
-							"exclusiveMaximum": true,
-							"minimum": 0,
-							"exclusiveMinimum": true,
-							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found.",
-							"format": "double"
+							"oneOf": [
+								{
+									"maximum": 100,
+									"exclusiveMaximum": true,
+									"minimum": 0,
+									"exclusiveMinimum": true,
+									"type": "number",
+									"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. "
+								},
+								{
+									"nullable": true
+								}
+							]
 						}
 					},
 					{
@@ -886,7 +899,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		""";
 
 	static readonly string expectedValidationComponenets = """
-			"ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.StatusEnum": {
+				"ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.StatusEnum": {
 			"type": "integer",
 			"description": "Enum: Success, Failure",
 			"enum": [
@@ -1012,7 +1025,8 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"actualUri": {
 					"oneOf": [
 						{
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						},
 						{
 							"nullable": true
@@ -1288,7 +1302,8 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 				"actualUri": {
 					"oneOf": [
 						{
-							"$ref": "#/components/schemas/System.Uri"
+							"type": "string",
+							"format": "uri"
 						},
 						{
 							"nullable": true
@@ -1757,7 +1772,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 							"minimum": 0,
 							"exclusiveMinimum": true,
 							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. "
 						},
 						{
 							"nullable": true
@@ -2090,7 +2105,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 							"minimum": 0,
 							"exclusiveMinimum": true,
 							"type": "number",
-							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. X digits and Y decimals were found."
+							"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. "
 						},
 						{
 							"nullable": true
