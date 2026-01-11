@@ -25,7 +25,6 @@ public static class OpenApiExtensions
 		/// <para>- Add validation logic (fluent validation, data annotation and manual rules)</para>
 		/// <para>// TODO: Here is the wiki guide for more info - </para>
 		/// </summary>
-		/// <param name="options"></param>
 		/// <param name="autoDocumentFluentValidation"></param>
 		/// <param name="appendRulesToPropertyDescription"></param>
 		/// <returns></returns>
