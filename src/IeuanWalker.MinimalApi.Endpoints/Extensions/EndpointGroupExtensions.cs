@@ -8,9 +8,11 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 [ExcludeFromCodeCoverage]
 public static class EndpointGroupExtensions
 {
-	[ExcludeFromCodeCoverage]
-	public static RouteHandlerBuilder Group<TEndpointGroup>(this RouteHandlerBuilder builder) where TEndpointGroup : IEndpointGroup
+	extension(RouteHandlerBuilder source)
 	{
-		return builder;
+		public RouteHandlerBuilder Group<TEndpointGroup>() where TEndpointGroup : IEndpointGroup
+		{
+			return source;
+		}
 	}
 }

@@ -6,44 +6,39 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
 [ExcludeFromCodeCoverage]
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 public static class RequestBindingTypeExtensions
 {
-	[ExcludeFromCodeCoverage]
-	public static RouteHandlerBuilder RequestFromBody(this RouteHandlerBuilder builder)
+	extension(RouteHandlerBuilder source)
 	{
-		return builder;
-	}
+		public RouteHandlerBuilder RequestFromBody()
+		{
+			return source;
+		}
 
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder RequestFromHeader(this RouteHandlerBuilder builder, string? name = null)
-	{
-		return builder;
-	}
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder RequestFromRoute(this RouteHandlerBuilder builder, string? name = null)
-	{
-		return builder;
-	}
+		public RouteHandlerBuilder RequestFromHeader(string? name = null)
+		{
+			return source;
+		}
 
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder RequestFromQuery(this RouteHandlerBuilder builder, string? name = null)
-	{
-		return builder;
-	}
+		public RouteHandlerBuilder RequestFromRoute(string? name = null)
+		{
+			return source;
+		}
 
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder RequestFromForm(this RouteHandlerBuilder builder, string? name = null)
-	{
-		return builder;
-	}
+		public RouteHandlerBuilder RequestFromQuery(string? name = null)
+		{
+			return source;
+		}
 
-	[ExcludeFromCodeCoverage]
-	public static RouteHandlerBuilder RequestAsParameters(this RouteHandlerBuilder builder)
-	{
-		return builder;
+		public RouteHandlerBuilder RequestFromForm(string? name = null)
+		{
+			return source;
+		}
+
+		public RouteHandlerBuilder RequestAsParameters()
+		{
+			return source;
+		}
 	}
 }

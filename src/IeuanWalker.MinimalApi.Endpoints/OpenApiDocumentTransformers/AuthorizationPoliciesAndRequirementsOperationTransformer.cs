@@ -1,12 +1,10 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Text;
+﻿using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
-[ExcludeFromCodeCoverage]
 sealed class AuthorizationPoliciesAndRequirementsOperationTransformer : IOpenApiOperationTransformer
 {
 	public Task TransformAsync(OpenApiOperation operation, OpenApiOperationTransformerContext context, CancellationToken cancellationToken)
