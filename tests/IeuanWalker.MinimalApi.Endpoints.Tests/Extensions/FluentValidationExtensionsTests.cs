@@ -29,6 +29,14 @@ public class FluentValidationExtensionsTests
 			RuleFor(x => x.Value).IsInEnum(typeof(string));
 		}
 	}
+	class NonEnumNullableValidator : AbstractValidator<NullableIntModel>
+	{
+		public NonEnumNullableValidator()
+		{
+			// Passing a non-enum type should throw in the extension
+			RuleFor(x => x.Value).IsInEnum(typeof(string));
+		}
+	}
 
 	class IntModelValidator : AbstractValidator<IntModel>
 	{
@@ -50,6 +58,13 @@ public class FluentValidationExtensionsTests
 	public void IsInEnum_NonEnumType_ThrowsArgumentException()
 	{
 		Should.Throw<ArgumentException>(() => new NonEnumValidator())
+			.ParamName.ShouldBe("enumType");
+	}
+
+	[Fact]
+	public void IsInEnum_NonEnumTypeNullable_ThrowsArgumentException()
+	{
+		Should.Throw<ArgumentException>(() => new NonEnumNullableValidator())
 			.ParamName.ShouldBe("enumType");
 	}
 
