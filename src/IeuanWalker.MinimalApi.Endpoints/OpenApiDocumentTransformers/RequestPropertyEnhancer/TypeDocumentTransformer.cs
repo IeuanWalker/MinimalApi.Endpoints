@@ -807,14 +807,13 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		}
 
 		// Recursively process oneOf schemas
-		if (OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) && openApiSchema is not null)
+		if (OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) &&
+			openApiSchema is not null &&
+			openApiSchema.OneOf is { Count: > 0 })
 		{
-			if (openApiSchema.OneOf is { Count: > 0 })
+			for (int i = 0; i < openApiSchema.OneOf.Count; i++)
 			{
-				for (int i = 0; i < openApiSchema.OneOf.Count; i++)
-				{
-					openApiSchema.OneOf[i] = InlineCollectionOrDictionarySchema(openApiSchema.OneOf[i], document);
-				}
+				openApiSchema.OneOf[i] = InlineCollectionOrDictionarySchema(openApiSchema.OneOf[i], document);
 			}
 		}
 
