@@ -4,7 +4,7 @@ using IeuanWalker.MinimalApi.Endpoints.Filters;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 
-namespace IeuanWalker.MinimalApi.Endpoints.Tests;
+namespace IeuanWalker.MinimalApi.Endpoints.Tests.Filters;
 
 public class FluentValidationFilterTests
 {
