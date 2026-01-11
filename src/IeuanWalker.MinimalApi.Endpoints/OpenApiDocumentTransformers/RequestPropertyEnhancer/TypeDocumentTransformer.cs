@@ -691,12 +691,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					{
 						if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
 						{
-							foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content)
+							foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content.Where(x => x.Value.Schema is not null))
 							{
-								if (contentItem.Value.Schema is not null)
-								{
-									contentItem.Value.Schema = InlineSimpleSystemTypes(contentItem.Value.Schema);
-								}
+								contentItem.Value.Schema = InlineSimpleSystemTypes(contentItem.Value.Schema!);
 							}
 						}
 					}
@@ -743,12 +740,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					// Inline in request body
 					if (operation.Value.RequestBody is OpenApiRequestBody requestBody && requestBody.Content is not null)
 					{
-						foreach (KeyValuePair<string, OpenApiMediaType> contentItem in requestBody.Content)
+						foreach (KeyValuePair<string, OpenApiMediaType> contentItem in requestBody.Content.Where(x => x.Value.Schema is not null))
 						{
-							if (contentItem.Value.Schema is not null)
-							{
-								contentItem.Value.Schema = InlineCollectionOrDictionarySchema(contentItem.Value.Schema, document);
-							}
+							contentItem.Value.Schema = InlineCollectionOrDictionarySchema(contentItem.Value.Schema!, document);
 						}
 					}
 
@@ -759,12 +753,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 						{
 							if (response.Value is OpenApiResponse openApiResponse && openApiResponse.Content is not null)
 							{
-								foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content)
+								foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiResponse.Content.Where(x => x.Value.Schema is not null)
 								{
-									if (contentItem.Value.Schema is not null)
-									{
-										contentItem.Value.Schema = InlineCollectionOrDictionarySchema(contentItem.Value.Schema, document);
-									}
+									contentItem.Value.Schema = InlineCollectionOrDictionarySchema(contentItem.Value.Schema!, document);
 								}
 							}
 						}
