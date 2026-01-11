@@ -2,7 +2,6 @@ using System.Reflection;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
@@ -679,12 +678,9 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				// Process request body - inline IFormFile types
 				if (operation.Value.RequestBody is OpenApiRequestBody openApiRequestBody && openApiRequestBody.Content is not null)
 				{
-					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiRequestBody.Content)
+					foreach (KeyValuePair<string, OpenApiMediaType> contentItem in openApiRequestBody.Content.Where(x => x.Value.Schema is not null))
 					{
-						if (contentItem.Value.Schema is not null)
-						{
-							contentItem.Value.Schema = InlineFileTypeReferences(contentItem.Value.Schema, document);
-						}
+						contentItem.Value.Schema = InlineFileTypeReferences(contentItem.Value.Schema!, document);
 					}
 				}
 
