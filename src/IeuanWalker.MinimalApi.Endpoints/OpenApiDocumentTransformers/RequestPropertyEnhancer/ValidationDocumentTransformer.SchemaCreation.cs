@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Reflection;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 using Microsoft.OpenApi;
@@ -189,15 +187,10 @@ partial class ValidationDocumentTransformer
 
 		List<string> descriptionParts = [];
 
-		string? enumDescription = null;
-		if (!string.IsNullOrEmpty(newInlineSchema.Description) && newInlineSchema.Description.StartsWith("Enum:"))
+		// Prefer enum description if set by ApplyRuleToSchema, otherwise use custom description
+		if (newInlineSchema.Description?.StartsWith("Enum:") == true)
 		{
-			enumDescription = newInlineSchema.Description;
-		}
-
-		if (!string.IsNullOrEmpty(enumDescription))
-		{
-			descriptionParts.Add(enumDescription);
+			descriptionParts.Add(newInlineSchema.Description);
 		}
 		else if (!string.IsNullOrEmpty(customDescription))
 		{
@@ -250,12 +243,9 @@ partial class ValidationDocumentTransformer
 		string? customDescription = rules.OfType<DescriptionRule>().FirstOrDefault()?.Description;
 		List<string> ruleDescriptions = [];
 
-		if (effectiveListRulesInDescription)
+		if (effectiveListRulesInDescription && rules.Any(r => r is RequiredRule))
 		{
-			foreach (RequiredRule _ in rules.OfType<RequiredRule>())
-			{
-				ruleDescriptions.Add("Is required");
-			}
+			ruleDescriptions.Add("Is required");
 		}
 
 		List<string> descriptionParts = [];
@@ -298,12 +288,9 @@ partial class ValidationDocumentTransformer
 		string? customDescription = rules.OfType<DescriptionRule>().FirstOrDefault()?.Description;
 		List<string> ruleDescriptions = [];
 
-		if (effectiveListRulesInDescription)
+		if (effectiveListRulesInDescription && rules.Any(r => r is RequiredRule))
 		{
-			foreach (RequiredRule _ in rules.OfType<RequiredRule>())
-			{
-				ruleDescriptions.Add("Required");
-			}
+			ruleDescriptions.Add("Required");
 		}
 
 		List<string> descriptionParts = [];
