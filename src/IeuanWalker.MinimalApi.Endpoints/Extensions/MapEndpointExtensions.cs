@@ -6,36 +6,30 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 #pragma warning restore IDE0130 // Namespace does not match folder structure
 
 [ExcludeFromCodeCoverage]
+[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
 public static class MapEndpointExtensions
 {
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Get(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
+	extension(RouteHandlerBuilder source)
 	{
-		return builder;
-	}
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Post(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
-	{
-		return builder;
-	}
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Put(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
-	{
-		return builder;
-	}
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Patch(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
-	{
-		return builder;
-	}
-	[ExcludeFromCodeCoverage]
-	[SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "<Pending>")]
-	public static RouteHandlerBuilder Delete(this RouteHandlerBuilder builder, [StringSyntax("Route")] string? pattern = null)
-	{
-		return builder;
+		public RouteHandlerBuilder Get([StringSyntax("Route")] string? pattern = null)
+		{
+			return source;
+		}
+		public RouteHandlerBuilder Post([StringSyntax("Route")] string? pattern = null)
+		{
+			return source;
+		}
+		public RouteHandlerBuilder Put([StringSyntax("Route")] string? pattern = null)
+		{
+			return source;
+		}
+		public RouteHandlerBuilder Patch([StringSyntax("Route")] string? pattern = null)
+		{
+			return source;
+		}
+		public RouteHandlerBuilder Delete([StringSyntax("Route")] string? pattern = null)
+		{
+			return source;
+		}
 	}
 }

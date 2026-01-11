@@ -1,20 +1,25 @@
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 
-[ExcludeFromCodeCoverage]
-sealed class SecuritySchemeTransformer(
-	IAuthenticationSchemeProvider authenticationSchemeProvider,
-	SecuritySchemeTransformerOptions? options = null) : IOpenApiDocumentTransformer
+sealed class SecuritySchemeTransformer : IOpenApiDocumentTransformer
 {
-	readonly SecuritySchemeTransformerOptions _options = options ?? new();
+	readonly SecuritySchemeTransformerOptions _options;
+	readonly IAuthenticationSchemeProvider _authenticationSchemeProvider;
+
+	public SecuritySchemeTransformer(
+		IAuthenticationSchemeProvider authenticationSchemeProvider,
+		SecuritySchemeTransformerOptions? options = null)
+	{
+		_authenticationSchemeProvider = authenticationSchemeProvider;
+		_options = options ?? new();
+	}
 
 	public async Task TransformAsync(OpenApiDocument document, OpenApiDocumentTransformerContext context, CancellationToken cancellationToken)
 	{
-		IEnumerable<AuthenticationScheme> authenticationSchemes = await authenticationSchemeProvider.GetAllSchemesAsync();
+		IEnumerable<AuthenticationScheme> authenticationSchemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
 
 		if (!authenticationSchemes.Any())
 		{
@@ -85,7 +90,6 @@ sealed class SecuritySchemeTransformer(
 /// <summary>
 /// Configuration options for <see cref="SecuritySchemeTransformer"/>.
 /// </summary>
-[ExcludeFromCodeCoverage]
 public class SecuritySchemeTransformerOptions
 {
 	/// <summary>

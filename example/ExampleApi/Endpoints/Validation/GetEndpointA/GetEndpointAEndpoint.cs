@@ -4,9 +4,9 @@ using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Validation.GetEndpointA;
 
+[ExcludeFromCodeCoverage]
 public class GetEndpointAEndpoint : IEndpointWithoutResponse<RequestModel>
 {
-	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder

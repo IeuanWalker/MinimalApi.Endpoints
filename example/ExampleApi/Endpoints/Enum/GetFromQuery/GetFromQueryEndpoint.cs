@@ -4,9 +4,9 @@ using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Enum.GetFromQuery;
 
+[ExcludeFromCodeCoverage]
 public class GetFromQueryEndpoint : IEndpointWithoutResponse<RequestModel>
 {
-	[ExcludeFromCodeCoverage]
 	public static void Configure(RouteHandlerBuilder builder)
 	{
 		builder
