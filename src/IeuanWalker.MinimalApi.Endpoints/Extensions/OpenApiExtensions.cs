@@ -79,7 +79,6 @@ public static class OpenApiExtensions
 		/// Adds security scheme documentation to the OpenAPI document with custom configuration.
 		/// This will automatically document all registered authentication schemes with the specified options.
 		/// </summary>
-		/// <param name="options">The OpenAPI options (passed via AddOpenApi lambda).</param>
 		/// <param name="configure">Action to customize security scheme options.</param>
 		/// <returns>The OpenAPI options for method chaining.</returns>
 		/// <example>
