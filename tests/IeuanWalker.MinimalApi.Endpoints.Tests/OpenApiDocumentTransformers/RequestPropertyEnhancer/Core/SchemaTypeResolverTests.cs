@@ -3,12 +3,6 @@ using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestProper
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
-public enum TestEnum
-{
-	ValueA,
-	ValueB,
-}
-
 public class SchemaTypeResolverTests
 {
 	[Fact]
@@ -18,7 +12,7 @@ public class SchemaTypeResolverTests
 		Type? result = SchemaTypeResolver.GetSchemaType("System.String");
 
 		// Assert
-		Assert.Equal(typeof(string), result);
+		result.ShouldBe(typeof(string));
 	}
 
 	[Fact]
@@ -31,7 +25,7 @@ public class SchemaTypeResolverTests
 		Type? result = SchemaTypeResolver.GetSchemaType(name);
 
 		// Assert
-		Assert.Equal(typeof(TestEnum), result);
+		result.ShouldBe(typeof(TestEnum));
 	}
 
 	[Fact]
@@ -41,7 +35,7 @@ public class SchemaTypeResolverTests
 		Type? result = SchemaTypeResolver.GetSchemaType("NonExistent.Type.That.Does.Not.Exist");
 
 		// Assert
-		Assert.Null(result);
+		result.ShouldBeNull();
 	}
 
 	[Fact]
@@ -55,7 +49,7 @@ public class SchemaTypeResolverTests
 		Type? second = SchemaTypeResolver.GetSchemaType(name);
 
 		// Assert
-		Assert.Same(first, second);
+		first.ShouldBeSameAs(second);
 	}
 
 	[Fact]
@@ -65,7 +59,7 @@ public class SchemaTypeResolverTests
 		Type? result = SchemaTypeResolver.GetEnumType(typeof(TestEnum).FullName!);
 
 		// Assert
-		Assert.Equal(typeof(TestEnum), result);
+		result.ShouldBe(typeof(TestEnum));
 	}
 
 	[Fact]
@@ -75,7 +69,7 @@ public class SchemaTypeResolverTests
 		Type? result = SchemaTypeResolver.GetEnumType("System.String");
 
 		// Assert
-		Assert.Null(result);
+		result.ShouldBeNull();
 	}
 
 	[Fact]
@@ -88,7 +82,7 @@ public class SchemaTypeResolverTests
 		Type? result = SchemaTypeResolver.GetEnumType(nullableIntTypeName);
 
 		// Assert
-		Assert.Null(result);
+		result.ShouldBeNull();
 	}
 
 	[Fact]
@@ -101,7 +95,7 @@ public class SchemaTypeResolverTests
 		Type? result = SchemaTypeResolver.GetEnumType(nullableEnumTypeName);
 
 		// Assert
-		Assert.Equal(typeof(TestEnum), result);
+		result.ShouldBe(typeof(TestEnum));
 	}
 
 	[Fact]
@@ -114,7 +108,7 @@ public class SchemaTypeResolverTests
 		bool result = SchemaTypeResolver.ShouldInspectAssembly(systemAssembly);
 
 		// Assert
-		Assert.False(result);
+		result.ShouldBeFalse();
 	}
 
 	[Fact]
@@ -127,7 +121,7 @@ public class SchemaTypeResolverTests
 		bool result = SchemaTypeResolver.ShouldInspectAssembly(microsoftAssembly);
 
 		// Assert
-		Assert.False(result);
+		result.ShouldBeFalse();
 	}
 
 	[Fact]
@@ -140,7 +134,7 @@ public class SchemaTypeResolverTests
 		bool result = SchemaTypeResolver.ShouldInspectAssembly(testAssembly);
 
 		// Assert
-		Assert.True(result);
+		result.ShouldBeTrue();
 	}
 
 	[Fact]
@@ -153,7 +147,7 @@ public class SchemaTypeResolverTests
 		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(asm);
 
 		// Assert
-		Assert.Contains(typeof(TestEnum), result);
+		result.ShouldContain(typeof(TestEnum));
 	}
 
 	[Fact]
@@ -166,7 +160,13 @@ public class SchemaTypeResolverTests
 		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(asm);
 
 		// Assert
-		Assert.NotNull(result);
-		Assert.NotEmpty(result);
+		result.ShouldNotBeNull();
+		result.ShouldNotBeEmpty();
+	}
+
+	public enum TestEnum
+	{
+		ValueA,
+		ValueB,
 	}
 }
