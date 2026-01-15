@@ -33,7 +33,7 @@ public class EndpointRequestTypeMapperTests
 	public void BuildEndpointToRequestTypeMapping_IgnoresNonRouteEndpoint_ReturnsEmptyMapping()
 	{
 		// Arrange
-		Endpoint endpoint = new Endpoint((RequestDelegate)(_ => Task.CompletedTask), new EndpointMetadataCollection(), "non-route");
+		Endpoint endpoint = new((RequestDelegate)(_ => Task.CompletedTask), new EndpointMetadataCollection(), "non-route");
 		EndpointDataSource endpointDataSource = new SimpleEndpointDataSource(new[]
 		{
 			endpoint
