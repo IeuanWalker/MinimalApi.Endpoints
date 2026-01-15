@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using System.Runtime.Serialization;
+using System.Runtime.CompilerServices;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
@@ -38,9 +38,7 @@ public class EndpointRequestTypeMapperTests
 	{
 		// Create uninitialized context and set ApplicationServices
 		Type contextType = typeof(OpenApiDocumentTransformerContext);
-#pragma warning disable SYSLIB0050
-		object context = FormatterServices.GetUninitializedObject(contextType);
-#pragma warning restore SYSLIB0050
+		object context = RuntimeHelpers.GetUninitializedObject(contextType);
 
 		PropertyInfo? prop = contextType.GetProperty("ApplicationServices", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		prop?.SetValue(context, new ServiceCollection().AddSingleton(ds).BuildServiceProvider());
@@ -53,9 +51,7 @@ public class EndpointRequestTypeMapperTests
 	{
 		// Arrange - context with no EndpointDataSource registered
 		Type contextType = typeof(OpenApiDocumentTransformerContext);
-#pragma warning disable SYSLIB0050
-		object context = FormatterServices.GetUninitializedObject(contextType);
-#pragma warning restore SYSLIB0050
+		object context = RuntimeHelpers.GetUninitializedObject(contextType);
 		// Ensure ApplicationServices is an empty provider to avoid null reference when accessing GetService
 		PropertyInfo? prop = contextType.GetProperty("ApplicationServices", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 		prop?.SetValue(context, new ServiceCollection().BuildServiceProvider());
