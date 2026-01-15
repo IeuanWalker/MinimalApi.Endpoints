@@ -10,9 +10,11 @@ public class OpenApiPathMatcherTests
 	[InlineData("/api/todos/{id}", "/api/todos/{todoId}", true)]
 	public void PathsMatch_ReturnsTrue_ForDirectAndNormalizedAndParameterMatches(string openApiPath, string routePattern, bool expected)
 	{
+		// Arrange + Act
 		bool result = OpenApiPathMatcher.PathsMatch(openApiPath, routePattern);
 
-		Assert.Equal(expected, result);
+		// Assert
+		result.ShouldBe(expected);
 	}
 
 	[Theory]
@@ -21,52 +23,66 @@ public class OpenApiPathMatcherTests
 	[InlineData("/api/v1/endpoint/", "api/v{version:apiVersion}/endpoint", true)]
 	public void PathsMatch_ReturnsTrue_ForVersionPlaceholderMatches(string openApiPath, string routePattern, bool expected)
 	{
+		// Arrange + Act
 		bool result = OpenApiPathMatcher.PathsMatch(openApiPath, routePattern);
 
-		Assert.Equal(expected, result);
+		// Assert
+		result.ShouldBe(expected);
 	}
 
 	[Fact]
 	public void PathsMatch_ReturnsFalse_When_SegmentCountDiffers()
 	{
+		// Arrange
 		string openApi = "/api/v1/endpoint";
 		string route = "/api/v{version:apiVersion}/endpoint/extra";
 
+		// Act
 		bool result = OpenApiPathMatcher.PathsMatch(openApi, route);
 
-		Assert.False(result);
+		// Assert
+		result.ShouldBeFalse();
 	}
 
 	[Fact]
 	public void PathsMatch_ReturnsFalse_ForNonDigitVersionInOpenApi()
 	{
+		// Arrange
 		string openApi = "/api/vx/endpoint"; // 'vx' is not a digit-only version
 		string route = "/api/v{version:apiVersion}/endpoint";
 
+		// Act
 		bool result = OpenApiPathMatcher.PathsMatch(openApi, route);
 
-		Assert.False(result);
+		// Assert
+		result.ShouldBeFalse();
 	}
 
 	[Fact]
 	public void PathsMatch_ReturnsFalse_ForLiteralSegmentAgainstParameter()
 	{
+		// Arrange
 		string openApi = "/api/todos/1";
 		string route = "/api/todos/{id}";
 
+		// Act
 		bool result = OpenApiPathMatcher.PathsMatch(openApi, route);
 
-		Assert.False(result);
+		// Assert
+		result.ShouldBeFalse();
 	}
 
 	[Fact]
 	public void PathsMatch_ReturnsFalse_When_RouteVersionPlaceholderDoesNotContainVersionKeyword()
 	{
+		// Arrange
 		string openApi = "/api/v1/endpoint";
 		string route = "/api/v{ver:api}/endpoint"; // does not contain 'version' substring
 
+		// Act
 		bool result = OpenApiPathMatcher.PathsMatch(openApi, route);
 
-		Assert.False(result);
+		// Assert
+		result.ShouldBeFalse();
 	}
 }
