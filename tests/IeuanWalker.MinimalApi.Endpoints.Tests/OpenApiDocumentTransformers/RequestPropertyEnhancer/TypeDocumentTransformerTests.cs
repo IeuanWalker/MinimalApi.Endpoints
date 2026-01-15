@@ -84,18 +84,18 @@ public class TypeDocumentTransformerTests
 		valuesSchema.OneOf.ShouldNotBeNull();
 		valuesSchema.OneOf.Count.ShouldBe(2);
 
-		OpenApiSchema? first = valuesSchema.OneOf[0] as OpenApiSchema;
-		first.ShouldNotBeNull();
-		first.Type.HasValue.ShouldBeFalse();
-		first.Extensions.ShouldNotBeNull();
-		first.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+        OpenApiSchema? first = valuesSchema.OneOf[0] as OpenApiSchema;
+        first.ShouldNotBeNull();
+        first.Type.ShouldBe(JsonSchemaType.Array);
+        OpenApiSchema? items = first.Items as OpenApiSchema;
+        items.ShouldNotBeNull();
+        items.Type.ShouldBe(JsonSchemaType.String);
 
-		OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
-		second.ShouldNotBeNull();
-		second.Type.ShouldBe(JsonSchemaType.Array);
-		OpenApiSchema? items = second.Items as OpenApiSchema;
-		items.ShouldNotBeNull();
-		items.Type.ShouldBe(JsonSchemaType.String);
+        OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
+        second.ShouldNotBeNull();
+        second.Type.HasValue.ShouldBeFalse();
+        second.Extensions.ShouldNotBeNull();
+        second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
 	}
 
 	[Fact]

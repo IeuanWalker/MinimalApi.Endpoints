@@ -159,6 +159,19 @@ public class ValidationConfigurationBuilderTests
 		Should.Throw<ArgumentException>(() => builder.Property(x => x.Name!.ToUpper()));
 	}
 
+	[Fact]
+	public void Property_SelectingParameter_ThrowsArgumentException()
+	{
+		// Arrange
+		ValidationConfigurationBuilder<TestRequest> builder = new();
+
+		// Act
+		ArgumentException ex = Should.Throw<ArgumentException>(() => builder.Property(x => x));
+
+		// Assert
+		ex.Message.ShouldContain("Expression must be a property selector");
+	}
+
 	#endregion
 
 	#region AppendRulesToPropertyDescription Tests

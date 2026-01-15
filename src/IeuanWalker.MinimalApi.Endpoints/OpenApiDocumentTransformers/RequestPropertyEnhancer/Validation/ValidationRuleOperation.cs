@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
 
 /// <summary>
 /// Base class for validation rule operations that can be applied to a list of rules
 /// </summary>
+[ExcludeFromCodeCoverage]
 abstract record ValidationRuleOperation
 {
 	/// <summary>
