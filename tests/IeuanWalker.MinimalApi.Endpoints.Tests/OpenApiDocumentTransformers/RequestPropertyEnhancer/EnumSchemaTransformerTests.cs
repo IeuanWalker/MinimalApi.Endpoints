@@ -83,6 +83,30 @@ public class EnumSchemaTransformerTests
 		schema.Extensions.ContainsKey("x-enum-descriptions").ShouldBeTrue();
 		schema.Description.ShouldStartWith("Enum:");
 	}
+
+	[Fact]
+	public async Task TransformAsync_WhenSchemaIsReference_DoesNotModifySchema()
+	{
+		// Arrange
+		EnumSchemaTransformer transformer = new();
+		OpenApiSchemaReference reference = new("Some.Type", null, null);
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>()
+				{
+					["Some.Type"] = reference
+				}
+			}
+		};
+
+		// Act
+		await transformer.TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert
+		document.Components.Schemas["Some.Type"].ShouldBe(reference);
+	}
 }
 
 public enum TestLocalEnum
