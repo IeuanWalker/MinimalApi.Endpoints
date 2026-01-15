@@ -25,6 +25,534 @@ public class NullableSchemaReorderTransformerTests
 	}
 
 	[Fact]
+	public async Task TransformAsync_WhenOneOfHasNoNullableMarkers_DoesNothing()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+
+		OpenApiSchema first = new()
+		{
+			Type = JsonSchemaType.String
+		};
+		OpenApiSchema second = new()
+		{
+			Type = JsonSchemaType.Integer
+		};
+
+		OpenApiSchema root = new()
+		{
+			OneOf = [first, second]
+		};
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					["noNullable"] = root
+				}
+			}
+		};
+
+		// Act
+		await transformer.TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert - order unchanged
+		root.OneOf![0].ShouldBe(first);
+		root.OneOf[1].ShouldBe(second);
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenSchemaHasNot_ReordersNestedOneOf()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+
+		OpenApiSchema nonNullSchema = new()
+		{
+			Type = JsonSchemaType.String
+		};
+		OpenApiSchema nullSchema = new()
+		{
+			Type = JsonSchemaType.Null
+		};
+
+		OpenApiSchema notSchema = new()
+		{
+			OneOf = [nullSchema, nonNullSchema]
+		};
+
+		OpenApiSchema root = new()
+		{
+			Not = notSchema
+		};
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					["withNot"] = root
+				}
+			}
+		};
+
+		// Act
+		await transformer.TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert
+		notSchema.OneOf[0].ShouldBe(nonNullSchema);
+		notSchema.OneOf[1].ShouldBe(nullSchema);
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenComponentSchemaIsNull_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					["nullSchema"] = null!
+				}
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenSchemaReferenceUnresolved_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents()
+		};
+
+		// Add a schema reference that points to a non-existent id
+		OpenApiSchemaReference schemaRef = new("missing", document, null);
+		document.Components.Schemas = new Dictionary<string, IOpenApiSchema>
+		{
+			["refRef"] = schemaRef
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+
+
+	[Fact]
+	public async Task TransformAsync_WhenSchemaIsReference_ResolvesAndProcessesReferencedSchema()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+
+		OpenApiSchema nonNullSchema = new()
+		{
+			Type = JsonSchemaType.String
+		};
+		OpenApiSchema nullSchema = new()
+		{
+			Type = JsonSchemaType.Null
+		};
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents()
+		};
+
+		// Referenced schema that needs processing
+		OpenApiSchema referenced = new()
+		{
+			OneOf = [nullSchema, nonNullSchema]
+		};
+
+		// Add the referenced schema under id "ref"
+		document.Components.Schemas = new Dictionary<string, IOpenApiSchema>
+		{
+			["ref"] = referenced
+		};
+
+		// Add a schema reference that points to the above referenced schema
+		OpenApiSchemaReference schemaRef = new("ref", document, null);
+		document.Components.Schemas["refRef"] = schemaRef;
+
+		// Act
+		await transformer.TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert - the referenced schema should have been processed and reordered
+		referenced.OneOf[0].ShouldBe(nonNullSchema);
+		referenced.OneOf[1].ShouldBe(nullSchema);
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenEncodingHasNoHeaders_ContinuesWithoutError()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+
+		OpenApiMediaType mediaType = new()
+		{
+			Schema = new OpenApiSchema { OneOf = [new OpenApiSchema { Type = JsonSchemaType.String }] },
+			Encoding = new Dictionary<string, OpenApiEncoding>
+			{
+				["p"] = new OpenApiEncoding() // Headers left null intentionally
+			}
+		};
+
+		OpenApiOperation op = new()
+		{
+			RequestBody = new OpenApiRequestBody
+			{
+				Content = new Dictionary<string, OpenApiMediaType>
+				{
+					["application/json"] = mediaType
+				}
+			}
+		};
+
+		OpenApiPathItem pathItem = new()
+		{
+			Operations = new Dictionary<HttpMethod, OpenApiOperation>
+			{
+				[HttpMethod.Post] = op
+			}
+		};
+
+		OpenApiDocument document = new()
+		{
+			Paths = new OpenApiPaths
+			{
+				["/x"] = pathItem
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenComponentResponseReferenceUnresolved_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		OpenApiResponseReference respRef = new("missing", null, null);
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Responses = new Dictionary<string, IOpenApiResponse>
+				{
+					["respRef"] = respRef
+				}
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenComponentRequestBodyReferenceUnresolved_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		// Create a request body reference that does not resolve in the document components
+		OpenApiRequestBodyReference rbRef = new("missing", null, null);
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				// Place the reference under a different key so resolution by id fails
+				RequestBodies = new Dictionary<string, IOpenApiRequestBody>
+				{
+					["rbRef"] = rbRef
+				}
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenResponseHeaderReferenceResolvesToHeaderWithNoSchema_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+
+		OpenApiHeaderReference headerRef = new("hdr", null, null);
+		OpenApiResponse response = new()
+		{
+			Headers = new Dictionary<string, IOpenApiHeader>
+			{
+				["h"] = headerRef
+			}
+		};
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Headers = new Dictionary<string, IOpenApiHeader>
+				{
+					["hdr"] = new OpenApiHeader { Schema = null }
+				},
+				Responses = new Dictionary<string, IOpenApiResponse>
+				{
+					["r"] = response
+				}
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenComponentHeaderReferenceUnresolved_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		// Create a header reference that does not resolve in the document components
+		OpenApiHeaderReference headerRef = new("missing", null, null);
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				// Include the header reference under a different key so resolution by id fails
+				Headers = new Dictionary<string, IOpenApiHeader>
+				{
+					["hdrRef"] = headerRef
+				}
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		// ProcessPaths won't touch components.Headers, so call ProcessComponents via TransformAsync covering ResolveReference branch
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenComponentHeaderHasNoSchema_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		OpenApiHeader header = new()
+		{
+			Schema = null
+		};
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Headers = new Dictionary<string, IOpenApiHeader>
+				{
+					["hdr"] = header
+				}
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenComponentParameterHasNoSchema_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		OpenApiParameter parameter = new()
+		{
+			Schema = null
+		};
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Parameters = new Dictionary<string, IOpenApiParameter>
+				{
+					["param"] = parameter
+				}
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenOperationResponsesIsNull_ContinuesWithoutError()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		OpenApiOperation operation = new();
+		// Ensure Responses is explicitly null to hit the null-check branch
+		operation.Responses = null;
+		OpenApiPathItem pathItem = new()
+		{
+			Operations = new Dictionary<HttpMethod, OpenApiOperation>
+			{
+				[HttpMethod.Get] = operation
+			}
+		};
+		OpenApiDocument document = new()
+		{
+			Paths = new OpenApiPaths
+			{
+				["/x"] = pathItem
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenPathItemOperationsIsNull_ContinuesWithoutError()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		OpenApiPathItem pathItem = new(); // Operations defaults to null
+		OpenApiDocument document = new()
+		{
+			Paths = new OpenApiPaths
+			{
+				["/x"] = pathItem
+			}
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenPathsIsNull_DoesNotThrow()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents(),
+			Paths = null!
+		};
+
+		// Act
+		Task task = transformer.TransformAsync(document, null!, CancellationToken.None);
+		await task;
+
+		// Assert
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenAllOfAndAnyOfHaveNullFirst_ReordersToNullLast()
+	{
+		// Arrange
+		NullableSchemaReorderTransformer transformer = new();
+
+		OpenApiSchema nonNullAllOf = new()
+		{
+			Type = JsonSchemaType.String
+		};
+		OpenApiSchema nullAllOf = new()
+		{
+			Type = JsonSchemaType.Null
+		};
+
+		OpenApiSchema nonNullAnyOf = new()
+		{
+			Type = JsonSchemaType.Integer
+		};
+		OpenApiSchema nullableExtAnyOf = OpenApiSchemaHelper.CreateNullableMarker();
+
+		OpenApiSchema root = new()
+		{
+			AllOf = [nullAllOf, nonNullAllOf],
+			AnyOf = [nullableExtAnyOf, nonNullAnyOf]
+		};
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>()
+				{
+					["Mixed"] = root
+				}
+			}
+		};
+
+		// Act
+		await transformer.TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert
+		root.AllOf[0].ShouldBe(nonNullAllOf);
+		root.AllOf[1].ShouldBe(nullAllOf);
+		root.AnyOf[0].ShouldBe(nonNullAnyOf);
+		root.AnyOf[1].ShouldBe(nullableExtAnyOf);
+	}
+
+	[Fact]
 	public async Task TransformAsync_WhenOneOfHasNullFirst_ReordersToNullLast()
 	{
 		// Arrange
