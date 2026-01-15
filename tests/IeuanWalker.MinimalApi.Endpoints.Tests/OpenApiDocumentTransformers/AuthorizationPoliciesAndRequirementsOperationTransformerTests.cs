@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -282,41 +281,34 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 		task.IsCompletedSuccessfully.ShouldBeTrue();
 	}
 
-	static OpenApiOperationTransformerContext CreateContext(IList<object> metadata)
-	{
-		// Create a minimal web application for services
-		WebApplicationBuilder builder = WebApplication.CreateBuilder();
-		WebApplication _ = builder.Build();
-
-		// Create a test ActionDescriptor directly with the metadata
-		TestActionDescriptor actionDescriptor = new(metadata);
-
-		// Create API description
-		ApiDescription apiDescription = new()
+		static OpenApiOperationTransformerContext CreateContext(IList<object> metadata)
 		{
-			ActionDescriptor = actionDescriptor
-		};
+			// Create a minimal web application for services
+			WebApplicationBuilder builder = WebApplication.CreateBuilder();
+			WebApplication app = builder.Build();
 
-		// Use RuntimeHelpers to create instance without calling constructor
-		Type contextType = typeof(OpenApiOperationTransformerContext);
-		object context = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(contextType);
+			// Create a test ActionDescriptor directly with the metadata
+			TestActionDescriptor actionDescriptor = new(metadata);
 
-		// Set the Description property using reflection
-		PropertyInfo? descriptionProp = contextType.GetProperty("Description");
-		descriptionProp?.SetValue(context, apiDescription);
+			// Create API description
+			ApiDescription apiDescription = new()
+			{
+				ActionDescriptor = actionDescriptor
+			};
 
-		return (OpenApiOperationTransformerContext)context;
-	}
+			return new OpenApiOperationTransformerContext
+			{
+				Description = apiDescription,
+				DocumentName = "v1",
+				ApplicationServices = app.Services
+			};
+		}
 
-	class TestActionDescriptor : Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor
-	{
-		public TestActionDescriptor(IList<object> metadata)
+		class TestActionDescriptor : Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor
 		{
-			// Set the backing field using reflection
-			FieldInfo? field = typeof(Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor)
-				.GetField("<EndpointMetadata>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance);
-
-			field?.SetValue(this, metadata);
+			public TestActionDescriptor(IList<object> metadata)
+			{
+				EndpointMetadata = metadata;
+			}
 		}
 	}
-}

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
+﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -13,19 +11,15 @@ public class TypeDocumentTransformerTests
 
 	static OpenApiDocumentTransformerContext CreateMockContext()
 	{
-		// Create a minimal web application for services
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
 		WebApplication app = builder.Build();
 
-		// Create uninitialized instance without calling constructor
-		Type contextType = typeof(OpenApiDocumentTransformerContext);
-		object context = RuntimeHelpers.GetUninitializedObject(contextType);
-
-		// Set the ApplicationServices property using reflection
-		PropertyInfo? applicationServicesProp = contextType.GetProperty("ApplicationServices");
-		applicationServicesProp?.SetValue(context, app.Services);
-
-		return (OpenApiDocumentTransformerContext)context;
+		return new OpenApiDocumentTransformerContext
+		{
+			DocumentName = "v1",
+			DescriptionGroups = [],
+			ApplicationServices = app.Services
+		};
 	}
 
 	#endregion

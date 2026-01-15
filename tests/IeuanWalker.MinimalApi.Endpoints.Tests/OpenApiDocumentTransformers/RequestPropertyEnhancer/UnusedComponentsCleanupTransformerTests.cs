@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
+﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.OpenApi;
@@ -15,13 +14,12 @@ public class UnusedComponentsCleanupTransformerTests
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
 		WebApplication app = builder.Build();
 
-		Type contextType = typeof(OpenApiDocumentTransformerContext);
-		object context = RuntimeHelpers.GetUninitializedObject(contextType);
-
-		System.Reflection.PropertyInfo? applicationServicesProp = contextType.GetProperty("ApplicationServices");
-		applicationServicesProp?.SetValue(context, app.Services);
-
-		return (OpenApiDocumentTransformerContext)context;
+		return new OpenApiDocumentTransformerContext
+		{
+			DocumentName = "v1",
+			DescriptionGroups = [],
+			ApplicationServices = app.Services
+		};
 	}
 
 	static OpenApiDocument CreateDocumentWithPaths(Dictionary<string, IOpenApiSchema>? schemas = null, OpenApiPaths? paths = null)
