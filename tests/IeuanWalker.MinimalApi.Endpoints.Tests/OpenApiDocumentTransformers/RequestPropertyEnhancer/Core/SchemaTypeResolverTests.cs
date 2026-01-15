@@ -1,5 +1,8 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
+using System.Reflection;
+using System.IO;
+
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
 public class SchemaTypeResolverTests
@@ -221,6 +224,42 @@ public class SchemaTypeResolverTests
 		result.ShouldBeFalse();
 	}
 
+	[Fact]
+	public void ShouldInspectAssemblyName_NullOrEmpty_ReturnsFalse()
+	{
+		// Act
+		bool nullResult = SchemaTypeResolver.ShouldInspectAssemblyName(null);
+		bool emptyResult = SchemaTypeResolver.ShouldInspectAssemblyName("");
+
+		// Assert
+		nullResult.ShouldBeFalse();
+		emptyResult.ShouldBeFalse();
+	}
+
+	[Fact]
+	public void GetAssembliesSafe_ProviderThrows_ReturnsEmpty()
+	{
+		// Arrange
+		Func<Assembly[]> provider = () => throw new InvalidOperationException("boom");
+
+		// Act
+		Assembly[] result = SchemaTypeResolver.GetAssembliesSafe(provider);
+
+		// Assert
+		result.ShouldNotBeNull();
+		result.Length.ShouldBe(0);
+	}
+
+	[Fact]
+	public void GetAssembliesSafe_Default_DoesNotThrow()
+	{
+		// Act
+		Assembly[] result = SchemaTypeResolver.GetAssembliesSafe();
+
+		// Assert - should return assemblies or empty but not throw
+		result.ShouldNotBeNull();
+	}
+
 	#endregion
 
 	#region GetLoadableTypes Tests
@@ -229,7 +268,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_ReturnsTypesFromAssembly()
 	{
 		// Act
-		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(typeof(TestEnum).Assembly);
+    IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(TestEnum).Assembly.GetTypes());
 
 		// Assert
 		result.ShouldContain(typeof(TestEnum));
@@ -239,7 +278,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_HandlesEmptyResults()
 	{
 		// Act
-		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(typeof(SchemaTypeResolverTests).Assembly);
+    IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(SchemaTypeResolverTests).Assembly.GetTypes());
 
 		// Assert
 		result.ShouldNotBeNull();
@@ -250,7 +289,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_ReturnsNestedTypes()
 	{
 		// Act
-		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(typeof(OuterClass).Assembly);
+    IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(OuterClass).Assembly.GetTypes());
 
 		// Assert - GetLoadableTypes does return nested types from the assembly
 		result.ShouldContain(typeof(OuterClass.NestedClass));
@@ -260,13 +299,44 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_ReturnsMultipleTypes()
 	{
 		// Act
-		List<Type> result = [.. SchemaTypeResolver.GetLoadableTypes(typeof(TestEnum).Assembly)];
+    List<Type> result = [.. SchemaTypeResolver.GetLoadableTypes(() => typeof(TestEnum).Assembly.GetTypes())];
 
 		// Assert
 		result.Count.ShouldBeGreaterThan(1);
 		result.ShouldContain(typeof(TestEnum));
 		result.ShouldContain(typeof(TestClass));
 	}
+
+	[Fact]
+	public void GetLoadableTypes_ProviderThrows_ReflectionTypeLoadException_ReturnsPartialTypes()
+	{
+		// Arrange - create a ReflectionTypeLoadException-like behavior by throwing one from provider
+		Type[]? types = new Type?[] { typeof(TestEnum), null } as Type[];
+		var ex = new ReflectionTypeLoadException(types!, Array.Empty<Exception>());
+
+		Func<Type[]> provider = () => throw ex;
+
+		// Act
+		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(provider);
+
+		// Assert
+		result.ShouldContain(typeof(TestEnum));
+	}
+
+	[Fact]
+	public void GetLoadableTypes_ProviderThrows_GeneralException_ReturnsEmpty()
+	{
+		// Arrange
+		Func<Type[]> provider = () => throw new InvalidOperationException("boom");
+
+		// Act
+		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(provider);
+
+		// Assert
+		result.ShouldNotBeNull();
+		result.ShouldBeEmpty();
+	}
+
 
 	#endregion
 }
@@ -292,5 +362,7 @@ public class OuterClass
 	public class NestedClass
 	{
 		public string? Property { get; set; }
-	}
+    }
 }
+
+

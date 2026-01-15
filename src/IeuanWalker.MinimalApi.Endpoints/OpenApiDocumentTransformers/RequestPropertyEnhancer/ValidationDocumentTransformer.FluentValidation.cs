@@ -26,7 +26,7 @@ partial class ValidationDocumentTransformer
 				continue;
 			}
 
-			foreach (Type type in SchemaTypeResolver.GetLoadableTypes(assembly))
+			foreach (Type type in SchemaTypeResolver.GetLoadableTypes(() => assembly.GetTypes()))
 			{
 				if (!discoveredValidatorTypes.Add(type))
 				{

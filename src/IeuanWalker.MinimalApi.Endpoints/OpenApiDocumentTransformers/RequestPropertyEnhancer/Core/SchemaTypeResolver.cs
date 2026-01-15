@@ -13,17 +13,36 @@ static class SchemaTypeResolver
 	static readonly ConcurrentDictionary<string, Lazy<Type?>> typeCache = new(StringComparer.Ordinal);
 	static readonly Lazy<Assembly[]> assemblies = new(static () =>
 	{
+		return GetAssembliesSafe();
+	}, LazyThreadSafetyMode.ExecutionAndPublication);
+
+	/// <summary>
+	/// Returns assemblies using the provided delegate and handles exceptions by returning an empty array.
+	/// Public overload with provider is intended for testing the exception path without requiring
+	/// AppDomain manipulation or reflection.
+	/// </summary>
+	public static Assembly[] GetAssembliesSafe(Func<Assembly[]> provider)
+	{
 		try
 		{
-			return [.. AppDomain.CurrentDomain
-				.GetAssemblies()
-				.Where(a => !a.IsDynamic)];
+			return provider();
 		}
+#pragma warning disable CA1031 // Do not catch general exception types
 		catch
 		{
 			return [];
 		}
-	}, LazyThreadSafetyMode.ExecutionAndPublication);
+#pragma warning restore CA1031 // Do not catch general exception types
+	}
+
+	/// <summary>
+	/// Returns the current AppDomain assemblies filtered for non-dynamic assemblies.
+	/// Exceptions are caught and an empty array is returned.
+	/// </summary>
+	public static Assembly[] GetAssembliesSafe()
+	{
+		return GetAssembliesSafe(() => [.. AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic)]);
+	}
 
 	/// <summary>
 	/// Gets the .NET type corresponding to an OpenAPI schema name.
@@ -69,24 +88,29 @@ static class SchemaTypeResolver
 		}
 
 		string? fullName = assembly.FullName;
+		return ShouldInspectAssemblyName(fullName);
+	}
+
+	public static bool ShouldInspectAssemblyName(string? fullName)
+	{
 		if (string.IsNullOrEmpty(fullName))
 		{
 			return false;
 		}
 
 		return !(fullName.StartsWith("System.", StringComparison.Ordinal) ||
-				 fullName.StartsWith("Microsoft.", StringComparison.Ordinal) ||
-				 fullName.StartsWith("netstandard", StringComparison.Ordinal));
+			 fullName.StartsWith("Microsoft.", StringComparison.Ordinal) ||
+			 fullName.StartsWith("netstandard", StringComparison.Ordinal));
 	}
 
 	/// <summary>
 	/// Gets all loadable types from an assembly, handling type load exceptions gracefully.
 	/// </summary>
-	public static IEnumerable<Type> GetLoadableTypes(Assembly assembly)
+	public static IEnumerable<Type> GetLoadableTypes(Func<Type[]> provider)
 	{
 		try
 		{
-			return assembly.GetTypes();
+			return provider();
 		}
 		catch (ReflectionTypeLoadException ex) when (ex.Types is not null)
 		{
