@@ -25,6 +25,31 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 	}
 
 	[Fact]
+	public async Task TransformAsync_WhenActionDescriptorIsNull_DoesNotModifyOperation()
+	{
+		// Arrange
+		AuthorizationPoliciesAndRequirementsOperationTransformer transformer = new();
+		Microsoft.OpenApi.OpenApiOperation operation = new() { Description = "Original description" };
+
+		// Create a context where the ApiDescription.ActionDescriptor is null
+		WebApplicationBuilder builder = WebApplication.CreateBuilder();
+		WebApplication app = builder.Build();
+
+		OpenApiOperationTransformerContext context = new OpenApiOperationTransformerContext
+		{
+			Description = new ApiDescription { ActionDescriptor = null },
+			DocumentName = "v1",
+			ApplicationServices = app.Services
+		};
+
+		// Act
+		await transformer.TransformAsync(operation, context, CancellationToken.None);
+
+		// Assert
+		operation.Description.ShouldStartWith("Original description");
+	}
+
+	[Fact]
 	public async Task TransformAsync_WhenNoAuthorizationPolicies_DoesNotModifyOperation()
 	{
 		// Arrange
