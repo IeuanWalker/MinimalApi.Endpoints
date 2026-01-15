@@ -51,7 +51,10 @@ public class FluentValidationFilterTests
 	{
 		// Arrange
 		IValidator<TestModel> validator = Substitute.For<IValidator<TestModel>>();
-		TestModel testModel = new() { Name = "Test" };
+		TestModel testModel = new()
+		{
+			Name = "Test"
+		};
 
 		validator.ValidateAsync(testModel, Arg.Any<CancellationToken>())
 			.Returns(new ValidationResult());
@@ -81,7 +84,10 @@ public class FluentValidationFilterTests
 	{
 		// Arrange
 		IValidator<TestModel> validator = Substitute.For<IValidator<TestModel>>();
-		TestModel testModel = new() { Name = "" };
+		TestModel testModel = new()
+		{
+			Name = string.Empty
+		};
 
 		ValidationFailure failure = new("Name", "Name is required");
 		ValidationResult validationResult = new([failure]);
