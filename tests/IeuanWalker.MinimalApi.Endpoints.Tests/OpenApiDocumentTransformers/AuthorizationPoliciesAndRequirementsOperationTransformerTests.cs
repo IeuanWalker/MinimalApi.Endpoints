@@ -286,7 +286,7 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 	{
 		// Create a minimal web application for services
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
-		WebApplication app = builder.Build();
+		WebApplication _ = builder.Build();
 
 		// Create a test ActionDescriptor directly with the metadata
 		TestActionDescriptor actionDescriptor = new(metadata);

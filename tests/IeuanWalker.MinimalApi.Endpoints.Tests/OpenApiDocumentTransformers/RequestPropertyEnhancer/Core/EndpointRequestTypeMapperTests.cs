@@ -133,5 +133,5 @@ public class EndpointRequestTypeMapperTests
 		result.ShouldBeNull();
 	}
 
-	static void HandleWithRequest(TestRequest req, CancellationToken ct) { }
+	static void HandleWithRequest(TestRequest _, CancellationToken __) { }
 }

@@ -34,8 +34,7 @@ public class OpenApiSchemaHelperTests
 	{
 		(JsonSchemaType? t, _) = OpenApiSchemaHelper.GetTypeAndFormatFromRefId("MyNamespace.Foo[]");
 		t.ShouldBe(JsonSchemaType.Array);
-		string? f;
-		(t, f) = OpenApiSchemaHelper.GetTypeAndFormatFromRefId(SchemaConstants.ListGenericType + "[System.String]");
+		(t, _) = OpenApiSchemaHelper.GetTypeAndFormatFromRefId(SchemaConstants.ListGenericType + "[System.String]");
 		t.ShouldBe(JsonSchemaType.Array);
 	}
 

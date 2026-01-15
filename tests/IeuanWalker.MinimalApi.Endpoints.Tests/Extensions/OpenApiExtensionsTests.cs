@@ -308,7 +308,16 @@ public class OpenApiExtensionsTests
 				}
 
 				object? val = null;
-				try { val = pi.GetValue(options); } catch { /* Ignore reflection errors */ }
+				try
+				{
+					val = pi.GetValue(options);
+				}
+#pragma warning disable CA1031 // Do not catch general exception types
+				catch
+				{
+					/* Ignore reflection errors */
+				}
+#pragma warning restore CA1031 // Do not catch general exception types
 				if (val is System.Collections.IEnumerable ie && CountEnumerable(ie) > 0)
 				{
 					return true;
