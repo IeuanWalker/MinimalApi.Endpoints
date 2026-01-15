@@ -4,6 +4,8 @@ namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.Req
 
 public class ValidationRuleTests
 {
+	#region RequiredRule Tests
+
 	[Fact]
 	public void RequiredRule_SetsPropertyNameAndDefaultErrorMessage()
 	{
@@ -17,6 +19,56 @@ public class ValidationRuleTests
 		rule.PropertyName.ShouldBe(propName);
 		rule.ErrorMessage.ShouldBe("Is required");
 	}
+
+	[Fact]
+	public void RequiredRule_WithCustomErrorMessage_UsesCustomMessage()
+	{
+		// Arrange
+		string propName = "Name";
+		string customMessage = "This field is mandatory";
+
+		// Act
+		RequiredRule rule = new(propName, customMessage);
+
+		// Assert
+		rule.PropertyName.ShouldBe(propName);
+		rule.ErrorMessage.ShouldBe(customMessage);
+	}
+
+	[Fact]
+	public void RequiredRule_NullPropertyName_ThrowsArgumentException()
+	{
+		// Act & Assert
+		Should.Throw<ArgumentException>(() => new RequiredRule(null!));
+	}
+
+	[Fact]
+	public void RequiredRule_EmptyPropertyName_ThrowsArgumentException()
+	{
+		// Act & Assert
+		Should.Throw<ArgumentException>(() => new RequiredRule(""));
+	}
+
+	[Fact]
+	public void RequiredRule_WhitespacePropertyName_ThrowsArgumentException()
+	{
+		// Act & Assert
+		Should.Throw<ArgumentException>(() => new RequiredRule("   "));
+	}
+
+	[Fact]
+	public void RequiredRule_WhitespaceErrorMessage_UsesDefaultMessage()
+	{
+		// Act
+		RequiredRule rule = new("Name", "   ");
+
+		// Assert
+		rule.ErrorMessage.ShouldBe("Is required");
+	}
+
+	#endregion
+
+	#region StringLengthRule Tests
 
 	[Fact]
 	public void StringLengthRule_ThrowsWhenBothNull()
@@ -54,6 +106,45 @@ public class ValidationRuleTests
 	}
 
 	[Fact]
+	public void StringLengthRule_WithCustomErrorMessage_UsesCustomMessage()
+	{
+		// Arrange
+		string customMessage = "Name must be between 5 and 100 characters";
+
+		// Act
+		StringLengthRule rule = new("Name", 5, 100, customMessage);
+
+		// Assert
+		rule.ErrorMessage.ShouldBe(customMessage);
+	}
+
+	[Fact]
+	public void StringLengthRule_ZeroMinLength_SetsCorrectly()
+	{
+		// Act
+		StringLengthRule rule = new("Name", 0, 100);
+
+		// Assert
+		rule.MinLength.ShouldBe(0);
+		rule.MaxLength.ShouldBe(100);
+	}
+
+	[Fact]
+	public void StringLengthRule_ZeroMaxLength_SetsCorrectly()
+	{
+		// Act
+		StringLengthRule rule = new("Name", null, 0);
+
+		// Assert
+		rule.MinLength.ShouldBeNull();
+		rule.MaxLength.ShouldBe(0);
+	}
+
+	#endregion
+
+	#region PatternRule Tests
+
+	[Fact]
 	public void PatternRule_ThrowsForEmptyPattern()
 	{
 		// Arrange
@@ -61,6 +152,26 @@ public class ValidationRuleTests
 
 		// Act / Assert
 		Should.Throw<ArgumentException>(() => new PatternRule(propName, ""));
+	}
+
+	[Fact]
+	public void PatternRule_ThrowsForNullPattern()
+	{
+		// Arrange
+		string propName = "Code";
+
+		// Act / Assert
+		Should.Throw<ArgumentException>(() => new PatternRule(propName, null!));
+	}
+
+	[Fact]
+	public void PatternRule_ThrowsForWhitespacePattern()
+	{
+		// Arrange
+		string propName = "Code";
+
+		// Act / Assert
+		Should.Throw<ArgumentException>(() => new PatternRule(propName, "   "));
 	}
 
 	[Fact]
@@ -78,6 +189,20 @@ public class ValidationRuleTests
 	}
 
 	[Fact]
+	public void PatternRule_WithCustomErrorMessage_UsesCustomMessage()
+	{
+		// Act
+		PatternRule rule = new("Code", @"^\d{5}$", "Must be a 5-digit ZIP code");
+
+		// Assert
+		rule.ErrorMessage.ShouldBe("Must be a 5-digit ZIP code");
+	}
+
+	#endregion
+
+	#region EmailRule Tests
+
+	[Fact]
 	public void EmailRule_DefaultMessage()
 	{
 		// Arrange
@@ -92,6 +217,20 @@ public class ValidationRuleTests
 	}
 
 	[Fact]
+	public void EmailRule_WithCustomErrorMessage_UsesCustomMessage()
+	{
+		// Act
+		EmailRule rule = new("Email", "Please enter a valid email");
+
+		// Assert
+		rule.ErrorMessage.ShouldBe("Please enter a valid email");
+	}
+
+	#endregion
+
+	#region UrlRule Tests
+
+	[Fact]
 	public void UrlRule_DefaultMessage()
 	{
 		// Arrange
@@ -104,6 +243,20 @@ public class ValidationRuleTests
 		rule.PropertyName.ShouldBe(propName);
 		rule.ErrorMessage.ShouldBe("Must be a valid URL");
 	}
+
+	[Fact]
+	public void UrlRule_WithCustomErrorMessage_UsesCustomMessage()
+	{
+		// Act
+		UrlRule rule = new("Website", "Enter a valid website URL");
+
+		// Assert
+		rule.ErrorMessage.ShouldBe("Enter a valid website URL");
+	}
+
+	#endregion
+
+	#region RangeRule Tests
 
 	[Fact]
 	public void RangeRule_ThrowsWhenBothNull()
@@ -141,6 +294,79 @@ public class ValidationRuleTests
 	}
 
 	[Fact]
+	public void RangeRule_AllExclusiveCombinations_GeneratesCorrectMessages()
+	{
+		// Arrange
+		string propName = "Value";
+
+		// Act - All combinations of exclusive flags
+		RangeRule<int> bothInclusive = new(propName, 1, 10, false, false);
+		RangeRule<int> minExclusive = new(propName, 1, 10, true, false);
+		RangeRule<int> maxExclusive = new(propName, 1, 10, false, true);
+		RangeRule<int> bothExclusive = new(propName, 1, 10, true, true);
+
+		// Assert
+		bothInclusive.ErrorMessage.ShouldContain(">=");
+		bothInclusive.ErrorMessage.ShouldContain("<=");
+
+		minExclusive.ErrorMessage.ShouldContain("> 1");
+		minExclusive.ErrorMessage.ShouldContain("<= 10");
+
+		maxExclusive.ErrorMessage.ShouldContain(">= 1");
+		maxExclusive.ErrorMessage.ShouldContain("< 10");
+
+		bothExclusive.ErrorMessage.ShouldContain("> 1");
+		bothExclusive.ErrorMessage.ShouldContain("< 10");
+	}
+
+	[Fact]
+	public void RangeRule_WithCustomErrorMessage_UsesCustomMessage()
+	{
+		// Act
+		RangeRule<decimal> rule = new("Price", 0.01m, 1000m, false, false, "Price must be between $0.01 and $1000");
+
+		// Assert
+		rule.ErrorMessage.ShouldBe("Price must be between $0.01 and $1000");
+	}
+
+	[Fact]
+	public void RangeRule_SupportsDecimalType()
+	{
+		// Act
+		RangeRule<decimal> rule = new("Price", 0.01m, 999.99m);
+
+		// Assert
+		rule.Minimum.ShouldBe(0.01m);
+		rule.Maximum.ShouldBe(999.99m);
+	}
+
+	[Fact]
+	public void RangeRule_SupportsDoubleType()
+	{
+		// Act
+		RangeRule<double> rule = new("Rating", 0.0, 5.0);
+
+		// Assert
+		rule.Minimum.ShouldBe(0.0);
+		rule.Maximum.ShouldBe(5.0);
+	}
+
+	[Fact]
+	public void RangeRule_SupportsLongType()
+	{
+		// Act
+		RangeRule<long> rule = new("BigNumber", 0L, long.MaxValue);
+
+		// Assert
+		rule.Minimum.ShouldBe(0L);
+		rule.Maximum.ShouldBe(long.MaxValue);
+	}
+
+	#endregion
+
+	#region CustomRule Tests
+
+	[Fact]
 	public void CustomRule_RequiresErrorMessage()
 	{
 		// Arrange
@@ -149,6 +375,35 @@ public class ValidationRuleTests
 		// Act / Assert
 		Should.Throw<ArgumentException>(() => new CustomRule<string>(propName, null!));
 	}
+
+	[Fact]
+	public void CustomRule_EmptyErrorMessage_Throws()
+	{
+		// Act / Assert
+		Should.Throw<ArgumentException>(() => new CustomRule<string>("Prop", ""));
+	}
+
+	[Fact]
+	public void CustomRule_WhitespaceErrorMessage_Throws()
+	{
+		// Act / Assert
+		Should.Throw<ArgumentException>(() => new CustomRule<string>("Prop", "   "));
+	}
+
+	[Fact]
+	public void CustomRule_ValidInput_SetsProperties()
+	{
+		// Act
+		CustomRule<int> rule = new("Age", "Age must be a positive number");
+
+		// Assert
+		rule.PropertyName.ShouldBe("Age");
+		rule.ErrorMessage.ShouldBe("Age must be a positive number");
+	}
+
+	#endregion
+
+	#region DescriptionRule Tests
 
 	[Fact]
 	public void DescriptionRule_RequiresDescription()
@@ -161,6 +416,35 @@ public class ValidationRuleTests
 	}
 
 	[Fact]
+	public void DescriptionRule_EmptyDescription_Throws()
+	{
+		// Act / Assert
+		Should.Throw<ArgumentException>(() => new DescriptionRule("Prop", ""));
+	}
+
+	[Fact]
+	public void DescriptionRule_WhitespaceDescription_Throws()
+	{
+		// Act / Assert
+		Should.Throw<ArgumentException>(() => new DescriptionRule("Prop", "   "));
+	}
+
+	[Fact]
+	public void DescriptionRule_ValidInput_SetsProperties()
+	{
+		// Act
+		DescriptionRule rule = new("Name", "The user's full name");
+
+		// Assert
+		rule.PropertyName.ShouldBe("Name");
+		rule.Description.ShouldBe("The user's full name");
+	}
+
+	#endregion
+
+	#region EnumRule Tests
+
+	[Fact]
 	public void EnumRule_ThrowsForInvalidEnumType()
 	{
 		// Arrange
@@ -168,6 +452,20 @@ public class ValidationRuleTests
 
 		// Act / Assert
 		Should.Throw<ArgumentException>(() => new EnumRule(propName, typeof(string), typeof(string)));
+	}
+
+	[Fact]
+	public void EnumRule_ThrowsForNullEnumType()
+	{
+		// Act / Assert
+		Should.Throw<ArgumentNullException>(() => new EnumRule("Status", null!, typeof(int)));
+	}
+
+	[Fact]
+	public void EnumRule_ThrowsForNullPropertyType()
+	{
+		// Act / Assert
+		Should.Throw<ArgumentNullException>(() => new EnumRule("Status", typeof(DayOfWeek), null!));
 	}
 
 	[Fact]
@@ -185,4 +483,50 @@ public class ValidationRuleTests
 		rule.ErrorMessage.ShouldContain(propName);
 		rule.ErrorMessage.ShouldContain("{value}");
 	}
+
+	[Fact]
+	public void EnumRule_WithCustomErrorMessage_UsesCustomMessage()
+	{
+		// Act
+		EnumRule rule = new("Status", typeof(DayOfWeek), typeof(int), "Invalid status value");
+
+		// Assert
+		rule.ErrorMessage.ShouldBe("Invalid status value");
+	}
+
+	[Fact]
+	public void EnumRule_WithStringPropertyType_SetsPropertyType()
+	{
+		// Act
+		EnumRule rule = new("Status", typeof(DayOfWeek), typeof(string));
+
+		// Assert
+		rule.PropertyType.ShouldBe(typeof(string));
+	}
+
+	#endregion
+
+	#region AppendRuleToPropertyDescription Tests
+
+	[Fact]
+	public void ValidationRule_AppendRuleToPropertyDescription_DefaultsToNull()
+	{
+		// Act
+		RequiredRule rule = new("Name");
+
+		// Assert
+		rule.AppendRuleToPropertyDescription.ShouldBeNull();
+	}
+
+	[Fact]
+	public void ValidationRule_AppendRuleToPropertyDescription_CanBeSetViaInit()
+	{
+		// Act
+		RequiredRule rule = new("Name") { AppendRuleToPropertyDescription = false };
+
+		// Assert
+		rule.AppendRuleToPropertyDescription.ShouldBe(false);
+	}
+
+	#endregion
 }
