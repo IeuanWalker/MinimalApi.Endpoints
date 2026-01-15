@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
+using Shouldly;
 using Xunit;
 
 public class ValidationRuleOperationTests
@@ -22,8 +23,8 @@ public class ValidationRuleOperationTests
 		op.Apply(rules);
 
 		// Assert
-		Assert.Single(rules);
-		Assert.Equal("New message", rules[0].ErrorMessage);
+		rules.Count.ShouldBe(1);
+		rules[0].ErrorMessage.ShouldBe("New message");
 	}
 
 	[Fact]
@@ -34,8 +35,8 @@ public class ValidationRuleOperationTests
 		AlterOperation op = new("Not found", "New message");
 
 		// Act & Assert
-		ArgumentException ex = Assert.Throws<ArgumentException>(() => op.Apply(rules));
-		Assert.Contains("No validation rule exists with error message", ex.Message);
+		ArgumentException ex = Should.Throw<ArgumentException>(() => op.Apply(rules));
+		ex.Message.ShouldContain("No validation rule exists with error message");
 	}
 
 	[Fact]
@@ -54,8 +55,8 @@ public class ValidationRuleOperationTests
 		op.Apply(rules);
 
 		// Assert
-		Assert.Single(rules);
-		Assert.Equal("Keep me", rules[0].ErrorMessage);
+		rules.Count.ShouldBe(1);
+		rules[0].ErrorMessage.ShouldBe("Keep me");
 	}
 
 	[Fact]
@@ -66,8 +67,8 @@ public class ValidationRuleOperationTests
 		RemoveOperation op = new("Does not exist");
 
 		// Act & Assert
-		ArgumentException ex = Assert.Throws<ArgumentException>(() => op.Apply(rules));
-		Assert.Contains("No validation rule exists with error message", ex.Message);
+		ArgumentException ex = Should.Throw<ArgumentException>(() => op.Apply(rules));
+		ex.Message.ShouldContain("No validation rule exists with error message");
 	}
 
 	[Fact]
@@ -81,7 +82,7 @@ public class ValidationRuleOperationTests
 		op.Apply(rules);
 
 		// Assert
-		Assert.Empty(rules);
+		rules.ShouldBeEmpty();
 	}
 
 	[Fact]
@@ -92,7 +93,7 @@ public class ValidationRuleOperationTests
 		RemoveAllOperation op = new();
 
 		// Act & Assert
-		InvalidOperationException ex = Assert.Throws<InvalidOperationException>(() => op.Apply(rules));
-		Assert.Equal("No validation rules exist to remove.", ex.Message);
+		InvalidOperationException ex = Should.Throw<InvalidOperationException>(() => op.Apply(rules));
+		ex.Message.ShouldBe("No validation rules exist to remove.");
 	}
 }

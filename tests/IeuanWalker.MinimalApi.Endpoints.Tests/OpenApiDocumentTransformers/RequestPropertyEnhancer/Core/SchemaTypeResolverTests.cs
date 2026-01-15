@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
+﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
@@ -49,7 +48,7 @@ public class SchemaTypeResolverTests
 		Type? second = SchemaTypeResolver.GetSchemaType(name);
 
 		// Assert
-		first.ShouldBeSameAs(second);
+		second.ShouldBeSameAs(first);
 	}
 
 	[Fact]
@@ -101,11 +100,8 @@ public class SchemaTypeResolverTests
 	[Fact]
 	public void ShouldInspectAssembly_FiltersSystemAssembly()
 	{
-		// Arrange
-		Assembly systemAssembly = typeof(string).Assembly;
-
 		// Act
-		bool result = SchemaTypeResolver.ShouldInspectAssembly(systemAssembly);
+		bool result = SchemaTypeResolver.ShouldInspectAssembly(typeof(string).Assembly);
 
 		// Assert
 		result.ShouldBeFalse();
@@ -114,11 +110,8 @@ public class SchemaTypeResolverTests
 	[Fact]
 	public void ShouldInspectAssembly_FiltersMicrosoftAssembly()
 	{
-		// Arrange
-		Assembly microsoftAssembly = typeof(System.ComponentModel.DataAnnotations.RequiredAttribute).Assembly;
-
 		// Act
-		bool result = SchemaTypeResolver.ShouldInspectAssembly(microsoftAssembly);
+		bool result = SchemaTypeResolver.ShouldInspectAssembly(typeof(System.ComponentModel.DataAnnotations.RequiredAttribute).Assembly);
 
 		// Assert
 		result.ShouldBeFalse();
@@ -127,11 +120,8 @@ public class SchemaTypeResolverTests
 	[Fact]
 	public void ShouldInspectAssembly_AllowsLocalAssembly()
 	{
-		// Arrange
-		Assembly testAssembly = Assembly.GetExecutingAssembly();
-
 		// Act
-		bool result = SchemaTypeResolver.ShouldInspectAssembly(testAssembly);
+		bool result = SchemaTypeResolver.ShouldInspectAssembly(typeof(TestEnum).Assembly);
 
 		// Assert
 		result.ShouldBeTrue();
@@ -140,33 +130,27 @@ public class SchemaTypeResolverTests
 	[Fact]
 	public void GetLoadableTypes_ReturnsTypesFromAssembly()
 	{
-		// Arrange
-		Assembly asm = Assembly.GetExecutingAssembly();
-
 		// Act
-		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(asm);
+		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(typeof(TestEnum).Assembly);
 
 		// Assert
 		result.ShouldContain(typeof(TestEnum));
 	}
 
 	[Fact]
-	public void GetLoadableTypes_ReturnsEmptyForInvalidAssembly()
+	public void GetLoadableTypes_HandlesEmptyResults()
 	{
-		// Arrange
-		Assembly asm = Assembly.GetExecutingAssembly();
-
 		// Act
-		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(asm);
+		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(typeof(SchemaTypeResolverTests).Assembly);
 
 		// Assert
 		result.ShouldNotBeNull();
 		result.ShouldNotBeEmpty();
 	}
+}
 
-	public enum TestEnum
-	{
-		ValueA,
-		ValueB,
-	}
+public enum TestEnum
+{
+	ValueA,
+	ValueB,
 }
