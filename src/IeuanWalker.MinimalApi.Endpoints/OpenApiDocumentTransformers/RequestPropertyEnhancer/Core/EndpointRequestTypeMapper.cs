@@ -17,9 +17,7 @@ static class EndpointRequestTypeMapper
 	/// <param name="context">The OpenAPI document transformer context.</param>
 	/// <param name="filterPredicate">Optional predicate to filter which types to include.</param>
 	/// <returns>A dictionary mapping route patterns to request types.</returns>
-	public static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(
-		OpenApiDocumentTransformerContext context,
-		Func<Type, bool>? filterPredicate = null)
+	public static Dictionary<string, Type> BuildEndpointToRequestTypeMapping(OpenApiDocumentTransformerContext context, Func<Type, bool>? filterPredicate = null)
 	{
 		Dictionary<string, Type> mapping = new(StringComparer.OrdinalIgnoreCase);
 
