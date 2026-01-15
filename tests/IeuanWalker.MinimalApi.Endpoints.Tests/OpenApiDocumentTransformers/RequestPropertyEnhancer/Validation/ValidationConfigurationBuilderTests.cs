@@ -4,18 +4,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.Req
 
 public class ValidationConfigurationBuilderTests
 {
-	class Nested
-	{
-		public string? StringMin { get; set; }
-	}
-
-	class TestRequest
-	{
-		public string? Name { get; set; }
-		public Nested? Nested { get; set; }
-		public List<Nested>? ListNestedObject { get; set; }
-	}
-
 	[Fact]
 	public void Build_CollectsRulesAndOperations_ForSimpleNestedAndArrayProperties()
 	{
@@ -68,5 +56,17 @@ public class ValidationConfigurationBuilderTests
 		RequiredRule? nameRule = config.Rules.OfType<RequiredRule>().FirstOrDefault(r => r.PropertyName == "Name");
 		nameRule.ShouldNotBeNull();
 		nameRule.AppendRuleToPropertyDescription.ShouldBe(true);
+	}
+
+	class Nested
+	{
+		public string? StringMin { get; set; }
+	}
+
+	class TestRequest
+	{
+		public string? Name { get; set; }
+		public Nested? Nested { get; set; }
+		public List<Nested>? ListNestedObject { get; set; }
 	}
 }
