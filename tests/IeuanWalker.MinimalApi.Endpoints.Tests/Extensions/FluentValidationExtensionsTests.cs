@@ -5,6 +5,77 @@ namespace IeuanWalker.MinimalApi.Endpoints.Tests.Extensions;
 
 public class FluentValidationExtensionsTests
 {
+	[Fact]
+	public void IsInEnum_NonEnumType_ThrowsArgumentException()
+	{
+		// Arrange + Act + Assert
+		Should.Throw<ArgumentException>(() => new NonEnumValidator())
+			.ParamName.ShouldBe("enumType");
+	}
+
+	[Fact]
+	public void IsInEnum_NonEnumTypeNullable_ThrowsArgumentException()
+	{
+		// Arrange + Act + Assert
+		Should.Throw<ArgumentException>(() => new NonEnumNullableValidator())
+			.ParamName.ShouldBe("enumType");
+	}
+
+	[Fact]
+	public void IsInEnum_IntValue_ValidAndInvalid()
+	{
+		// Arrange
+		IntModelValidator validator = new();
+		IntModel valid = new()
+		{
+			Value = (int)TestEnum.One
+		};
+		IntModel invalid = new()
+		{
+			Value = 999
+		};
+
+		// Act
+		ValidationResult resultValid = validator.Validate(valid);
+		ValidationResult resultInvalid = validator.Validate(invalid);
+
+		// Assert
+		resultValid.IsValid.ShouldBeTrue();
+		resultInvalid.IsValid.ShouldBeFalse();
+		resultInvalid.Errors.Single().ErrorMessage.ShouldBe("Value must be a valid value of enum TestEnum.");
+	}
+
+	[Fact]
+	public void IsInEnum_NullableIntValue_AllCases()
+	{
+		// Arrange
+		NullableIntModelValidator validator = new();
+		NullableIntModel nullModel = new()
+		{
+			Value = null
+		};
+		NullableIntModel validModel = new()
+		{
+			Value = (int)TestEnum.Zero
+		};
+		NullableIntModel invalidModel = new()
+		{
+			Value = 1234
+		};
+
+		// Act & Assert
+		ValidationResult resultValid1 = validator.Validate(nullModel);
+		ValidationResult resultValid2 = validator.Validate(validModel);
+		ValidationResult invalidResult = validator.Validate(invalidModel);
+
+		// Assert
+		resultValid1.IsValid.ShouldBeTrue();
+		resultValid2.IsValid.ShouldBeTrue();
+		invalidResult.IsValid.ShouldBeFalse();
+		invalidResult.Errors.Single().ErrorMessage.ShouldBe("Value must be empty or a valid value of enum TestEnum.");
+	}
+
+
 	enum TestEnum
 	{
 		Zero = 0,
@@ -52,52 +123,5 @@ public class FluentValidationExtensionsTests
 		{
 			RuleFor(x => x.Value).IsInEnum(typeof(TestEnum));
 		}
-	}
-
-	[Fact]
-	public void IsInEnum_NonEnumType_ThrowsArgumentException()
-	{
-		Should.Throw<ArgumentException>(() => new NonEnumValidator())
-			.ParamName.ShouldBe("enumType");
-	}
-
-	[Fact]
-	public void IsInEnum_NonEnumTypeNullable_ThrowsArgumentException()
-	{
-		Should.Throw<ArgumentException>(() => new NonEnumNullableValidator())
-			.ParamName.ShouldBe("enumType");
-	}
-
-	[Fact]
-	public void IsInEnum_IntValue_ValidAndInvalid()
-	{
-		IntModelValidator validator = new();
-
-		IntModel valid = new() { Value = (int)TestEnum.One };
-		IntModel invalid = new() { Value = 999 };
-
-		ValidationResult resultValid = validator.Validate(valid);
-		resultValid.IsValid.ShouldBeTrue();
-
-		ValidationResult resultInvalid = validator.Validate(invalid);
-		resultInvalid.IsValid.ShouldBeFalse();
-		resultInvalid.Errors.Single().ErrorMessage.ShouldBe("Value must be a valid value of enum TestEnum.");
-	}
-
-	[Fact]
-	public void IsInEnum_NullableIntValue_AllCases()
-	{
-		NullableIntModelValidator validator = new();
-
-		NullableIntModel nullModel = new() { Value = null };
-		NullableIntModel validModel = new() { Value = (int)TestEnum.Zero };
-		NullableIntModel invalidModel = new() { Value = 1234 };
-
-		validator.Validate(nullModel).IsValid.ShouldBeTrue();
-		validator.Validate(validModel).IsValid.ShouldBeTrue();
-
-		ValidationResult invalidResult = validator.Validate(invalidModel);
-		invalidResult.IsValid.ShouldBeFalse();
-		invalidResult.Errors.Single().ErrorMessage.ShouldBe("Value must be empty or a valid value of enum TestEnum.");
 	}
 }
