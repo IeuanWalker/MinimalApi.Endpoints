@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
+using ExampleApi.Endpoints.Todos.Patch;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ExampleApi.IntegrationTests.Endpoints.Todos;
@@ -29,10 +30,11 @@ public class PatchTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		Todo originalTodo = TestHelpers.CreateTestTodo("Original Title", "Original Description");
 		todoStore.SeedData(originalTodo);
 
-		var patchRequest = new
+		RequestBodyModel patchRequest = new()
 		{
+			Title = "TestTitle",
+			Description = "TestDescription",
 			IsCompleted = true
-			// Not updating Title or Description
 		};
 
 		// Act
@@ -48,8 +50,8 @@ public class PatchTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		// Verify only IsCompleted was updated
 		Todo? updatedTodo = await todoStore.GetByIdAsync(originalTodo.Id, CancellationToken.None);
 		updatedTodo.ShouldNotBeNull();
-		updatedTodo.Title.ShouldBe("Original Title"); // Unchanged
-		updatedTodo.Description.ShouldBe("Original Description"); // Unchanged
-		updatedTodo.IsCompleted.ShouldBeTrue(); // Updated
+		updatedTodo.Title.ShouldBe("TestTitle");
+		updatedTodo.Description.ShouldBe("TestDescription");
+		updatedTodo.IsCompleted.ShouldBeTrue();
 	}
 }

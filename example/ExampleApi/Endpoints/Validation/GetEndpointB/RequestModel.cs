@@ -1,15 +1,18 @@
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExampleApi.Endpoints.Validation.GetEndpointB;
 
+[ExcludeFromCodeCoverage]
 public class RequestModel
 {
 	[FromQuery]
 	public string Name { get; set; } = string.Empty;
 }
 
+[ExcludeFromCodeCoverage]
 sealed class RequestModelValidator : Validator<RequestModel>
 {
 	public RequestModelValidator()

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Validation;
 
 namespace ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody;
@@ -274,7 +275,7 @@ public class NestedObjectModel
 	public string CustomValidationWithDefaultMessageOverrideMessage { get; set; } = string.Empty;
 }
 
-// Helper validator used by CustomValidationAttribute
+[ExcludeFromCodeCoverage]
 public static class RequestModelValidators
 {
 	public static ValidationResult? ValidateCustomProperty(object? value, ValidationContext context)
@@ -288,6 +289,7 @@ public static class RequestModelValidators
 	}
 }
 
+[ExcludeFromCodeCoverage]
 public class WithDefaultErrorMessageAttribute : ValidationAttribute
 {
 	public WithDefaultErrorMessageAttribute()
@@ -311,6 +313,7 @@ public class WithDefaultErrorMessageAttribute : ValidationAttribute
 	}
 }
 
+[ExcludeFromCodeCoverage]
 public class WithoutDefaultErrorMessageAttribute : ValidationAttribute
 {
 	public WithoutDefaultErrorMessageAttribute()
