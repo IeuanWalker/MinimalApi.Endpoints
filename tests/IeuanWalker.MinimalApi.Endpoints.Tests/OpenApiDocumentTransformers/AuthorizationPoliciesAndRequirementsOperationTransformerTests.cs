@@ -297,11 +297,9 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 			ActionDescriptor = actionDescriptor
 		};
 
-		// Use FormatterServices to create instance without calling constructor
+		// Use RuntimeHelpers to create instance without calling constructor
 		Type contextType = typeof(OpenApiOperationTransformerContext);
-#pragma warning disable SYSLIB0050 // FormatterServices is obsolete
-		object context = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(contextType);
-#pragma warning restore SYSLIB0050
+		object context = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(contextType);
 
 		// Set the Description property using reflection
 		PropertyInfo? descriptionProp = contextType.GetProperty("Description");
