@@ -1,4 +1,11 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing.Patterns;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
@@ -20,6 +27,119 @@ public class EndpointRequestTypeMapperTests
 
 		// Assert
 		result.ShouldBe(typeof(TestRequest));
+	}
+
+	[Fact]
+	public void BuildEndpointToRequestTypeMapping_IgnoresNonRouteEndpoint_ReturnsEmptyMapping()
+	{
+		// Arrange
+		Endpoint endpoint = new Endpoint((RequestDelegate)(_ => Task.CompletedTask), new EndpointMetadataCollection(), "non-route");
+		EndpointDataSource endpointDataSource = new SimpleEndpointDataSource(new[]
+		{
+			endpoint
+		});
+
+		ServiceProvider services = new ServiceCollection()
+			.AddSingleton<EndpointDataSource>(endpointDataSource)
+			.BuildServiceProvider();
+
+		OpenApiDocumentTransformerContext context = new()
+		{
+			DocumentName = "v1",
+			ApplicationServices = services,
+			DescriptionGroups = new List<ApiDescriptionGroup>()
+		};
+
+		// Act
+		Dictionary<string, Type> result = EndpointRequestTypeMapper.BuildEndpointToRequestTypeMapping(context);
+
+		// Assert
+		result.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BuildEndpointToRequestTypeMapping_RouteEndpointWithNoMethodInfo_ReturnsEmptyMapping()
+	{
+		// Arrange
+		string routePatternText = "/api/test/{id}";
+
+		RoutePattern routePattern = RoutePatternFactory.Parse(routePatternText);
+		RouteEndpoint routeEndpoint = new(
+			(RequestDelegate)(_ => Task.CompletedTask),
+			routePattern,
+			order: 0,
+			metadata: new EndpointMetadataCollection(),
+			displayName: "test");
+
+		EndpointDataSource endpointDataSource = new SimpleEndpointDataSource([routeEndpoint]);
+
+		ServiceProvider services = new ServiceCollection()
+			.AddSingleton<EndpointDataSource>(endpointDataSource)
+			.BuildServiceProvider();
+
+		OpenApiDocumentTransformerContext context = new()
+		{
+			DocumentName = "v1",
+			ApplicationServices = services,
+			DescriptionGroups = []
+		};
+
+		// Act
+		Dictionary<string, Type> result = EndpointRequestTypeMapper.BuildEndpointToRequestTypeMapping(context);
+
+		// Assert
+		result.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BuildEndpointToRequestTypeMapping_RouteEndpointWithEmptyRoutePattern_ReturnsEmptyMapping()
+	{
+		// Arrange
+		RoutePattern routePattern = RoutePatternFactory.Parse(string.Empty);
+		RouteEndpoint routeEndpoint = new(
+			(RequestDelegate)(_ => Task.CompletedTask),
+			routePattern,
+			order: 0,
+			metadata: new EndpointMetadataCollection(),
+			displayName: "test");
+
+		EndpointDataSource endpointDataSource = new SimpleEndpointDataSource([routeEndpoint]);
+
+		ServiceProvider services = new ServiceCollection()
+			.AddSingleton<EndpointDataSource>(endpointDataSource)
+			.BuildServiceProvider();
+
+		OpenApiDocumentTransformerContext context = new()
+		{
+			DocumentName = "v1",
+			ApplicationServices = services,
+			DescriptionGroups = []
+		};
+
+		// Act
+		Dictionary<string, Type> result = EndpointRequestTypeMapper.BuildEndpointToRequestTypeMapping(context);
+
+		// Assert
+		result.ShouldBeEmpty();
+	}
+
+	[Fact]
+	public void BuildEndpointToRequestTypeMapping_NoEndpointDataSource_ReturnsEmptyMapping()
+	{
+		// Arrange
+		ServiceProvider services = new ServiceCollection().BuildServiceProvider();
+		OpenApiDocumentTransformerContext context = new()
+		{
+			DocumentName = "v1",
+			ApplicationServices = services,
+			DescriptionGroups = new List<ApiDescriptionGroup>()
+		};
+
+		// Act
+		Dictionary<string, Type> result = EndpointRequestTypeMapper.BuildEndpointToRequestTypeMapping(context);
+
+		// Assert
+		result.ShouldBeEmpty();
 	}
 
 	[Fact]
@@ -101,12 +221,27 @@ public class EndpointRequestTypeMapperTests
 		// The first match in iteration order wins
 	}
 
-		#endregion
+	#endregion
 
-		#region Test Types
+	#region Test Types
 
-		class TestRequest { public string? Name { get; set; } }
-		class AnotherRequest { public int Id { get; set; } }
+	class TestRequest { public string? Name { get; set; } }
+	class AnotherRequest { public int Id { get; set; } }
 
-		#endregion
+	class SimpleEndpointDataSource : EndpointDataSource
+	{
+		public SimpleEndpointDataSource(IEnumerable<Endpoint> endpoints)
+		{
+			Endpoints = endpoints.ToList();
+		}
+
+		public override IReadOnlyList<Endpoint> Endpoints { get; }
+
+		public override IChangeToken GetChangeToken()
+		{
+			return new CancellationChangeToken(new CancellationToken());
+		}
 	}
+
+	#endregion
+}

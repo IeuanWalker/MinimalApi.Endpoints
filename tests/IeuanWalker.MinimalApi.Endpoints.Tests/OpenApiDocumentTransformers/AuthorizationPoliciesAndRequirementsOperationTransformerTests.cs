@@ -35,9 +35,9 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
 		WebApplication app = builder.Build();
 
-		OpenApiOperationTransformerContext context = new OpenApiOperationTransformerContext
+		OpenApiOperationTransformerContext context = new()
 		{
-			Description = new ApiDescription { ActionDescriptor = null },
+			Description = new ApiDescription { ActionDescriptor = null! },
 			DocumentName = "v1",
 			ApplicationServices = app.Services
 		};
@@ -306,34 +306,34 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 		task.IsCompletedSuccessfully.ShouldBeTrue();
 	}
 
-		static OpenApiOperationTransformerContext CreateContext(IList<object> metadata)
+	static OpenApiOperationTransformerContext CreateContext(IList<object> metadata)
+	{
+		// Create a minimal web application for services
+		WebApplicationBuilder builder = WebApplication.CreateBuilder();
+		WebApplication app = builder.Build();
+
+		// Create a test ActionDescriptor directly with the metadata
+		TestActionDescriptor actionDescriptor = new(metadata);
+
+		// Create API description
+		ApiDescription apiDescription = new()
 		{
-			// Create a minimal web application for services
-			WebApplicationBuilder builder = WebApplication.CreateBuilder();
-			WebApplication app = builder.Build();
+			ActionDescriptor = actionDescriptor
+		};
 
-			// Create a test ActionDescriptor directly with the metadata
-			TestActionDescriptor actionDescriptor = new(metadata);
-
-			// Create API description
-			ApiDescription apiDescription = new()
-			{
-				ActionDescriptor = actionDescriptor
-			};
-
-			return new OpenApiOperationTransformerContext
-			{
-				Description = apiDescription,
-				DocumentName = "v1",
-				ApplicationServices = app.Services
-			};
-		}
-
-		class TestActionDescriptor : Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor
+		return new OpenApiOperationTransformerContext
 		{
-			public TestActionDescriptor(IList<object> metadata)
-			{
-				EndpointMetadata = metadata;
-			}
+			Description = apiDescription,
+			DocumentName = "v1",
+			ApplicationServices = app.Services
+		};
+	}
+
+	class TestActionDescriptor : Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor
+	{
+		public TestActionDescriptor(IList<object> metadata)
+		{
+			EndpointMetadata = metadata;
 		}
 	}
+}
