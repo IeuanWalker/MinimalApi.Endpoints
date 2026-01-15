@@ -8,16 +8,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.Tests.Filters;
 
 public class FluentValidationFilterTests
 {
-	public class TestModel
-	{
-		public string Name { get; set; } = string.Empty;
-	}
-
-	public class OtherModel
-	{
-		public int Id { get; set; }
-	}
-
 	[Fact]
 	public void Constructor_WhenValidatorIsNull_ThrowsArgumentNullException()
 	{
@@ -326,5 +316,15 @@ public class FluentValidationFilterTests
 		result.ShouldBe(expectedResult);
 		await validator.DidNotReceive().ValidateAsync(Arg.Any<TestModel>(), Arg.Any<CancellationToken>());
 		await next.Received(1).Invoke(context);
+	}
+
+	public class TestModel
+	{
+		public string Name { get; set; } = string.Empty;
+	}
+
+	public class OtherModel
+	{
+		public int Id { get; set; }
 	}
 }

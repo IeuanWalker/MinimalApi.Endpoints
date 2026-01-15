@@ -153,12 +153,6 @@ public class OpenApiExtensionsTests
 		result.ShouldBeSameAs(route);
 	}
 
-	class SampleRequest
-	{
-		public string? Title { get; set; }
-		public string? Description { get; set; }
-	}
-
 	[Fact]
 	public void WithValidationRules_ReturnsSameBuilder()
 	{
@@ -240,4 +234,9 @@ public class OpenApiExtensionsTests
 		result.ShouldBeSameAs(route);
 	}
 
+	class SampleRequest
+	{
+		public string? Title { get; set; }
+		public string? Description { get; set; }
+	}
 }
