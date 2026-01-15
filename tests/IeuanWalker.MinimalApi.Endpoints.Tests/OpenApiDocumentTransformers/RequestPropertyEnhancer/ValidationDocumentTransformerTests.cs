@@ -6,76 +6,8 @@ using ValidationRule = IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransform
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
-public partial class ValidationDocumentTransformerTests
+public class ValidationDocumentTransformerTests
 {
-	#region Test Helpers
-
-	static OpenApiDocument CreateTestDocument()
-	{
-		return new OpenApiDocument
-		{
-			Components = new OpenApiComponents
-			{
-				Schemas = new Dictionary<string, IOpenApiSchema>()
-			}
-		};
-	}
-
-	static OpenApiSchema CreateStringSchema()
-	{
-		return new OpenApiSchema
-		{
-			Type = JsonSchemaType.String
-		};
-	}
-
-	static OpenApiSchema CreateIntegerSchema()
-	{
-		return new OpenApiSchema
-		{
-			Type = JsonSchemaType.Integer,
-			Format = "int32"
-		};
-	}
-
-	static OpenApiSchema CreateNumberSchema()
-	{
-		return new OpenApiSchema
-		{
-			Type = JsonSchemaType.Number,
-			Format = "double"
-		};
-	}
-
-	static OpenApiSchema CreateArraySchema(IOpenApiSchema itemsSchema)
-	{
-		return new OpenApiSchema
-		{
-			Type = JsonSchemaType.Array,
-			Items = itemsSchema
-		};
-	}
-
-	static OpenApiSchema CreateNullableWrapperSchema(OpenApiSchema innerSchema)
-	{
-		return new OpenApiSchema
-		{
-			OneOf =
-			[
-				new OpenApiSchema
-				{
-					Extensions = new Dictionary<string, IOpenApiExtension>
-					{
-						["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
-					}
-				},
-				innerSchema
-			]
-		};
-	}
-
-	#endregion
-
 	#region CreateInlineSchemaWithAllValidation - RequiredRule Tests
 
 	[Fact]
@@ -985,6 +917,74 @@ public partial class ValidationDocumentTransformerTests
 		transformer.AutoDocumentFluentValidation.ShouldBeFalse();
 		transformer.AutoDocumentDataAnnotationValidation.ShouldBeFalse();
 		transformer.AppendRulesToPropertyDescription.ShouldBeFalse();
+	}
+
+	#endregion
+
+	#region Test Helpers
+
+	static OpenApiDocument CreateTestDocument()
+	{
+		return new OpenApiDocument
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>()
+			}
+		};
+	}
+
+	static OpenApiSchema CreateStringSchema()
+	{
+		return new OpenApiSchema
+		{
+			Type = JsonSchemaType.String
+		};
+	}
+
+	static OpenApiSchema CreateIntegerSchema()
+	{
+		return new OpenApiSchema
+		{
+			Type = JsonSchemaType.Integer,
+			Format = "int32"
+		};
+	}
+
+	static OpenApiSchema CreateNumberSchema()
+	{
+		return new OpenApiSchema
+		{
+			Type = JsonSchemaType.Number,
+			Format = "double"
+		};
+	}
+
+	static OpenApiSchema CreateArraySchema(IOpenApiSchema itemsSchema)
+	{
+		return new OpenApiSchema
+		{
+			Type = JsonSchemaType.Array,
+			Items = itemsSchema
+		};
+	}
+
+	static OpenApiSchema CreateNullableWrapperSchema(OpenApiSchema innerSchema)
+	{
+		return new OpenApiSchema
+		{
+			OneOf =
+			[
+				new OpenApiSchema
+				{
+					Extensions = new Dictionary<string, IOpenApiExtension>
+					{
+						["nullable"] = new JsonNodeExtension(JsonValue.Create(true)!)
+					}
+				},
+				innerSchema
+			]
+		};
 	}
 
 	#endregion

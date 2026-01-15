@@ -333,7 +333,7 @@ public class TypeDocumentTransformerTests
 				new OpenApiSchema
 				{
 					Type = JsonSchemaType.Null
-					}
+				}
 			]
 		};
 
