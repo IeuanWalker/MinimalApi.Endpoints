@@ -14,8 +14,8 @@ public class ValidationRuleTests
 		RequiredRule rule = new(propName);
 
 		// Assert
-		Assert.Equal(propName, rule.PropertyName);
-		Assert.Equal("Is required", rule.ErrorMessage);
+		rule.PropertyName.ShouldBe(propName);
+		rule.ErrorMessage.ShouldBe("Is required");
 	}
 
 	[Fact]
@@ -25,7 +25,7 @@ public class ValidationRuleTests
 		string propName = "Description";
 
 		// Act / Assert
-		Assert.Throws<ArgumentException>(() => new StringLengthRule(propName, null, null));
+		Should.Throw<ArgumentException>(() => new StringLengthRule(propName, null, null));
 	}
 
 	[Fact]
@@ -40,34 +40,41 @@ public class ValidationRuleTests
 		StringLengthRule maxOnly = new(propName, null, 5);
 
 		// Assert
-		Assert.Equal(2, both.MinLength);
-		Assert.Equal(10, both.MaxLength);
-		Assert.Contains("at least 2", both.ErrorMessage);
+		both.MinLength.ShouldBe(2);
+		both.MaxLength.ShouldBe(10);
+		both.ErrorMessage.ShouldContain("at least 2");
 
-		Assert.Equal(3, minOnly.MinLength);
-		Assert.Null(minOnly.MaxLength);
-		Assert.Contains("3 characters or more", minOnly.ErrorMessage);
+		minOnly.MinLength.ShouldBe(3);
+		minOnly.MaxLength.ShouldBeNull();
+		minOnly.ErrorMessage.ShouldContain("3 characters or more");
 
-		Assert.Null(maxOnly.MinLength);
-		Assert.Equal(5, maxOnly.MaxLength);
-		Assert.Contains("5 characters or fewer", maxOnly.ErrorMessage);
+		maxOnly.MinLength.ShouldBeNull();
+		maxOnly.MaxLength.ShouldBe(5);
+		maxOnly.ErrorMessage.ShouldContain("5 characters or fewer");
 	}
 
 	[Fact]
-	public void PatternRule_ThrowsForInvalidPattern_AndSetsDefaultMessage()
+	public void PatternRule_ThrowsForEmptyPattern()
 	{
 		// Arrange
 		string propName = "Code";
 
 		// Act / Assert
-		Assert.ThrowsAny<ArgumentException>(() => new PatternRule(propName, ""));
+		Should.Throw<ArgumentException>(() => new PatternRule(propName, ""));
+	}
+
+	[Fact]
+	public void PatternRule_SetsPatternAndDefaultErrorMessage()
+	{
+		// Arrange
+		string propName = "Code";
 
 		// Act
 		PatternRule rule = new(propName, "^[A-Z]{3}$");
 
 		// Assert
-		Assert.Equal("^[A-Z]{3}$", rule.Pattern);
-		Assert.Contains("Must match pattern", rule.ErrorMessage);
+		rule.Pattern.ShouldBe("^[A-Z]{3}$");
+		rule.ErrorMessage.ShouldContain("Must match pattern");
 	}
 
 	[Fact]
@@ -80,8 +87,8 @@ public class ValidationRuleTests
 		EmailRule rule = new(propName);
 
 		// Assert
-		Assert.Equal(propName, rule.PropertyName);
-		Assert.Equal("Must be a valid email address", rule.ErrorMessage);
+		rule.PropertyName.ShouldBe(propName);
+		rule.ErrorMessage.ShouldBe("Must be a valid email address");
 	}
 
 	[Fact]
@@ -94,8 +101,8 @@ public class ValidationRuleTests
 		UrlRule rule = new(propName);
 
 		// Assert
-		Assert.Equal(propName, rule.PropertyName);
-		Assert.Equal("Must be a valid URL", rule.ErrorMessage);
+		rule.PropertyName.ShouldBe(propName);
+		rule.ErrorMessage.ShouldBe("Must be a valid URL");
 	}
 
 	[Fact]
@@ -105,7 +112,7 @@ public class ValidationRuleTests
 		string propName = "Amount";
 
 		// Act / Assert
-		Assert.Throws<ArgumentException>(() => new RangeRule<int>(propName, null, null));
+		Should.Throw<ArgumentException>(() => new RangeRule<int>(propName, null, null));
 	}
 
 	[Fact]
@@ -120,17 +127,17 @@ public class ValidationRuleTests
 		RangeRule<int> maxOnly = new(propName, null, 10, exclusiveMaximum: true);
 
 		// Assert
-		Assert.Equal(1, both.Minimum);
-		Assert.Equal(5, both.Maximum);
-		Assert.Contains("Must be", both.ErrorMessage);
+		both.Minimum.ShouldBe(1);
+		both.Maximum.ShouldBe(5);
+		both.ErrorMessage.ShouldContain("Must be");
 
-		Assert.Equal(2, minOnly.Minimum);
-		Assert.True(minOnly.ExclusiveMinimum);
-		Assert.Contains(">", minOnly.ErrorMessage);
+		minOnly.Minimum.ShouldBe(2);
+		minOnly.ExclusiveMinimum.ShouldBeTrue();
+		minOnly.ErrorMessage.ShouldContain(">");
 
-		Assert.Equal(10, maxOnly.Maximum);
-		Assert.True(maxOnly.ExclusiveMaximum);
-		Assert.Contains("<", maxOnly.ErrorMessage);
+		maxOnly.Maximum.ShouldBe(10);
+		maxOnly.ExclusiveMaximum.ShouldBeTrue();
+		maxOnly.ErrorMessage.ShouldContain("<");
 	}
 
 	[Fact]
@@ -140,7 +147,7 @@ public class ValidationRuleTests
 		string propName = "CustomProp";
 
 		// Act / Assert
-		Assert.ThrowsAny<ArgumentException>(() => new CustomRule<string>(propName, null!));
+		Should.Throw<ArgumentException>(() => new CustomRule<string>(propName, null!));
 	}
 
 	[Fact]
@@ -150,25 +157,32 @@ public class ValidationRuleTests
 		string propName = "Desc";
 
 		// Act / Assert
-		Assert.ThrowsAny<ArgumentException>(() => new DescriptionRule(propName, null!));
+		Should.Throw<ArgumentException>(() => new DescriptionRule(propName, null!));
 	}
 
 	[Fact]
-	public void EnumRule_ValidatesEnumTypeAndSetsDefaults()
+	public void EnumRule_ThrowsForInvalidEnumType()
 	{
 		// Arrange
 		string propName = "Status";
 
-		// Act / Assert - invalid enum type
-		Assert.Throws<ArgumentException>(() => new EnumRule(propName, typeof(string), typeof(string)));
+		// Act / Assert
+		Should.Throw<ArgumentException>(() => new EnumRule(propName, typeof(string), typeof(string)));
+	}
 
-		// Act - valid enum
+	[Fact]
+	public void EnumRule_SetsEnumTypeAndDefaultErrorMessage()
+	{
+		// Arrange
+		string propName = "Status";
+
+		// Act
 		EnumRule rule = new(propName, typeof(DayOfWeek), typeof(int));
 
 		// Assert
-		Assert.Equal(typeof(DayOfWeek), rule.EnumType);
-		Assert.Equal(typeof(int), rule.PropertyType);
-		Assert.Contains(propName, rule.ErrorMessage);
-		Assert.Contains("{value}", rule.ErrorMessage);
+		rule.EnumType.ShouldBe(typeof(DayOfWeek));
+		rule.PropertyType.ShouldBe(typeof(int));
+		rule.ErrorMessage.ShouldContain(propName);
+		rule.ErrorMessage.ShouldContain("{value}");
 	}
 }
