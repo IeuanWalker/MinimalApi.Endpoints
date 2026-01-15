@@ -10,8 +10,10 @@ public class OpenApiConstantsTests
 	[InlineData("MyNamespace.CustomType", false)]
 	public void IsSystemType_Works(string input, bool expected)
 	{
+		// Arrange + Act
 		bool result = SchemaConstants.IsSystemType(input);
 
+		// Assert
 		result.ShouldBe(expected);
 	}
 
@@ -21,8 +23,10 @@ public class OpenApiConstantsTests
 	[InlineData("System.Int32", false)]
 	public void IsNullableType_Works(string input, bool expected)
 	{
+		// Arrange + Act
 		bool result = SchemaConstants.IsNullableType(input);
 
+		// Assert
 		result.ShouldBe(expected);
 	}
 
@@ -33,8 +37,10 @@ public class OpenApiConstantsTests
 	[InlineData("System.String", false)]
 	public void IsCollectionType_Works(string input, bool expected)
 	{
+		// Arrange + Act
 		bool result = SchemaConstants.IsCollectionType(input);
 
+		// Assert
 		result.ShouldBe(expected);
 	}
 
@@ -45,14 +51,20 @@ public class OpenApiConstantsTests
 	[InlineData("System.Collections.Generic.List`1[System.String]", false)]
 	public void IsDictionaryType_Works(string input, bool expected)
 	{
+		// Arrange + Act
 		bool result = SchemaConstants.IsDictionaryType(input);
 
+		// Assert
 		result.ShouldBe(expected);
 	}
 
 	[Fact]
 	public void ArraySuffix_Constant_IsBracketPair()
 	{
-		SchemaConstants.ArraySuffix.ShouldBe("[]");
+		// Arrange + Act
+		string result = SchemaConstants.ArraySuffix;
+
+		// Assert
+		result.ShouldBe("[]");
 	}
 }
