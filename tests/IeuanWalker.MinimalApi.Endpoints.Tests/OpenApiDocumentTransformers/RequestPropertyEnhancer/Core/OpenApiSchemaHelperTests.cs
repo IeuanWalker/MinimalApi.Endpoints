@@ -30,7 +30,8 @@ public class OpenApiSchemaHelperTests
 
 		// Assert
 		schema.ShouldNotBeNull();
-		schema!.Type.ShouldBe(expectedType);
+		schema.Type.ShouldNotBeNull();
+		schema.Type.ShouldBe(expectedType);
 		schema.Format.ShouldBe(expectedFormat);
 	}
 
@@ -61,11 +62,13 @@ public class OpenApiSchemaHelperTests
 		// Assert
 		arraySchema.Type.ShouldBe(JsonSchemaType.Array);
 		arraySchema.Items.ShouldNotBeNull();
-		arraySchema.Items!.Type.ShouldBe(JsonSchemaType.Integer);
+		arraySchema.Items.Type.ShouldNotBeNull();
+		arraySchema.Items.Type.ShouldBe(JsonSchemaType.Integer);
 
 		listSchema.Type.ShouldBe(JsonSchemaType.Array);
 		listSchema.Items.ShouldNotBeNull();
-		listSchema.Items!.Type.ShouldBe(JsonSchemaType.String);
+		listSchema.Items.Type.ShouldNotBeNull();
+		listSchema.Items.Type.ShouldBe(JsonSchemaType.String);
 
 		nullableSchema.OneOf.ShouldNotBeNull();
 		nullableSchema.OneOf.Count.ShouldBe(2);
@@ -73,7 +76,7 @@ public class OpenApiSchemaHelperTests
 		nullableSchema.OneOf[1].ShouldNotBeNull();
 		OpenApiSchema? marker = nullableSchema.OneOf[1] as OpenApiSchema;
 		marker.ShouldNotBeNull();
-		marker!.Extensions.ShouldNotBeNull();
+		marker.Extensions.ShouldNotBeNull();
 		marker.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
 	}
 
@@ -90,7 +93,7 @@ public class OpenApiSchemaHelperTests
 
 		// Assert
 		unwrapped.Reference.ShouldNotBeNull();
-		unwrapped.Reference!.Id.ShouldBe("MyNamespace.MyEnum");
+		unwrapped.Reference.Id.ShouldBe("MyNamespace.MyEnum");
 	}
 
 	[Fact]
