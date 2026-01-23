@@ -1,13 +1,14 @@
-﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
+﻿using System.Reflection;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
-using Microsoft.OpenApi;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Routing.Patterns;
-using Microsoft.Extensions.Primitives;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
+using Microsoft.Extensions.Primitives;
+using Microsoft.OpenApi;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.RequestPropertyEnhancer;
 
@@ -43,11 +44,11 @@ public class TypeDocumentTransformerTests
 			Type = JsonSchemaType.Array,
 			Items = new OpenApiSchema
 			{
-				OneOf = new List<IOpenApiSchema>
-				{
+				OneOf =
+				[
 					nullableMarker,
 					typeSchema
-				}
+				]
 			}
 		};
 
@@ -84,18 +85,18 @@ public class TypeDocumentTransformerTests
 		valuesSchema.OneOf.ShouldNotBeNull();
 		valuesSchema.OneOf.Count.ShouldBe(2);
 
-        OpenApiSchema? first = valuesSchema.OneOf[0] as OpenApiSchema;
-        first.ShouldNotBeNull();
-        first.Type.ShouldBe(JsonSchemaType.Array);
-        OpenApiSchema? items = first.Items as OpenApiSchema;
-        items.ShouldNotBeNull();
-        items.Type.ShouldBe(JsonSchemaType.String);
+		OpenApiSchema? first = valuesSchema.OneOf[0] as OpenApiSchema;
+		first.ShouldNotBeNull();
+		first.Type.ShouldBe(JsonSchemaType.Array);
+		OpenApiSchema? items = first.Items as OpenApiSchema;
+		items.ShouldNotBeNull();
+		items.Type.ShouldBe(JsonSchemaType.String);
 
-        OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
-        second.ShouldNotBeNull();
-        second.Type.HasValue.ShouldBeFalse();
-        second.Extensions.ShouldNotBeNull();
-        second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
+		second.ShouldNotBeNull();
+		second.Type.HasValue.ShouldBeFalse();
+		second.Extensions.ShouldNotBeNull();
+		second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
 	}
 
 	[Fact]
@@ -109,11 +110,11 @@ public class TypeDocumentTransformerTests
 			Type = JsonSchemaType.Array,
 			Items = new OpenApiSchema
 			{
-				OneOf = new List<IOpenApiSchema>
-				{
+				OneOf =
+				[
 					new OpenApiSchema { Type = JsonSchemaType.String },
 					new OpenApiSchema { Type = JsonSchemaType.Integer }
-				}
+				]
 			}
 		};
 
@@ -141,30 +142,30 @@ public class TypeDocumentTransformerTests
 		// Act
 		await transformer.TransformAsync(document, CreateMockContext(), CancellationToken.None);
 
-        // Assert - transformer converts items.OneOf into a nullable-array oneOf: [ array of first type, nullable marker ]
-        OpenApiSchema? result = document.Components.Schemas[typeName] as OpenApiSchema;
-        result.ShouldNotBeNull();
-        result.Properties.ShouldNotBeNull();
-        OpenApiSchema? valuesSchema = result.Properties["Values"] as OpenApiSchema;
-        valuesSchema.ShouldNotBeNull();
-        // Top-level should now be a OneOf (nullable-array wrapper)
-        valuesSchema.OneOf.ShouldNotBeNull();
-        valuesSchema.OneOf.Count.ShouldBe(2);
+		// Assert - transformer converts items.OneOf into a nullable-array oneOf: [ array of first type, nullable marker ]
+		OpenApiSchema? result = document.Components.Schemas[typeName] as OpenApiSchema;
+		result.ShouldNotBeNull();
+		result.Properties.ShouldNotBeNull();
+		OpenApiSchema? valuesSchema = result.Properties["Values"] as OpenApiSchema;
+		valuesSchema.ShouldNotBeNull();
+		// Top-level should now be a OneOf (nullable-array wrapper)
+		valuesSchema.OneOf.ShouldNotBeNull();
+		valuesSchema.OneOf.Count.ShouldBe(2);
 
-        // First element should be an array schema whose items is the first type from the original oneOf
-        OpenApiSchema? first = valuesSchema.OneOf[0] as OpenApiSchema;
-        first.ShouldNotBeNull();
-        first.Type.ShouldBe(JsonSchemaType.Array);
-        OpenApiSchema? firstItems = first.Items as OpenApiSchema;
-        firstItems.ShouldNotBeNull();
-        firstItems.Type.ShouldBe(JsonSchemaType.String);
+		// First element should be an array schema whose items is the first type from the original oneOf
+		OpenApiSchema? first = valuesSchema.OneOf[0] as OpenApiSchema;
+		first.ShouldNotBeNull();
+		first.Type.ShouldBe(JsonSchemaType.Array);
+		OpenApiSchema? firstItems = first.Items as OpenApiSchema;
+		firstItems.ShouldNotBeNull();
+		firstItems.Type.ShouldBe(JsonSchemaType.String);
 
-        // Second element should be the nullable marker (no Type, but has nullable extension)
-        OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
-        second.ShouldNotBeNull();
-        second.Type.HasValue.ShouldBeFalse();
-        second.Extensions.ShouldNotBeNull();
-        second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		// Second element should be the nullable marker (no Type, but has nullable extension)
+		OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
+		second.ShouldNotBeNull();
+		second.Type.HasValue.ShouldBeFalse();
+		second.Extensions.ShouldNotBeNull();
+		second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
 	}
 
 	[Fact]
@@ -173,7 +174,7 @@ public class TypeDocumentTransformerTests
 		// Arrange
 		TypeDocumentTransformer transformer = new();
 
-		OpenApiParameter paramWithNullSchema = new OpenApiParameter
+		OpenApiParameter paramWithNullSchema = new()
 		{
 			Name = "p",
 			In = ParameterLocation.Query,
@@ -190,10 +191,10 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								paramWithNullSchema
-							}
+							]
 						}
 					}
 				}
@@ -201,7 +202,7 @@ public class TypeDocumentTransformerTests
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
-				}
+			}
 		};
 
 		// Act
@@ -210,7 +211,7 @@ public class TypeDocumentTransformerTests
 		// Assert - parameter should remain with null schema
 		OpenApiPathItem? pathItem = document.Paths["/nullschema"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? resultParam = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == "p");
@@ -224,7 +225,7 @@ public class TypeDocumentTransformerTests
 		// Arrange
 		TypeDocumentTransformer transformer = new();
 
-		OpenApiParameter paramWithEmptyName = new OpenApiParameter
+		OpenApiParameter paramWithEmptyName = new()
 		{
 			Name = string.Empty,
 			In = ParameterLocation.Query,
@@ -241,10 +242,10 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								paramWithEmptyName
-							}
+							]
 						}
 					}
 				}
@@ -252,7 +253,7 @@ public class TypeDocumentTransformerTests
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
-				}
+			}
 		};
 
 		// Act
@@ -261,7 +262,7 @@ public class TypeDocumentTransformerTests
 		// Assert - parameter should remain a schema reference to System.String
 		OpenApiPathItem? pathItem = document.Paths["/emptyname"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? resultParam = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == string.Empty);
@@ -278,16 +279,16 @@ public class TypeDocumentTransformerTests
 
 		// Prepare an EndpointDataSource with a RouteEndpoint whose metadata contains a handler method
 		// The handler method takes a TestRequest which has an enum property named "Status"
-		var handlerMethod = typeof(TestEnumHandler).GetMethod(nameof(TestEnumHandler.Handle))!;
+		MethodInfo handlerMethod = typeof(TestEnumHandler).GetMethod(nameof(TestEnumHandler.Handle))!;
 
-		var routeEndpoint = new RouteEndpoint(
+		RouteEndpoint routeEndpoint = new(
 			(RequestDelegate)(_ => Task.CompletedTask),
 			RoutePatternFactory.Parse("/enumtest"),
 			0,
 			new EndpointMetadataCollection(handlerMethod),
 			"TestEndpoint");
 
-		var testSource = new SimpleEndpointDataSource(new[] { routeEndpoint });
+		SimpleEndpointDataSource testSource = new(new[] { routeEndpoint });
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
 		builder.Services.AddSingleton<EndpointDataSource>(testSource);
@@ -312,15 +313,15 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								new OpenApiParameter
 								{
 									Name = "Status",
 									In = ParameterLocation.Query,
 									Schema = new OpenApiSchemaReference(nullableEnumRef, null, null)
 								}
-							}
+							]
 						}
 					}
 				}
@@ -328,7 +329,7 @@ public class TypeDocumentTransformerTests
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
-				}
+			}
 		};
 
 		// Act
@@ -337,7 +338,7 @@ public class TypeDocumentTransformerTests
 		// Assert - the nullable enum reference should be unwrapped to the underlying enum type
 		OpenApiPathItem? pathItem = document.Paths["/enumtest"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? param = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == "Status");
@@ -366,7 +367,7 @@ public class TypeDocumentTransformerTests
 
 	static class TestEnumHandler
 	{
-		public static Task Handle(TestRequest req) => Task.CompletedTask;
+		public static Task Handle(TestRequest _) => Task.CompletedTask;
 	}
 
 	[Fact]
@@ -375,15 +376,15 @@ public class TypeDocumentTransformerTests
 		// Arrange: endpoint maps to TestRequest which does not have property named "DoesNotExist"
 		TypeDocumentTransformer transformer = new();
 
-		var handlerMethod = typeof(TestEnumHandler).GetMethod(nameof(TestEnumHandler.Handle))!;
-		var routeEndpoint = new RouteEndpoint(
+		MethodInfo handlerMethod = typeof(TestEnumHandler).GetMethod(nameof(TestEnumHandler.Handle))!;
+		RouteEndpoint routeEndpoint = new(
 			(RequestDelegate)(_ => Task.CompletedTask),
 			RoutePatternFactory.Parse("/enumtest"),
 			0,
 			new EndpointMetadataCollection(handlerMethod),
 			"TestEndpoint");
 
-		var testSource = new SimpleEndpointDataSource(new[] { routeEndpoint });
+		SimpleEndpointDataSource testSource = new(new[] { routeEndpoint });
 
 		WebApplicationBuilder builder = WebApplication.CreateBuilder();
 		builder.Services.AddSingleton<EndpointDataSource>(testSource);
@@ -406,15 +407,15 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								new OpenApiParameter
 								{
 									Name = "DoesNotExist",
 									In = ParameterLocation.Query,
 									Schema = new OpenApiSchemaReference("System.String", null, null)
 								}
-							}
+							]
 						}
 					}
 				}
@@ -422,7 +423,7 @@ public class TypeDocumentTransformerTests
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
-				}
+			}
 		};
 
 		// Act
@@ -431,7 +432,7 @@ public class TypeDocumentTransformerTests
 		// Assert - since the request type has no matching property, the schema reference should be inlined to a string schema
 		OpenApiPathItem? pathItem = document.Paths["/enumtest"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? param = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == "DoesNotExist");
@@ -458,15 +459,15 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								new OpenApiParameter
 								{
 									Name = "type",
 									In = ParameterLocation.Query,
 									Schema = new OpenApiSchemaReference("MyNamespace.MyType", null, null)
 								}
-							}
+							]
 						}
 					}
 				}
@@ -474,7 +475,7 @@ public class TypeDocumentTransformerTests
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
-				}
+			}
 		};
 
 		// Act
@@ -483,7 +484,7 @@ public class TypeDocumentTransformerTests
 		// Assert - parameter schema should remain the original reference
 		OpenApiPathItem? pathItem = document.Paths["/items"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? param = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == "type");
@@ -512,15 +513,15 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								new OpenApiParameter
 								{
 									Name = "status",
 									In = ParameterLocation.Query,
 									Schema = new OpenApiSchemaReference(malformedNullableRef, null, null)
 								}
-							}
+							]
 						}
 					}
 				}
@@ -528,7 +529,7 @@ public class TypeDocumentTransformerTests
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
-				}
+			}
 		};
 
 		// Act
@@ -537,7 +538,7 @@ public class TypeDocumentTransformerTests
 		// Assert - schema should remain the original reference (no unwrapping)
 		OpenApiPathItem? pathItem = document.Paths["/test2"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? param = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == "status");
@@ -566,15 +567,15 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								new OpenApiParameter
 								{
 									Name = "status",
 									In = ParameterLocation.Query,
 									Schema = new OpenApiSchemaReference(nullableRef, null, null)
 								}
-							}
+							]
 						}
 					}
 				}
@@ -582,7 +583,7 @@ public class TypeDocumentTransformerTests
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
-				}
+			}
 		};
 
 		// Act
@@ -591,7 +592,7 @@ public class TypeDocumentTransformerTests
 		// Assert
 		OpenApiPathItem? pathItem = document.Paths["/test"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? param = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == "status");
@@ -658,15 +659,15 @@ public class TypeDocumentTransformerTests
 					{
 						[HttpMethod.Get] = new OpenApiOperation
 						{
-							Parameters = new List<IOpenApiParameter>
-							{
+							Parameters =
+							[
 								new OpenApiParameter
 								{
 									Name = "tags",
 									In = ParameterLocation.Query,
 									Schema = new OpenApiSchemaReference("System.String[]", null, null)
 								}
-							}
+							]
 						}
 					}
 				}
@@ -683,7 +684,7 @@ public class TypeDocumentTransformerTests
 		// Assert
 		OpenApiPathItem? pathItem = document.Paths["/search"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Get];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Get];
 		operation.ShouldNotBeNull();
 		operation.Parameters.ShouldNotBeNull();
 		OpenApiParameter? param = operation.Parameters.Cast<OpenApiParameter>().FirstOrDefault(p => p.Name == "tags");
@@ -757,10 +758,10 @@ public class TypeDocumentTransformerTests
 									{
 										Schema = new OpenApiSchema
 										{
-											OneOf = new List<IOpenApiSchema>
-											{
+											OneOf =
+											[
 												new OpenApiSchemaReference("Microsoft.AspNetCore.Http.IFormFile", null, null)
-											}
+											]
 										}
 									}
 								}
@@ -781,11 +782,11 @@ public class TypeDocumentTransformerTests
 		// Assert
 		OpenApiPathItem? pathItem = document.Paths["/upload-oneof"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Post];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Post];
 		operation.ShouldNotBeNull();
 		OpenApiRequestBody? requestBody = operation.RequestBody as OpenApiRequestBody;
 		requestBody.ShouldNotBeNull();
-		OpenApiMediaType? media = requestBody.Content["multipart/form-data"];
+		OpenApiMediaType? media = requestBody.Content?["multipart/form-data"];
 		media.ShouldNotBeNull();
 		OpenApiSchema? schema = media.Schema as OpenApiSchema;
 		schema.ShouldNotBeNull();
@@ -821,10 +822,10 @@ public class TypeDocumentTransformerTests
 									{
 										Schema = new OpenApiSchema
 										{
-											AllOf = new List<IOpenApiSchema>
-											{
+											AllOf =
+											[
 												new OpenApiSchemaReference("Microsoft.AspNetCore.Http.IFormFile", null, null)
-											}
+											]
 										}
 									}
 								}
@@ -845,11 +846,11 @@ public class TypeDocumentTransformerTests
 		// Assert
 		OpenApiPathItem? pathItem = document.Paths["/upload-allof"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Post];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Post];
 		operation.ShouldNotBeNull();
 		OpenApiRequestBody? requestBody = operation.RequestBody as OpenApiRequestBody;
 		requestBody.ShouldNotBeNull();
-		OpenApiMediaType? media = requestBody.Content["multipart/form-data"];
+		OpenApiMediaType? media = requestBody.Content?["multipart/form-data"];
 		media.ShouldNotBeNull();
 		OpenApiSchema? schema = media.Schema as OpenApiSchema;
 		schema.ShouldNotBeNull();
@@ -885,10 +886,10 @@ public class TypeDocumentTransformerTests
 									{
 										Schema = new OpenApiSchema
 										{
-											AnyOf = new List<IOpenApiSchema>
-											{
+											AnyOf =
+											[
 												new OpenApiSchemaReference("Microsoft.AspNetCore.Http.IFormFile", null, null)
-											}
+											]
 										}
 									}
 								}
@@ -909,11 +910,11 @@ public class TypeDocumentTransformerTests
 		// Assert
 		OpenApiPathItem? pathItem = document.Paths["/upload-anyof"] as OpenApiPathItem;
 		pathItem.ShouldNotBeNull();
-		OpenApiOperation? operation = pathItem.Operations[HttpMethod.Post];
+		OpenApiOperation? operation = pathItem.Operations?[HttpMethod.Post];
 		operation.ShouldNotBeNull();
 		OpenApiRequestBody? requestBody = operation.RequestBody as OpenApiRequestBody;
 		requestBody.ShouldNotBeNull();
-		OpenApiMediaType? media = requestBody.Content["multipart/form-data"];
+		OpenApiMediaType? media = requestBody.Content?["multipart/form-data"];
 		media.ShouldNotBeNull();
 		OpenApiSchema? schema = media.Schema as OpenApiSchema;
 		schema.ShouldNotBeNull();
@@ -932,7 +933,7 @@ public class TypeDocumentTransformerTests
 		TypeDocumentTransformer transformer = new();
 		OpenApiDocument document = new()
 		{
-			Paths = null,
+			Paths = null!,
 			Components = new OpenApiComponents
 			{
 				Schemas = new Dictionary<string, IOpenApiSchema>()
@@ -954,7 +955,7 @@ public class TypeDocumentTransformerTests
 		TypeDocumentTransformer transformer = new();
 		OpenApiDocument document = new()
 		{
-			Paths = null,
+			Paths = null!,
 			Components = null
 		};
 
@@ -966,37 +967,37 @@ public class TypeDocumentTransformerTests
 		task.IsCompletedSuccessfully.ShouldBeTrue();
 	}
 
-    [Fact]
-    public async Task TransformAsync_SkipsNonOpenApiPathItemEntries()
-    {
-        // Arrange
-        TypeDocumentTransformer transformer = new();
+	[Fact]
+	public async Task TransformAsync_SkipsNonOpenApiPathItemEntries()
+	{
+		// Arrange
+		TypeDocumentTransformer transformer = new();
 
-        // Create a path item value that is not an OpenApiPathItem implementation
-        // Use the reference-style type if available
-        IOpenApiPathItem? referencePathItem = new OpenApiPathItemReference("/ref", null, null);
+		// Create a path item value that is not an OpenApiPathItem implementation
+		// Use the reference-style type if available
+		IOpenApiPathItem? referencePathItem = new OpenApiPathItemReference("/ref", null, null);
 
-        OpenApiDocument document = new()
-        {
-            Paths = new OpenApiPaths
-            {
-                ["/refpath"] = referencePathItem
-            },
-            Components = new OpenApiComponents
-            {
-                Schemas = new Dictionary<string, IOpenApiSchema>()
-            }
-        };
+		OpenApiDocument document = new()
+		{
+			Paths = new OpenApiPaths
+			{
+				["/refpath"] = referencePathItem
+			},
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>()
+			}
+		};
 
-        // Act
-        Task task = transformer.TransformAsync(document, CreateMockContext(), CancellationToken.None);
-        await task;
+		// Act
+		Task task = transformer.TransformAsync(document, CreateMockContext(), CancellationToken.None);
+		await task;
 
-        // Assert - should not throw and should preserve the original reference instance
-        task.IsCompletedSuccessfully.ShouldBeTrue();
-        document.Paths.ShouldContainKey("/refpath");
-        document.Paths["/refpath"].ShouldBeSameAs(referencePathItem);
-    }
+		// Assert - should not throw and should preserve the original reference instance
+		task.IsCompletedSuccessfully.ShouldBeTrue();
+		document.Paths.ShouldContainKey("/refpath");
+		document.Paths["/refpath"].ShouldBeSameAs(referencePathItem);
+	}
 
 	[Fact]
 	public async Task TransformAsync_DoesNotModify_WhenNullableMarkerAndArrayPresentForArrayProperty()
@@ -1053,19 +1054,19 @@ public class TypeDocumentTransformerTests
 		vs.OneOf.ShouldNotBeNull();
 		vs.OneOf.Count.ShouldBe(2);
 		// First element is the nullable marker (no Type)
-		OpenApiSchema first = vs.OneOf[0] as OpenApiSchema;
+		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
 		first.ShouldNotBeNull();
 		first.Type.HasValue.ShouldBeFalse();
 		// Second element is the array schema
-		OpenApiSchema second = vs.OneOf[1] as OpenApiSchema;
+		OpenApiSchema? second = vs.OneOf[1] as OpenApiSchema;
 		second.ShouldNotBeNull();
 		second.Type.ShouldBe(JsonSchemaType.Array);
 	}
 
-public class TestArrayHolder
-{
-    public string[] Values { get; set; } = null!;
-}
+	public class TestArrayHolder
+	{
+		public string[] Values { get; set; } = null!;
+	}
 
 	[Theory]
 	[InlineData(false, true)]
@@ -1092,7 +1093,7 @@ public class TestArrayHolder
 		};
 
 		IOpenApiSchema propertySchema = inOneOf
-			? new OpenApiSchema { OneOf = new List<IOpenApiSchema> { nestedArray } }
+			? new OpenApiSchema { OneOf = [nestedArray] }
 			: nestedArray;
 
 		OpenApiSchema parent = new()
@@ -1393,10 +1394,10 @@ public class TestArrayHolder
 
 		OpenApiSchema component = new()
 		{
-			OneOf = new List<IOpenApiSchema>
-			{
+			OneOf =
+			[
 				new OpenApiSchemaReference("Microsoft.AspNetCore.Http.IFormFile", null, null)
-			}
+			]
 		};
 
 		OpenApiDocument document = new()

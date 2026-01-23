@@ -1,7 +1,5 @@
-﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
-
-using System.Reflection;
-using System.IO;
+﻿using System.Reflection;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.OpenApiDocumentTransformers.RequestPropertyEnhancer.Core;
 
@@ -240,7 +238,7 @@ public class SchemaTypeResolverTests
 	public void GetAssembliesSafe_ProviderThrows_ReturnsEmpty()
 	{
 		// Arrange
-		Func<Assembly[]> provider = () => throw new InvalidOperationException("boom");
+		static Assembly[] provider() => throw new InvalidOperationException("boom");
 
 		// Act
 		Assembly[] result = SchemaTypeResolver.GetAssembliesSafe(provider);
@@ -268,7 +266,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_ReturnsTypesFromAssembly()
 	{
 		// Act
-    IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(TestEnum).Assembly.GetTypes());
+		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(TestEnum).Assembly.GetTypes());
 
 		// Assert
 		result.ShouldContain(typeof(TestEnum));
@@ -278,7 +276,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_HandlesEmptyResults()
 	{
 		// Act
-    IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(SchemaTypeResolverTests).Assembly.GetTypes());
+		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(SchemaTypeResolverTests).Assembly.GetTypes());
 
 		// Assert
 		result.ShouldNotBeNull();
@@ -289,7 +287,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_ReturnsNestedTypes()
 	{
 		// Act
-    IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(OuterClass).Assembly.GetTypes());
+		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(() => typeof(OuterClass).Assembly.GetTypes());
 
 		// Assert - GetLoadableTypes does return nested types from the assembly
 		result.ShouldContain(typeof(OuterClass.NestedClass));
@@ -299,7 +297,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_ReturnsMultipleTypes()
 	{
 		// Act
-    List<Type> result = [.. SchemaTypeResolver.GetLoadableTypes(() => typeof(TestEnum).Assembly.GetTypes())];
+		List<Type> result = [.. SchemaTypeResolver.GetLoadableTypes(() => typeof(TestEnum).Assembly.GetTypes())];
 
 		// Assert
 		result.Count.ShouldBeGreaterThan(1);
@@ -312,9 +310,9 @@ public class SchemaTypeResolverTests
 	{
 		// Arrange - create a ReflectionTypeLoadException-like behavior by throwing one from provider
 		Type[]? types = new Type?[] { typeof(TestEnum), null } as Type[];
-		var ex = new ReflectionTypeLoadException(types!, Array.Empty<Exception>());
+		ReflectionTypeLoadException ex = new(types!, []);
 
-		Func<Type[]> provider = () => throw ex;
+		Type[] provider() => throw ex;
 
 		// Act
 		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(provider);
@@ -327,7 +325,7 @@ public class SchemaTypeResolverTests
 	public void GetLoadableTypes_ProviderThrows_GeneralException_ReturnsEmpty()
 	{
 		// Arrange
-		Func<Type[]> provider = () => throw new InvalidOperationException("boom");
+		static Type[] provider() => throw new InvalidOperationException("boom");
 
 		// Act
 		IEnumerable<Type> result = SchemaTypeResolver.GetLoadableTypes(provider);
@@ -362,7 +360,7 @@ public class OuterClass
 	public class NestedClass
 	{
 		public string? Property { get; set; }
-    }
+	}
 }
 
 

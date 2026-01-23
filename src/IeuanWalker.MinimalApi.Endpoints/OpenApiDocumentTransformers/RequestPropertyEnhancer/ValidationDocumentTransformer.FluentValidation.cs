@@ -107,7 +107,7 @@ partial class ValidationDocumentTransformer
 		foreach (IGrouping<string, (IPropertyValidator Validator, IRuleComponent Options)> memberValidators in descriptor.GetMembersWithValidators())
 		{
 			string propertyName = memberValidators.Key;
-			
+
 			// Handle multi-property validations (e.g., RuleFor(x => new { x.Prop1, x.Prop2 }))
 			if (string.IsNullOrWhiteSpace(propertyName))
 			{
@@ -116,14 +116,14 @@ partial class ValidationDocumentTransformer
 				{
 					IPropertyValidator propertyValidator = validatorTuple.Validator;
 					IRuleComponent ruleComponent = validatorTuple.Options;
-					
-					List<string>? propertyNames = TryExtractPropertyNamesFromMultiPropertyRule(propertyValidator, ruleComponent, logger);
-					
+
+					List<string>? propertyNames = TryExtractPropertyNamesFromMultiPropertyRule(propertyValidator);
+
 					if (propertyNames is not null && propertyNames.Count > 0)
 					{
 						// Create a custom rule for each property involved
 						string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, string.Empty, logger);
-						
+
 						foreach (string extractedPropertyName in propertyNames)
 						{
 							ValidationRule multiPropertyRule = new CustomRule<object>(extractedPropertyName, errorMessage);
@@ -153,45 +153,45 @@ partial class ValidationDocumentTransformer
 
 		return rules;
 	}
-	
-	static List<string>? TryExtractPropertyNamesFromMultiPropertyRule(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, ILogger logger)
+
+	static List<string>? TryExtractPropertyNamesFromMultiPropertyRule(IPropertyValidator propertyValidator)
 	{
 		// For multi-property rules like RuleFor(x => new { x.Prop1, x.Prop2 }),
 		// FluentValidation creates a PredicateValidator with the anonymous type as a generic argument
 		Type validatorType = propertyValidator.GetType();
-		
+
 		// Check if it's a PredicateValidator
 		if (!validatorType.Name.StartsWith("PredicateValidator", StringComparison.Ordinal))
 		{
 			return null;
 		}
-		
+
 		// Get the generic arguments - for PredicateValidator<TModel, TProperty>
 		// TProperty will be the anonymous type containing the properties
 		if (!validatorType.IsGenericType)
 		{
 			return null;
 		}
-		
+
 		Type[] genericArgs = validatorType.GetGenericArguments();
 		if (genericArgs.Length < 2)
 		{
 			return null;
 		}
-		
+
 		// The second generic argument is the property type (or anonymous type)
 		Type propertyType = genericArgs[1];
-		
+
 		// Check if it's an anonymous type (compiler-generated types with names like <>f__AnonymousType)
 		if (!propertyType.Name.Contains("AnonymousType", StringComparison.Ordinal) && !propertyType.Name.StartsWith("<>", StringComparison.Ordinal))
 		{
 			return null;
 		}
-		
+
 		// Extract property names from the anonymous type's properties
 		List<string> propertyNames = [];
 		PropertyInfo[] anonymousTypeProperties = propertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-		
+
 		foreach (PropertyInfo prop in anonymousTypeProperties)
 		{
 			string propName = prop.Name;
@@ -200,7 +200,7 @@ partial class ValidationDocumentTransformer
 				propertyNames.Add(propName);
 			}
 		}
-		
+
 		return propertyNames.Count > 0 ? propertyNames : null;
 	}
 
@@ -261,9 +261,7 @@ partial class ValidationDocumentTransformer
 					{
 						if (message.Equals("The specified condition was not met for '{PropertyName}'.") && logger.IsEnabled(LogLevel.Warning))
 						{
-#pragma warning disable CA1873 // Avoid potentially expensive logging
 							LogVagueErrorMessageFluentValidation(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
 						}
 
 						if (message.Equals("'{PropertyName}' is not a valid credit card number."))
@@ -318,9 +316,7 @@ partial class ValidationDocumentTransformer
 				validatorTypeName = validatorTypeName[..backtickIndex];
 			}
 
-#pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogUnableToDetermineCustomErrorMessage(logger, propertyValidator.GetType().FullName ?? string.Empty, propertyName);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
 
 			return $"{propertyName} {validatorTypeName} validation";
 		}
@@ -328,9 +324,7 @@ partial class ValidationDocumentTransformer
 		catch (Exception ex)
 #pragma warning restore CA1031 // Do not catch general exception types
 		{
-#pragma warning disable CA1873 // Avoid potentially expensive logging
 			LogExceptionWhileObtainingValidatorErrorMessage(logger, propertyName, propertyValidator.GetType().FullName ?? string.Empty, ex);
-#pragma warning restore CA1873 // Avoid potentially expensive logging
 			return $"{propertyName} custom validation";
 		}
 	}

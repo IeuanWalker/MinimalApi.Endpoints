@@ -437,9 +437,11 @@ public class NullableSchemaReorderTransformerTests
 	{
 		// Arrange
 		NullableSchemaReorderTransformer transformer = new();
-		OpenApiOperation operation = new();
-		// Ensure Responses is explicitly null to hit the null-check branch
-		operation.Responses = null;
+		OpenApiOperation operation = new()
+		{
+			// Ensure Responses is explicitly null to hit the null-check branch
+			Responses = null
+		};
 		OpenApiPathItem pathItem = new()
 		{
 			Operations = new Dictionary<HttpMethod, OpenApiOperation>
