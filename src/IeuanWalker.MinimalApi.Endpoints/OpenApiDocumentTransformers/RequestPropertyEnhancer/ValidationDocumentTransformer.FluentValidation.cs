@@ -107,6 +107,36 @@ partial class ValidationDocumentTransformer
 		foreach (IGrouping<string, (IPropertyValidator Validator, IRuleComponent Options)> memberValidators in descriptor.GetMembersWithValidators())
 		{
 			string propertyName = memberValidators.Key;
+			
+			// Handle multi-property validations (e.g., RuleFor(x => new { x.Prop1, x.Prop2 }))
+			if (string.IsNullOrWhiteSpace(propertyName))
+			{
+				// Try to extract individual property names from the rule
+				foreach ((IPropertyValidator Validator, IRuleComponent Options) validatorTuple in memberValidators)
+				{
+					IPropertyValidator propertyValidator = validatorTuple.Validator;
+					IRuleComponent ruleComponent = validatorTuple.Options;
+					
+					List<string>? propertyNames = TryExtractPropertyNamesFromMultiPropertyRule(propertyValidator, ruleComponent, logger);
+					
+					if (propertyNames is not null && propertyNames.Count > 0)
+					{
+						// Create a custom rule for each property involved
+						string errorMessage = GetValidatorErrorMessage(propertyValidator, ruleComponent, string.Empty, logger);
+						
+						foreach (string extractedPropertyName in propertyNames)
+						{
+							ValidationRule multiPropertyRule = new CustomRule<object>(extractedPropertyName, errorMessage);
+							rules.Add(multiPropertyRule);
+						}
+					}
+					else if (logger.IsEnabled(LogLevel.Debug))
+					{
+						logger.LogDebug("Skipping FluentValidation rule with empty property name - unable to extract individual properties");
+					}
+				}
+				continue;
+			}
 
 			foreach ((IPropertyValidator Validator, IRuleComponent Options) validatorTuple in memberValidators)
 			{
@@ -122,6 +152,56 @@ partial class ValidationDocumentTransformer
 		}
 
 		return rules;
+	}
+	
+	static List<string>? TryExtractPropertyNamesFromMultiPropertyRule(IPropertyValidator propertyValidator, IRuleComponent ruleComponent, ILogger logger)
+	{
+		// For multi-property rules like RuleFor(x => new { x.Prop1, x.Prop2 }),
+		// FluentValidation creates a PredicateValidator with the anonymous type as a generic argument
+		Type validatorType = propertyValidator.GetType();
+		
+		// Check if it's a PredicateValidator
+		if (!validatorType.Name.StartsWith("PredicateValidator", StringComparison.Ordinal))
+		{
+			return null;
+		}
+		
+		// Get the generic arguments - for PredicateValidator<TModel, TProperty>
+		// TProperty will be the anonymous type containing the properties
+		if (!validatorType.IsGenericType)
+		{
+			return null;
+		}
+		
+		Type[] genericArgs = validatorType.GetGenericArguments();
+		if (genericArgs.Length < 2)
+		{
+			return null;
+		}
+		
+		// The second generic argument is the property type (or anonymous type)
+		Type propertyType = genericArgs[1];
+		
+		// Check if it's an anonymous type (compiler-generated types with names like <>f__AnonymousType)
+		if (!propertyType.Name.Contains("AnonymousType", StringComparison.Ordinal) && !propertyType.Name.StartsWith("<>", StringComparison.Ordinal))
+		{
+			return null;
+		}
+		
+		// Extract property names from the anonymous type's properties
+		List<string> propertyNames = [];
+		PropertyInfo[] anonymousTypeProperties = propertyType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+		
+		foreach (PropertyInfo prop in anonymousTypeProperties)
+		{
+			string propName = prop.Name;
+			if (!string.IsNullOrWhiteSpace(propName) && !propertyNames.Contains(propName))
+			{
+				propertyNames.Add(propName);
+			}
+		}
+		
+		return propertyNames.Count > 0 ? propertyNames : null;
 	}
 
 	static ValidationRule? ConvertToValidationRule(string propertyName, IPropertyValidator propertyValidator, IRuleComponent ruleComponent, ILogger logger)
