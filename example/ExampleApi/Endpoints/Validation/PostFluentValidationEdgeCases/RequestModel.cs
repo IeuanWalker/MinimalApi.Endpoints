@@ -25,7 +25,7 @@ public class RequestValidator : Validator<RequestModel>
 			.WithMessage("Must be one of the following: en-GB, cy-GB");
 
 		RuleFor(x => new { x.Uprn, x.Easting, x.Northing })
-	.Must(x => x.Uprn is not null || (x.Easting is not null && x.Northing is not null)).WithMessage("Must provide either uprn or easting/ northing");
+			.Must(x => x.Uprn is not null || (x.Easting is not null && x.Northing is not null)).WithMessage("Must provide either uprn or easting/ northing");
 
 		RuleFor(x => x.Uprn)
 			.Must((request, uprn) =>
