@@ -18,30 +18,34 @@ partial class ValidationDocumentTransformer
 		IOpenApiSchema? actualSchema = originalOpenApiSchema;
 		IOpenApiSchema? typeSourceSchema = null;
 
-		if (isNullableWrapper)
+	if (isNullableWrapper)
+	{
+		// Find the schema with actual type information (not the nullable marker which has Type=Null)
+		actualSchema = originalOpenApiSchema!.OneOf?.FirstOrDefault(s =>
 		{
-			actualSchema = originalOpenApiSchema!.OneOf?.FirstOrDefault(s =>
+			if (s is OpenApiSchemaReference)
 			{
-				if (s is OpenApiSchemaReference)
-				{
-					return true;
-				}
-				if (OpenApiSchemaHelper.TryAsOpenApiSchema(s, out OpenApiSchema? schema))
-				{
-					return schema!.Type.HasValue || schema.Properties?.Count > 0 || schema.AllOf?.Count > 0 ||
-						   schema.MaxLength.HasValue || schema.MinLength.HasValue ||
-						   schema.Maximum is not null || schema.Minimum is not null;
-				}
-				return false;
-			});
-
-			typeSourceSchema = originalOpenApiSchema!.OneOf?.FirstOrDefault(s => s is OpenApiSchemaReference);
-
-			if (actualSchema is not null && actualSchema != originalOpenApiSchema)
-			{
-				originalOpenApiSchema = actualSchema as OpenApiSchema;
+				// Schema references should be considered
+				return true;
 			}
+			if (OpenApiSchemaHelper.TryAsOpenApiSchema(s, out OpenApiSchema? schema))
+			{
+				// Exclude the nullable marker (Type=Null) and select schemas with actual types or constraints
+				return (schema!.Type.HasValue && schema.Type != JsonSchemaType.Null) ||
+					   schema.Properties?.Count > 0 || schema.AllOf?.Count > 0 ||
+					   schema.MaxLength.HasValue || schema.MinLength.HasValue ||
+					   schema.Maximum is not null || schema.Minimum is not null;
+			}
+			return false;
+		});
+
+		typeSourceSchema = originalOpenApiSchema!.OneOf?.FirstOrDefault(s => s is OpenApiSchemaReference);
+
+		if (actualSchema is not null && actualSchema != originalOpenApiSchema)
+		{
+			originalOpenApiSchema = actualSchema as OpenApiSchema;
 		}
+	}
 
 		actualSchema ??= originalSchema;
 
