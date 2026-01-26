@@ -27,7 +27,7 @@ public static class OpenApiExtensions
 		/// <param name="autoDocumentFluentValidation"></param>
 		/// <param name="appendRulesToPropertyDescription"></param>
 		/// <returns></returns>
-		public OpenApiOptions EnhancePropertiesAndValidation(bool autoDocumentFluentValidation = true, bool appendRulesToPropertyDescription = true)
+		public OpenApiOptions EnhancePropertiesAndValidation(bool autoDocumentFluentValidation = true, bool autoDocumentDataAnnotationValidation = true, bool appendRulesToPropertyDescription = true)
 		{
 			// Add type transformer first to ensure all property types are correctly documented
 			source.AddDocumentTransformer<TypeDocumentTransformer>();
@@ -41,6 +41,7 @@ public static class OpenApiExtensions
 				RPE.ValidationDocumentTransformer transformer = new()
 				{
 					AutoDocumentFluentValidation = autoDocumentFluentValidation,
+					AutoDocumentDataAnnotationValidation = autoDocumentDataAnnotationValidation,
 					AppendRulesToPropertyDescription = appendRulesToPropertyDescription
 				};
 				return transformer.TransformAsync(document, context, ct);
