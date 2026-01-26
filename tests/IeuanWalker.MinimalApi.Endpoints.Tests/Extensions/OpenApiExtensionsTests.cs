@@ -119,7 +119,7 @@ public class OpenApiExtensionsTests
 		RouteHandlerBuilder route = app.MapPost("/created", (HttpContext ctx) => Results.Created("/created", null));
 
 		// Act
-		RouteHandlerBuilder result = route.WithResponse<string>(201, "Created", "application/json", "application/xml");
+		RouteHandlerBuilder result = route.WithResponse<string>(201, "Created", "application/json", ["application/xml"]);
 
 		// Assert
 		result.ShouldBeSameAs(route);
@@ -147,7 +147,7 @@ public class OpenApiExtensionsTests
 		RouteHandlerBuilder route = app.MapGet("/multi", () => Results.Ok());
 
 		// Act
-		RouteHandlerBuilder result = route.WithResponse<string>(200, "OK", "application/json", "application/xml", "text/plain");
+		RouteHandlerBuilder result = route.WithResponse<string>(200, "OK", "application/json", ["application/xml", "text/plain"]);
 
 		// Assert
 		result.ShouldBeSameAs(route);
