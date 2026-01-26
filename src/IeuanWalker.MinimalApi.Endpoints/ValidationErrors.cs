@@ -94,11 +94,13 @@ public sealed class ValidationErrors<T>
 
 		if (expression is MethodCallExpression call && call.Method.Name == "get_Item")
 		{
-			members.Push($"{((MemberExpression)call.Object!).Member.Name}[{call.Arguments[0]}]");
-			if (call.Object is MemberExpression)
+			if (call.Object is MemberExpression memberObject)
 			{
+				members.Push($"{memberObject.Member.Name}[{call.Arguments[0]}]");
 				return string.Join(".", members);
 			}
+
+			throw new ArgumentException("Indexer expressions are only supported on direct member access, e.g. x => x.Items[0]");
 		}
 
 		throw new ArgumentException("Expression must select a (possibly nested) property, e.g. x => x.Prop1.Prop2");
