@@ -13,7 +13,7 @@ public class OpenApiExtensionsTests
 		OpenApiOptions options = new();
 
 		// Act
-		OpenApiOptions result = options.EnhanceRequestProperties();
+		OpenApiOptions result = options.EnhancePropertiesAndValidation();
 
 		// Assert
 		result.ShouldBeSameAs(options);
@@ -26,7 +26,7 @@ public class OpenApiExtensionsTests
 		OpenApiOptions options = new();
 
 		// Act
-		OpenApiOptions result = options.EnhanceRequestProperties(autoDocumentFluentValidation: false, appendRulesToPropertyDescription: false);
+		OpenApiOptions result = options.EnhancePropertiesAndValidation(autoDocumentFluentValidation: false, appendRulesToPropertyDescription: false);
 
 		// Assert
 		result.ShouldBeSameAs(options);

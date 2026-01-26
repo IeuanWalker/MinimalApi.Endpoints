@@ -1,5 +1,6 @@
 ﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.RequestPropertyEnhancer.Validation;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.PropertyEnhancer;
+using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.PropertyEnhancer.Validation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -19,22 +20,20 @@ public static class OpenApiExtensions
 	extension(OpenApiOptions source)
 	{
 		/// <summary>
-		/// <para>This enhances OpenAPI documentation for request properties, it does a number of things - </para>
-		/// <para>- Sets the appropriate types</para>
-		/// <para>- Adds in all the enum information</para>
-		/// <para>- Add validation logic (fluent validation, data annotation and manual rules)</para>
-		/// <para>// TODO: Here is the wiki guide for more info - </para>
+		/// <para> This enhances OpenAPI documentation for properties, it does a number of things - </para> <para> - Sets the
+		/// appropriate types</para> <para> - Adds in all the enum information</para> <para> - Add validation logic (fluent
+		/// validation, data annotation and manual rules)</para>
 		/// </summary>
 		/// <param name="autoDocumentFluentValidation"></param>
 		/// <param name="appendRulesToPropertyDescription"></param>
 		/// <returns></returns>
-		public OpenApiOptions EnhanceRequestProperties(bool autoDocumentFluentValidation = true, bool appendRulesToPropertyDescription = true)
+		public OpenApiOptions EnhancePropertiesAndValidation(bool autoDocumentFluentValidation = true, bool appendRulesToPropertyDescription = true)
 		{
 			// Add type transformer first to ensure all property types are correctly documented
-			source.AddDocumentTransformer<RPE.TypeDocumentTransformer>();
+			source.AddDocumentTransformer<TypeDocumentTransformer>();
 
 			// Add enum transformer second so enum schemas are enriched before validation processing
-			source.AddDocumentTransformer<RPE.EnumSchemaTransformer>();
+			source.AddDocumentTransformer<EnumSchemaTransformer>();
 
 			// Add unified validation transformer that handles both FluentValidation and WithValidation
 			source.AddDocumentTransformer((document, context, ct) =>
@@ -48,27 +47,22 @@ public static class OpenApiExtensions
 			});
 
 			// Reorder so nullable is last
-			source.AddDocumentTransformer<RPE.NullableSchemaReorderTransformer>();
+			source.AddDocumentTransformer<NullableSchemaReorderTransformer>();
 
 			// Add cleanup transformer as the absolute final step to remove unused component schemas
 			// This removes schemas that are no longer referenced after aggressive inlining and unwrapping
-			source.AddDocumentTransformer<RPE.UnusedComponentsCleanupTransformer>();
+			source.AddDocumentTransformer<UnusedComponentsCleanupTransformer>();
 
 			return source;
 		}
 
 		/// <summary>
-		/// Adds security scheme documentation to the OpenAPI document with default configuration.
-		/// This will automatically document all registered authentication schemes.
+		/// Adds security scheme documentation to the OpenAPI document with default configuration. This will automatically
+		/// document all registered authentication schemes.
 		/// </summary>
 		/// <example>
-		/// Simple usage with defaults:
-		/// <code>
-		/// builder.Services.AddOpenApi(options =>
-		/// {
-		///     options.AddAuthenticationSchemes();
-		/// });
-		/// </code>
+		/// Simple usage with defaults: <code> builder.Services.AddOpenApi(options => { options.AddAuthenticationSchemes();
+		/// }); </code>
 		/// </example>
 		public OpenApiOptions AddAuthenticationSchemes()
 		{
@@ -76,30 +70,17 @@ public static class OpenApiExtensions
 		}
 
 		/// <summary>
-		/// Adds security scheme documentation to the OpenAPI document with custom configuration.
-		/// This will automatically document all registered authentication schemes with the specified options.
+		/// Adds security scheme documentation to the OpenAPI document with custom configuration. This will automatically
+		/// document all registered authentication schemes with the specified options.
 		/// </summary>
 		/// <param name="configure">Action to customize security scheme options.</param>
 		/// <returns>The OpenAPI options for method chaining.</returns>
 		/// <example>
-		/// Custom configuration example:
-		/// <code>
-		/// builder.Services.AddOpenApi(options =>
-		/// {
-		///     options.AddAuthenticationSchemes(o =>
-		///     {
-		///         o.BearerFormat = "My Custom JWT";
-		///         o.ApiKeyHeaderName = "X-Custom-Key";
-		///         o.OAuth2AuthorizationUrl = new Uri("https://auth.example.com/authorize");
-		///         o.OAuth2Scopes = new Dictionary&lt;string, string&gt;
-		///         {
-		///             { "read", "Read access" },
-		///             { "write", "Write access" }
-		///         };
-		///         o.OpenIdConnectUrl = new Uri("https://auth.example.com/.well-known/openid-configuration");
-		///     });
-		/// });
-		/// </code>
+		/// Custom configuration example: <code> builder.Services.AddOpenApi(options => { options.AddAuthenticationSchemes(o
+		/// => { o.BearerFormat = "My Custom JWT"; o.ApiKeyHeaderName = "X-Custom-Key"; o.OAuth2AuthorizationUrl = new
+		/// Uri("https://auth.example.com/authorize"); o.OAuth2Scopes = new Dictionary&lt;string, string&gt; { { "read", "Read
+		/// access" }, { "write", "Write access" } }; o.OpenIdConnectUrl = new
+		/// Uri("https://auth.example.com/.well-known/openid-configuration"); }); }); </code>
 		/// </example>
 		public OpenApiOptions AddAuthenticationSchemes(Action<SecuritySchemeTransformerOptions>? configure)
 		{
@@ -119,18 +100,13 @@ public static class OpenApiExtensions
 		}
 
 		/// <summary>
-		/// Adds authorization policy documentation to the OpenAPI document.
-		/// This will automatically document all authorization policies applied to endpoints,
-		/// extracting and displaying their requirements in the operation descriptions.
+		/// Adds authorization policy documentation to the OpenAPI document. This will automatically document all
+		/// authorization policies applied to endpoints, extracting and displaying their requirements in the operation
+		/// descriptions.
 		/// </summary>
 		/// <example>
-		/// Usage with OpenAPI options:
-		/// <code>
-		/// builder.Services.AddOpenApi(options =>
-		/// {
-		///     options.AddAuthorizationPoliciesAndRequirements();
-		/// });
-		/// </code>
+		/// Usage with OpenAPI options: <code> builder.Services.AddOpenApi(options => {
+		/// options.AddAuthorizationPoliciesAndRequirements(); }); </code>
 		/// </example>
 		public OpenApiOptions AddAuthorizationPoliciesAndRequirements()
 		{
@@ -191,27 +167,17 @@ public static class OpenApiExtensions
 		}
 
 		/// <summary>
-		/// Adds validation rules to the endpoint for OpenAPI schema documentation.
-		/// This enables declarative validation constraints that appear in the generated OpenAPI specification.
-		/// Note: This does NOT perform runtime validation - it only updates the OpenAPI documentation.
+		/// Adds validation rules to the endpoint for OpenAPI schema documentation. This enables declarative validation
+		/// constraints that appear in the generated OpenAPI specification. Note: This does NOT perform runtime validation -
+		/// it only updates the OpenAPI documentation.
 		/// </summary>
 		/// <typeparam name="TRequest">The type of the request model to validate</typeparam>
 		/// <param name="configure">Action to configure validation rules</param>
 		/// <returns>The route handler builder for method chaining</returns>
 		/// <example>
-		/// <code>
-		/// app.MapPost("/todos", async (TodoRequest request) => { ... })
-		///    .WithValidation&lt;TodoRequest&gt;(config =>
-		///    {
-		///        config.Property(x => x.Title)
-		///            .Required()
-		///            .MinLength(1)
-		///            .MaxLength(200);
-		///
-		///        config.Property(x => x.Email)
-		///            .Email();
-		///    });
-		/// </code>
+		/// <code> app.MapPost("/todos", async (TodoRequest request) => { ... }) .WithValidation&lt;TodoRequest&gt;(config =>
+		/// { config.Property(x => x.Title) .Required() .MinLength(1) .MaxLength(200); config.Property(x => x.Email) .Email();
+		/// }); </code>
 		/// </example>
 		public RouteHandlerBuilder WithValidationRules<TRequest>(Action<ValidationConfigurationBuilder<TRequest>> configure)
 		{
