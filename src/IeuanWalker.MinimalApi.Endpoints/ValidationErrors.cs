@@ -96,8 +96,14 @@ public sealed class ValidationErrors<T>
 		{
 			if (call.Object is MemberExpression memberObject)
 			{
-				members.Push($"{memberObject.Member.Name}[{call.Arguments[0]}]");
-				return string.Join(".", members);
+				string basePath = GetPropertyPath(memberObject);
+				string indexedPath = $"{basePath}[{call.Arguments[0]}]";
+				if (members.Count == 0)
+				{
+					return indexedPath;
+				}
+
+				return $"{indexedPath}.{string.Join(".", members)}";
 			}
 
 			throw new ArgumentException("Indexer expressions are only supported on direct member access, e.g. x => x.Items[0]");

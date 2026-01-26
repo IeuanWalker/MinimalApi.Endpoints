@@ -102,6 +102,62 @@ public class ValidationErrorsTests
 	}
 
 	[Fact]
+	public void Add_WithNestedIndexerExpression_UsesPropertyPath()
+	{
+		// Arrange
+		ValidationErrors<TestModel> errors = new();
+
+		// Act
+		errors.Add(x => x.Nested.Map["key"], "Nested map entry is invalid");
+
+		// Assert
+		HttpValidationProblemDetails problemDetails = errors.ToProblemDetails();
+		problemDetails.Errors.ShouldContainKey("Nested.Map[\"key\"]");
+	}
+
+	[Fact]
+	public void Add_WithNestedObjectProperty_UsesPropertyPath()
+	{
+		// Arrange
+		ValidationErrors<TestModel> errors = new();
+
+		// Act
+		errors.Add(x => x.Nested.Detail.Name, "Nested detail name is required");
+
+		// Assert
+		HttpValidationProblemDetails problemDetails = errors.ToProblemDetails();
+		problemDetails.Errors.ShouldContainKey("Nested.Detail.Name");
+	}
+
+	[Fact]
+	public void Add_WithListOfObjectsProperty_UsesPropertyPath()
+	{
+		// Arrange
+		ValidationErrors<TestModel> errors = new();
+
+		// Act
+		errors.Add(x => x.Items[0].Name, "First item name is required");
+
+		// Assert
+		HttpValidationProblemDetails problemDetails = errors.ToProblemDetails();
+		problemDetails.Errors.ShouldContainKey("Items[0].Name");
+	}
+
+	[Fact]
+	public void Add_WithListOfObjectsThirdItem_UsesPropertyPath()
+	{
+		// Arrange
+		ValidationErrors<TestModel> errors = new();
+
+		// Act
+		errors.Add(x => x.Items[2].Name, "Third item name is required");
+
+		// Assert
+		HttpValidationProblemDetails problemDetails = errors.ToProblemDetails();
+		problemDetails.Errors.ShouldContainKey("Items[2].Name");
+	}
+
+	[Fact]
 	public void Add_WithInvalidExpression_ThrowsArgumentException()
 	{
 		// Arrange
@@ -186,10 +242,23 @@ public class ValidationErrorsTests
 		public int Number { get; set; }
 		public NestedModel Nested { get; set; } = new();
 		public Dictionary<string, string> Map { get; set; } = new();
+		public List<ItemModel> Items { get; set; } = [];
 	}
 
 	public class NestedModel
 	{
 		public string Description { get; set; } = string.Empty;
+		public Dictionary<string, string> Map { get; set; } = new();
+		public DetailModel Detail { get; set; } = new();
+	}
+
+	public class DetailModel
+	{
+		public string Name { get; set; } = string.Empty;
+	}
+
+	public class ItemModel
+	{
+		public string Name { get; set; } = string.Empty;
 	}
 }
