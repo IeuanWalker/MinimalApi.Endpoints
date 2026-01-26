@@ -1,8 +1,9 @@
-The WithValidation extension method allow you to manually document validation rules.
+# WithValidationRules
+The `WithValidationRules` extension lets you manually document validation rules for OpenAPI.
 
-> IMPORTANT: This does not perform any validation, just documents the rules.
+> IMPORTANT: This does not perform any validation, it only updates the OpenAPI spec.
 
-## Usage 
+## Usage
 ```csharp
 public static void Configure(RouteHandlerBuilder builder)
 {
@@ -44,7 +45,14 @@ public static void Configure(RouteHandlerBuilder builder)
 }
 ```
 
-There are several built in extension methods, that all maps to the open api spec except for the extension method `.Custom()`
+## Behavior
+- Rules are merged with auto-discovered rules (FluentValidation and DataAnnotations).
+- Manual rules replace any auto-discovered rules for the same property.
+- Use `Alter`, `Remove`, or `RemoveAll` to adjust auto-discovered rules instead of replacing them.
+
+## Available rule methods
+All methods map to OpenAPI schema constraints except `Custom()`, which only adds documentation.
+
 | Extension | Details |
 | --- | --- |
 | `Description(string description)` | Adds a description to the property |
@@ -63,42 +71,38 @@ There are several built in extension methods, that all maps to the open api spec
 | `LessThanOrEqual<TValue>(TValue value, string? errorMessage = null)` | Number rule |
 
 ## Alter
-Allows you to alter an existing rule. This may be useful if you want to change the default validation rules documented via Data Annotations or Fluent Validation
-
+Change the error message for an existing rule (typically from auto-discovered rules).
 ```csharp
 .WithValidationRules<RequestModel>(x =>
 {
-	// Demonstrate Alter: Change the Fluent Validation pattern error message
 	x.Property(p => p.Test).Alter("Must match pattern: ^[a-zA-Z0-9]+$", "Must be alphanumeric");
 });
 ```
 
 ## Remove
-
+Remove a specific rule by its error message.
 ```csharp
 .WithValidationRules<RequestModel>(x =>
 {
-	// Demonstrate Remove: Remove the MaxLength rule from Fluent Validation
 	x.Property(p => p.Test).Remove("Must be 100 characters or fewer");
 });
 ```
 
 ## RemoveAll
-
+Remove all rules for a property.
 ```csharp
 .WithValidationRules<RequestModel>(x =>
 {
-	// Demonstrate RemoveAll: Remove all Fluent Validation rules for this property
 	x.Property(p => p.Test).RemoveAll();
 });
 ```
 
 ## AppendRulesToPropertyDescription
-Using this property you can control whether rules get listed in the property description or not. Rules will still be documented in the open api spec if it is supported but it would be appended to the property description.
+Control whether rules are appended to property descriptions.
 ```csharp
 .WithValidationRules<RequestModel>(x =>
 {
 	x.AppendRulesToPropertyDescription(false); // Disable rule appending for all properties in RequestModel
-	x.Property(p => p.Test).AppendRulesToPropertyDescription(false); // Disable rule appending for specific property within RequestModel
+	x.Property(p => p.Test).AppendRulesToPropertyDescription(false); // Disable for a specific property
 });
 ```
