@@ -1063,6 +1063,160 @@ public class TypeDocumentTransformerTests
 		second.Type.ShouldBe(JsonSchemaType.Array);
 	}
 
+	[Fact]
+	public async Task TransformAsync_PreservesNullableMarkerAndCollectionRefInOneOf_WhenPropertyIsArrayType()
+	{
+		// Arrange
+		// This test verifies the early-return behavior in FixSchemaType when:
+		// 1. The property type is an array/collection (string[] in TestArrayHolder)
+		// 2. The schema has OneOf: [ nullable marker, collection reference ]
+		// The selected code returns the schema unchanged to preserve the correct structure.
+
+		TypeDocumentTransformer transformer = new();
+
+		// Create a property schema with OneOf: [ nullable marker, collection reference ]
+		OpenApiSchema nullableMarker = OpenApiSchemaHelper.CreateNullableMarker();
+		string collectionTypeName = "System.Collections.Generic.List`1[[System.String]]";
+		OpenApiSchemaReference collectionRef = new(collectionTypeName, null, null);
+
+		OpenApiSchema propertySchema = new()
+		{
+			OneOf =
+			[
+				nullableMarker,
+				collectionRef
+			]
+		};
+
+		OpenApiSchema component = new()
+		{
+			Properties = new Dictionary<string, IOpenApiSchema>
+			{
+				["Values"] = propertySchema
+			}
+		};
+
+		// Use the actual type so SchemaTypeResolver can resolve it
+		string typeName = typeof(TestArrayHolder).AssemblyQualifiedName!;
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					[typeName] = component
+				}
+			}
+		};
+
+		// Act
+		await transformer.TransformAsync(document, CreateMockContext(), CancellationToken.None);
+
+		// Assert - verify the early return preserved the structure
+		// The schema should remain a OneOf since the property type (string[]) is an array
+		// and the schema already has the correct nullable + collection structure
+		OpenApiSchema? result = document.Components.Schemas[typeName] as OpenApiSchema;
+		result.ShouldNotBeNull();
+		result.Properties.ShouldNotBeNull();
+
+		IOpenApiSchema? valuesSchema = result.Properties["Values"];
+		valuesSchema.ShouldBeOfType<OpenApiSchema>();
+		OpenApiSchema vs = (OpenApiSchema)valuesSchema;
+
+		// Verify OneOf structure was preserved by the early return
+		vs.OneOf.ShouldNotBeNull();
+		vs.OneOf.Count.ShouldBe(2);
+
+		// First element should be the nullable marker
+		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
+		first.ShouldNotBeNull();
+		first.Type.HasValue.ShouldBeFalse();
+		first.Extensions.ShouldNotBeNull();
+		first.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+
+		// Second element should still be present
+		// The key verification is that the early-return code preserved the OneOf structure
+		vs.OneOf[1].ShouldNotBeNull();
+	}
+
+	[Fact]
+	public async Task TransformAsync_PreservesNullableMarkerAndArrayInOneOf_WhenPropertyIsArrayType()
+	{
+		// Arrange
+		// This test verifies the early-return code when the OneOf contains
+		// a nullable marker and an ARRAY schema (not a reference)
+
+		TypeDocumentTransformer transformer = new();
+
+		// Create a property schema with OneOf: [ nullable marker, array schema ]
+		OpenApiSchema nullableMarker = OpenApiSchemaHelper.CreateNullableMarker();
+		OpenApiSchema arraySchema = new()
+		{
+			Type = JsonSchemaType.Array,
+			Items = new OpenApiSchema { Type = JsonSchemaType.String }
+		};
+
+		OpenApiSchema propertySchema = new()
+		{
+			OneOf =
+			[
+				nullableMarker,
+				arraySchema
+			]
+		};
+
+		OpenApiSchema component = new()
+		{
+			Properties = new Dictionary<string, IOpenApiSchema>
+			{
+				["Values"] = propertySchema
+			}
+		};
+
+		// Use the actual type so SchemaTypeResolver can resolve it
+		string typeName = typeof(TestArrayHolder).AssemblyQualifiedName!;
+
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					[typeName] = component
+				}
+			}
+		};
+
+		// Act
+		await transformer.TransformAsync(document, CreateMockContext(), CancellationToken.None);
+
+		// Assert - verify the early return preserved the structure
+		OpenApiSchema? result = document.Components.Schemas[typeName] as OpenApiSchema;
+		result.ShouldNotBeNull();
+		result.Properties.ShouldNotBeNull();
+
+		IOpenApiSchema? valuesSchema = result.Properties["Values"];
+		valuesSchema.ShouldBeOfType<OpenApiSchema>();
+		OpenApiSchema vs = (OpenApiSchema)valuesSchema;
+
+		// Verify OneOf structure was preserved
+		vs.OneOf.ShouldNotBeNull();
+		vs.OneOf.Count.ShouldBe(2);
+
+		// First element should be the nullable marker
+		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
+		first.ShouldNotBeNull();
+		first.Type.HasValue.ShouldBeFalse();
+		first.Extensions.ShouldNotBeNull();
+		first.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+
+		// Second element should be the array schema
+		OpenApiSchema? second = vs.OneOf[1] as OpenApiSchema;
+		second.ShouldNotBeNull();
+		second.Type.ShouldBe(JsonSchemaType.Array);
+	}
+
 	public class TestArrayHolder
 	{
 		public string[] Values { get; set; } = null!;

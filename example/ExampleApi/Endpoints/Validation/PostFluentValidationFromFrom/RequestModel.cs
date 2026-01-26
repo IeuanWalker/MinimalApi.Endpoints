@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom;
 
+[ExcludeFromCodeCoverage]
 public class RequestModel
 {
 	public string StringMin { get; set; } = string.Empty;
@@ -39,6 +41,7 @@ public class RequestModel
 	public required StatusEnum EnumTest { get; set; }
 }
 
+[ExcludeFromCodeCoverage]
 public class NestedObjectModel
 {
 	public string StringMin { get; set; } = string.Empty;
@@ -69,6 +72,7 @@ public enum StatusEnum
 	Failure
 }
 
+[ExcludeFromCodeCoverage]
 sealed class RequestModelValidator : Validator<RequestModel>
 {
 	public RequestModelValidator()
@@ -143,6 +147,7 @@ sealed class RequestModelValidator : Validator<RequestModel>
 	}
 }
 
+[ExcludeFromCodeCoverage]
 sealed class NestedObjectModelValidator : Validator<NestedObjectModel>
 {
 	public NestedObjectModelValidator()

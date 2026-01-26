@@ -1,8 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Validation;
 
 namespace ExampleApi.Endpoints.Validation.GetDataAnnotationsFromQuery;
+
+[ExcludeFromCodeCoverage]
 #pragma warning disable ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
 [ValidatableType]// Required for DataAnnotations validation
 #pragma warning restore ASP0029 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
@@ -149,6 +152,7 @@ public class RequestModel
 }
 
 // Helper validator used by CustomValidationAttribute
+[ExcludeFromCodeCoverage]
 public static class RequestModelValidators
 {
 	public static ValidationResult? ValidateCustomProperty(object? value, ValidationContext context)
@@ -162,6 +166,7 @@ public static class RequestModelValidators
 	}
 }
 
+[ExcludeFromCodeCoverage]
 public class WithDefaultErrorMessageAttribute : ValidationAttribute
 {
 	public WithDefaultErrorMessageAttribute()
@@ -185,6 +190,7 @@ public class WithDefaultErrorMessageAttribute : ValidationAttribute
 	}
 }
 
+[ExcludeFromCodeCoverage]
 public class WithoutDefaultErrorMessageAttribute : ValidationAttribute
 {
 	public WithoutDefaultErrorMessageAttribute()
