@@ -22,6 +22,7 @@ public sealed class ValidationErrors<T>
 
 	public ValidationErrors<T> Add(string key, params string[] messages)
 	{
+		ArgumentNullException.ThrowIfNullOrWhiteSpace(key, nameof(key));
 		ValidateMessages(messages);
 		if (!_errors.TryGetValue(key, out List<string>? list))
 		{

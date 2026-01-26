@@ -122,6 +122,20 @@ public class ValidationErrorsTests
 		ex.ParamName.ShouldBe("messages");
 	}
 
+	[Theory]
+	[InlineData(null)]
+	[InlineData("")]
+	[InlineData("   ")]
+	public void Add_WithInvalidKey_ThrowsArgumentException(string? key)
+	{
+		// Arrange
+		ValidationErrors<TestModel> errors = new();
+
+		// Act & Assert
+		ArgumentException ex = Should.Throw<ArgumentException>(() => errors.Add(key!, "Name is required"));
+		ex.ParamName.ShouldBe("key");
+	}
+
 	[Fact]
 	public void Add_WithExpressionNoMessages_ThrowsArgumentException()
 	{
