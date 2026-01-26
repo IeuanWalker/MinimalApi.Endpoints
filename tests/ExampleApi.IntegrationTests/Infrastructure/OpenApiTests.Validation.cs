@@ -451,7 +451,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		    }
 		  }
 		},
-		"/api/v1/validation/FluentValidation/FromQuery": {
+				"/api/v1/validation/FluentValidation/FromQuery": {
 		  "get": {
 		    "tags": [
 		      "Validation"
@@ -748,13 +748,27 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		    }
 		  }
 		},
-		"/api/v1/validation/DataValidation": {
+				"/api/v1/validation/ValidationErrors": {
+				  "get": {
+				    "tags": [
+				      "Validation"
+				    ],
+				    "summary": "ValidationErrors",
+				    "operationId": "get_ValidationValidationErrors_21",
+				    "responses": {
+				      "200": {
+				        "description": "OK"
+				      }
+				    }
+				  }
+				},
+				"/api/v1/validation/DataValidation": {
 		  "post": {
 		    "tags": [
 		      "Validation"
 		    ],
 		    "summary": "DataAnnotationsFromBody",
-		    "operationId": "post_ValidationDataValidation_21",
+				    "operationId": "post_ValidationDataValidation_22",
 		    "requestBody": {
 		      "content": {
 		        "application/json": {
@@ -777,7 +791,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		      "Validation"
 		    ],
 		    "summary": "FluentValidationFromBody",
-		    "operationId": "post_ValidationFluentValidation_22",
+				    "operationId": "post_ValidationFluentValidation_23",
 		    "requestBody": {
 		      "content": {
 		        "application/json": {
@@ -807,7 +821,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		      "Validation"
 		    ],
 		    "summary": "FluentValidationFromForm",
-		    "operationId": "post_ValidationFluentValidationFromForm_23",
+				    "operationId": "post_ValidationFluentValidationFromForm_24",
 		    "requestBody": {
 		      "content": {
 		        "multipart/form-data": {
@@ -843,7 +857,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		      "Validation"
 		    ],
 		    "summary": "FluentValidationEdgeCases",
-		    "operationId": "post_ValidationFluentValidationEdgeCases_24",
+				    "operationId": "post_ValidationFluentValidationEdgeCases_25",
 		    "requestBody": {
 		      "content": {
 		        "application/json": {
@@ -873,7 +887,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		      "Validation"
 		    ],
 		    "summary": "ManualWithValidation",
-		    "operationId": "post_ValidationWithValidation_25",
+				    "operationId": "post_ValidationWithValidation_26",
 		    "requestBody": {
 		      "content": {
 		        "application/json": {
@@ -896,7 +910,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		      "Validation"
 		    ],
 		    "summary": "WithValidationAlterAndRemove",
-		    "operationId": "post_ValidationWithValidationAlterAndRemove_26",
+				    "operationId": "post_ValidationWithValidationAlterAndRemove_27",
 		    "requestBody": {
 		      "content": {
 		        "multipart/form-data": {

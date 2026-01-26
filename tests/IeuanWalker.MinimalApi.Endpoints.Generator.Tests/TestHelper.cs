@@ -59,16 +59,7 @@ public static class TestHelper
 
 		foreach (string assemblyName in systemAssemblies)
 		{
-			try
-			{
-				references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
-			}
-#pragma warning disable CA1031 // Do not catch general exception types
-			catch
-			{
-				// Skip if assembly can't be loaded
-			}
-#pragma warning restore CA1031 // Do not catch general exception types
+			references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
 		}
 
 		// Add ASP.NET Core references
@@ -83,16 +74,7 @@ public static class TestHelper
 
 		foreach (string assemblyName in aspNetAssemblies)
 		{
-			try
-			{
-				references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
-			}
-#pragma warning disable CA1031 // Do not catch general exception types
-			catch
-			{
-				// Skip if assembly can't be loaded - we'll try to find it via file system
-			}
-#pragma warning restore CA1031 // Do not catch general exception types
+			references.Add(MetadataReference.CreateFromFile(Assembly.Load(assemblyName).Location));
 		}
 
 		// Add reference to the library project containing the interfaces
@@ -122,17 +104,8 @@ public static class TestHelper
 #pragma warning restore CA1031 // Do not catch general exception types
 
 		// Add FluentValidation reference
-		try
-		{
-			Assembly fluentValidationAssembly = Assembly.Load("FluentValidation");
-			references.Add(MetadataReference.CreateFromFile(fluentValidationAssembly.Location));
-		}
-#pragma warning disable CA1031 // Do not catch general exception types
-		catch
-		{
-			// FluentValidation is optional for some tests
-		}
-#pragma warning restore CA1031 // Do not catch general exception types
+		Assembly fluentValidationAssembly = Assembly.Load("FluentValidation");
+		references.Add(MetadataReference.CreateFromFile(fluentValidationAssembly.Location));
 
 		return references;
 	}
