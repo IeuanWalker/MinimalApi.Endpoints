@@ -82,19 +82,3 @@ public sealed class ValidationErrors<T>
 		}
 	}
 }
-
-//ProblemHttpResult
-
-//	catch(InvalidUprnException)
-//		{
-//			return new ValidationErrors<RequestModel>()
-//				.Add(x => x.Uprn!, "Invalid UPRN")
-//				.ToProblemResponse();
-//		}
-//		catch(InvalidEastingNorthingException)
-//		{
-//	return new ValidationErrors<RequestModel>()
-//		.Add(x => x.Easting!, "Invalid easting")
-//		.Add(x => x.Northing!, "Invalid northing")
-//		.ToProblemResponse();
-//}
