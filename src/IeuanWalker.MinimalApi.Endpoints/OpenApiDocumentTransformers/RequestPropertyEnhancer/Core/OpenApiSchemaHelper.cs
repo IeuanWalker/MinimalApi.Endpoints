@@ -319,12 +319,12 @@ static class OpenApiSchemaHelper
 		_ when refId.Contains(SchemaConstants.SystemTimeOnly) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatTime },
 		_ when refId.Contains(SchemaConstants.SystemGuid) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatUuid },
 		_ when refId.Contains(SchemaConstants.SystemUri) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatUri },
-		_ when refId.Contains(SchemaConstants.IFormFile) || refId.Equals("IFormFile", StringComparison.Ordinal) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatBinary },
 		_ when refId.Contains(SchemaConstants.IFormFileCollection) || refId.Equals("IFormFileCollection", StringComparison.Ordinal) => new OpenApiSchema
 		{
 			Type = JsonSchemaType.Array,
 			Items = new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatBinary }
 		},
+		_ when refId.Contains(SchemaConstants.IFormFile) || refId.Equals("IFormFile", StringComparison.Ordinal) => new OpenApiSchema { Type = JsonSchemaType.String, Format = SchemaConstants.FormatBinary },
 		_ => null
 	};
 
@@ -431,6 +431,8 @@ static class OpenApiSchemaHelper
 		{
 			return referenceable;
 		}
+
+
 
 		string? referenceId = referenceable switch
 		{

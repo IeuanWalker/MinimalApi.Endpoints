@@ -11,6 +11,7 @@
 						<Exclude>CompilerGeneratedAttribute</Exclude>
 						<Exclude>ExcludeFromCodeCoverageAttribute</Exclude>
 					</ExcludeByAttribute>
+					<SkipAutoProps>true</SkipAutoProps>
 				</Configuration>
 			</DataCollector>
 		</DataCollectors>

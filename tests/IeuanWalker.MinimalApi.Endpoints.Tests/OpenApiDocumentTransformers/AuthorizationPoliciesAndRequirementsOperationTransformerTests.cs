@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
+﻿using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
@@ -17,6 +16,31 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 		Microsoft.OpenApi.OpenApiOperation operation = new() { Description = "Original description" };
 
 		OpenApiOperationTransformerContext context = CreateContext([]);
+
+		// Act
+		await transformer.TransformAsync(operation, context, CancellationToken.None);
+
+		// Assert
+		operation.Description.ShouldStartWith("Original description");
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenActionDescriptorIsNull_DoesNotModifyOperation()
+	{
+		// Arrange
+		AuthorizationPoliciesAndRequirementsOperationTransformer transformer = new();
+		Microsoft.OpenApi.OpenApiOperation operation = new() { Description = "Original description" };
+
+		// Create a context where the ApiDescription.ActionDescriptor is null
+		WebApplicationBuilder builder = WebApplication.CreateBuilder();
+		WebApplication app = builder.Build();
+
+		OpenApiOperationTransformerContext context = new()
+		{
+			Description = new ApiDescription { ActionDescriptor = null! },
+			DocumentName = "v1",
+			ApplicationServices = app.Services
+		};
 
 		// Act
 		await transformer.TransformAsync(operation, context, CancellationToken.None);
@@ -297,28 +321,19 @@ public class AuthorizationPoliciesAndRequirementsOperationTransformerTests
 			ActionDescriptor = actionDescriptor
 		};
 
-		// Use FormatterServices to create instance without calling constructor
-		Type contextType = typeof(OpenApiOperationTransformerContext);
-#pragma warning disable SYSLIB0050 // FormatterServices is obsolete
-		object context = System.Runtime.Serialization.FormatterServices.GetUninitializedObject(contextType);
-#pragma warning restore SYSLIB0050
-
-		// Set the Description property using reflection
-		PropertyInfo? descriptionProp = contextType.GetProperty("Description");
-		descriptionProp?.SetValue(context, apiDescription);
-
-		return (OpenApiOperationTransformerContext)context;
+		return new OpenApiOperationTransformerContext
+		{
+			Description = apiDescription,
+			DocumentName = "v1",
+			ApplicationServices = app.Services
+		};
 	}
 
 	class TestActionDescriptor : Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor
 	{
 		public TestActionDescriptor(IList<object> metadata)
 		{
-			// Set the backing field using reflection
-			FieldInfo? field = typeof(Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor)
-				.GetField("<EndpointMetadata>k__BackingField", BindingFlags.NonPublic | BindingFlags.Instance);
-
-			field?.SetValue(this, metadata);
+			EndpointMetadata = metadata;
 		}
 	}
 }

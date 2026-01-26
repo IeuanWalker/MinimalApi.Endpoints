@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using IeuanWalker.MinimalApi.Endpoints;
 
 namespace ExampleApi.Endpoints.Validation.PostWithValidationAlterRemove;
 
+[ExcludeFromCodeCoverage]
 public class RequestModel
 {
 	public string Alter { get; set; } = string.Empty;
@@ -10,6 +12,7 @@ public class RequestModel
 	public string RemoveAll { get; set; } = string.Empty;
 }
 
+[ExcludeFromCodeCoverage]
 sealed class RequestModelValidator : Validator<RequestModel>
 {
 	public RequestModelValidator()

@@ -1812,13 +1812,43 @@
 				}
 			}
 		},
+		"/api/v1/validation/FluentValidationEdgeCases": {
+			"post": {
+				"tags": [
+					"Validation"
+				],
+				"summary": "FluentValidationEdgeCases",
+				"operationId": "post_ValidationFluentValidationEdgeCases_24",
+				"requestBody": {
+					"content": {
+						"application/json": {
+							"schema": {
+								"$ref": "#/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationEdgeCases.RequestModel"
+							}
+						}
+					}
+				},
+				"responses": {
+					"400": {
+						"description": "Bad Request",
+						"content": {
+							"application/problem+json": {
+								"schema": {
+									"$ref": "#/components/schemas/Microsoft.AspNetCore.Http.HttpValidationProblemDetails"
+								}
+							}
+						}
+					}
+				}
+			}
+		},
 		"/api/v1/validation/WithValidation": {
 			"post": {
 				"tags": [
 					"Validation"
 				],
 				"summary": "ManualWithValidation",
-				"operationId": "post_ValidationWithValidation_24",
+				"operationId": "post_ValidationWithValidation_25",
 				"requestBody": {
 					"content": {
 						"application/json": {
@@ -1841,7 +1871,7 @@
 					"Validation"
 				],
 				"summary": "WithValidationAlterAndRemove",
-				"operationId": "post_ValidationWithValidationAlterAndRemove_25",
+				"operationId": "post_ValidationWithValidationAlterAndRemove_26",
 				"requestBody": {
 					"content": {
 						"multipart/form-data": {
@@ -2014,6 +2044,7 @@
 							{
 								"type": "integer",
 								"description": "Enum: Low, Medium, High, Critical",
+								"format": "int32",
 								"enum": [
 									0,
 									1,
@@ -4402,7 +4433,8 @@
 								"maxLength": 100,
 								"minLength": 3,
 								"type": "number",
-								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer",
+								"format": "double"
 							},
 							{
 								"nullable": true
@@ -4507,10 +4539,11 @@
 					"fileExtension": {
 						"oneOf": [
 							{
-								"nullable": true
+								"type": "string",
+								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
+								"format": "binary"
 							},
 							{
-								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
 								"nullable": true
 							}
 						]
@@ -4679,7 +4712,8 @@
 								"maxLength": 100,
 								"minLength": 3,
 								"type": "number",
-								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer"
+								"description": "Validation rules:\n- Is required\n- Must be >= 10 and <= 25\n- Must be 3 characters or more\n- Must be 100 characters or fewer",
+								"format": "double"
 							},
 							{
 								"nullable": true
@@ -4784,10 +4818,11 @@
 					"fileExtension": {
 						"oneOf": [
 							{
-								"nullable": true
+								"type": "string",
+								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
+								"format": "binary"
 							},
 							{
-								"description": "Validation rules:\n- Must be a file with extension: jpg,png",
 								"nullable": true
 							}
 						]
@@ -5231,7 +5266,8 @@
 								"minimum": 0,
 								"exclusiveMinimum": true,
 								"type": "number",
-								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. "
+								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. ",
+								"format": "double"
 							},
 							{
 								"nullable": true
@@ -5283,6 +5319,58 @@
 					"Success",
 					"Failure"
 				]
+			},
+			"ExampleApi.Endpoints.Validation.PostFluentValidationEdgeCases.RequestModel": {
+				"required": [
+					"key",
+					"language"
+				],
+				"type": "object",
+				"properties": {
+					"key": {
+						"type": "string"
+					},
+					"language": {
+						"type": "string",
+						"description": "Validation rules:\n- Must be one of the following: en-GB, cy-GB"
+					},
+					"uprn": {
+						"oneOf": [
+							{
+								"type": "integer",
+								"description": "Validation rules:\n- Must provide either uprn or easting/ northing\n- Must provide UPRN if required by chosen key",
+								"format": "int64"
+							},
+							{
+								"nullable": true
+							}
+						]
+					},
+					"easting": {
+						"oneOf": [
+							{
+								"type": "number",
+								"description": "Validation rules:\n- Must provide either uprn or easting/ northing",
+								"format": "double"
+							},
+							{
+								"nullable": true
+							}
+						]
+					},
+					"northing": {
+						"oneOf": [
+							{
+								"type": "number",
+								"description": "Validation rules:\n- Must provide either uprn or easting/ northing",
+								"format": "double"
+							},
+							{
+								"nullable": true
+							}
+						]
+					}
+				}
 			},
 			"ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel": {
 				"type": "object",
@@ -5564,7 +5652,8 @@
 								"minimum": 0,
 								"exclusiveMinimum": true,
 								"type": "number",
-								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. "
+								"description": "Validation rules:\n- Is required\n- Must not be equal to '10'.\n- Must be equal to '10'.\n- Must be < 100\n- Must be less than 'MaxNumberTest'.\n- Must be <= 100\n- Must be less than or equal to 'MaxNumberTest'.\n- Must be > 0\n- Must be greater than 'MinNumberTest'.\n- Must be >= 1\n- Must be greater than or equal to 'MinNumberTest'.\n- Must be empty.\n- Must be >= 1 and <= 10\n- Must not be more than 4 digits in total, with allowance for 2 decimals. ",
+								"format": "double"
 							},
 							{
 								"nullable": true

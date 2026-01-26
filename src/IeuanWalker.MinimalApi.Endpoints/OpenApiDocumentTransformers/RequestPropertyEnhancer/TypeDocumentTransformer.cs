@@ -310,12 +310,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 	{
 		if (!schema.Type.HasValue || schema.Type == JsonSchemaType.Null)
 		{
-			if (schemaName.Contains(SchemaConstants.IFormFile))
-			{
-				schema.Type = JsonSchemaType.String;
-				schema.Format = SchemaConstants.FormatBinary;
-			}
-			else if (schemaName.Contains(SchemaConstants.IFormFileCollection))
+			// Check IFormFileCollection FIRST since it contains "IFormFile" in its name
+			if (schemaName.Contains(SchemaConstants.IFormFileCollection))
 			{
 				schema.Type = JsonSchemaType.Array;
 				schema.Items = new OpenApiSchema
@@ -323,6 +319,11 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					Type = JsonSchemaType.String,
 					Format = SchemaConstants.FormatBinary
 				};
+			}
+			else if (schemaName.Contains(SchemaConstants.IFormFile))
+			{
+				schema.Type = JsonSchemaType.String;
+				schema.Format = SchemaConstants.FormatBinary;
 			}
 		}
 	}

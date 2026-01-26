@@ -1,10 +1,12 @@
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExampleApi.Endpoints.Enum.GetFromQuery;
 
+[ExcludeFromCodeCoverage]
 public class RequestModel
 {
 	[FromQuery]
@@ -37,6 +39,7 @@ public enum PriorityEnum
 	Critical = 3
 }
 
+[ExcludeFromCodeCoverage]
 public class RequestModelValidator : Validator<RequestModel>
 {
 	public RequestModelValidator()

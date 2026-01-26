@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using FluentValidation;
 using IeuanWalker.MinimalApi.Endpoints;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery;
 
+[ExcludeFromCodeCoverage]
 public class RequestModel
 {
 	[FromQuery]

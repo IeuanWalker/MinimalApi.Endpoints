@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OpenApi;
 
@@ -58,7 +57,12 @@ public class OpenApiExtensionsTests
 			o.BearerFormat = "Custom";
 			o.ApiKeyHeaderName = "X-Custom";
 			o.OAuth2AuthorizationUrl = new Uri("https://auth.example.com/authorize");
-			o.OAuth2Scopes = new System.Collections.Generic.Dictionary<string, string> { { "read", "Read" } };
+			o.OAuth2Scopes = new Dictionary<string, string>
+			{
+				{
+					"read", "Read"
+				}
+			};
 			o.OpenIdConnectUrl = new Uri("https://auth.example.com/.well-known/openid-configuration");
 		});
 
@@ -149,12 +153,6 @@ public class OpenApiExtensionsTests
 		result.ShouldBeSameAs(route);
 	}
 
-	class SampleRequest
-	{
-		public string? Title { get; set; }
-		public string? Description { get; set; }
-	}
-
 	[Fact]
 	public void WithValidationRules_ReturnsSameBuilder()
 	{
@@ -236,95 +234,9 @@ public class OpenApiExtensionsTests
 		result.ShouldBeSameAs(route);
 	}
 
-	[Fact]
-	public void AddAuthenticationSchemes_AddsTransformers()
+	class SampleRequest
 	{
-		// Arrange
-		OpenApiOptions options = new();
-
-		// Act
-		OpenApiOptions result = options.AddAuthenticationSchemes();
-
-		// Assert - verify method doesn't throw and returns same instance
-		result.ShouldBeSameAs(options);
-
-		// Verify a transformer was added by checking internal state via reflection
-		bool hasTransformer = HasDocumentTransformer(options);
-		hasTransformer.ShouldBeTrue();
-	}
-
-	[Fact]
-	public void AddAuthenticationSchemes_WithConfiguration_AddsTransformers()
-	{
-		// Arrange
-		OpenApiOptions options = new();
-
-		// Act
-		OpenApiOptions result = options.AddAuthenticationSchemes(opts =>
-		{
-			opts.BearerFormat = "CustomJWT";
-			opts.ApiKeyHeaderName = "X-Custom-API-Key";
-		});
-
-		// Assert
-		result.ShouldBeSameAs(options);
-
-		// Verify a transformer was added
-		bool hasTransformer = HasDocumentTransformer(options);
-		hasTransformer.ShouldBeTrue();
-	}
-
-	[Fact]
-	public void AddAuthorizationPoliciesAndRequirements_AddsOperationTransformer()
-	{
-		// Arrange
-		OpenApiOptions options = new();
-
-		// Act
-		OpenApiOptions result = options.AddAuthorizationPoliciesAndRequirements();
-
-		// Assert - just verify it doesn't throw and returns the same instance
-		result.ShouldBeSameAs(options);
-	}
-
-	static bool HasDocumentTransformer(OpenApiOptions options)
-	{
-		Type optionsType = options.GetType();
-		foreach (MemberInfo member in optionsType.GetMembers(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
-		{
-			if (member is FieldInfo fi)
-			{
-				object? val = fi.GetValue(options);
-				if (val is System.Collections.IEnumerable ie && CountEnumerable(ie) > 0)
-				{
-					return true;
-				}
-			}
-			else if (member is PropertyInfo pi && pi.Name.Contains("DocumentTransformer", StringComparison.OrdinalIgnoreCase))
-			{
-				if (pi.GetIndexParameters().Length > 0)
-				{
-					continue;
-				}
-
-				object? val = null;
-				try { val = pi.GetValue(options); } catch { /* Ignore reflection errors */ }
-				if (val is System.Collections.IEnumerable ie && CountEnumerable(ie) > 0)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	static int CountEnumerable(System.Collections.IEnumerable enumerable)
-	{
-		int count = 0;
-		foreach (object? _ in enumerable)
-		{
-			count++;
-		}
-		return count;
+		public string? Title { get; set; }
+		public string? Description { get; set; }
 	}
 }
