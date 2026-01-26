@@ -112,6 +112,28 @@ public class ValidationErrorsTests
 	}
 
 	[Fact]
+	public void Add_WithNoMessages_ThrowsArgumentException()
+	{
+		// Arrange
+		ValidationErrors<TestModel> errors = new();
+
+		// Act & Assert
+		ArgumentException ex = Should.Throw<ArgumentException>(() => errors.Add("Name"));
+		ex.ParamName.ShouldBe("messages");
+	}
+
+	[Fact]
+	public void Add_WithExpressionNoMessages_ThrowsArgumentException()
+	{
+		// Arrange
+		ValidationErrors<TestModel> errors = new();
+
+		// Act & Assert
+		ArgumentException ex = Should.Throw<ArgumentException>(() => errors.Add(x => x.Name));
+		ex.ParamName.ShouldBe("messages");
+	}
+
+	[Fact]
 	public void ToProblemDetails_ReturnsAllErrors()
 	{
 		// Arrange

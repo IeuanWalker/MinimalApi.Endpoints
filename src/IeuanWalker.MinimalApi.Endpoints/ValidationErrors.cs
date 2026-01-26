@@ -15,12 +15,14 @@ public sealed class ValidationErrors<T>
 
 	public ValidationErrors<T> Add(Expression<Func<T, object>> property, params string[] messages)
 	{
+		ValidateMessages(messages);
 		string name = GetPropertyPath(property.Body);
 		return Add(name, messages);
 	}
 
 	public ValidationErrors<T> Add(string key, params string[] messages)
 	{
+		ValidateMessages(messages);
 		if (!_errors.TryGetValue(key, out List<string>? list))
 		{
 			list = [];
@@ -69,6 +71,14 @@ public sealed class ValidationErrors<T>
 		}
 
 		throw new ArgumentException("Expression must select a (possibly nested) property, e.g. x => x.Prop1.Prop2");
+	}
+
+	static void ValidateMessages(string[] messages)
+	{
+		if (messages.Length == 0)
+		{
+			throw new ArgumentException("At least one validation message must be provided.", nameof(messages));
+		}
 	}
 }
 
