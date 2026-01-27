@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.Extensions.Primitives;
 
-#pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
-#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 [ExcludeFromCodeCoverage]
 sealed class AllowAuthenticatedCachePolicy : IOutputCachePolicy
