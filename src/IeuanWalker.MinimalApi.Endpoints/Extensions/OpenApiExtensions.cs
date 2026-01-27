@@ -118,6 +118,14 @@ public static class OpenApiExtensions
 
 	extension(RouteHandlerBuilder source)
 	{
+		/// <summary>
+		/// Documents a response for the endpoint without specifying a response body type.
+		/// </summary>
+		/// <param name="statusCode">The HTTP status code returned by the endpoint.</param>
+		/// <param name="description">The description to apply to the documented response in OpenAPI.</param>
+		/// <param name="contentType">The primary content type for the response.</param>
+		/// <param name="additionalContentTypes">Additional content types for the response.</param>
+		/// <returns>The same <see cref="RouteHandlerBuilder"/> instance for chaining.</returns>
 		public RouteHandlerBuilder WithResponse(int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 		{
 			source.WithResponse(null, statusCode, description, contentType, additionalContentTypes);
@@ -125,6 +133,15 @@ public static class OpenApiExtensions
 			return source;
 		}
 
+		/// <summary>
+		/// Documents a response for the endpoint, including the response body type.
+		/// </summary>
+		/// <typeparam name="T">The response body type.</typeparam>
+		/// <param name="statusCode">The HTTP status code returned by the endpoint.</param>
+		/// <param name="description">The description to apply to the documented response in OpenAPI.</param>
+		/// <param name="contentType">The primary content type for the response. Defaults to <c>application/json</c> when a response type is specified.</param>
+		/// <param name="additionalContentTypes">Additional content types for the response.</param>
+		/// <returns>The same <see cref="RouteHandlerBuilder"/> instance for chaining.</returns>
 		public RouteHandlerBuilder WithResponse<T>(int statusCode, string description, string? contentType = null, params string[] additionalContentTypes)
 		{
 			source.WithResponse(typeof(T), statusCode, description, contentType, additionalContentTypes);

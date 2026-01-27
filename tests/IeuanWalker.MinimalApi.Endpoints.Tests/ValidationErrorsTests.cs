@@ -241,14 +241,14 @@ public class ValidationErrorsTests
 		public string Name { get; set; } = string.Empty;
 		public int Number { get; set; }
 		public NestedModel Nested { get; set; } = new();
-		public Dictionary<string, string> Map { get; set; } = new();
+		public Dictionary<string, string> Map { get; set; } = [];
 		public List<ItemModel> Items { get; set; } = [];
 	}
 
 	public class NestedModel
 	{
 		public string Description { get; set; } = string.Empty;
-		public Dictionary<string, string> Map { get; set; } = new();
+		public Dictionary<string, string> Map { get; set; } = [];
 		public DetailModel Detail { get; set; } = new();
 	}
 
