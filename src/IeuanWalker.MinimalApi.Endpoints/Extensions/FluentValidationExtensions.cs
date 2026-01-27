@@ -6,6 +6,14 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 
 public static class FluentValidationEnumExtensions
 {
+	/// <summary>
+	/// Validates that the integer value is defined in the specified enum type.
+	/// </summary>
+	/// <typeparam name="T">The type being validated.</typeparam>
+	/// <param name="ruleBuilder">The FluentValidation rule builder.</param>
+	/// <param name="enumType">The enum type to validate against.</param>
+	/// <returns>The rule builder options so additional rules can be chained.</returns>
+	/// <exception cref="ArgumentException">Thrown when <paramref name="enumType"/> is not an enum type.</exception>
 	public static IRuleBuilderOptions<T, int> IsInEnum<T>(this IRuleBuilder<T, int> ruleBuilder, Type enumType)
 	{
 		if (!enumType.IsEnum)
@@ -18,6 +26,14 @@ public static class FluentValidationEnumExtensions
 			.WithMessage("{PropertyName} must be a valid value of enum " + enumType.Name + ".");
 	}
 
+	/// <summary>
+	/// Validates that the nullable integer value is either empty or defined in the specified enum type.
+	/// </summary>
+	/// <typeparam name="T">The type being validated.</typeparam>
+	/// <param name="ruleBuilder">The FluentValidation rule builder.</param>
+	/// <param name="enumType">The enum type to validate against.</param>
+	/// <returns>The rule builder options so additional rules can be chained.</returns>
+	/// <exception cref="ArgumentException">Thrown when <paramref name="enumType"/> is not an enum type.</exception>
 	public static IRuleBuilderOptions<T, int?> IsInEnum<T>(this IRuleBuilder<T, int?> ruleBuilder, Type enumType)
 	{
 		if (!enumType.IsEnum)
