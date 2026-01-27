@@ -37,7 +37,7 @@ sealed class AllowAuthenticatedCachePolicy : IOutputCachePolicy
 			return ValueTask.CompletedTask;
 		}
 
-		// Only cache successful 200 OK responses by default.
+		// Only cache successful 200 OK responses.
 		if (response.StatusCode != StatusCodes.Status200OK)
 		{
 			context.AllowCacheStorage = false;
