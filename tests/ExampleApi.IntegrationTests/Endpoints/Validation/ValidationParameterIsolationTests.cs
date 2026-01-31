@@ -17,10 +17,10 @@ public class ValidationParameterIsolationTests : IClassFixture<ExampleApiWebAppl
 	public async Task BothEndpoints_ShouldHaveDifferentValidationRules()
 	{
 		// Act - Get OpenAPI document as JSON
-		HttpResponseMessage response = await _client.GetAsync("/openapi/v1.json");
+		HttpResponseMessage response = await _client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
 		response.EnsureSuccessStatusCode();
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		using JsonDocument document = JsonDocument.Parse(content);
 
 		// Find both endpoints in the paths

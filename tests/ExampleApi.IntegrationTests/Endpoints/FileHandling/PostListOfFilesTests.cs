@@ -38,11 +38,11 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		content.Add(file3Content, "files", "image.png");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>();
+		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.Length.ShouldBe(3);
 
@@ -67,11 +67,11 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		content.Add(fileContent, "file", "single.txt");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>();
+		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.Length.ShouldBe(1);
 		result[0].FileName.ShouldBe("single.txt");
@@ -88,11 +88,11 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		content.Add(stringContent, "dummy");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>();
+		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.ShouldBeEmpty();
 	}
@@ -112,11 +112,11 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		content.Add(file2Content, "property2", "file2.txt");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>();
+		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.Length.ShouldBe(2);
 		result[0].PropertyName.ShouldBe("property1");
@@ -138,11 +138,11 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		content.Add(file2Content, "files", "empty2.txt");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>();
+		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.Length.ShouldBe(2);
 		result[0].Size.ShouldBe(0);

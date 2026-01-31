@@ -25,7 +25,7 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 	public async Task EndpointA_WithValidNameLengths_ReturnsOk(string name)
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointA?Name={name}");
+		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointA?Name={name}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK, $"EndpointA should accept name '{name}' with length {name.Length} (minLength=5)");
@@ -37,7 +37,7 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 	public async Task EndpointA_WithTooShortName_ReturnsBadRequest(string name)
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointA?Name={name}");
+		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointA?Name={name}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest, $"EndpointA should reject name '{name}' with length {name.Length} (minLength=5)");
@@ -49,7 +49,7 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 	public async Task EndpointB_WithValidNameLengths_ReturnsOk(string name)
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointB?Name={name}");
+		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointB?Name={name}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK, $"EndpointB should accept name '{name}' with length {name.Length} (minLength=10)");
@@ -62,7 +62,7 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 	public async Task EndpointB_WithTooShortName_ReturnsBadRequest(string name)
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointB?Name={name}");
+		HttpResponseMessage response = await _client.GetAsync($"/api/v1/validation/EndpointB?Name={name}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest, $"EndpointB should reject name '{name}' with length {name.Length} (minLength=10)");
@@ -79,8 +79,8 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 		string name = "testing"; // 7 characters
 
 		// Act
-		HttpResponseMessage responseA = await _client.GetAsync($"/api/v1/validation/EndpointA?Name={name}");
-		HttpResponseMessage responseB = await _client.GetAsync($"/api/v1/validation/EndpointB?Name={name}");
+		HttpResponseMessage responseA = await _client.GetAsync($"/api/v1/validation/EndpointA?Name={name}", TestContext.Current.CancellationToken);
+		HttpResponseMessage responseB = await _client.GetAsync($"/api/v1/validation/EndpointB?Name={name}", TestContext.Current.CancellationToken);
 
 		// Assert
 		responseA.StatusCode.ShouldBe(HttpStatusCode.OK, $"EndpointA should accept '{name}' (length {name.Length} >= 5)");
@@ -91,7 +91,7 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 	public async Task EndpointA_WithMissingRequiredParameter_ReturnsBadRequest()
 	{
 		// Act - Call without the required Name parameter
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/validation/EndpointA");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/validation/EndpointA", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest, "Missing required parameter should return BadRequest");
@@ -101,7 +101,7 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 	public async Task EndpointB_WithMissingRequiredParameter_ReturnsBadRequest()
 	{
 		// Act - Call without the required Name parameter
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/validation/EndpointB");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/validation/EndpointB", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest, "Missing required parameter should return BadRequest");
@@ -114,8 +114,8 @@ public class ValidationParameterIsolationRuntimeTests : IClassFixture<ExampleApi
 		// by verifying both can be called successfully with their respective valid inputs
 
 		// Act - Use names that meet each endpoint's minimum length requirement
-		HttpResponseMessage responseA = await _client.GetAsync("/api/v1/validation/EndpointA?Name=TestA"); // 5 chars - OK for A
-		HttpResponseMessage responseB = await _client.GetAsync("/api/v1/validation/EndpointB?Name=TestBLonger"); // 11 chars - OK for B
+		HttpResponseMessage responseA = await _client.GetAsync("/api/v1/validation/EndpointA?Name=TestA", TestContext.Current.CancellationToken); // 5 chars - OK for A
+		HttpResponseMessage responseB = await _client.GetAsync("/api/v1/validation/EndpointB?Name=TestBLonger", TestContext.Current.CancellationToken); // 11 chars - OK for B
 
 		// Assert
 		responseA.StatusCode.ShouldBe(HttpStatusCode.OK, "EndpointA should process independently");

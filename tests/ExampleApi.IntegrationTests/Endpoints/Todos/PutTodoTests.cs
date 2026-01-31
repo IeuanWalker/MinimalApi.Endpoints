@@ -37,7 +37,7 @@ public class PutTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PutAsJsonAsync($"/api/v1/todos/{originalTodo.Id}", updateRequest);
+		HttpResponseMessage response = await _client.PutAsJsonAsync($"/api/v1/todos/{originalTodo.Id}", updateRequest, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);

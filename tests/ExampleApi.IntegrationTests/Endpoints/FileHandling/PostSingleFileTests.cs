@@ -27,11 +27,11 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		content.Add(fileContent, "request", "document.pdf");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>();
+		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.FileName.ShouldBe("document.pdf");
 		result.PropertyName.ShouldBe("request");
@@ -49,11 +49,11 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		content.Add(fileContent, "request", "empty.txt");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>();
+		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.FileName.ShouldBe("empty.txt");
 		result.Size.ShouldBe(0);
@@ -73,11 +73,11 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		content.Add(fileContent, "request", fileName);
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>();
+		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.FileName.ShouldBe(fileName);
 	}
@@ -96,11 +96,11 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		content.Add(fileContent, "request", "largefile.bin");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>();
+		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.Size.ShouldBe(1024 * 100);
 	}

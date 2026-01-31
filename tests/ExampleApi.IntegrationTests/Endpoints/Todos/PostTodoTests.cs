@@ -34,11 +34,11 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ResponseModel? createdTodo = await response.Content.ReadFromJsonAsync<ResponseModel>();
+		ResponseModel? createdTodo = await response.Content.ReadFromJsonAsync<ResponseModel>(TestContext.Current.CancellationToken);
 		createdTodo.ShouldNotBeNull();
 		createdTodo.Title.ShouldBe("Valid Todo Title");
 	}
@@ -54,12 +54,12 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("title", Case.Insensitive);
 	}
 
@@ -74,7 +74,7 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
@@ -94,12 +94,12 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
 		// Should contain multiple validation errors
 		content.ShouldContain("title", Case.Insensitive);
@@ -122,12 +122,12 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("title", Case.Insensitive);
 	}
 
@@ -147,12 +147,12 @@ public class PostTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		};
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/todos", request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("description", Case.Insensitive);
 	}
 }

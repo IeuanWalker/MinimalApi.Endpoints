@@ -26,11 +26,11 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore!.Clear();
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldBeEmpty();
 	}
 
@@ -46,7 +46,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore.SeedData(todo1, todo2);
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -58,7 +58,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		response.Content.Headers.ContentDisposition.FileName.ShouldStartWith("todos-");
 		response.Content.Headers.ContentDisposition.FileName.ShouldEndWith(".html");
 
-		string htmlContent = await response.Content.ReadAsStringAsync();
+		string htmlContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
 		// Verify HTML structure
 		htmlContent.ShouldContain("<!DOCTYPE html>");
@@ -93,11 +93,11 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore.SeedData(todoWithSpecialChars);
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		string htmlContent = await response.Content.ReadAsStringAsync();
+		string htmlContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
 		// Verify HTML encoding worked properly
 		htmlContent.ShouldContain("&lt;script&gt;");
@@ -119,7 +119,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore.SeedData(todo);
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -159,7 +159,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
 		response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
 
-		string htmlContent = await response.Content.ReadAsStringAsync();
+		string htmlContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		htmlContent.ShouldNotBeEmpty();
 
 		// Verify all todos are present

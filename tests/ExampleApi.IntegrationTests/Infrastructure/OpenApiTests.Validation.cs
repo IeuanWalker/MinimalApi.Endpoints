@@ -6,8 +6,8 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 	public async Task OpenApiJson_ValidValidationStructure()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/openapi/v1.json");
-		string actualContent = await response.Content.ReadAsStringAsync();
+		HttpResponseMessage response = await _client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+		string actualContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		string normalizedActual = RemoveNewLinesAndWhitespace(NormalizeOpenApiJson(actualContent, GetOptions()));
 
 		// Assert

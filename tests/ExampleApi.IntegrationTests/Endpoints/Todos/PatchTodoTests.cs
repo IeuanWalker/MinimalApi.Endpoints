@@ -42,7 +42,7 @@ public class PatchTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		{
 			Content = JsonContent.Create(patchRequest)
 		};
-		HttpResponseMessage response = await _client.SendAsync(request);
+		HttpResponseMessage response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);

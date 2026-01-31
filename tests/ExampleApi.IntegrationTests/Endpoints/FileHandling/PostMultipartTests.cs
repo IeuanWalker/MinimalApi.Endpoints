@@ -30,11 +30,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		);
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>();
+		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 
 		result.SomeData.ShouldBe("Test Data");
@@ -68,11 +68,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		);
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>();
+		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 
 		result.SomeData.ShouldBe("Minimal Data");
@@ -99,11 +99,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		content.Add(list1Content, "ReadOnlyList1", "small.txt");
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>();
+		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 
 		result.SingleFile.Size.ShouldBe(1024 * 50);
@@ -130,11 +130,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		);
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>();
+		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 
 		result.ReadOnlyList1.Count.ShouldBe(4);
@@ -158,11 +158,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		);
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>();
+		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 
 		result.SingleFile.PropertyName.ShouldBe("SingleFile");
@@ -187,11 +187,11 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		);
 
 		// Act
-		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content);
+		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>();
+		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
 		result.ShouldNotBeNull();
 		result.SomeData.ShouldBe(someData);
 	}

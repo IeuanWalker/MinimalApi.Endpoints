@@ -65,7 +65,7 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 			EnumTest = ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum.Success
 		};
 
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/FluentValidation", request, TestContext.Current.CancellationToken);
 
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 	}
@@ -105,11 +105,11 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 			EnumTest = ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum.Success
 		};
 
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/FluentValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/FluentValidation", request, TestContext.Current.CancellationToken);
 
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("StringMin", Case.Insensitive);
 	}
 }

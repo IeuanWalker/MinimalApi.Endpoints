@@ -19,11 +19,11 @@ public class WeatherForecastV1Tests : IClassFixture<ExampleApiWebApplicationFact
 	public async Task GetWeatherForecast_V1_ReturnsV1Response()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/weatherforecast?api-version=1");
+		HttpResponseMessage response = await _client.GetAsync("/weatherforecast?api-version=1", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]>();
+		ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]>(TestContext.Current.CancellationToken);
 		forecast.ShouldNotBeNull();
 		forecast.Length.ShouldBe(5);
 
@@ -44,11 +44,11 @@ public class WeatherForecastV1Tests : IClassFixture<ExampleApiWebApplicationFact
 		request.Headers.Add("X-Version", "1");
 
 		// Act
-		HttpResponseMessage response = await _client.SendAsync(request);
+		HttpResponseMessage response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]>();
+		ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]>(TestContext.Current.CancellationToken);
 		forecast.ShouldNotBeNull();
 		forecast.Length.ShouldBe(5);
 	}
@@ -57,11 +57,11 @@ public class WeatherForecastV1Tests : IClassFixture<ExampleApiWebApplicationFact
 	public async Task GetWeatherForecast_WithQueryParameter_V1_ReturnsV1Response()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/weatherforecast?api-version=1");
+		HttpResponseMessage response = await _client.GetAsync("/weatherforecast?api-version=1", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]>();
+		ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V1.ResponseModel[]>(TestContext.Current.CancellationToken);
 		forecast.ShouldNotBeNull();
 	}
 
@@ -69,7 +69,7 @@ public class WeatherForecastV1Tests : IClassFixture<ExampleApiWebApplicationFact
 	public async Task GetWeatherForecast_WithInvalidVersion_ReturnsBadRequest()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/weatherforecast?api-version=3");
+		HttpResponseMessage response = await _client.GetAsync("/weatherforecast?api-version=3", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);

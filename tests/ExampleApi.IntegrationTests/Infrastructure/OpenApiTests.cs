@@ -21,20 +21,20 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 	public async Task OpenApiJson_ReturnsValidResponse()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/openapi/v1.json");
+		HttpResponseMessage response = await _client.GetAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
 		response.Content.Headers.ContentType?.MediaType.ShouldBe("application/json");
 
-		string actualContent = await response.Content.ReadAsStringAsync();
+		string actualContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 
 		Debugger.Break();
 
 		actualContent.ShouldNotBeNullOrWhiteSpace();
 
 		// Load expected OpenAPI JSON
-		string expectedContent = await File.ReadAllTextAsync("ExpectedOpenApi.json");
+		string expectedContent = await File.ReadAllTextAsync("ExpectedOpenApi.json", TestContext.Current.CancellationToken);
 
 		// Normalize both JSON strings (URLs and formatting) before comparison
 		string normalizedActual = NormalizeOpenApiJson(actualContent, GetOptions());
