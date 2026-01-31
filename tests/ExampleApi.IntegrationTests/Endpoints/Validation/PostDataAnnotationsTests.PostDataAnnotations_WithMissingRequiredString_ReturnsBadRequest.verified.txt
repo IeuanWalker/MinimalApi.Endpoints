@@ -1,0 +1,39 @@
+﻿{
+  Status: 400 Bad Request,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc9110#section-15.5.1,
+      title: One or more validation errors occurred.,
+      status: 400,
+      errors: {
+        AllBuiltInStringValidators: [
+          The AllBuiltInStringValidators field is required.
+        ],
+        AllBuiltInNumberValidators: [
+          The AllBuiltInNumberValidators field is required.
+        ],
+        RequiredString: [
+          The RequiredString field is required.
+        ],
+        ListMin: [
+          The field ListMin must be a string or array type with a minimum length of '3'.
+        ],
+        NestedObject.AllBuiltInStringValidators: [
+          The AllBuiltInStringValidators field is required.
+        ],
+        NestedObject.AllBuiltInNumberValidators: [
+          The AllBuiltInNumberValidators field is required.
+        ],
+        NestedObject.ListMin: [
+          The field ListMin must be a string or array type with a minimum length of '3'.
+        ]
+      }
+    }
+  }
+}

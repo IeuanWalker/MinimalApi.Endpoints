@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Http.Json;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,10 +28,8 @@ public class GetAllTodosTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]? todos = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]>(TestContext.Current.CancellationToken);
-		todos.ShouldNotBeNull();
-		todos.ShouldBeEmpty();
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -51,11 +47,7 @@ public class GetAllTodosTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]? todos = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]>(TestContext.Current.CancellationToken);
-		todos.ShouldNotBeNull();
-		todos.Length.ShouldBe(2);
-		todos.ShouldContain(t => t.Title == "Test Todo 1" && !t.IsCompleted);
-		todos.ShouldContain(t => t.Title == "Test Todo 2" && t.IsCompleted);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 }

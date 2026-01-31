@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Patch;
@@ -45,7 +44,8 @@ public class PatchTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 
 		// Verify only IsCompleted was updated
 		Todo? updatedTodo = await todoStore.GetByIdAsync(originalTodo.Id, CancellationToken.None);

@@ -1,0 +1,39 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      someData: Large File Test,
+      singleFile: {
+        fileName: large.bin,
+        propertyName: SingleFile,
+        size: 51200
+      },
+      totalFileCount: 2,
+      readOnlyList1: [
+        {
+          fileName: small.txt,
+          propertyName: ReadOnlyList1,
+          size: 10
+        }
+      ],
+      fileCollectionList: [
+        {
+          fileName: large.bin,
+          propertyName: SingleFile,
+          size: 51200
+        },
+        {
+          fileName: small.txt,
+          propertyName: ReadOnlyList1,
+          size: 10
+        }
+      ]
+    }
+  }
+}

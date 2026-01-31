@@ -1,5 +1,3 @@
-using System.Net;
-using System.Net.Http.Json;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -33,12 +31,8 @@ public class GetTodoByIdTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync($"/api/v1/todos/{todo.Id}", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.Todos.GetById.ResponseModel? returnedTodo = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetById.ResponseModel>(TestContext.Current.CancellationToken);
-		returnedTodo.ShouldNotBeNull();
-		returnedTodo!.Id.ShouldBe(todo.Id);
-		returnedTodo.Title.ShouldBe("Test Todo");
-		returnedTodo.IsCompleted.ShouldBeFalse();
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -54,6 +48,7 @@ public class GetTodoByIdTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync($"/api/v1/todos/{nonExistentId}", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 }

@@ -1,0 +1,39 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      someData: Data with special chars: !@#$%,
+      singleFile: {
+        fileName: file.txt,
+        propertyName: SingleFile,
+        size: 7
+      },
+      totalFileCount: 2,
+      readOnlyList1: [
+        {
+          fileName: list.txt,
+          propertyName: ReadOnlyList1,
+          size: 4
+        }
+      ],
+      fileCollectionList: [
+        {
+          fileName: file.txt,
+          propertyName: SingleFile,
+          size: 7
+        },
+        {
+          fileName: list.txt,
+          propertyName: ReadOnlyList1,
+          size: 4
+        }
+      ]
+    }
+  }
+}

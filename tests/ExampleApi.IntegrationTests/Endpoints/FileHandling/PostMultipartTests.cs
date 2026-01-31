@@ -1,7 +1,3 @@
-using System.Net;
-using System.Net.Http.Json;
-using Multipart = ExampleApi.Endpoints.FileHandling.PostMultipart;
-
 namespace ExampleApi.IntegrationTests.Endpoints.FileHandling;
 
 /// <summary>
@@ -33,25 +29,8 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-
-		result.SomeData.ShouldBe("Test Data");
-		result.TotalFileCount.ShouldBe(6);
-
-		result.SingleFile.FileName.ShouldBe("single.pdf");
-		result.SingleFile.PropertyName.ShouldBe("SingleFile");
-		result.SingleFile.Size.ShouldBe(19); // "Single file content"
-
-		result.ReadOnlyList1.Count.ShouldBe(2);
-		result.ReadOnlyList1[0].FileName.ShouldBe("list1_file1.txt");
-		result.ReadOnlyList1[1].FileName.ShouldBe("list1_file2.txt");
-
-		result.ReadOnlyList2.Count.ShouldBe(1);
-		result.ReadOnlyList2[0].FileName.ShouldBe("list2_file1.doc");
-
-		result.FileCollectionList.Count.ShouldBe(6); // IFormFileCollection binds all files
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -71,12 +50,8 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-
-		result.SomeData.ShouldBe("Minimal Data");
-		result.ReadOnlyList2.ShouldBeEmpty();
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -102,12 +77,8 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-
-		result.SingleFile.Size.ShouldBe(1024 * 50);
-		result.ReadOnlyList1[0].Size.ShouldBe(10); // "Small file"
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -133,15 +104,8 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-
-		result.ReadOnlyList1.Count.ShouldBe(4);
-		result.ReadOnlyList1[0].FileName.ShouldBe("file1.txt");
-		result.ReadOnlyList1[1].FileName.ShouldBe("file2.txt");
-		result.ReadOnlyList1[2].FileName.ShouldBe("file3.txt");
-		result.ReadOnlyList1[3].FileName.ShouldBe("file4.txt");
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -161,13 +125,7 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-
-		result.SingleFile.PropertyName.ShouldBe("SingleFile");
-		result.ReadOnlyList1[0].PropertyName.ShouldBe("ReadOnlyList1");
-		result.ReadOnlyList2[0].PropertyName.ShouldBe("ReadOnlyList2");
+		await Verify(response);
 	}
 
 	[Theory]
@@ -190,10 +148,8 @@ public class PostMultipartTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/Multipart", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		Multipart.ResponseModel? result = await response.Content.ReadFromJsonAsync<Multipart.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.SomeData.ShouldBe(someData);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	/// <summary>

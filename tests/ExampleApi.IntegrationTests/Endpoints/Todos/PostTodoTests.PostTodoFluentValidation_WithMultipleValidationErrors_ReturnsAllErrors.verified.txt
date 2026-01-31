@@ -1,0 +1,25 @@
+﻿{
+  Status: 400 Bad Request,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc9110#section-15.5.1,
+      title: One or more validation errors occurred.,
+      status: 400,
+      errors: {
+        Title: [
+          'Title' must not be empty.,
+          The length of 'Title' must be at least 1 characters. You entered 0 characters.
+        ],
+        Description: [
+          'Description' must not be empty.
+        ]
+      }
+    }
+  }
+}

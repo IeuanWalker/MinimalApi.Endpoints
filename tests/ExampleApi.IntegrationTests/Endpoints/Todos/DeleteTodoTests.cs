@@ -1,4 +1,3 @@
-using System.Net;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,7 +31,8 @@ public class DeleteTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.DeleteAsync($"/api/v1/todos/{todo.Id}", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 
 		// Verify it was actually deleted
 		Todo? deletedTodo = await todoStore.GetByIdAsync(todo.Id, CancellationToken.None);
@@ -52,6 +52,7 @@ public class DeleteTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.DeleteAsync($"/api/v1/todos/{nonExistentId}", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 }

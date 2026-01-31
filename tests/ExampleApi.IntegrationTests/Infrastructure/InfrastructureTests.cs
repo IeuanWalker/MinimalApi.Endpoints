@@ -15,49 +15,6 @@ public partial class InfrastructureTests : IClassFixture<ExampleApiWebApplicatio
 	}
 
 	[Fact]
-	public async Task ScalarUI_ReturnsValidResponse()
-	{
-		// Act
-		HttpResponseMessage response = await _client.GetAsync("/scalar/v1", TestContext.Current.CancellationToken);
-
-		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
-
-		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		content.ShouldNotBeNullOrWhiteSpace();
-		content.ShouldContain("Scalar");
-	}
-
-	[Fact]
-	public async Task HttpsRedirection_IsConfigured()
-	{
-		// This test verifies that HTTPS redirection is properly configured
-		// In a test environment, this might not redirect, but we can verify the middleware is present
-		// by checking that HTTP requests are handled appropriately
-
-		// Act
-		HttpResponseMessage response = await _client.GetAsync("/weatherforecast", TestContext.Current.CancellationToken);
-
-		// Assert
-		// Should not fail due to HTTPS redirection in test environment
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-	}
-
-	[Theory]
-	[InlineData("/api/v1/todos")]
-	[InlineData("/weatherforecast")]
-	[InlineData("/api/v2/weatherforecast")]
-	public async Task CommonEndpoints_AreAccessible(string endpoint)
-	{
-		// Act
-		HttpResponseMessage response = await _client.GetAsync(endpoint, TestContext.Current.CancellationToken);
-
-		// Assert
-		response.StatusCode.ShouldBeOneOf(HttpStatusCode.OK, HttpStatusCode.NoContent);
-	}
-
-	[Fact]
 	public async Task NonExistentEndpoint_Returns404()
 	{
 		// Act

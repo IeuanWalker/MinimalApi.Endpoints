@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +39,7 @@ public class PutTodoValidationTests : IClassFixture<ExampleApiWebApplicationFact
 		HttpResponseMessage response = await _client.PutAsJsonAsync($"/api/v1/todos/{existingTodo.Id}", invalidUpdateRequest, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "traceId");
 	}
 }

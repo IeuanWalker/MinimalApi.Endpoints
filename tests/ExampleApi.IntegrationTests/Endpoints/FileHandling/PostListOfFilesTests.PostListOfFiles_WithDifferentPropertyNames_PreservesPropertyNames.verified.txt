@@ -1,0 +1,23 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        fileName: file1.txt,
+        propertyName: property1,
+        size: 6
+      },
+      {
+        fileName: file2.txt,
+        propertyName: property2,
+        size: 6
+      }
+    ]
+  }
+}

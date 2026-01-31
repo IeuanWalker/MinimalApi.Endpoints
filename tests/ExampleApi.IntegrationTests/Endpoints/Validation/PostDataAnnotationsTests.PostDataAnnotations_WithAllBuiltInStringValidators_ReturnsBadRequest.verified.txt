@@ -1,0 +1,38 @@
+﻿{
+  Status: 400 Bad Request,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc9110#section-15.5.1,
+      title: One or more validation errors occurred.,
+      status: 400,
+      errors: {
+        AllBuiltInStringValidators: [
+          The AllBuiltInStringValidators field is not a valid e-mail address.,
+          The AllBuiltInStringValidators field is not a valid phone number.,
+          The AllBuiltInStringValidators field is not a valid fully-qualified http, https, or ftp URL.,
+          The AllBuiltInStringValidators field is not a valid credit card number.
+        ],
+        AllBuiltInNumberValidators: [
+          The field of type System.Decimal must be a string, array or ICollection type.,
+          The field of type System.Decimal must be a string, array or ICollection type.
+        ],
+        NestedObject.AllBuiltInStringValidators: [
+          The AllBuiltInStringValidators field is not a valid e-mail address.,
+          The AllBuiltInStringValidators field is not a valid phone number.,
+          The AllBuiltInStringValidators field is not a valid fully-qualified http, https, or ftp URL.,
+          The AllBuiltInStringValidators field is not a valid credit card number.
+        ],
+        NestedObject.AllBuiltInNumberValidators: [
+          The field of type System.Decimal must be a string, array or ICollection type.,
+          The field of type System.Decimal must be a string, array or ICollection type.
+        ]
+      }
+    }
+  }
+}
