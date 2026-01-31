@@ -27,11 +27,11 @@ public class GetAllTodosTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore!.Clear();
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]? todos = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]>();
+		ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]? todos = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]>(TestContext.Current.CancellationToken);
 		todos.ShouldNotBeNull();
 		todos.ShouldBeEmpty();
 	}
@@ -48,11 +48,11 @@ public class GetAllTodosTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore.SeedData(todo1, todo2);
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]? todos = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]>();
+		ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]? todos = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetAll.ResponseModel[]>(TestContext.Current.CancellationToken);
 		todos.ShouldNotBeNull();
 		todos.Length.ShouldBe(2);
 		todos.ShouldContain(t => t.Title == "Test Todo 1" && !t.IsCompleted);

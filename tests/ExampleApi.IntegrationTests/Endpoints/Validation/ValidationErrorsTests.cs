@@ -16,13 +16,13 @@ public class ValidationErrorsTests : IClassFixture<ExampleApiWebApplicationFacto
 	public async Task GetValidationErrors_ReturnsProblemDetailsWithErrors()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v1/validation/ValidationErrors");
+		HttpResponseMessage response = await _client.GetAsync("/api/v1/validation/ValidationErrors", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 		response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		using JsonDocument json = JsonDocument.Parse(content);
 
 		JsonElement errors = json.RootElement.GetProperty("errors");

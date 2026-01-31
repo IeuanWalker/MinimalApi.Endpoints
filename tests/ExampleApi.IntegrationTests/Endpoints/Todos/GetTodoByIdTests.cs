@@ -30,11 +30,11 @@ public class GetTodoByIdTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore.SeedData(todo);
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync($"/api/v1/todos/{todo.Id}");
+		HttpResponseMessage response = await _client.GetAsync($"/api/v1/todos/{todo.Id}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.Todos.GetById.ResponseModel? returnedTodo = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetById.ResponseModel>();
+		ExampleApi.Endpoints.Todos.GetById.ResponseModel? returnedTodo = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.Todos.GetById.ResponseModel>(TestContext.Current.CancellationToken);
 		returnedTodo.ShouldNotBeNull();
 		returnedTodo!.Id.ShouldBe(todo.Id);
 		returnedTodo.Title.ShouldBe("Test Todo");
@@ -51,7 +51,7 @@ public class GetTodoByIdTests : IClassFixture<ExampleApiWebApplicationFactory>
 		const int nonExistentId = 999;
 
 		// Act
-		HttpResponseMessage response = await _client.GetAsync($"/api/v1/todos/{nonExistentId}");
+		HttpResponseMessage response = await _client.GetAsync($"/api/v1/todos/{nonExistentId}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.NoContent);

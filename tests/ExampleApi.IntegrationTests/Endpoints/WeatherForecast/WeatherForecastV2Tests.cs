@@ -19,11 +19,11 @@ public class WeatherForecastV2Tests : IClassFixture<ExampleApiWebApplicationFact
 	public async Task GetWeatherForecast_V2_ReturnsV2Response()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v2/weatherforecast");
+		HttpResponseMessage response = await _client.GetAsync("/api/v2/weatherforecast", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>();
+		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>(TestContext.Current.CancellationToken);
 		forecast.ShouldNotBeNull();
 		forecast.Length.ShouldBe(5);
 
@@ -50,11 +50,11 @@ public class WeatherForecastV2Tests : IClassFixture<ExampleApiWebApplicationFact
 		request.Headers.Add("X-Version", "2");
 
 		// Act
-		HttpResponseMessage response = await _client.SendAsync(request);
+		HttpResponseMessage response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>();
+		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>(TestContext.Current.CancellationToken);
 		forecast.ShouldNotBeNull();
 	}
 
@@ -62,11 +62,11 @@ public class WeatherForecastV2Tests : IClassFixture<ExampleApiWebApplicationFact
 	public async Task GetWeatherForecast_WithQueryParameter_V2_ReturnsV2Response()
 	{
 		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v2/weatherforecast?api-version=2");
+		HttpResponseMessage response = await _client.GetAsync("/api/v2/weatherforecast?api-version=2", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>();
+		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>(TestContext.Current.CancellationToken);
 		forecast.ShouldNotBeNull();
 	}
 }

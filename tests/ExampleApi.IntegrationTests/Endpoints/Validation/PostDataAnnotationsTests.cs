@@ -101,7 +101,7 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
 		// Since AllBuiltInStringValidators requires email, url, credit card, phone, etc. all at once
 		// which is impossible, we expect BadRequest (the field serves as comprehensive test example)
@@ -185,11 +185,11 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("RequiredString", Case.Insensitive);
 	}
 
@@ -270,11 +270,11 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("StringLength", Case.Insensitive);
 	}
 
@@ -355,11 +355,11 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("RangeInt", Case.Insensitive);
 	}
 
@@ -440,11 +440,11 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request);
+		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
 		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
 
-		string content = await response.Content.ReadAsStringAsync();
+		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
 		content.ShouldContain("StringEmail", Case.Insensitive);
 	}
 }

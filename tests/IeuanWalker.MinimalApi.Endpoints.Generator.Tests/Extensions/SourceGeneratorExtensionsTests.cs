@@ -114,20 +114,20 @@ public class SourceGeneratorExtensionsTests
 			{
 				public void Method1() { }
 			}
-			
+
 			public class SecondClass
 			{
 				public void Method2() { }
 			}
-			
+
 			public class ThirdClass
 			{
 				public void Method3() { }
 			}
 			""";
 
-		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
-		CompilationUnitSyntax root = syntaxTree.GetCompilationUnitRoot();
+		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode, cancellationToken: TestContext.Current.CancellationToken);
+		CompilationUnitSyntax root = syntaxTree.GetCompilationUnitRoot(TestContext.Current.CancellationToken);
 
 		// Get all type declarations
 		TypeDeclarationSyntax[] allTypeDeclarations = [.. root.DescendantNodes().OfType<TypeDeclarationSyntax>()];
@@ -141,7 +141,7 @@ public class SourceGeneratorExtensionsTests
 
 		SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
 		TypeDeclarationSyntax secondClassDeclaration = allTypeDeclarations.First(t => t.Identifier.ValueText == "SecondClass");
-		INamedTypeSymbol? symbol = semanticModel.GetDeclaredSymbol(secondClassDeclaration);
+		INamedTypeSymbol? symbol = semanticModel.GetDeclaredSymbol(secondClassDeclaration, TestContext.Current.CancellationToken);
 
 		// Act
 		TypeDeclarationSyntax? result = symbol!.ToTypeDeclarationSyntax(typeDeclarations, compilation);
@@ -514,9 +514,9 @@ public class SourceGeneratorExtensionsTests
 			public class TestEndpoint
 			{
 				public string Property { get; set; }
-				
+
 				public int Field;
-				
+
 				public event EventHandler SomeEvent;
 			}
 			""";
@@ -594,7 +594,7 @@ public class SourceGeneratorExtensionsTests
 				{
 					builder.Get("/test");
 				}
-				
+
 				public void Handle() { }
 			}
 			""";
@@ -619,12 +619,12 @@ public class SourceGeneratorExtensionsTests
 			public class GetUserByIdEndpoint
 			{
 				readonly IUserService _userService;
-				
+
 				public GetUserByIdEndpoint(IUserService userService)
 				{
 					_userService = userService;
 				}
-				
+
 				public static void Configure(RouteHandlerBuilder builder)
 				{
 					builder
@@ -634,12 +634,12 @@ public class SourceGeneratorExtensionsTests
 						.Produces<UserResponse>(200)
 						.ProducesProblem(404);
 				}
-				
+
 				public async Task<Results<Ok<UserResponse>, NotFound>> Handle(GetUserRequest request, CancellationToken ct)
 				{
 					var user = await _userService.GetByIdAsync(request.Id, ct);
-					return user is null 
-						? TypedResults.NotFound() 
+					return user is null
+						? TypedResults.NotFound()
 						: TypedResults.Ok(UserResponse.FromUser(user));
 				}
 			}

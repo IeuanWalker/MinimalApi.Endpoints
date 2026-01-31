@@ -29,7 +29,7 @@ public class DeleteTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		todoStore.SeedData(todo);
 
 		// Act
-		HttpResponseMessage response = await _client.DeleteAsync($"/api/v1/todos/{todo.Id}");
+		HttpResponseMessage response = await _client.DeleteAsync($"/api/v1/todos/{todo.Id}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
@@ -49,7 +49,7 @@ public class DeleteTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		const int nonExistentId = 999;
 
 		// Act
-		HttpResponseMessage response = await _client.DeleteAsync($"/api/v1/todos/{nonExistentId}");
+		HttpResponseMessage response = await _client.DeleteAsync($"/api/v1/todos/{nonExistentId}", TestContext.Current.CancellationToken);
 
 		// Assert
 		response.StatusCode.ShouldBe(HttpStatusCode.OK);
