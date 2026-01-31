@@ -33,8 +33,7 @@ public static class TestHelper
 		driver = driver.RunGenerators(compilation);
 
 		// Use Verify to snapshot test the results
-		return Verifier.Verify(driver, sourceFile: sourceFile)
-			.UseDirectory("Snapshots");
+		return Verifier.Verify(driver, sourceFile: sourceFile);
 	}
 
 	static List<PortableExecutableReference> GetReferences()
