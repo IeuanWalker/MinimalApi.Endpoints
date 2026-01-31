@@ -1,0 +1,12 @@
+﻿{
+  Result: {
+    ContentType: text/html,
+    FileDownloadName: todos.html,
+    EnableRangeProcessing: false,
+    FileLength: 837,
+    FileContents: {
+      Length: 837,
+      IsEmpty: false
+    }
+  }
+}

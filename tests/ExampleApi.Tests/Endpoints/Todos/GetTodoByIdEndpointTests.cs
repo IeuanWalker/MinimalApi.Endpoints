@@ -31,14 +31,7 @@ public class GetTodoByIdEndpointTests
 		Results<Ok<ResponseModel>, NoContent> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldBeOfType<Results<Ok<ResponseModel>, NoContent>>();
-
-		Ok<ResponseModel>? okResult = result.Result as Ok<ResponseModel>;
-		okResult.ShouldNotBeNull();
-		okResult.Value!.Id.ShouldBe(1);
-		okResult.Value!.Title.ShouldBe("Test Todo");
-		okResult.Value!.Description.ShouldBe("Test Description");
-		okResult.Value!.IsCompleted.ShouldBeFalse();
+		await Verify(result);
 	}
 
 	[Fact]
@@ -57,10 +50,6 @@ public class GetTodoByIdEndpointTests
 		Results<Ok<ResponseModel>, NoContent> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldBeOfType<Results<Ok<ResponseModel>, NoContent>>();
-
-		NoContent? noContentResult = result.Result as NoContent;
-		noContentResult.ShouldNotBeNull();
-		noContentResult.ToString()!.ShouldContain("NoContent");
+		await Verify(result);
 	}
 }

@@ -1,0 +1,5 @@
+﻿{
+  FileName: image.png,
+  PropertyName: imageUpload,
+  Size: 2048
+}

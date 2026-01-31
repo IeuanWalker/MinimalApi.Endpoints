@@ -16,9 +16,7 @@ public class PostFileHandlingSingleFileEndpointTests
 		ResponseModel result = await endpoint.Handle(file, CancellationToken.None);
 
 		// Assert
-		result.FileName.ShouldBe("document.pdf");
-		result.PropertyName.ShouldBe("uploadedFile");
-		result.Size.ShouldBe(1024);
+		await Verify(result);
 	}
 
 	[Fact]
@@ -32,9 +30,7 @@ public class PostFileHandlingSingleFileEndpointTests
 		ResponseModel result = await endpoint.Handle(file, CancellationToken.None);
 
 		// Assert
-		result.FileName.ShouldBe("empty.txt");
-		result.PropertyName.ShouldBe("emptyFile");
-		result.Size.ShouldBe(0);
+		await Verify(result);
 	}
 
 	[Fact]
@@ -49,7 +45,7 @@ public class PostFileHandlingSingleFileEndpointTests
 		ResponseModel result = await endpoint.Handle(file, CancellationToken.None);
 
 		// Assert
-		result.Size.ShouldBe(largeFileSize);
+		await Verify(result);
 	}
 
 	[Theory]
@@ -66,9 +62,8 @@ public class PostFileHandlingSingleFileEndpointTests
 		ResponseModel result = await endpoint.Handle(file, CancellationToken.None);
 
 		// Assert
-		result.FileName.ShouldBe(fileName);
-		result.PropertyName.ShouldBe(propertyName);
-		result.Size.ShouldBe(size);
+		await Verify(result)
+			.UseParameters(fileName, propertyName, size);
 	}
 
 	static IFormFile CreateMockFormFile(string fileName, string name, long length)

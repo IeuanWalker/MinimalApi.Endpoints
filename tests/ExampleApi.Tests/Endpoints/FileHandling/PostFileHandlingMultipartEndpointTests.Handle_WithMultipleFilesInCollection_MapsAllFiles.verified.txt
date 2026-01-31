@@ -1,0 +1,33 @@
+﻿{
+  SomeData: Multiple Files Test,
+  SingleFile: {
+    FileName: single.pdf,
+    PropertyName: SingleFile,
+    Size: 100
+  },
+  TotalFileCount: 5,
+  ReadOnlyList1: [
+    {
+      FileName: list.txt,
+      PropertyName: ReadOnlyList1,
+      Size: 200
+    }
+  ],
+  FileCollectionList: [
+    {
+      FileName: col1.png,
+      PropertyName: FileCollectionList,
+      Size: 300
+    },
+    {
+      FileName: col2.jpg,
+      PropertyName: FileCollectionList,
+      Size: 400
+    },
+    {
+      FileName: col3.gif,
+      PropertyName: FileCollectionList,
+      Size: 500
+    }
+  ]
+}

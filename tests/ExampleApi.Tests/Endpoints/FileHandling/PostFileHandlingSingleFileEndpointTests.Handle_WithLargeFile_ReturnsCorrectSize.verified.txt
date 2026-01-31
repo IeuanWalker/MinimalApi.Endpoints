@@ -1,0 +1,5 @@
+﻿{
+  FileName: largefile.bin,
+  PropertyName: largeFile,
+  Size: 2147483647
+}

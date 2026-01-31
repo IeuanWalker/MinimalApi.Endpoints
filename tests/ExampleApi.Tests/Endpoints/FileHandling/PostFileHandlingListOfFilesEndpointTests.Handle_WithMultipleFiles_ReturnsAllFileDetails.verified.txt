@@ -1,0 +1,17 @@
+﻿[
+  {
+    FileName: document.pdf,
+    PropertyName: file1,
+    Size: 1024
+  },
+  {
+    FileName: image.png,
+    PropertyName: file2,
+    Size: 2048
+  },
+  {
+    FileName: data.json,
+    PropertyName: file3,
+    Size: 512
+  }
+]

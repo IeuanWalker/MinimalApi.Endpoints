@@ -1,0 +1,16 @@
+﻿[
+  {
+    Id: 1,
+    Title: Todo 1,
+    Description: Description 1,
+    IsCompleted: false,
+    CreatedAt: DateTime_1
+  },
+  {
+    Id: 2,
+    Title: Todo 2,
+    Description: Description 2,
+    IsCompleted: true,
+    CreatedAt: DateTime_2
+  }
+]

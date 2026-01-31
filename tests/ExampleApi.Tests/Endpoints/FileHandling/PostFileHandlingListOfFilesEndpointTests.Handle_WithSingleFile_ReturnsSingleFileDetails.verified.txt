@@ -1,0 +1,7 @@
+﻿[
+  {
+    FileName: test.txt,
+    PropertyName: uploadedFile,
+    Size: 256
+  }
+]
