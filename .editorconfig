@@ -306,3 +306,13 @@ dotnet_diagnostic.S1643.severity = silent      # Strings should not be concatena
 dotnet_diagnostic.S2344.severity = none        # Enumeration type names should not have "Flags" or "Enum" suffixes
 dotnet_diagnostic.S3358.severity = silent      # Ternary operators should not be nested
 dotnet_diagnostic.S1121.severity = none        # Assignments should not be made from within sub-expressions
+
+# Verify
+[*.{received,verified}.{cs,txt}]
+charset = utf-8-bom
+end_of_line = lf
+indent_size = unset
+indent_style = unset
+insert_final_newline = false
+tab_width = unset
+trim_trailing_whitespace = false
