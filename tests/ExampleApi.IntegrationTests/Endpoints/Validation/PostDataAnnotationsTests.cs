@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody;
 
@@ -18,11 +17,7 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 	[Fact]
 	public async Task PostDataAnnotations_WithAllBuiltInStringValidators_ReturnsBadRequest()
 	{
-		// Note: This endpoint is configured with all validation attributes as examples,
-		// but for most practical tests we expect validation failures.
-		// The purpose is to test OpenAPI documentation, not actual endpoint behavior.
-		// So we're testing that validation IS working by expecting BadRequest for incomplete data.
-
+		// Arrange
 		RequestModel request = new()
 		{
 			RequiredString = "test",
@@ -101,16 +96,18 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
+		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
-		// Since AllBuiltInStringValidators requires email, url, credit card, phone, etc. all at once
-		// which is impossible, we expect BadRequest (the field serves as comprehensive test example)
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+		// Assert
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "traceId");
 	}
 
 	[Fact]
 	public async Task PostDataAnnotations_WithMissingRequiredString_ReturnsBadRequest()
 	{
+		// Arrange
 		RequestModel request = new()
 		{
 			RequiredString = "", // Empty string (required)
@@ -185,17 +182,18 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
+		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		content.ShouldContain("RequiredString", Case.Insensitive);
+		// Assert
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "traceId");
 	}
 
 	[Fact]
 	public async Task PostDataAnnotations_WithStringTooShort_ReturnsBadRequest()
 	{
+		// Arrange
 		RequestModel request = new()
 		{
 			RequiredString = "test",
@@ -270,17 +268,18 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
+		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		content.ShouldContain("StringLength", Case.Insensitive);
+		// Assert
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "traceId");
 	}
 
 	[Fact]
 	public async Task PostDataAnnotations_WithInvalidRange_ReturnsBadRequest()
 	{
+		// Arrange
 		RequestModel request = new()
 		{
 			RequiredString = "test",
@@ -355,17 +354,18 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
+		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		content.ShouldContain("RangeInt", Case.Insensitive);
+		// Assert
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "traceId");
 	}
 
 	[Fact]
 	public async Task PostDataAnnotations_WithInvalidEmail_ReturnsBadRequest()
 	{
+		// Arrange
 		RequestModel request = new()
 		{
 			RequiredString = "test",
@@ -440,11 +440,11 @@ public class PostDataAnnotationsTests : IClassFixture<ExampleApiWebApplicationFa
 			CustomValidationWithDefaultMessageOverrideMessage = "test"
 		};
 
+		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/DataValidation", request, TestContext.Current.CancellationToken);
 
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		content.ShouldContain("StringEmail", Case.Insensitive);
+		// Assert
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "traceId");
 	}
 }

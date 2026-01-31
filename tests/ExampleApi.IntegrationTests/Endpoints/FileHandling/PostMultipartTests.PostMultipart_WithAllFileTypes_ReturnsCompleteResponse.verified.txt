@@ -1,0 +1,71 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      someData: Test Data,
+      singleFile: {
+        fileName: single.pdf,
+        propertyName: SingleFile,
+        size: 19
+      },
+      totalFileCount: 6,
+      readOnlyList1: [
+        {
+          fileName: list1_file1.txt,
+          propertyName: ReadOnlyList1,
+          size: 12
+        },
+        {
+          fileName: list1_file2.txt,
+          propertyName: ReadOnlyList1,
+          size: 12
+        }
+      ],
+      readOnlyList2: [
+        {
+          fileName: list2_file1.doc,
+          propertyName: ReadOnlyList2,
+          size: 12
+        }
+      ],
+      fileCollectionList: [
+        {
+          fileName: single.pdf,
+          propertyName: SingleFile,
+          size: 19
+        },
+        {
+          fileName: list1_file1.txt,
+          propertyName: ReadOnlyList1,
+          size: 12
+        },
+        {
+          fileName: list1_file2.txt,
+          propertyName: ReadOnlyList1,
+          size: 12
+        },
+        {
+          fileName: list2_file1.doc,
+          propertyName: ReadOnlyList2,
+          size: 12
+        },
+        {
+          fileName: collection1.png,
+          propertyName: FileCollectionList,
+          size: 12
+        },
+        {
+          fileName: collection2.jpg,
+          propertyName: FileCollectionList,
+          size: 12
+        }
+      ]
+    }
+  }
+}

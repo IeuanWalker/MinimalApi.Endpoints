@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +39,8 @@ public class PutTodoTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.PutAsJsonAsync($"/api/v1/todos/{originalTodo.Id}", updateRequest, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 
 		Todo? updatedTodo = await todoStore.GetByIdAsync(originalTodo.Id, CancellationToken.None);
 		updatedTodo.ShouldNotBeNull();

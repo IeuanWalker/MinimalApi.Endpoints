@@ -1,4 +1,3 @@
-using System.Net;
 using ExampleApi.Data;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -29,9 +28,8 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.NoContent);
-		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		content.ShouldBeEmpty();
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -49,34 +47,8 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
-
-		// Verify Content-Disposition header for file download
-		response.Content.Headers.ContentDisposition.ShouldNotBeNull();
-		response.Content.Headers.ContentDisposition.DispositionType.ShouldBe("attachment");
-		response.Content.Headers.ContentDisposition.FileName.ShouldStartWith("todos-");
-		response.Content.Headers.ContentDisposition.FileName.ShouldEndWith(".html");
-
-		string htmlContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-		// Verify HTML structure
-		htmlContent.ShouldContain("<!DOCTYPE html>");
-		htmlContent.ShouldContain("<title>Todo Export</title>");
-		htmlContent.ShouldContain("<h1>Todo Export</h1>");
-		htmlContent.ShouldContain("<table>");
-
-		// Verify data is present
-		htmlContent.ShouldContain("Test Todo 1");
-		htmlContent.ShouldContain("Description 1");
-		htmlContent.ShouldContain("Test Todo 2");
-		htmlContent.ShouldContain("Description 2");
-		htmlContent.ShouldContain("No"); // For completed status of todo1
-		htmlContent.ShouldContain("Yes"); // For completed status of todo2
-
-		// Verify HTML encoding is working (should not contain raw HTML)
-		htmlContent.ShouldNotContain("<script");
-		htmlContent.ShouldNotContain("javascript:");
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -96,16 +68,8 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		string htmlContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-		// Verify HTML encoding worked properly
-		htmlContent.ShouldContain("&lt;script&gt;");
-		htmlContent.ShouldContain("&amp;");
-		htmlContent.ShouldContain("&quot;");
-
-		// Should NOT contain unencoded dangerous content
-		htmlContent.ShouldNotContain("<script>alert");
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -122,19 +86,8 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-
-		string? fileName = response.Content.Headers.ContentDisposition?.FileName;
-		fileName.ShouldNotBeNull();
-
-		// Verify filename format: todos-YYYY-MM-DD-HH-mm-ss.html
-		fileName.ShouldStartWith("todos-");
-		fileName.ShouldEndWith(".html");
-
-		// Extract date part and verify it's a valid format
-		string datePart = fileName[6..^5]; // Remove "todos-" and ".html"
-		datePart.Length.ShouldBe(19); // YYYY-MM-DD-HH-mm-ss format
-		datePart.ShouldMatch(@"^\d{4}-\d{2}-\d{2}-\d{2}-\d{2}-\d{2}$");
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -156,18 +109,7 @@ public class GetExportTests : IClassFixture<ExampleApiWebApplicationFactory>
 		HttpResponseMessage response = await _client.GetAsync("/api/v1/todos/export", cts.Token);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		response.Content.Headers.ContentType?.MediaType.ShouldBe("text/html");
-
-		string htmlContent = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		htmlContent.ShouldNotBeEmpty();
-
-		// Verify all todos are present
-		htmlContent.ShouldContain("Todo 1");
-		htmlContent.ShouldContain("Todo 50");
-		htmlContent.ShouldContain("Todo 100");
-
-		// Verify the content size is reasonable (should be larger for more todos)
-		htmlContent.Length.ShouldBeGreaterThan(10000); // Rough estimate for 100 todos
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 }

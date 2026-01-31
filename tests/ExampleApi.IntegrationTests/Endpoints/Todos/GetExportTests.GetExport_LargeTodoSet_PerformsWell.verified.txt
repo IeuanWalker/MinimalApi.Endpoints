@@ -1,0 +1,752 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Disposition: attachment; filename=todos.html; filename*=UTF-8''todos.html,
+      Content-Type: text/html
+    },
+    Value:
+		<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Todo Export</title>
+			<style>
+				table {
+					width: 100%;
+					border-collapse: collapse;
+				}
+				th, td {
+					border: 1px solid #ddd;
+					padding: 8px;
+				}
+				th {
+					background-color: #f2f2f2;
+					text-align: left;
+				}
+			</style>
+		</head>
+		<body>
+			<h1>Todo Export</h1>
+			<table>
+				<thead>
+					<tr>
+						<th>ID</th>
+						<th>Title</th>
+						<th>Description</th>
+						<th>Is Completed</th>
+						<th>Created At</th>
+						<th>Updated At</th>
+					</tr>
+				</thead>
+				<tbody>
+					
+			<tr>
+				<td>1</td>
+				<td>Todo 1</td>
+				<td>Description for todo 1</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>2</td>
+				<td>Todo 2</td>
+				<td>Description for todo 2</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>3</td>
+				<td>Todo 3</td>
+				<td>Description for todo 3</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>4</td>
+				<td>Todo 4</td>
+				<td>Description for todo 4</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>5</td>
+				<td>Todo 5</td>
+				<td>Description for todo 5</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>6</td>
+				<td>Todo 6</td>
+				<td>Description for todo 6</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>7</td>
+				<td>Todo 7</td>
+				<td>Description for todo 7</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>8</td>
+				<td>Todo 8</td>
+				<td>Description for todo 8</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>9</td>
+				<td>Todo 9</td>
+				<td>Description for todo 9</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>10</td>
+				<td>Todo 10</td>
+				<td>Description for todo 10</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>11</td>
+				<td>Todo 11</td>
+				<td>Description for todo 11</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>12</td>
+				<td>Todo 12</td>
+				<td>Description for todo 12</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>13</td>
+				<td>Todo 13</td>
+				<td>Description for todo 13</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>14</td>
+				<td>Todo 14</td>
+				<td>Description for todo 14</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>15</td>
+				<td>Todo 15</td>
+				<td>Description for todo 15</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>16</td>
+				<td>Todo 16</td>
+				<td>Description for todo 16</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>17</td>
+				<td>Todo 17</td>
+				<td>Description for todo 17</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>18</td>
+				<td>Todo 18</td>
+				<td>Description for todo 18</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>19</td>
+				<td>Todo 19</td>
+				<td>Description for todo 19</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>20</td>
+				<td>Todo 20</td>
+				<td>Description for todo 20</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>21</td>
+				<td>Todo 21</td>
+				<td>Description for todo 21</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>22</td>
+				<td>Todo 22</td>
+				<td>Description for todo 22</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>23</td>
+				<td>Todo 23</td>
+				<td>Description for todo 23</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>24</td>
+				<td>Todo 24</td>
+				<td>Description for todo 24</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>25</td>
+				<td>Todo 25</td>
+				<td>Description for todo 25</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>26</td>
+				<td>Todo 26</td>
+				<td>Description for todo 26</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>27</td>
+				<td>Todo 27</td>
+				<td>Description for todo 27</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>28</td>
+				<td>Todo 28</td>
+				<td>Description for todo 28</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>29</td>
+				<td>Todo 29</td>
+				<td>Description for todo 29</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>30</td>
+				<td>Todo 30</td>
+				<td>Description for todo 30</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>31</td>
+				<td>Todo 31</td>
+				<td>Description for todo 31</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>32</td>
+				<td>Todo 32</td>
+				<td>Description for todo 32</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>33</td>
+				<td>Todo 33</td>
+				<td>Description for todo 33</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>34</td>
+				<td>Todo 34</td>
+				<td>Description for todo 34</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>35</td>
+				<td>Todo 35</td>
+				<td>Description for todo 35</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>36</td>
+				<td>Todo 36</td>
+				<td>Description for todo 36</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>37</td>
+				<td>Todo 37</td>
+				<td>Description for todo 37</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>38</td>
+				<td>Todo 38</td>
+				<td>Description for todo 38</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>39</td>
+				<td>Todo 39</td>
+				<td>Description for todo 39</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>40</td>
+				<td>Todo 40</td>
+				<td>Description for todo 40</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>41</td>
+				<td>Todo 41</td>
+				<td>Description for todo 41</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>42</td>
+				<td>Todo 42</td>
+				<td>Description for todo 42</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>43</td>
+				<td>Todo 43</td>
+				<td>Description for todo 43</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>44</td>
+				<td>Todo 44</td>
+				<td>Description for todo 44</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>45</td>
+				<td>Todo 45</td>
+				<td>Description for todo 45</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>46</td>
+				<td>Todo 46</td>
+				<td>Description for todo 46</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>47</td>
+				<td>Todo 47</td>
+				<td>Description for todo 47</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>48</td>
+				<td>Todo 48</td>
+				<td>Description for todo 48</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>49</td>
+				<td>Todo 49</td>
+				<td>Description for todo 49</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>50</td>
+				<td>Todo 50</td>
+				<td>Description for todo 50</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>51</td>
+				<td>Todo 51</td>
+				<td>Description for todo 51</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>52</td>
+				<td>Todo 52</td>
+				<td>Description for todo 52</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>53</td>
+				<td>Todo 53</td>
+				<td>Description for todo 53</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>54</td>
+				<td>Todo 54</td>
+				<td>Description for todo 54</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>55</td>
+				<td>Todo 55</td>
+				<td>Description for todo 55</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>56</td>
+				<td>Todo 56</td>
+				<td>Description for todo 56</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>57</td>
+				<td>Todo 57</td>
+				<td>Description for todo 57</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>58</td>
+				<td>Todo 58</td>
+				<td>Description for todo 58</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>59</td>
+				<td>Todo 59</td>
+				<td>Description for todo 59</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>60</td>
+				<td>Todo 60</td>
+				<td>Description for todo 60</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>61</td>
+				<td>Todo 61</td>
+				<td>Description for todo 61</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>62</td>
+				<td>Todo 62</td>
+				<td>Description for todo 62</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>63</td>
+				<td>Todo 63</td>
+				<td>Description for todo 63</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>64</td>
+				<td>Todo 64</td>
+				<td>Description for todo 64</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>65</td>
+				<td>Todo 65</td>
+				<td>Description for todo 65</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>66</td>
+				<td>Todo 66</td>
+				<td>Description for todo 66</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>67</td>
+				<td>Todo 67</td>
+				<td>Description for todo 67</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>68</td>
+				<td>Todo 68</td>
+				<td>Description for todo 68</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>69</td>
+				<td>Todo 69</td>
+				<td>Description for todo 69</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>70</td>
+				<td>Todo 70</td>
+				<td>Description for todo 70</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>71</td>
+				<td>Todo 71</td>
+				<td>Description for todo 71</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>72</td>
+				<td>Todo 72</td>
+				<td>Description for todo 72</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>73</td>
+				<td>Todo 73</td>
+				<td>Description for todo 73</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>74</td>
+				<td>Todo 74</td>
+				<td>Description for todo 74</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>75</td>
+				<td>Todo 75</td>
+				<td>Description for todo 75</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>76</td>
+				<td>Todo 76</td>
+				<td>Description for todo 76</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>77</td>
+				<td>Todo 77</td>
+				<td>Description for todo 77</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>78</td>
+				<td>Todo 78</td>
+				<td>Description for todo 78</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>79</td>
+				<td>Todo 79</td>
+				<td>Description for todo 79</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>80</td>
+				<td>Todo 80</td>
+				<td>Description for todo 80</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>81</td>
+				<td>Todo 81</td>
+				<td>Description for todo 81</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>82</td>
+				<td>Todo 82</td>
+				<td>Description for todo 82</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>83</td>
+				<td>Todo 83</td>
+				<td>Description for todo 83</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>84</td>
+				<td>Todo 84</td>
+				<td>Description for todo 84</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>85</td>
+				<td>Todo 85</td>
+				<td>Description for todo 85</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>86</td>
+				<td>Todo 86</td>
+				<td>Description for todo 86</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>87</td>
+				<td>Todo 87</td>
+				<td>Description for todo 87</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>88</td>
+				<td>Todo 88</td>
+				<td>Description for todo 88</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>89</td>
+				<td>Todo 89</td>
+				<td>Description for todo 89</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>90</td>
+				<td>Todo 90</td>
+				<td>Description for todo 90</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>91</td>
+				<td>Todo 91</td>
+				<td>Description for todo 91</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>92</td>
+				<td>Todo 92</td>
+				<td>Description for todo 92</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>93</td>
+				<td>Todo 93</td>
+				<td>Description for todo 93</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>94</td>
+				<td>Todo 94</td>
+				<td>Description for todo 94</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>95</td>
+				<td>Todo 95</td>
+				<td>Description for todo 95</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>96</td>
+				<td>Todo 96</td>
+				<td>Description for todo 96</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>97</td>
+				<td>Todo 97</td>
+				<td>Description for todo 97</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>98</td>
+				<td>Todo 98</td>
+				<td>Description for todo 98</td>
+				<td>Yes</td>
+			</tr>
+
+			<tr>
+				<td>99</td>
+				<td>Todo 99</td>
+				<td>Description for todo 99</td>
+				<td>No</td>
+			</tr>
+
+			<tr>
+				<td>100</td>
+				<td>Todo 100</td>
+				<td>Description for todo 100</td>
+				<td>Yes</td>
+			</tr>
+				</tbody>
+			</table>
+		</body>
+		</html>
+  }
+}

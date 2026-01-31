@@ -1,0 +1,29 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        id: 1,
+        title: Test Todo 1,
+        description: Test description,
+        isCompleted: false,
+        createdAt: DateTimeOffset_1,
+        updatedAt: null
+      },
+      {
+        id: 2,
+        title: Test Todo 2,
+        description: Test description,
+        isCompleted: true,
+        createdAt: DateTimeOffset_2,
+        updatedAt: null
+      }
+    ]
+  }
+}

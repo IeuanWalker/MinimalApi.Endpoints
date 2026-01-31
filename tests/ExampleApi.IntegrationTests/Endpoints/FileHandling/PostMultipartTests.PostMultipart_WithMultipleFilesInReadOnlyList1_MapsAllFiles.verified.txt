@@ -1,0 +1,69 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      someData: Multiple List Files,
+      singleFile: {
+        fileName: single.pdf,
+        propertyName: SingleFile,
+        size: 6
+      },
+      totalFileCount: 5,
+      readOnlyList1: [
+        {
+          fileName: file1.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        },
+        {
+          fileName: file2.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        },
+        {
+          fileName: file3.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        },
+        {
+          fileName: file4.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        }
+      ],
+      fileCollectionList: [
+        {
+          fileName: single.pdf,
+          propertyName: SingleFile,
+          size: 6
+        },
+        {
+          fileName: file1.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        },
+        {
+          fileName: file2.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        },
+        {
+          fileName: file3.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        },
+        {
+          fileName: file4.txt,
+          propertyName: ReadOnlyList1,
+          size: 9
+        }
+      ]
+    }
+  }
+}

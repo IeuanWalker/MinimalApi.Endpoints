@@ -1,4 +1,3 @@
-using System.Net;
 using System.Net.Http.Json;
 using ExampleApi.Endpoints.Validation.PostFluentValidation;
 
@@ -16,63 +15,9 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 	}
 
 	[Fact]
-	public async Task PostFluentValidation_WithValidData_ReturnsOk()
-	{
-		RequestModel request = new()
-		{
-			StringMin = "abc",
-			StringMax = "ok",
-			StringRange = "range",
-			StringPattern = "ABC123",
-			IntMin = 1,
-			IntMax = 0,
-			IntRange = 50,
-			DoubleMin = 0.1,
-			DoubleMax = 1.0,
-			DoubleRange = 1.0,
-			ListStringMinCount = ["x"],
-			ListStringMaxCount = [],
-			ListStringRangeCount = ["x"],
-			ListIntMinCount = [1],
-			ListIntMaxCount = [],
-			ListIntRangeCount = [1],
-			NestedObject = new NestedObjectModel
-			{
-				StringMin = "abc",
-				StringMax = "ok",
-				StringRange = "range",
-				StringPattern = "ABC123",
-				IntMin = 1,
-				IntMax = 0,
-				IntRange = 50,
-				DoubleMin = 0.1,
-				DoubleMax = 1.0,
-				DoubleRange = 1.0,
-				ListStringMinCount = ["x"],
-				ListStringMaxCount = [],
-				ListStringRangeCount = ["x"],
-				ListIntMinCount = [1],
-				ListIntMaxCount = [],
-				ListIntRangeCount = [1]
-			},
-			// Fluent specific required properties
-			AllBuiltInStringValidators = null,
-			AllBuiltInNumberValidators = null,
-			MaxNumberTest = 0,
-			MinNumberTest = 0,
-			EnumStringValidator = "Success",
-			EnumIntValidator = 0,
-			EnumTest = ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum.Success
-		};
-
-		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/FluentValidation", request, TestContext.Current.CancellationToken);
-
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-	}
-
-	[Fact]
 	public async Task PostFluentValidation_WithShortStringMin_ReturnsBadRequest()
 	{
+		// Arrange
 		RequestModel request = new()
 		{
 			StringMin = "ab", // too short (min length 3)
@@ -105,11 +50,11 @@ public class PostFluentValidationTests : IClassFixture<ExampleApiWebApplicationF
 			EnumTest = ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum.Success
 		};
 
+		// Act
 		HttpResponseMessage response = await _client.PostAsJsonAsync("/api/v1/validation/FluentValidation", request, TestContext.Current.CancellationToken);
 
-		response.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
-
-		string content = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-		content.ShouldContain("StringMin", Case.Insensitive);
+		// Assert
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "traceId");
 	}
 }

@@ -1,7 +1,3 @@
-using System.Net;
-using System.Net.Http.Json;
-using SingleFile = ExampleApi.Endpoints.FileHandling.PostSingleFile;
-
 namespace ExampleApi.IntegrationTests.Endpoints.FileHandling;
 
 /// <summary>
@@ -30,12 +26,8 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.FileName.ShouldBe("document.pdf");
-		result.PropertyName.ShouldBe("request");
-		result.Size.ShouldBe(17); // "Test file content" is 17 bytes
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -52,11 +44,8 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.FileName.ShouldBe("empty.txt");
-		result.Size.ShouldBe(0);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Theory]
@@ -76,10 +65,8 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.FileName.ShouldBe(fileName);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -99,9 +86,7 @@ public class PostSingleFileTests : IClassFixture<ExampleApiWebApplicationFactory
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/SingleFile", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		SingleFile.ResponseModel? result = await response.Content.ReadFromJsonAsync<SingleFile.ResponseModel>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.Size.ShouldBe(1024 * 100);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 }

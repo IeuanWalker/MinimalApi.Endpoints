@@ -1,0 +1,28 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: [
+      {
+        fileName: document1.pdf,
+        propertyName: files,
+        size: 18
+      },
+      {
+        fileName: document2.txt,
+        propertyName: files,
+        size: 19
+      },
+      {
+        fileName: image.png,
+        propertyName: files,
+        size: 18
+      }
+    ]
+  }
+}

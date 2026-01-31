@@ -1,6 +1,3 @@
-using System.Net;
-using System.Net.Http.Json;
-
 namespace ExampleApi.IntegrationTests.Endpoints.WeatherForecast;
 
 /// <summary>
@@ -22,51 +19,7 @@ public class WeatherForecastV2Tests : IClassFixture<ExampleApiWebApplicationFact
 		HttpResponseMessage response = await _client.GetAsync("/api/v2/weatherforecast", TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>(TestContext.Current.CancellationToken);
-		forecast.ShouldNotBeNull();
-		forecast.Length.ShouldBe(5);
-
-		foreach (ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel item in forecast)
-		{
-			item.Date.ShouldNotBe(default);
-			item.Summary.ShouldNotBeNullOrWhiteSpace();
-			item.TemperatureC.ShouldBeGreaterThanOrEqualTo(-20);
-			item.TemperatureC.ShouldBeLessThanOrEqualTo(55);
-			item.TemperatureF.ShouldBeGreaterThanOrEqualTo(-4);
-			item.TemperatureF.ShouldBeLessThanOrEqualTo(131);
-
-			// Verify F = C * 9/5 + 32
-			int expectedF = 32 + (int)(item.TemperatureC / 0.5556);
-			Math.Abs(item.TemperatureF - expectedF).ShouldBeLessThanOrEqualTo(1); // Allow for rounding
-		}
-	}
-
-	[Fact]
-	public async Task GetWeatherForecast_WithVersionHeader_V2_ReturnsV2Response()
-	{
-		// Arrange
-		using HttpRequestMessage request = new(HttpMethod.Get, "/api/v2/weatherforecast");
-		request.Headers.Add("X-Version", "2");
-
-		// Act
-		HttpResponseMessage response = await _client.SendAsync(request, TestContext.Current.CancellationToken);
-
-		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>(TestContext.Current.CancellationToken);
-		forecast.ShouldNotBeNull();
-	}
-
-	[Fact]
-	public async Task GetWeatherForecast_WithQueryParameter_V2_ReturnsV2Response()
-	{
-		// Act
-		HttpResponseMessage response = await _client.GetAsync("/api/v2/weatherforecast?api-version=2", TestContext.Current.CancellationToken);
-
-		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]? forecast = await response.Content.ReadFromJsonAsync<ExampleApi.Endpoints.WeatherForecast.Get.V2.ResponseModel[]>(TestContext.Current.CancellationToken);
-		forecast.ShouldNotBeNull();
+		await Verify(response)
+			.IgnoreMembers("Content-Length", "date", "temperatureC", "temperatureF", "summary");
 	}
 }

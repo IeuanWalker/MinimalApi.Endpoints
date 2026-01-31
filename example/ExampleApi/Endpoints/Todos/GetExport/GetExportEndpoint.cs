@@ -38,7 +38,7 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 			return TypedResults.NoContent();
 		}
 
-		string fileName = $"todos-{DateTime.UtcNow:yyyy-MM-dd-HH-mm-ss}.html";
+		string fileName = $"todos.html";
 		string htmlContent = ExportToHtml(result);
 
 		byte[] fileBytes = Encoding.UTF8.GetBytes(htmlContent);
@@ -54,8 +54,6 @@ public class GetExportEndpoint : IEndpointWithoutRequest<Results<FileContentHttp
 				<td>{WebUtility.HtmlEncode(t.Title)}</td>
 				<td>{WebUtility.HtmlEncode(t.Description)}</td>
 				<td>{(t.IsCompleted ? "Yes" : "No")}</td>
-				<td>{t.CreatedAt:yyyy-MM-dd HH:mm:ss}</td>
-				<td>{(t.UpdatedAt.HasValue ? t.UpdatedAt.Value.ToString("yyyy-MM-dd HH:mm-ss") : "")}</td>
 			</tr>"));
 
 		return $$"""

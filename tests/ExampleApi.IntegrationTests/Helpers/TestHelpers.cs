@@ -1,6 +1,3 @@
-using System.Net.Http.Json;
-using System.Text.Json;
-
 namespace ExampleApi.IntegrationTests.Helpers;
 
 /// <summary>
@@ -8,19 +5,6 @@ namespace ExampleApi.IntegrationTests.Helpers;
 /// </summary>
 public static class TestHelpers
 {
-	/// <summary>
-	/// Creates JSON content with custom serializer options
-	/// </summary>
-	public static JsonContent CreateJsonContent<T>(T value, JsonSerializerOptions? options = null)
-	{
-		options ??= new JsonSerializerOptions
-		{
-			PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-		};
-
-		return JsonContent.Create(value, options: options);
-	}
-
 	/// <summary>
 	/// Generates random test data for titles
 	/// </summary>
@@ -64,21 +48,5 @@ public static class TestHelpers
 		}
 
 		throw new TimeoutException($"Condition was not met within {timeout}");
-	}
-
-	/// <summary>
-	/// Asserts that an HTTP response contains expected JSON properties
-	/// </summary>
-	public static async Task AssertJsonContainsAsync(HttpContent content, params string[] expectedProperties)
-	{
-		string json = await content.ReadAsStringAsync();
-
-		foreach (string property in expectedProperties)
-		{
-			if (!json.Contains($"\"{property}\"", StringComparison.OrdinalIgnoreCase))
-			{
-				throw new Xunit.Sdk.XunitException($"JSON response does not contain expected property: {property}");
-			}
-		}
 	}
 }

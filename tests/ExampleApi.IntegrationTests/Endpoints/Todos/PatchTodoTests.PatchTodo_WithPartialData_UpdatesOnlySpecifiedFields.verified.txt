@@ -1,0 +1,19 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      id: 1,
+      title: TestTitle,
+      description: TestDescription,
+      isCompleted: true,
+      createdAt: DateTimeOffset_1,
+      updatedAt: DateTimeOffset_2
+    }
+  }
+}

@@ -1,0 +1,60 @@
+﻿{
+  Status: 400 Bad Request,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/problem+json
+    },
+    Value: {
+      type: https://tools.ietf.org/html/rfc9110#section-15.5.1,
+      title: One or more validation errors occurred.,
+      status: 400,
+      errors: {
+        StringMin: [
+          The length of 'String Min' must be at least 3 characters. You entered 2 characters.
+        ],
+        StringRange: [
+          'String Range' must be between 3 and 50 characters. You entered 0 characters.
+        ],
+        StringPattern: [
+          'String Pattern' is not in the correct format.
+        ],
+        IntMin: [
+          'Int Min' must be greater than or equal to '1'.
+        ],
+        IntRange: [
+          'Int Range' must be between 1 and 100. You entered 0.
+        ],
+        DoubleMin: [
+          'Double Min' must be greater than or equal to '0.1'.
+        ],
+        DoubleRange: [
+          'Double Range' must be between 0.1 and 99.9. You entered 0.
+        ],
+        ListStringMinCount: [
+          Must contain at least 1 item.
+        ],
+        ListStringRangeCount: [
+          Must contain between 1 and 10 items.
+        ],
+        ListIntMinCount: [
+          Must contain at least 1 item.
+        ],
+        ListIntRangeCount: [
+          Must contain between 1 and 10 items.
+        ],
+        AllBuiltInStringValidators: [
+          'All Built In String Validators' must not be empty.,
+          'All Built In String Validators' must be equal to 'TestEqual'.,
+          The specified condition was not met for 'All Built In String Validators'.
+        ],
+        AllBuiltInNumberValidators: [
+          'All Built In Number Validators' must not be empty.,
+          'All Built In Number Validators' must be equal to '10'.
+        ]
+      }
+    }
+  }
+}

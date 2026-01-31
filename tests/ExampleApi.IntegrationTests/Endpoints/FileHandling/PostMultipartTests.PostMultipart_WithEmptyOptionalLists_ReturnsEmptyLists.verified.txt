@@ -1,0 +1,39 @@
+﻿{
+  Status: 200 OK,
+  Headers: {
+    api-supported-versions: 1, 2
+  },
+  Content: {
+    Headers: {
+      Content-Type: application/json; charset=utf-8
+    },
+    Value: {
+      someData: Minimal Data,
+      singleFile: {
+        fileName: single.pdf,
+        propertyName: SingleFile,
+        size: 7
+      },
+      totalFileCount: 2,
+      readOnlyList1: [
+        {
+          fileName: required.txt,
+          propertyName: ReadOnlyList1,
+          size: 8
+        }
+      ],
+      fileCollectionList: [
+        {
+          fileName: single.pdf,
+          propertyName: SingleFile,
+          size: 7
+        },
+        {
+          fileName: required.txt,
+          propertyName: ReadOnlyList1,
+          size: 8
+        }
+      ]
+    }
+  }
+}

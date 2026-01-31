@@ -1,7 +1,3 @@
-using System.Net;
-using System.Net.Http.Json;
-using ListOfFiles = ExampleApi.Endpoints.FileHandling.PostListOfFiles;
-
 namespace ExampleApi.IntegrationTests.Endpoints.FileHandling;
 
 /// <summary>
@@ -41,19 +37,8 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.Length.ShouldBe(3);
-
-		result[0].FileName.ShouldBe("document1.pdf");
-		result[0].Size.ShouldBe(18); // "First file content"
-
-		result[1].FileName.ShouldBe("document2.txt");
-		result[1].Size.ShouldBe(19); // "Second file content"
-
-		result[2].FileName.ShouldBe("image.png");
-		result[2].Size.ShouldBe(18); // "Third file content"
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -70,12 +55,8 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.Length.ShouldBe(1);
-		result[0].FileName.ShouldBe("single.txt");
-		result[0].Size.ShouldBe(11); // "Single file"
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -91,10 +72,8 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.ShouldBeEmpty();
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -115,12 +94,8 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.Length.ShouldBe(2);
-		result[0].PropertyName.ShouldBe("property1");
-		result[1].PropertyName.ShouldBe("property2");
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 
 	[Fact]
@@ -141,11 +116,7 @@ public class PostListOfFilesTests : IClassFixture<ExampleApiWebApplicationFactor
 		HttpResponseMessage response = await _client.PostAsync("/api/v1/FileHandling/ListOfFiles", content, TestContext.Current.CancellationToken);
 
 		// Assert
-		response.StatusCode.ShouldBe(HttpStatusCode.OK);
-		ListOfFiles.ResponseModel[]? result = await response.Content.ReadFromJsonAsync<ListOfFiles.ResponseModel[]>(TestContext.Current.CancellationToken);
-		result.ShouldNotBeNull();
-		result.Length.ShouldBe(2);
-		result[0].Size.ShouldBe(0);
-		result[1].Size.ShouldBe(0);
+		await Verify(response)
+			.IgnoreMember("Content-Length");
 	}
 }
