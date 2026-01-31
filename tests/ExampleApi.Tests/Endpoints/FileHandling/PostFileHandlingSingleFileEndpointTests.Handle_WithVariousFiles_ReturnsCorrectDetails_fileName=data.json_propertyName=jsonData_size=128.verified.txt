@@ -1,0 +1,5 @@
+﻿{
+  FileName: data.json,
+  PropertyName: jsonData,
+  Size: 128
+}

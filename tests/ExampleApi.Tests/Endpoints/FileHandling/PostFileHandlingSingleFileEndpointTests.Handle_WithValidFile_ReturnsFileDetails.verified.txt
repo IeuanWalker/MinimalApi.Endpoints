@@ -1,0 +1,5 @@
+﻿{
+  FileName: document.pdf,
+  PropertyName: uploadedFile,
+  Size: 1024
+}

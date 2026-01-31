@@ -1,5 +1,6 @@
 using ExampleApi.Data;
 using ExampleApi.Endpoints.Todos.Post;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace ExampleApi.Tests.Endpoints.Todos;
 
@@ -19,9 +20,11 @@ public class PostTodoEndpointTests
 		RequestModel request = new() { Title = "Exists", Description = "D" };
 
 		// Act
-		_ = await endpoint.Handle(request, CancellationToken.None);
+		Results<Ok<ResponseModel>, Conflict> result = await endpoint.Handle(request, CancellationToken.None);
 
-		// Assert: CreateAsync should not be called when title exists
+		// Assert
+		await Verify(result);
+
 		await todoStore
 			.DidNotReceive()
 			.CreateAsync(Arg.Any<Todo>(), Arg.Any<CancellationToken>());
@@ -46,7 +49,7 @@ public class PostTodoEndpointTests
 		// Act
 		_ = await endpoint.Handle(request, CancellationToken.None);
 
-		// Assert: ensure CreateAsync was called
+		// Assert
 		await todoStore
 			.Received(1)
 			.CreateAsync(Arg.Any<Todo>(), Arg.Any<CancellationToken>());

@@ -21,20 +21,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = [.. result];
-		resultArray.Length.ShouldBe(3);
-
-		resultArray[0].FileName.ShouldBe("document.pdf");
-		resultArray[0].PropertyName.ShouldBe("file1");
-		resultArray[0].Size.ShouldBe(1024);
-
-		resultArray[1].FileName.ShouldBe("image.png");
-		resultArray[1].PropertyName.ShouldBe("file2");
-		resultArray[1].Size.ShouldBe(2048);
-
-		resultArray[2].FileName.ShouldBe("data.json");
-		resultArray[2].PropertyName.ShouldBe("file3");
-		resultArray[2].Size.ShouldBe(512);
+		await Verify(result);
 	}
 
 	[Fact]
@@ -50,11 +37,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = [.. result];
-		resultArray.ShouldHaveSingleItem();
-		resultArray[0].FileName.ShouldBe("test.txt");
-		resultArray[0].PropertyName.ShouldBe("uploadedFile");
-		resultArray[0].Size.ShouldBe(256);
+		await Verify(result);
 	}
 
 	[Fact]
@@ -85,9 +68,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = [.. result];
-		resultArray.ShouldHaveSingleItem();
-		resultArray[0].Size.ShouldBe(0);
+		await Verify(result);
 	}
 
 	[Fact]
@@ -104,9 +85,7 @@ public class PostFileHandlingListOfFilesEndpointTests
 		IEnumerable<ResponseModel> result = await endpoint.Handle(formFileCollection, CancellationToken.None);
 
 		// Assert
-		ResponseModel[] resultArray = [.. result];
-		resultArray.ShouldHaveSingleItem();
-		resultArray[0].Size.ShouldBe(largeFileSize);
+		await Verify(result);
 	}
 
 	static IFormFile CreateMockFormFile(string fileName, string name, long length)

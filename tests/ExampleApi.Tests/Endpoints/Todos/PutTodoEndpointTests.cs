@@ -32,15 +32,7 @@ public class PutTodoEndpointTests
 		Results<Ok<ResponseModel>, Conflict> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldBeOfType<Results<Ok<ResponseModel>, Conflict>>();
-
-		Ok<ResponseModel>? okResult = result.Result as Ok<ResponseModel>;
-		okResult.ShouldNotBeNull();
-		okResult.Value.ShouldNotBeNull();
-		okResult.Value.Id.ShouldBe(5);
-		okResult.Value.Title.ShouldBe("Updated");
-		okResult.Value.Description.ShouldBe("Updated Desc");
-		okResult.Value.IsCompleted.ShouldBeTrue();
+		await Verify(result);
 
 		await todoStore
 			.Received(1)
@@ -63,9 +55,6 @@ public class PutTodoEndpointTests
 		Results<Ok<ResponseModel>, Conflict> result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldBeOfType<Results<Ok<ResponseModel>, Conflict>>();
-
-		Conflict? conflictResult = result.Result as Conflict;
-		conflictResult.ShouldNotBeNull();
+		await Verify(result);
 	}
 }

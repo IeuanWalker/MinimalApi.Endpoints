@@ -23,8 +23,8 @@ public class PatchTodoEndpointTests
 		ResponseModel? result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ShouldNotBeNull();
-		result.Title.ShouldBe("Patched");
+		await Verify(result);
+
 		await todoStore
 			.Received(1)
 			.PatchAsync(1, Arg.Any<Action<Todo>>(), Arg.Any<CancellationToken>());

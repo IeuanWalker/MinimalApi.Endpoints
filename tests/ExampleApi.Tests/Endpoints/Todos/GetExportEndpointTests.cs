@@ -21,7 +21,7 @@ public class GetExportEndpointTests
 		Results<FileContentHttpResult, NoContent> result = await endpoint.Handle(CancellationToken.None);
 
 		// Assert - result is a Results<FileContentHttpResult, NoContent> wrapper; check for NoContent
-		result.ToString()!.ShouldContain("NoContent");
+		await Verify(result);
 	}
 
 	[Fact]
@@ -40,6 +40,6 @@ public class GetExportEndpointTests
 		Results<FileContentHttpResult, NoContent> result = await endpoint.Handle(CancellationToken.None);
 
 		// Assert - ensure File result case
-		result.ToString()!.ShouldContain("FileContentHttpResult");
+		await Verify(result);
 	}
 }

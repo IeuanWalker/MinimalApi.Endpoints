@@ -1,0 +1,6 @@
+﻿[
+  {
+    FileName: empty.txt,
+    PropertyName: emptyFile
+  }
+]

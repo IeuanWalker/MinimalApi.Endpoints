@@ -1,0 +1,5 @@
+﻿{
+  FileName: file.pdf,
+  PropertyName: pdfFile,
+  Size: 500
+}

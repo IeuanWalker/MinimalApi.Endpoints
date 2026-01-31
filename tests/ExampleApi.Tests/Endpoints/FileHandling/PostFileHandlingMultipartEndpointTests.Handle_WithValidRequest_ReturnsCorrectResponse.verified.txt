@@ -1,0 +1,35 @@
+﻿{
+  SomeData: Test Data,
+  SingleFile: {
+    FileName: single.pdf,
+    PropertyName: SingleFile,
+    Size: 1024
+  },
+  TotalFileCount: 5,
+  ReadOnlyList1: [
+    {
+      FileName: list1.txt,
+      PropertyName: ReadOnlyList1,
+      Size: 512
+    },
+    {
+      FileName: list2.txt,
+      PropertyName: ReadOnlyList1,
+      Size: 256
+    }
+  ],
+  ReadOnlyList2: [
+    {
+      FileName: optional.doc,
+      PropertyName: ReadOnlyList2,
+      Size: 128
+    }
+  ],
+  FileCollectionList: [
+    {
+      FileName: collection.png,
+      PropertyName: FileCollectionList,
+      Size: 2048
+    }
+  ]
+}

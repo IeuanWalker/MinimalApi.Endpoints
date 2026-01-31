@@ -40,22 +40,7 @@ public class PostFileHandlingMultipartEndpointTests
 		ResponseModel result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.SomeData.ShouldBe("Test Data");
-		result.TotalFileCount.ShouldBe(5);
-
-		result.SingleFile.FileName.ShouldBe("single.pdf");
-		result.SingleFile.PropertyName.ShouldBe("SingleFile");
-		result.SingleFile.Size.ShouldBe(1024);
-
-		result.ReadOnlyList1.Count.ShouldBe(2);
-		result.ReadOnlyList1[0].FileName.ShouldBe("list1.txt");
-		result.ReadOnlyList1[1].FileName.ShouldBe("list2.txt");
-
-		result.ReadOnlyList2.Count.ShouldBe(1);
-		result.ReadOnlyList2[0].FileName.ShouldBe("optional.doc");
-
-		result.FileCollectionList.Count.ShouldBe(1);
-		result.FileCollectionList[0].FileName.ShouldBe("collection.png");
+		await Verify(result);
 	}
 
 	[Fact]
@@ -82,8 +67,7 @@ public class PostFileHandlingMultipartEndpointTests
 		ResponseModel result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.ReadOnlyList2.ShouldBeEmpty();
-		result.FileCollectionList.ShouldBeEmpty();
+		await Verify(result);
 	}
 
 	[Fact]
@@ -114,13 +98,7 @@ public class PostFileHandlingMultipartEndpointTests
 		ResponseModel result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.FileCollectionList.Count.ShouldBe(3);
-		result.FileCollectionList[0].FileName.ShouldBe("col1.png");
-		result.FileCollectionList[0].Size.ShouldBe(300);
-		result.FileCollectionList[1].FileName.ShouldBe("col2.jpg");
-		result.FileCollectionList[1].Size.ShouldBe(400);
-		result.FileCollectionList[2].FileName.ShouldBe("col3.gif");
-		result.FileCollectionList[2].Size.ShouldBe(500);
+		await Verify(result);
 	}
 
 	[Fact]
@@ -147,8 +125,7 @@ public class PostFileHandlingMultipartEndpointTests
 		ResponseModel result = await endpoint.Handle(request, CancellationToken.None);
 
 		// Assert
-		result.SingleFile.PropertyName.ShouldBe("CustomSingleName");
-		result.ReadOnlyList1[0].PropertyName.ShouldBe("CustomListName");
+		await Verify(result);
 	}
 
 	static IFormFile CreateMockFormFile(string fileName, string name, long length)

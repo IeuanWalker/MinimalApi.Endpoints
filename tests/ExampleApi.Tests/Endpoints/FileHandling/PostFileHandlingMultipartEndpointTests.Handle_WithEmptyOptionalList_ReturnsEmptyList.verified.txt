@@ -1,0 +1,16 @@
+﻿{
+  SomeData: Test Data,
+  SingleFile: {
+    FileName: single.pdf,
+    PropertyName: SingleFile,
+    Size: 1024
+  },
+  TotalFileCount: 2,
+  ReadOnlyList1: [
+    {
+      FileName: list.txt,
+      PropertyName: ReadOnlyList1,
+      Size: 512
+    }
+  ]
+}

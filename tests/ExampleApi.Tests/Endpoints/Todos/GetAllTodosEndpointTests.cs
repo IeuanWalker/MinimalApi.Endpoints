@@ -25,11 +25,7 @@ public class GetAllTodosEndpointTests
 		ResponseModel[] result = await endpoint.Handle(CancellationToken.None);
 
 		// Assert
-		result.Length.ShouldBe(2);
-		result[0].Id.ShouldBe(1);
-		result[0].Title.ShouldBe("Todo 1");
-		result[1].Id.ShouldBe(2);
-		result[1].Title.ShouldBe("Todo 2");
+		await Verify(result);
 	}
 
 	[Fact]
