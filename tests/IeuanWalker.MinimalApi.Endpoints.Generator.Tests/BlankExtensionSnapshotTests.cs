@@ -7,7 +7,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WhenNoEndpointsFound()
 	{
 		// Arrange - Empty source with no endpoint implementations
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using System;
 
 			namespace TestNamespace;
@@ -26,7 +29,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WhenOnlyAbstractEndpointsFound()
 	{
 		// Arrange - Source with abstract endpoint classes (should be ignored)
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -54,7 +60,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WhenOnlyInterfacesFound()
 	{
 		// Arrange - Source with interface definitions only
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 
 			namespace TestNamespace;
@@ -75,7 +84,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WithSpecialCharactersInAssemblyName()
 	{
 		// Arrange - This test verifies the assembly name sanitization in blank extensions
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			namespace TestNamespace;
 
 			public class RegularClass
@@ -93,7 +105,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WhenOnlyValidatorsFound()
 	{
 		// Arrange - Source with only validators, no endpoints
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 
@@ -119,7 +134,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WhenOnlyEndpointGroupsFound()
 	{
 		// Arrange - Source with only endpoint groups, no endpoints
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 
 			namespace TestNamespace;
@@ -149,7 +167,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WhenEndpointHasNoConfigure()
 	{
 		// Arrange - Source with endpoint that doesn't properly implement Configure method
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -176,7 +197,10 @@ public class BlankExtensionSnapshotTests
 	public Task GeneratesBlankExtensions_WhenEndpointConfigureHasNoHttpVerb()
 	{
 		// Arrange - Source with endpoint that has Configure method but no HTTP verb
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 

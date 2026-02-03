@@ -8,7 +8,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI001_NoHttpVerbConfigured_ShouldError()
 	{
 		// Arrange - This test covers the MINAPI001 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -43,7 +46,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI002_MultipleHttpVerbsConfigured_ShouldError()
 	{
 		// Arrange - This test covers the MINAPI002 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -79,7 +85,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI003_GroupConfigureMissingMapGroup_ShouldError()
 	{
 		// Arrange - This test covers the MINAPI003 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Builder;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -125,7 +134,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI004_MultipleMapGroupCallsInGroupConfigure_ShouldError()
 	{
 		// Arrange - This test covers the MINAPI004 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Builder;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -172,7 +184,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI005_MultipleGroupCallsInConfigure_ShouldError()
 	{
 		// Arrange - This test covers the MINAPI005 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -218,7 +233,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI006_UnusedEndpointGroup_ShouldWarn()
 	{
 		// Arrange - This test covers the MINAPI006 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Builder;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -263,7 +281,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI007_MultipleValidatorsForSameType_ShouldError()
 	{
 		// Arrange - This test covers the MINAPI007 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -315,7 +336,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI008_ValidatorButValidationDisabled_ShouldWarn()
 	{
 		// Arrange - This test covers the MINAPI008 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -359,7 +383,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI009_AbstractValidatorOnRequest_ShouldWarn()
 	{
 		// Arrange - This test covers the MINAPI009 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -401,7 +428,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI009_MultipleAbstractValidatorsOnRequestTypes_ShouldWarnMultiple()
 	{
 		// Arrange - Test multiple abstract validators matching request types
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -467,7 +497,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI009_AbstractValidatorNotMatchingRequestType_ShouldNotWarn()
 	{
 		// Arrange - Abstract validator for a type that's not used as a request type
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -509,7 +542,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI009_MixedValidatorTypes_ShouldOnlyWarnForAbstractValidators()
 	{
 		// Arrange - Mix of proper Validator<T> and AbstractValidator<T>
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -576,7 +612,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI009_AbstractValidatorInheritanceChain_ShouldWarn()
 	{
 		// Arrange - Abstract validator with inheritance chain
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using FluentValidation;
 			using Microsoft.AspNetCore.Http.HttpResults;
@@ -631,7 +670,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI010_MultipleRequestTypesConfigured_ShouldError()
 	{
 		// Arrange - This test covers the MINAPI010 diagnostic
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -664,7 +706,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI010_ThreeRequestTypesConfigured_ShouldError()
 	{
 		// Arrange - Test with three different request type methods
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -698,7 +743,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI010_MultipleRequestTypesWithMethodChaining_ShouldError()
 	{
 		// Arrange - Test with method chaining pattern
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -733,7 +781,10 @@ public class DiagnosticSnapshotTests
 	public Task DiagnosticMINAPI010_SingleRequestType_ShouldNotError()
 	{
 		// Arrange - Test that single request type works correctly (no errors)
-		const string source = """
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
 			using IeuanWalker.MinimalApi.Endpoints;
 			using Microsoft.AspNetCore.Http.HttpResults;
 
