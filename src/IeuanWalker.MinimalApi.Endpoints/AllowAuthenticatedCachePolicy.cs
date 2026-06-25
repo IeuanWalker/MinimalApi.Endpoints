@@ -42,6 +42,11 @@ sealed class AllowAuthenticatedCachePolicy : IOutputCachePolicy
 			return ValueTask.CompletedTask;
 		}
 
+		// Re-enable storage that the built-in DefaultPolicy disables for authenticated
+		// requests in its own ServeResponseAsync. Without this, authenticated responses
+		// are never stored and this policy has no effect.
+		context.AllowCacheStorage = true;
+
 		return ValueTask.CompletedTask;
 	}
 }
