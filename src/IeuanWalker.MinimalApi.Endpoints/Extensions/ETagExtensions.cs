@@ -2,7 +2,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 
-namespace IeuanWalker.MinimalApi.Endpoints.Extensions;
+#pragma warning disable IDE0130 // Namespace does not match folder structure
+namespace IeuanWalker.MinimalApi.Endpoints;
+#pragma warning restore IDE0130 // Namespace does not match folder structure
 
 /// <summary>
 /// Extension methods for generating ETags for output cache revalidation.
