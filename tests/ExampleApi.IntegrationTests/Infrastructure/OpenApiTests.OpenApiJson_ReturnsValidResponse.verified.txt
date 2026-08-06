@@ -8,6 +8,7 @@
       openapi: 3.0.4,
       info: {
         title: Test API,
+        description: Example API demonstrating MinimalApi.Endpoints.,
         version: 1
       },
       servers: [

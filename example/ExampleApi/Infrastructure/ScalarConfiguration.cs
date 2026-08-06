@@ -42,7 +42,9 @@ static class ScalarConfiguration
 					{
 						Title = "Test API",
 						Version = description?.ApiVersion.ToString() ?? context.DocumentName,
-						Description = description?.IsDeprecated == true ? "This API version is deprecated." : null
+						Description = description?.IsDeprecated == true
+							? "This API version is deprecated."
+							: "Example API demonstrating MinimalApi.Endpoints."
 					};
 
 					return Task.CompletedTask;
