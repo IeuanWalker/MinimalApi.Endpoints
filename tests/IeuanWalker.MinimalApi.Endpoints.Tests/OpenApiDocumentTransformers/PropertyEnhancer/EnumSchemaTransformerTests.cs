@@ -77,8 +77,9 @@ public class EnumSchemaTransformerTests
 		await transformer.TransformAsync(document, null!, CancellationToken.None);
 
 		// Assert
+		schema.Enum.ShouldNotBeNull();
+		schema.Enum.Count.ShouldBe(Enum.GetValues<TestLocalEnum>().Length);
 		schema.Extensions.ShouldNotBeNull();
-		schema.Extensions.ContainsKey("enum").ShouldBeTrue();
 		schema.Extensions.ContainsKey("x-enum-varnames").ShouldBeTrue();
 		schema.Extensions.ContainsKey("x-enum-descriptions").ShouldBeTrue();
 		schema.Description.ShouldStartWith("Enum:");

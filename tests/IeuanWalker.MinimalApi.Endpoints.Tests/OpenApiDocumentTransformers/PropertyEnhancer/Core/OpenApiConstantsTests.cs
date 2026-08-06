@@ -108,20 +108,6 @@ public class OpenApiConstantsTests
 	}
 
 	[Fact]
-	public void NullableExtension_Constant_IsNullable()
-	{
-		// Assert
-		SchemaConstants.NullableExtension.ShouldBe("nullable");
-	}
-
-	[Fact]
-	public void EnumExtension_Constant_IsEnum()
-	{
-		// Assert
-		SchemaConstants.EnumExtension.ShouldBe("enum");
-	}
-
-	[Fact]
 	public void EnumVarNamesExtension_Constant_HasCorrectValue()
 	{
 		// Assert

@@ -594,42 +594,6 @@ public class NullableSchemaReorderTransformerTests
 	}
 
 	[Fact]
-	public async Task TransformAsync_WhenOneOfHasNullableExtension_ReordersToLast()
-	{
-		// Arrange
-		NullableSchemaReorderTransformer transformer = new();
-
-		OpenApiSchema nonNullSchema = new()
-		{
-			Type = JsonSchemaType.Integer
-		};
-		OpenApiSchema nullableExtSchema = OpenApiSchemaHelper.CreateNullableMarker();
-
-		OpenApiSchema root = new()
-		{
-			OneOf = [nullableExtSchema, nonNullSchema]
-		};
-
-		OpenApiDocument document = new()
-		{
-			Components = new OpenApiComponents
-			{
-				Schemas = new Dictionary<string, IOpenApiSchema>()
-				{
-					["TestNullableExt"] = root
-				}
-			}
-		};
-
-		// Act
-		await transformer.TransformAsync(document, null!, CancellationToken.None);
-
-		// Assert
-		root.OneOf![0].ShouldBe(nonNullSchema);
-		root.OneOf[1].ShouldBe(nullableExtSchema);
-	}
-
-	[Fact]
 	public async Task TransformAsync_WhenComponentParameterSchema_ReordersOneOf()
 	{
 		// Arrange

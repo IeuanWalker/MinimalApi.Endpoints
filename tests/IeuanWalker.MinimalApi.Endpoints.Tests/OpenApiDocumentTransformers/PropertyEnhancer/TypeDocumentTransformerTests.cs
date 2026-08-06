@@ -94,9 +94,7 @@ public class TypeDocumentTransformerTests
 
 		OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
 		second.ShouldNotBeNull();
-		second.Type.HasValue.ShouldBeFalse();
-		second.Extensions.ShouldNotBeNull();
-		second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		second.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Fact]
@@ -160,12 +158,10 @@ public class TypeDocumentTransformerTests
 		firstItems.ShouldNotBeNull();
 		firstItems.Type.ShouldBe(JsonSchemaType.String);
 
-		// Second element should be the nullable marker (no Type, but has nullable extension)
+		// Second element should be the null schema
 		OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
 		second.ShouldNotBeNull();
-		second.Type.HasValue.ShouldBeFalse();
-		second.Extensions.ShouldNotBeNull();
-		second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		second.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Fact]
@@ -1006,7 +1002,7 @@ public class TypeDocumentTransformerTests
 		TypeDocumentTransformer transformer = new();
 
 		// Property schema has OneOf: [ nullable marker, array ]
-		OpenApiSchema nullableMarker = new();
+		OpenApiSchema nullableMarker = OpenApiSchemaHelper.CreateNullableMarker();
 		OpenApiSchema arraySchema = new() { Type = JsonSchemaType.Array };
 
 		OpenApiSchema propertySchema = new()
@@ -1053,10 +1049,10 @@ public class TypeDocumentTransformerTests
 		OpenApiSchema vs = (OpenApiSchema)valuesSchema;
 		vs.OneOf.ShouldNotBeNull();
 		vs.OneOf.Count.ShouldBe(2);
-		// First element is the nullable marker (no Type)
+		// First element is the null schema
 		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
 		first.ShouldNotBeNull();
-		first.Type.HasValue.ShouldBeFalse();
+		first.Type.ShouldBe(JsonSchemaType.Null);
 		// Second element is the array schema
 		OpenApiSchema? second = vs.OneOf[1] as OpenApiSchema;
 		second.ShouldNotBeNull();
@@ -1131,9 +1127,7 @@ public class TypeDocumentTransformerTests
 		// First element should be the nullable marker
 		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
 		first.ShouldNotBeNull();
-		first.Type.HasValue.ShouldBeFalse();
-		first.Extensions.ShouldNotBeNull();
-		first.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		first.Type.ShouldBe(JsonSchemaType.Null);
 
 		// Second element should still be present
 		// The key verification is that the early-return code preserved the OneOf structure
@@ -1207,9 +1201,7 @@ public class TypeDocumentTransformerTests
 		// First element should be the nullable marker
 		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
 		first.ShouldNotBeNull();
-		first.Type.HasValue.ShouldBeFalse();
-		first.Extensions.ShouldNotBeNull();
-		first.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		first.Type.ShouldBe(JsonSchemaType.Null);
 
 		// Second element should be the array schema
 		OpenApiSchema? second = vs.OneOf[1] as OpenApiSchema;

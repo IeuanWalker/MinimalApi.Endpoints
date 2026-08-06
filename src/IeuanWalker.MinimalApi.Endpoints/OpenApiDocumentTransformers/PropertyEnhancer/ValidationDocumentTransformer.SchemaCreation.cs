@@ -223,12 +223,6 @@ partial class ValidationDocumentTransformer
 
 		if (isNullableWrapper && !isNullableReference)
 		{
-			newInlineSchema.Extensions?.Remove(OpenApiConstants.NullableExtension);
-			if (newInlineSchema.Extensions?.Count == 0)
-			{
-				newInlineSchema.Extensions = null;
-			}
-
 			return new OpenApiSchema
 			{
 				OneOf =

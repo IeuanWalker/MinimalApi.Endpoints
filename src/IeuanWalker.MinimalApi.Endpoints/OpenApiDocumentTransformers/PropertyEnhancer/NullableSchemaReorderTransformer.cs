@@ -334,16 +334,7 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 
 	static bool IsNullableMarker(IOpenApiSchema schema)
 	{
-		if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) || openApiSchema is null)
-		{
-			return false;
-		}
-
-		bool hasNullableExtension = openApiSchema.Extensions?.ContainsKey(SchemaConstants.NullableExtension) == true;
-		bool hasTypeInformation = openApiSchema.Type.HasValue;
-		bool hasCompositeChildren = (openApiSchema.AllOf?.Count ?? 0) > 0 || (openApiSchema.OneOf?.Count ?? 0) > 0 || (openApiSchema.AnyOf?.Count ?? 0) > 0;
-		bool hasSchemaMembers = (openApiSchema.Properties?.Count ?? 0) > 0 || openApiSchema.Items is not null || openApiSchema.AdditionalProperties is not null || openApiSchema.Not is not null;
-
-		return openApiSchema.Type == JsonSchemaType.Null || (hasNullableExtension && !hasTypeInformation && !hasCompositeChildren && !hasSchemaMembers);
+		return OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) &&
+			openApiSchema?.Type == JsonSchemaType.Null;
 	}
 }

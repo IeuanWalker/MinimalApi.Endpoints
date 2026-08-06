@@ -135,8 +135,7 @@ public class OpenApiSchemaHelperTests
 		nullableSchema.OneOf[1].ShouldNotBeNull();
 		OpenApiSchema? marker = nullableSchema.OneOf[1] as OpenApiSchema;
 		marker.ShouldNotBeNull();
-		marker.Extensions.ShouldNotBeNull();
-		marker.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		marker.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Theory]
@@ -269,13 +268,7 @@ public class OpenApiSchemaHelperTests
 		};
 		OpenApiSchema enumSchema = new()
 		{
-			Extensions = new Dictionary<string, IOpenApiExtension>
-			{
-				[SchemaConstants.EnumExtension] = new JsonNodeExtension(new JsonArray
-				{
-					JsonValue.Create("A")!
-				})
-			}
+			Enum = [JsonValue.Create("A")!]
 		};
 		doc.Components.Schemas!["MyEnum"] = enumSchema;
 
@@ -372,7 +365,8 @@ public class OpenApiSchemaHelperTests
 
 		// Assert
 		schema.Extensions.ShouldNotBeNull();
-		schema.Extensions.ContainsKey(SchemaConstants.EnumExtension).ShouldBeTrue();
+		schema.Enum.ShouldNotBeNull();
+		schema.Enum.Select(value => value!.GetValue<long>()).ShouldBe([0L, 1L]);
 		schema.Extensions.ContainsKey(SchemaConstants.EnumVarNamesExtension).ShouldBeTrue();
 		schema.Extensions.ContainsKey(SchemaConstants.EnumDescriptionsExtension).ShouldBeTrue();
 		schema.Description.ShouldStartWith("Enum:");
@@ -580,19 +574,14 @@ public class OpenApiSchemaHelperTests
 	#region Nullable Schema Tests
 
 	[Fact]
-	public void CreateNullableMarker_CreatesSchemaWithNullableExtension()
+	public void CreateNullableMarker_CreatesNullSchema()
 	{
 		// Act
 		OpenApiSchema marker = OpenApiSchemaHelper.CreateNullableMarker();
 
 		// Assert
 		marker.ShouldNotBeNull();
-		marker.Extensions.ShouldNotBeNull();
-		marker.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
-
-		JsonNodeExtension? extension = marker.Extensions[SchemaConstants.NullableExtension] as JsonNodeExtension;
-		extension.ShouldNotBeNull();
-		extension!.Node.ShouldNotBeNull();
+		marker.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Fact]
@@ -611,8 +600,7 @@ public class OpenApiSchemaHelperTests
 
 		OpenApiSchema? nullMarker = wrappedSchema.OneOf[1] as OpenApiSchema;
 		nullMarker.ShouldNotBeNull();
-		nullMarker!.Extensions.ShouldNotBeNull();
-		nullMarker.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		nullMarker.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	#endregion

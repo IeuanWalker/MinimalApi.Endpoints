@@ -188,7 +188,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count == 2)
 				{
 					bool hasNullableMarker = openApiSchema.OneOf.Any(s =>
-						s is OpenApiSchema os && !os.Type.HasValue);
+						s is OpenApiSchema os && os.Type == JsonSchemaType.Null);
 					bool hasArray = openApiSchema.OneOf.Any(s =>
 						s is OpenApiSchema os && os.Type == JsonSchemaType.Array);
 					bool hasCollectionRef = openApiSchema.OneOf.Any(s =>
@@ -213,7 +213,7 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 					if (isNullable && openApiSchema.OneOf is not null && openApiSchema.OneOf.Count > 0)
 					{
 						IOpenApiSchema? nonNullableSchema = openApiSchema.OneOf
-							.FirstOrDefault(s => s is OpenApiSchema os && os.Extensions is not null && !os.Extensions.ContainsKey(SchemaConstants.NullableExtension));
+							.FirstOrDefault(s => s is not OpenApiSchema os || os.Type != JsonSchemaType.Null);
 						if (nonNullableSchema is not null)
 						{
 							itemsSchema = nonNullableSchema;

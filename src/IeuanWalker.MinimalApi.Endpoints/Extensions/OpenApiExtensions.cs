@@ -50,6 +50,9 @@ public static class OpenApiExtensions
 			// Reorder so nullable is last
 			source.AddDocumentTransformer<NullableSchemaReorderTransformer>();
 
+			// Normalize inline value-or-null unions to version-appropriate nullable schemas
+			source.AddDocumentTransformer<NullableSchemaNormalizationTransformer>();
+
 			// Add cleanup transformer as the absolute final step to remove unused component schemas
 			// This removes schemas that are no longer referenced after aggressive inlining and unwrapping
 			source.AddDocumentTransformer<UnusedComponentsCleanupTransformer>();
