@@ -281,6 +281,6 @@ public class OpenApiExtensionsTests
 			.SelectMany(dataSource => dataSource.Endpoints)
 			.Single();
 
-		return endpoint.Metadata.GetOrderedMetadata<IProducesResponseTypeMetadata>().ToArray();
+		return [.. endpoint.Metadata.GetOrderedMetadata<IProducesResponseTypeMetadata>()];
 	}
 }
