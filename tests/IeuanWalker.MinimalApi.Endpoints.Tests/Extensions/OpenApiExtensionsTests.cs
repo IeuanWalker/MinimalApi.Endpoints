@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.OpenApi;
+using Microsoft.AspNetCore.Routing;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Tests.Extensions;
 
@@ -154,6 +156,39 @@ public class OpenApiExtensionsTests
 	}
 
 	[Fact]
+	public void WithDefaultSuccessResponse_WithOnlyErrorResponse_AddsOkResponse()
+	{
+		// Arrange
+		WebApplication app = WebApplication.CreateBuilder().Build();
+		RouteHandlerBuilder route = app.MapGet("/default-success", () => Task.CompletedTask)
+			.ProducesValidationProblem();
+
+		// Act
+		route.WithDefaultSuccessResponse();
+
+		// Assert
+		IProducesResponseTypeMetadata[] responses = GetResponseMetadata(app);
+		responses.Select(response => response.StatusCode).ShouldBe([400, 200], ignoreOrder: true);
+	}
+
+	[Fact]
+	public void WithDefaultSuccessResponse_WithExplicitCreatedResponse_DoesNotAddOkResponse()
+	{
+		// Arrange
+		WebApplication app = WebApplication.CreateBuilder().Build();
+		RouteHandlerBuilder route = app.MapPost("/explicit-success", () => Task.CompletedTask)
+			.ProducesValidationProblem()
+			.WithResponse(201, "Created");
+
+		// Act
+		route.WithDefaultSuccessResponse();
+
+		// Assert
+		IProducesResponseTypeMetadata[] responses = GetResponseMetadata(app);
+		responses.Select(response => response.StatusCode).ShouldBe([400, 201], ignoreOrder: true);
+	}
+
+	[Fact]
 	public void WithValidationRules_ReturnsSameBuilder()
 	{
 		// Arrange
@@ -238,5 +273,14 @@ public class OpenApiExtensionsTests
 	{
 		public string? Title { get; set; }
 		public string? Description { get; set; }
+	}
+
+	static IProducesResponseTypeMetadata[] GetResponseMetadata(WebApplication app)
+	{
+		Endpoint endpoint = ((IEndpointRouteBuilder)app).DataSources
+			.SelectMany(dataSource => dataSource.Endpoints)
+			.Single();
+
+		return endpoint.Metadata.GetOrderedMetadata<IProducesResponseTypeMetadata>().ToArray();
 	}
 }

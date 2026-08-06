@@ -4,6 +4,7 @@ using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.PropertyEnhan
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
@@ -17,6 +18,28 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 
 public static class OpenApiExtensions
 {
+	/// <summary>
+	/// Adds an empty <c>200 OK</c> response when the endpoint does not already declare a successful response.
+	/// </summary>
+	/// <param name="source">The route handler builder.</param>
+	/// <returns>The same <see cref="RouteHandlerBuilder"/> instance for chaining.</returns>
+	public static RouteHandlerBuilder WithDefaultSuccessResponse(this RouteHandlerBuilder source)
+	{
+		source.Add(endpointBuilder =>
+		{
+			bool hasSuccessResponse = endpointBuilder.Metadata
+				.OfType<IProducesResponseTypeMetadata>()
+				.Any(metadata => metadata.StatusCode is >= StatusCodes.Status200OK and < StatusCodes.Status300MultipleChoices);
+
+			if (!hasSuccessResponse)
+			{
+				endpointBuilder.Metadata.Add(new ProducesResponseTypeMetadata(StatusCodes.Status200OK, typeof(void)));
+			}
+		});
+
+		return source;
+	}
+
 	extension(OpenApiOptions source)
 	{
 		/// <summary>

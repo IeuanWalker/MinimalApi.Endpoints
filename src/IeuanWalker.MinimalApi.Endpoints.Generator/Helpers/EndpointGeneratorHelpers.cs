@@ -36,6 +36,7 @@ static class EndpointGeneratorHelpers
 			builder.Append($".WithName(\"{uniqueRootName}\")");
 		}
 
+		bool addDefaultSuccessResponse = false;
 		if (endpoint.RequestType is not null && !endpoint.DisableValidation)
 		{
 			ValidatorInfo? requestValidator = validators.FirstOrDefault(x => x.ValidatedTypeName.Equals(endpoint.RequestType));
@@ -46,6 +47,7 @@ static class EndpointGeneratorHelpers
 				builder.AppendLine(".DisableValidation()");
 				builder.AppendLine($".AddEndpointFilter<FluentValidationFilter<global::{endpoint.RequestType}>>()");
 				builder.Append(".ProducesValidationProblem()");
+				addDefaultSuccessResponse = endpoint.ResponseType is null;
 			}
 		}
 
@@ -55,6 +57,10 @@ static class EndpointGeneratorHelpers
 
 		// Configure the endpoint
 		builder.AppendLine($"global::{endpoint.TypeName}.Configure({uniqueRootName});");
+		if (addDefaultSuccessResponse)
+		{
+			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithDefaultSuccessResponse({uniqueRootName});");
+		}
 	}
 
 	static string GetBindingType(this EndpointInfo endpoint)
