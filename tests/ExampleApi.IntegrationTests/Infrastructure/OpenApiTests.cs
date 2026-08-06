@@ -29,7 +29,7 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		// Act
 		string json = await _client.GetStringAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
 		ValidationRuleSet rules = ValidationRuleSet.GetDefaultRuleSet();
-		var (document, diagnostic) = OpenApiDocument.Parse(
+		(OpenApiDocument? document, OpenApiDiagnostic? diagnostic) = OpenApiDocument.Parse(
 			json,
 			"json",
 			new OpenApiReaderSettings { RuleSet = rules });
