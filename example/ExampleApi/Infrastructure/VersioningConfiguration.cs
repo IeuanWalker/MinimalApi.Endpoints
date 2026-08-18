@@ -1,7 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using ExampleApi.Infrastructure;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.Extensions.Options;
 
 namespace ExampleApi.Infrastructure;
 
@@ -13,7 +14,6 @@ public static class VersioningConfiguration
 		builder.Services
 			.AddApiVersioning(options =>
 			{
-				options.DefaultApiVersion = new ApiVersion(1, 0);
 				options.ReportApiVersions = true;
 				options.AssumeDefaultVersionWhenUnspecified = true;
 			})
@@ -21,7 +21,17 @@ public static class VersioningConfiguration
 			{
 				config.GroupNameFormat = "'v'VVV";
 				config.SubstituteApiVersionInUrl = true;
-			});
+			})
+			.AddOpenApi();
+
+		ServiceDescriptor? versioningOpenApiPostConfigure = builder.Services.FirstOrDefault(descriptor =>
+			descriptor.ServiceType == typeof(IPostConfigureOptions<OpenApiOptions>) &&
+			descriptor.ImplementationType?.FullName == "Asp.Versioning.OpenApi.Configuration.ConfigureOpenApiOptions");
+
+		if (versioningOpenApiPostConfigure is not null)
+		{
+			builder.Services.Remove(versioningOpenApiPostConfigure);
+		}
 
 		return builder;
 	}

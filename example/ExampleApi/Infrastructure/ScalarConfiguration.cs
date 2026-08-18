@@ -12,7 +12,6 @@ static class ScalarConfiguration
 {
 	internal static IHostApplicationBuilder AddScalar(this IHostApplicationBuilder builder)
 	{
-		builder.Services.AddEndpointsApiExplorer();
 		builder.Services.AddOpenApi(config =>
 		{
 			config.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
@@ -25,26 +24,20 @@ static class ScalarConfiguration
 			new ApiVersion(2)
 		];
 
-		foreach (int majorVersion in versions.Where(x => x.MajorVersion is not null).Select(versions => versions.MajorVersion!.Value))
+		foreach (int majorVersion in versions.Where(version => version.MajorVersion is not null).Select(version => version.MajorVersion!.Value))
 		{
-			builder.Services.Configure<ScalarOptions>(options => options.AddDocument($"v{majorVersion}", $"v{majorVersion}"));
 			builder.Services.AddOpenApi($"v{majorVersion}", options =>
 			{
 				options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
 				options.CreateSchemaReferenceId = jsonTypeInfo => jsonTypeInfo.Type.FullName?.Replace('+', '.');
 				options.EnhancePropertiesAndValidation();
-				options.AddDocumentTransformer((document, context, _) =>
+				options.AddDocumentTransformer((document, _, _) =>
 				{
-					IApiVersionDescriptionProvider provider = context.ApplicationServices.GetRequiredService<IApiVersionDescriptionProvider>();
-					ApiVersionDescription? description = provider.ApiVersionDescriptions.FirstOrDefault(d => d.GroupName == context.DocumentName);
-
 					document.Info = new OpenApiInfo
 					{
 						Title = "Test API",
-						Version = description?.ApiVersion.ToString() ?? context.DocumentName,
-						Description = description?.IsDeprecated == true
-							? "This API version is deprecated."
-							: "Example API demonstrating MinimalApi.Endpoints."
+						Version = majorVersion.ToString(),
+						Description = "Example API demonstrating MinimalApi.Endpoints."
 					};
 
 					return Task.CompletedTask;
@@ -55,12 +48,21 @@ static class ScalarConfiguration
 		return builder;
 	}
 
-
 	internal static IApplicationBuilder UseScalar(this WebApplication app)
 	{
-		app.MapOpenApi();
+		IReadOnlyList<ApiVersionDescription> descriptions = app.DescribeApiVersions();
+
+		app.MapOpenApi().WithDocumentPerVersion();
 		app.MapScalarApiReference((options, _) =>
 		{
+			for (int i = 0; i < descriptions.Count; i++)
+			{
+				ApiVersionDescription description = descriptions[i];
+				bool isDefault = i == descriptions.Count - 1;
+
+				options.AddDocument(description.GroupName, description.GroupName, isDefault: isDefault);
+			}
+
 			options
 				.WithTheme(ScalarTheme.Default)
 				.WithFavicon("https://scalar.com/logo-light.svg")
