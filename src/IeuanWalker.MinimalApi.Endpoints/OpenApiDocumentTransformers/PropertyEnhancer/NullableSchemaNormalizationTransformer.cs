@@ -213,13 +213,14 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 
 	static OpenApiSchema NormalizeInlineNullableSchema(OpenApiSchema wrapper)
 	{
-		IList<IOpenApiSchema>? composition = wrapper.OneOf is { Count: 2 }
+		bool usesOneOf = wrapper.OneOf is { Count: 2 };
+		IList<IOpenApiSchema>? composition = usesOneOf
 			? wrapper.OneOf
 			: wrapper.AnyOf is { Count: 2 }
 				? wrapper.AnyOf
 				: null;
 
-		if (composition is null)
+		if (composition is null || HasSemanticSiblingKeywords(wrapper, usesOneOf))
 		{
 			return wrapper;
 		}
@@ -258,6 +259,70 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 		}
 
 		return normalized;
+	}
+
+	static bool HasSemanticSiblingKeywords(OpenApiSchema schema, bool usesOneOf)
+	{
+		return schema.Type.HasValue ||
+			schema.Format is not null ||
+			schema.Maximum is not null ||
+			schema.Minimum is not null ||
+			schema.ExclusiveMaximum is not null ||
+			schema.ExclusiveMinimum is not null ||
+			schema.MultipleOf.HasValue ||
+			schema.MaxLength.HasValue ||
+			schema.MinLength.HasValue ||
+			schema.Pattern is not null ||
+			schema.MaxItems.HasValue ||
+			schema.MinItems.HasValue ||
+			schema.UniqueItems.HasValue ||
+			schema.MaxProperties.HasValue ||
+			schema.MinProperties.HasValue ||
+			schema.Required is { Count: > 0 } ||
+			schema.Enum is { Count: > 0 } ||
+			schema.Properties is { Count: > 0 } ||
+			schema.Items is not null ||
+			schema.AdditionalProperties is not null ||
+			!schema.AdditionalPropertiesAllowed ||
+			schema.AllOf is { Count: > 0 } ||
+			(usesOneOf ? schema.AnyOf is { Count: > 0 } : schema.OneOf is { Count: > 0 }) ||
+			schema.Not is not null ||
+			schema.Discriminator is not null ||
+			schema.ReadOnly ||
+			schema.WriteOnly ||
+			schema.Deprecated ||
+			schema.Xml is not null ||
+			schema.ExternalDocs is not null ||
+			schema.Example is not null ||
+			schema.Examples is { Count: > 0 } ||
+			schema.Default is not null ||
+			schema.Extensions is { Count: > 0 } ||
+			schema.Id is not null ||
+			schema.Schema is not null ||
+			schema.Anchor is not null ||
+			schema.DynamicAnchor is not null ||
+			schema.DynamicRef is not null ||
+			schema.Vocabulary is { Count: > 0 } ||
+			schema.Comment is not null ||
+			schema.Definitions is { Count: > 0 } ||
+			schema.Const is not null ||
+			schema.PatternProperties is { Count: > 0 } ||
+			schema.PropertyNames is not null ||
+			schema.UnevaluatedPropertiesSchema is not null ||
+			!schema.UnevaluatedProperties ||
+			schema.DependentRequired is { Count: > 0 } ||
+			schema.DependentSchemas is { Count: > 0 } ||
+			schema.Contains is not null ||
+			schema.MaxContains.HasValue ||
+			schema.MinContains.HasValue ||
+			schema.If is not null ||
+			schema.Then is not null ||
+			schema.Else is not null ||
+			schema.ContentEncoding is not null ||
+			schema.ContentMediaType is not null ||
+			schema.ContentSchema is not null ||
+			schema.UnrecognizedKeywords is { Count: > 0 } ||
+			schema.Metadata is { Count: > 0 };
 	}
 
 	static bool IsNullSchema(OpenApiSchema schema)

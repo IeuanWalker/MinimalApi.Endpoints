@@ -55,6 +55,35 @@ public class NullableSchemaNormalizationTransformerTests
 	}
 
 	[Fact]
+	public async Task TransformAsync_PreservesWrapperWithSemanticSiblingKeywords()
+	{
+		OpenApiSchema wrapper = new()
+		{
+			MinLength = 3,
+			Extensions = new Dictionary<string, IOpenApiExtension>
+			{
+				["x-wrapper"] = new JsonNodeExtension(JsonValue.Create(true)!)
+			},
+			OneOf =
+			[
+				new OpenApiSchema { Type = JsonSchemaType.String },
+				new OpenApiSchema { Type = JsonSchemaType.Null }
+			]
+		};
+		OpenApiDocument document = CreateDocument(wrapper);
+
+		await new NullableSchemaNormalizationTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		OpenApiSchema result = document.Components!.Schemas!["test"].ShouldBeOfType<OpenApiSchema>();
+		result.ShouldBeSameAs(wrapper);
+		result.MinLength.ShouldBe(3);
+		result.Extensions.ShouldNotBeNull();
+		result.Extensions.ShouldContainKey("x-wrapper");
+		result.OneOf.ShouldNotBeNull();
+		result.OneOf.Count.ShouldBe(2);
+	}
+
+	[Fact]
 	public async Task TransformAsync_PreservesNullableReferenceComposition()
 	{
 		OpenApiSchemaReference reference = new("Referenced", null, null);
