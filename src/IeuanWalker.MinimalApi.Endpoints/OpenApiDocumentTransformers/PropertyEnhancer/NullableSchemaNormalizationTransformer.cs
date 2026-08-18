@@ -234,7 +234,8 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 		IOpenApiSchema valueCandidate = composition.First(candidate => !ReferenceEquals(candidate, nullSchema));
 		if (valueCandidate is not OpenApiSchema valueSchema ||
 			!valueSchema.Type.HasValue ||
-			valueSchema.Type.Value.HasFlag(JsonSchemaType.Null))
+			valueSchema.Type.Value.HasFlag(JsonSchemaType.Null) ||
+			HasAssertionsThatApplyToNull(valueSchema))
 		{
 			return wrapper;
 		}
@@ -259,6 +260,20 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 		}
 
 		return normalized;
+	}
+
+	static bool HasAssertionsThatApplyToNull(OpenApiSchema schema)
+	{
+		return schema.Const is not null ||
+			schema.AllOf is { Count: > 0 } ||
+			schema.OneOf is { Count: > 0 } ||
+			schema.AnyOf is { Count: > 0 } ||
+			schema.Not is not null ||
+			schema.If is not null ||
+			schema.Then is not null ||
+			schema.Else is not null ||
+			schema.DynamicRef is not null ||
+			schema.UnrecognizedKeywords is { Count: > 0 };
 	}
 
 	static bool HasSemanticSiblingKeywords(OpenApiSchema schema, bool usesOneOf)

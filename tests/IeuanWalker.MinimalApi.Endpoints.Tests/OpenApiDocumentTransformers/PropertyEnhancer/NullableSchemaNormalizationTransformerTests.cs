@@ -26,6 +26,50 @@ public class NullableSchemaNormalizationTransformerTests
 	}
 
 	[Fact]
+	public async Task TransformAsync_PreservesValueSchemaWithConstAssertion()
+	{
+		OpenApiSchema valueSchema = new()
+		{
+			Type = JsonSchemaType.String,
+			Const = "fixed"
+		};
+		OpenApiSchema wrapper = new()
+		{
+			OneOf = [valueSchema, new OpenApiSchema { Type = JsonSchemaType.Null }]
+		};
+		OpenApiDocument document = CreateDocument(wrapper);
+
+		await new NullableSchemaNormalizationTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		OpenApiSchema result = document.Components!.Schemas!["test"].ShouldBeOfType<OpenApiSchema>();
+		result.ShouldBeSameAs(wrapper);
+		result.OneOf.ShouldNotBeNull();
+		result.OneOf[0].ShouldBeSameAs(valueSchema);
+	}
+
+	[Fact]
+	public async Task TransformAsync_PreservesValueSchemaWithNestedComposition()
+	{
+		OpenApiSchema valueSchema = new()
+		{
+			Type = JsonSchemaType.String,
+			AllOf = [new OpenApiSchema { Type = JsonSchemaType.String, MinLength = 1 }]
+		};
+		OpenApiSchema wrapper = new()
+		{
+			OneOf = [valueSchema, new OpenApiSchema { Type = JsonSchemaType.Null }]
+		};
+		OpenApiDocument document = CreateDocument(wrapper);
+
+		await new NullableSchemaNormalizationTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		OpenApiSchema result = document.Components!.Schemas!["test"].ShouldBeOfType<OpenApiSchema>();
+		result.ShouldBeSameAs(wrapper);
+		result.OneOf.ShouldNotBeNull();
+		result.OneOf[0].ShouldBeSameAs(valueSchema);
+	}
+
+	[Fact]
 	public async Task TransformAsync_NormalizesNestedInlineSchemaAndPreservesMetadata()
 	{
 		OpenApiSchema wrapper = new()
