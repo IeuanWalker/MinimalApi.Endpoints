@@ -48,6 +48,28 @@ public class NullableSchemaNormalizationTransformerTests
 	}
 
 	[Fact]
+	public async Task TransformAsync_PreservesNullSchemaWithConstAssertion()
+	{
+		OpenApiSchema nullSchema = new()
+		{
+			Type = JsonSchemaType.Null,
+			Const = "not-null"
+		};
+		OpenApiSchema wrapper = new()
+		{
+			OneOf = [new OpenApiSchema { Type = JsonSchemaType.String }, nullSchema]
+		};
+		OpenApiDocument document = CreateDocument(wrapper);
+
+		await new NullableSchemaNormalizationTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		OpenApiSchema result = document.Components!.Schemas!["test"].ShouldBeOfType<OpenApiSchema>();
+		result.ShouldBeSameAs(wrapper);
+		result.OneOf.ShouldNotBeNull();
+		result.OneOf[1].ShouldBeSameAs(nullSchema);
+	}
+
+	[Fact]
 	public async Task TransformAsync_PreservesValueSchemaWithNestedComposition()
 	{
 		OpenApiSchema valueSchema = new()
@@ -173,6 +195,54 @@ public class NullableSchemaNormalizationTransformerTests
 		json.ShouldContain("\"type\": \"integer\"");
 		json.ShouldContain("\"nullable\": true");
 		json.ShouldContain("null");
+	}
+
+	[Fact]
+	public async Task TransformAsync_NormalizesContentSchemasForParametersAndHeaders()
+	{
+		OpenApiParameter parameter = new()
+		{
+			Content = new Dictionary<string, OpenApiMediaType>
+			{
+				["application/json"] = new() { Schema = CreateNullableSchema(JsonSchemaType.Integer) }
+			}
+		};
+		OpenApiHeader header = new()
+		{
+			Content = new Dictionary<string, OpenApiMediaType>
+			{
+				["application/json"] = new() { Schema = CreateNullableSchema(JsonSchemaType.String) }
+			}
+		};
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Parameters = new Dictionary<string, IOpenApiParameter> { ["parameter"] = parameter },
+				Headers = new Dictionary<string, IOpenApiHeader> { ["header"] = header }
+			}
+		};
+
+		await new NullableSchemaNormalizationTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		OpenApiSchema parameterSchema = parameter.Content!["application/json"].Schema.ShouldBeOfType<OpenApiSchema>();
+		parameterSchema.Type.ShouldBe(JsonSchemaType.Integer | JsonSchemaType.Null);
+		parameterSchema.OneOf.ShouldBeNull();
+		OpenApiSchema headerSchema = header.Content!["application/json"].Schema.ShouldBeOfType<OpenApiSchema>();
+		headerSchema.Type.ShouldBe(JsonSchemaType.String | JsonSchemaType.Null);
+		headerSchema.OneOf.ShouldBeNull();
+	}
+
+	static OpenApiSchema CreateNullableSchema(JsonSchemaType type)
+	{
+		return new OpenApiSchema
+		{
+			OneOf =
+			[
+				new OpenApiSchema { Type = type },
+				new OpenApiSchema { Type = JsonSchemaType.Null }
+			]
+		};
 	}
 
 	static OpenApiDocument CreateDocument(IOpenApiSchema schema)

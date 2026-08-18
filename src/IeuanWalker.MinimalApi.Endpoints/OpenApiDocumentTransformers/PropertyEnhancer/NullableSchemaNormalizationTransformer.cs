@@ -95,19 +95,31 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 	static void ProcessParameter(IOpenApiParameter parameter, OpenApiComponents? components, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
 	{
 		IOpenApiParameter resolved = OpenApiSchemaHelper.ResolveReference(parameter, components?.Parameters);
-		if (resolved is OpenApiParameter openApiParameter && openApiParameter.Schema is not null)
+		if (resolved is not OpenApiParameter openApiParameter)
+		{
+			return;
+		}
+
+		if (openApiParameter.Schema is not null)
 		{
 			openApiParameter.Schema = ProcessSchema(openApiParameter.Schema, visitedSchemas, cancellationToken);
 		}
+		ProcessContent(openApiParameter.Content, components, visitedSchemas, cancellationToken);
 	}
 
 	static void ProcessHeader(IOpenApiHeader header, OpenApiComponents? components, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
 	{
 		IOpenApiHeader resolved = OpenApiSchemaHelper.ResolveReference(header, components?.Headers);
-		if (resolved is OpenApiHeader openApiHeader && openApiHeader.Schema is not null)
+		if (resolved is not OpenApiHeader openApiHeader)
+		{
+			return;
+		}
+
+		if (openApiHeader.Schema is not null)
 		{
 			openApiHeader.Schema = ProcessSchema(openApiHeader.Schema, visitedSchemas, cancellationToken);
 		}
+		ProcessContent(openApiHeader.Content, components, visitedSchemas, cancellationToken);
 	}
 
 	static void ProcessRequestBody(IOpenApiRequestBody requestBody, OpenApiComponents? components, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
@@ -343,6 +355,7 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 	static bool IsNullSchema(OpenApiSchema schema)
 	{
 		return schema.Type == JsonSchemaType.Null &&
+			!HasAssertionsThatApplyToNull(schema) &&
 			schema.OneOf is not { Count: > 0 } &&
 			schema.AnyOf is not { Count: > 0 } &&
 			schema.AllOf is not { Count: > 0 } &&
