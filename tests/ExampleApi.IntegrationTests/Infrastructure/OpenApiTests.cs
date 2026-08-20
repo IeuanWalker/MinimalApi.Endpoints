@@ -165,8 +165,17 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		{
 			type.ValueKind.ShouldBe(JsonValueKind.Array);
 			type.GetArrayLength().ShouldBe(2);
-			type[0].GetString().ShouldBe("null");
-			type[1].GetString().ShouldBe("number");
+
+			bool hasNull = false;
+			bool hasNumber = false;
+			foreach (JsonElement element in type.EnumerateArray())
+			{
+				hasNull |= element.GetString() == "null";
+				hasNumber |= element.GetString() == "number";
+			}
+
+			hasNull.ShouldBeTrue();
+			hasNumber.ShouldBeTrue();
 		}
 		else
 		{

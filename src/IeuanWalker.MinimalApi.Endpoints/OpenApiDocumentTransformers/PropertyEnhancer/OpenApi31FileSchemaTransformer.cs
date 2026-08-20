@@ -70,7 +70,8 @@ sealed class OpenApi31FileSchemaTransformer(bool enabled = true) : IOpenApiDocum
 			return;
 		}
 
-		if (ContainsBinarySchema(urlEncoded.Schema, components?.Schemas, [], cancellationToken))
+		HashSet<IOpenApiSchema> visited = new(ReferenceEqualityComparer.Instance);
+		if (ContainsBinarySchema(urlEncoded.Schema, components?.Schemas, visited, cancellationToken))
 		{
 			openApiRequestBody.Content.Remove(formUrlEncoded);
 		}
