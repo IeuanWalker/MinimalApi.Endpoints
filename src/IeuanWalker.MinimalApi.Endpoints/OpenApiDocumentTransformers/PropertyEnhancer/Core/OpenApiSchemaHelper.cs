@@ -478,6 +478,7 @@ static class OpenApiSchemaHelper
 		else if (actualType == typeof(decimal))
 		{
 			schema.Type = JsonSchemaType.Number;
+			schema.Format = null;
 		}
 		else if (actualType == typeof(double))
 		{

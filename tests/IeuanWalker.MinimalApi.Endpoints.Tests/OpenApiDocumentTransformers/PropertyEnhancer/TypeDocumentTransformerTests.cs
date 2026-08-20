@@ -1247,6 +1247,11 @@ public class TypeDocumentTransformerTests
 								Pattern = decimalPattern,
 								Format = "double"
 							},
+							[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalAmount)] = new OpenApiSchema
+							{
+								Pattern = decimalPattern,
+								Format = "double"
+							},
 							[nameof(TypeDocumentTransformerPrimitiveHolder.Values)] = new OpenApiSchema
 							{
 								Type = JsonSchemaType.Array,
@@ -1298,8 +1303,17 @@ public class TypeDocumentTransformerTests
 
 		OpenApiSchema amount = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.Amount)].ShouldBeOfType<OpenApiSchema>();
 		amount.Type.ShouldBe(JsonSchemaType.Number);
-		amount.Format.ShouldBe("double");
+		amount.Format.ShouldBeNull();
 		amount.Pattern.ShouldBeNull();
+
+		OpenApiSchema optionalAmount = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalAmount)].ShouldBeOfType<OpenApiSchema>();
+		optionalAmount.OneOf.ShouldNotBeNull();
+		optionalAmount.OneOf.Count.ShouldBe(2);
+		OpenApiSchema optionalAmountValue = optionalAmount.OneOf[0].ShouldBeOfType<OpenApiSchema>();
+		optionalAmountValue.Type.ShouldBe(JsonSchemaType.Number);
+		optionalAmountValue.Format.ShouldBeNull();
+		optionalAmountValue.Pattern.ShouldBeNull();
+		optionalAmount.OneOf[1].ShouldBeOfType<OpenApiSchema>().Type.ShouldBe(JsonSchemaType.Null);
 
 		OpenApiSchema values = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.Values)].ShouldBeOfType<OpenApiSchema>();
 		values.Type.ShouldBe(JsonSchemaType.Array);
@@ -2709,6 +2723,7 @@ public class TypeDocumentTransformerPrimitiveHolder
 	public int Count { get; set; }
 	public int? OptionalCount { get; set; }
 	public decimal Amount { get; set; }
+	public decimal? OptionalAmount { get; set; }
 	public List<int> Values { get; set; } = [];
 	public List<int>? OptionalValues { get; set; }
 	public string? OptionalText { get; set; }

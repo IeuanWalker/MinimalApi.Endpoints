@@ -2629,12 +2629,10 @@ Validation rules:
                 nullable: true
               },
               decimalValue: {
-                type: number,
-                format: double
+                type: number
               },
               nullableDecimalValue: {
                 type: number,
-                format: double,
                 nullable: true
               },
               doubleValue: {
@@ -2957,12 +2955,10 @@ Validation rules:
                 nullable: true
               },
               decimalValue: {
-                type: number,
-                format: double
+                type: number
               },
               nullableDecimalValue: {
                 type: number,
-                format: double,
                 nullable: true
               },
               doubleValue: {
@@ -3274,12 +3270,10 @@ Validation rules:
                 nullable: true
               },
               decimalValue: {
-                type: number,
-                format: double
+                type: number
               },
               nullableDecimalValue: {
                 type: number,
-                format: double,
                 nullable: true
               },
               doubleValue: {
@@ -3602,12 +3596,10 @@ Validation rules:
                 nullable: true
               },
               decimalValue: {
-                type: number,
-                format: double
+                type: number
               },
               nullableDecimalValue: {
                 type: number,
-                format: double,
                 nullable: true
               },
               doubleValue: {
@@ -3923,8 +3915,7 @@ Validation rules:
 - Is required
 - Must be >= 10 and <= 25
 - Must be 3 characters or more
-- Must be 100 characters or fewer,
-                format: double
+- Must be 100 characters or fewer
               },
               requiredString: {
                 type: string,
@@ -4245,8 +4236,7 @@ Validation rules:
 - Is required
 - Must be >= 10 and <= 25
 - Must be 3 characters or more
-- Must be 100 characters or fewer,
-                format: double
+- Must be 100 characters or fewer
               },
               requiredString: {
                 type: string,
@@ -4905,8 +4895,7 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals.,
-                format: double
+- Must not be more than 4 digits in total, with allowance for 2 decimals.
               },
               maxNumberTest: {
                 type: integer,
@@ -5343,8 +5332,7 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals.,
-                format: double
+- Must not be more than 4 digits in total, with allowance for 2 decimals.
               },
               maxNumberTest: {
                 type: integer,

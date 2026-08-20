@@ -98,4 +98,38 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		requiredNumber.TryGetProperty("minLength", out _).ShouldBeFalse();
 		requiredNumber.TryGetProperty("maxLength", out _).ShouldBeFalse();
 	}
+
+	[Fact]
+	public async Task OpenApiJson_RepresentsDecimalsWithoutDoubleFormat()
+	{
+		// Act
+		string json = await _client.GetStringAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+		using JsonDocument document = JsonDocument.Parse(json);
+		JsonElement schemas = document.RootElement
+			.GetProperty("components")
+			.GetProperty("schemas");
+
+		// Assert
+		foreach (string schemaName in new[]
+		{
+			"ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel",
+			"ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel"
+		})
+		{
+			JsonElement properties = schemas.GetProperty(schemaName).GetProperty("properties");
+			AssertDecimalSchema(properties.GetProperty("decimalValue"), nullable: false);
+			AssertDecimalSchema(properties.GetProperty("nullableDecimalValue"), nullable: true);
+		}
+	}
+
+	static void AssertDecimalSchema(JsonElement schema, bool nullable)
+	{
+		schema.GetProperty("type").GetString().ShouldBe("number");
+		schema.TryGetProperty("format", out _).ShouldBeFalse();
+		schema.TryGetProperty("nullable", out JsonElement nullableProperty).ShouldBe(nullable);
+		if (nullable)
+		{
+			nullableProperty.GetBoolean().ShouldBeTrue();
+		}
+	}
 }
