@@ -7,8 +7,6 @@ namespace ExampleApi.Infrastructure;
 [ExcludeFromCodeCoverage]
 static class ScalarConfiguration
 {
-	internal static IHostApplicationBuilder AddScalar(this IHostApplicationBuilder builder) => builder;
-
 	internal static IApplicationBuilder UseScalar(this WebApplication app)
 	{
 		IReadOnlyList<ApiVersionDescription> descriptions = app.DescribeApiVersions();
