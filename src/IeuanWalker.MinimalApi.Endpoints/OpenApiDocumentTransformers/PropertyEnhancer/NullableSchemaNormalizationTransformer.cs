@@ -8,6 +8,8 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.PropertyE
 /// Converts inline value-or-null compositions to nullable schema types. Microsoft.OpenApi serializes these as
 /// <c>type</c> plus <c>nullable: true</c> for OpenAPI 3.0 and as a type union for OpenAPI 3.1.
 /// Nullable references remain composed because OpenAPI 3.0 does not allow nullable semantics on a Reference Object.
+/// Pure-null composition branches are represented as <c>enum: [null]</c> so OpenAPI 3.0 output does not contain a
+/// redundant, ineffective <c>nullable: true</c> keyword without a sibling <c>type</c>.
 /// </summary>
 sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransformer
 {
@@ -209,6 +211,7 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 		}
 
 		openApiSchema = NormalizeInlineNullableSchema(openApiSchema);
+		openApiSchema = NormalizeNullOnlySchema(openApiSchema);
 		if (!visitedSchemas.Add(openApiSchema))
 		{
 			return openApiSchema;
@@ -339,6 +342,19 @@ sealed class NullableSchemaNormalizationTransformer : IOpenApiDocumentTransforme
 			normalized.Description = wrapper.Description;
 		}
 
+		return normalized;
+	}
+
+	static OpenApiSchema NormalizeNullOnlySchema(OpenApiSchema schema)
+	{
+		if (!IsNullSchema(schema))
+		{
+			return schema;
+		}
+
+		OpenApiSchema normalized = (OpenApiSchema)schema.CreateShallowCopy();
+		normalized.Type = null;
+		normalized.Enum = [null!];
 		return normalized;
 	}
 
