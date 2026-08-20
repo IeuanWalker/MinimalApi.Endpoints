@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi;
 
 #pragma warning disable IDE0130 // Namespace does not match folder structure
 namespace IeuanWalker.MinimalApi.Endpoints;
@@ -17,6 +19,18 @@ public static class RequestBindingTypeExtensions
 		/// <returns>The same <see cref="RouteHandlerBuilder"/> instance for chaining.</returns>
 		public RouteHandlerBuilder RequestFromBody()
 		{
+			source.AddOpenApiOperationTransformer((operation, _, cancellationToken) =>
+			{
+				cancellationToken.ThrowIfCancellationRequested();
+
+				if (operation.RequestBody is OpenApiRequestBody requestBody)
+				{
+					requestBody.Required = true;
+				}
+
+				return Task.CompletedTask;
+			});
+
 			return source;
 		}
 

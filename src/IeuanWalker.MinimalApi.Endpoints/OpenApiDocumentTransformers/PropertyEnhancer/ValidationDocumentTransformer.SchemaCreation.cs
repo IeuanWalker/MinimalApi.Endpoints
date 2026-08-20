@@ -11,6 +11,7 @@ partial class ValidationDocumentTransformer
 	{
 		bool? perPropertySetting = rules.FirstOrDefault(r => r.AppendRuleToPropertyDescription.HasValue)?.AppendRuleToPropertyDescription;
 		bool effectiveListRulesInDescription = perPropertySetting ?? typeAppendRulesToPropertyDescription;
+		bool hasRequiredRule = rules.Any(r => r is RequiredRule);
 
 		OpenApiSchemaHelper.TryAsOpenApiSchema(originalSchema, out OpenApiSchema? originalOpenApiSchema);
 
@@ -189,6 +190,11 @@ partial class ValidationDocumentTransformer
 			}
 		}
 
+		if (hasRequiredRule)
+		{
+			MakeSchemaNonNullable(newInlineSchema);
+		}
+
 		List<string> descriptionParts = [];
 
 		// Prefer enum description if set by ApplyRuleToSchema, otherwise use custom description
@@ -221,7 +227,7 @@ partial class ValidationDocumentTransformer
 			}
 		}
 
-		if (isNullableWrapper && !isNullableReference)
+		if (isNullableWrapper && !isNullableReference && !hasRequiredRule)
 		{
 			return new OpenApiSchema
 			{
@@ -234,6 +240,20 @@ partial class ValidationDocumentTransformer
 		}
 
 		return newInlineSchema;
+	}
+
+	static void MakeSchemaNonNullable(OpenApiSchema schema)
+	{
+		if (schema.Type.HasValue && schema.Type.Value.HasFlag(JsonSchemaType.Null))
+		{
+			JsonSchemaType nonNullableType = schema.Type.Value & ~JsonSchemaType.Null;
+			schema.Type = nonNullableType == 0 ? null : nonNullableType;
+		}
+
+		if (schema.Enum is { Count: > 0 })
+		{
+			schema.Enum = [.. schema.Enum.Where(value => value is not null)];
+		}
 	}
 
 	static OpenApiSchema CreateCustomTypeReferenceSchema(OpenApiSchemaReference customTypeRef, List<ValidationRule> rules, bool effectiveListRulesInDescription, bool appendRulesToPropertyDescription, OpenApiDocument document)
@@ -410,7 +430,7 @@ partial class ValidationDocumentTransformer
 						schema.MaxItems = stringLengthRule.MaxLength.Value;
 					}
 				}
-				else
+				else if (schema.Type?.HasFlag(JsonSchemaType.String) == true)
 				{
 					if (stringLengthRule.MinLength.HasValue)
 					{

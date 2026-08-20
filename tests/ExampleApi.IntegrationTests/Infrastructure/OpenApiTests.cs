@@ -67,4 +67,35 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		nullableSchemaEnum.GetArrayLength().ShouldBe(1);
 		nullableSchemaEnum[0].ValueKind.ShouldBe(JsonValueKind.Null);
 	}
+
+	[Fact]
+	public async Task OpenApiJson_RepresentsRequiredBodyAndValidationNullability()
+	{
+		// Act
+		string json = await _client.GetStringAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+		using JsonDocument document = JsonDocument.Parse(json);
+
+		JsonElement requestBody = document.RootElement
+			.GetProperty("paths")
+			.GetProperty("/api/v1/validation/DataValidation")
+			.GetProperty("post")
+			.GetProperty("requestBody");
+
+		JsonElement properties = document.RootElement
+			.GetProperty("components")
+			.GetProperty("schemas")
+			.GetProperty("ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.RequestModel")
+			.GetProperty("properties");
+
+		// Assert
+		requestBody.GetProperty("required").GetBoolean().ShouldBeTrue();
+
+		JsonElement requiredString = properties.GetProperty("allBuiltInStringValidators");
+		requiredString.TryGetProperty("nullable", out _).ShouldBeFalse();
+
+		JsonElement requiredNumber = properties.GetProperty("allBuiltInNumberValidators");
+		requiredNumber.TryGetProperty("nullable", out _).ShouldBeFalse();
+		requiredNumber.TryGetProperty("minLength", out _).ShouldBeFalse();
+		requiredNumber.TryGetProperty("maxLength", out _).ShouldBeFalse();
+	}
 }

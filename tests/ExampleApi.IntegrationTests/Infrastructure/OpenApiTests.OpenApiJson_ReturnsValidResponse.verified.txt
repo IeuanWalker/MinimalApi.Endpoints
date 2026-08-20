@@ -183,7 +183,8 @@
                     $ref: #/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               400: {
@@ -389,7 +390,8 @@
                     $ref: #/components/schemas/ExampleApi.Endpoints.Todos.Post.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -899,7 +901,8 @@
                     $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -994,8 +997,7 @@ Validation rules:
                   description:
 Validation rules:
 - Is required
-- Must be >= 10 and <= 25,
-                  nullable: true
+- Must be >= 10 and <= 25
                 }
               },
               {
@@ -1738,8 +1740,7 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals. ,
-                  nullable: true
+- Must not be more than 4 digits in total, with allowance for 2 decimals.
                 }
               },
               {
@@ -1845,7 +1846,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -1868,7 +1870,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               400: {
@@ -1940,7 +1943,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationEdgeCases.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               400: {
@@ -1973,7 +1977,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -3907,14 +3912,11 @@ Validation rules:
 - Must be a valid credit card number
 - AllBuiltInStringValidators is not valid.
 - Default error message,
-                format: uri,
-                nullable: true
+                format: uri
               },
               allBuiltInNumberValidators: {
                 maximum: 25,
                 minimum: 10,
-                maxLength: 100,
-                minLength: 3,
                 type: number,
                 description:
 Validation rules:
@@ -3922,8 +3924,7 @@ Validation rules:
 - Must be >= 10 and <= 25
 - Must be 3 characters or more
 - Must be 100 characters or fewer,
-                format: double,
-                nullable: true
+                format: double
               },
               requiredString: {
                 type: string,
@@ -4233,14 +4234,11 @@ Validation rules:
 - Must be a valid phone number
 - Must be a valid URL
 - Must be a valid credit card number,
-                format: uri,
-                nullable: true
+                format: uri
               },
               allBuiltInNumberValidators: {
                 maximum: 25,
                 minimum: 10,
-                maxLength: 100,
-                minLength: 3,
                 type: number,
                 description:
 Validation rules:
@@ -4248,8 +4246,7 @@ Validation rules:
 - Must be >= 10 and <= 25
 - Must be 3 characters or more
 - Must be 100 characters or fewer,
-                format: double,
-                nullable: true
+                format: double
               },
               requiredString: {
                 type: string,
@@ -4885,8 +4882,7 @@ Validation rules:
 - Must be a valid email address
 - Must be a valid credit card number
 - Must be empty.,
-                format: email,
-                nullable: true
+                format: email
               },
               allBuiltInNumberValidators: {
                 maximum: 100,
@@ -4909,9 +4905,8 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals. ,
-                format: double,
-                nullable: true
+- Must not be more than 4 digits in total, with allowance for 2 decimals.,
+                format: double
               },
               maxNumberTest: {
                 type: integer,
@@ -5325,8 +5320,7 @@ Validation rules:
 - Must be a valid email address
 - Must be a valid credit card number
 - Must be empty.,
-                format: email,
-                nullable: true
+                format: email
               },
               allBuiltInNumberValidators: {
                 maximum: 100,
@@ -5349,9 +5343,8 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals. ,
-                format: double,
-                nullable: true
+- Must not be more than 4 digits in total, with allowance for 2 decimals.,
+                format: double
               },
               maxNumberTest: {
                 type: integer,
