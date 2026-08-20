@@ -454,7 +454,7 @@ static class OpenApiSchemaHelper
 			   genericDef == typeof(IReadOnlyCollection<>);
 	}
 
-	static void SetPrimitiveTypeInfo(OpenApiSchema schema, Type actualType)
+	internal static void SetPrimitiveTypeInfo(OpenApiSchema schema, Type actualType)
 	{
 		if (actualType == typeof(string))
 		{

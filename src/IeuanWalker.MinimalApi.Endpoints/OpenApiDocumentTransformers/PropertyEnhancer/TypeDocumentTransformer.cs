@@ -51,6 +51,8 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 			return;
 		}
 
+		NullabilityInfoContext nullabilityContext = new();
+
 		foreach (KeyValuePair<string, IOpenApiSchema> schemaEntry in document.Components.Schemas)
 		{
 			if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schemaEntry.Value, out OpenApiSchema? schema) || schema is null)
@@ -66,7 +68,10 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 				foreach ((string propertyName, IOpenApiSchema propertySchema) in schema.Properties)
 				{
 					PropertyInfo? propertyInfo = schemaType?.GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance | BindingFlags.IgnoreCase);
-					IOpenApiSchema fixedSchema = FixSchemaType(propertySchema, document, propertyInfo?.PropertyType);
+					bool isNullableReference = propertyInfo is not null &&
+						!propertyInfo.PropertyType.IsValueType &&
+						nullabilityContext.Create(propertyInfo).ReadState == NullabilityState.Nullable;
+					IOpenApiSchema fixedSchema = FixSchemaType(propertySchema, document, propertyInfo?.PropertyType, isNullableReference);
 					fixedSchema = FixNullableArraySchema(fixedSchema);
 					fixedSchema = UnwrapDoubleArrays(fixedSchema);
 					schema.Properties[propertyName] = fixedSchema;
@@ -167,12 +172,31 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 		return schema;
 	}
 
-	static IOpenApiSchema FixSchemaType(IOpenApiSchema schema, OpenApiDocument document, Type? actualPropertyType = null)
+	static IOpenApiSchema FixSchemaType(IOpenApiSchema schema, OpenApiDocument document, Type? actualPropertyType = null, bool isNullableReference = false)
 	{
-		if (actualPropertyType is not null && OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) && openApiSchema is not null)
+		if (actualPropertyType is not null)
 		{
 			Type actualType = Nullable.GetUnderlyingType(actualPropertyType) ?? actualPropertyType;
-			bool isNullable = Nullable.GetUnderlyingType(actualPropertyType) is not null;
+			bool isNullable = Nullable.GetUnderlyingType(actualPropertyType) is not null || isNullableReference;
+
+			if (isNullable && schema is OpenApiSchemaReference)
+			{
+				return new OpenApiSchema
+				{
+					OneOf =
+					[
+						FixSchemaType(schema, document, actualType),
+						OpenApiSchemaHelper.CreateNullableMarker()
+					]
+				};
+			}
+
+			if (!OpenApiSchemaHelper.TryAsOpenApiSchema(schema, out OpenApiSchema? openApiSchema) || openApiSchema is null)
+			{
+				return schema is OpenApiSchemaReference schemaReference
+					? OpenApiSchemaHelper.InlinePrimitiveTypeReference(schemaReference, document)
+					: schema;
+			}
 
 			bool isArrayOrCollection = actualType.IsArray ||
 				actualType == typeof(IFormFileCollection) ||
@@ -185,6 +209,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 			if (isArrayOrCollection)
 			{
+				Type? elementType = actualType.IsArray
+					? actualType.GetElementType()
+					: actualType == typeof(IFormFileCollection)
+						? typeof(IFormFile)
+						: actualType.IsGenericType
+							? actualType.GetGenericArguments()[0]
+							: null;
+
 				if (openApiSchema.OneOf is not null && openApiSchema.OneOf.Count == 2)
 				{
 					bool hasNullableMarker = openApiSchema.OneOf.Any(s =>
@@ -197,11 +229,21 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 					if (hasNullableMarker && (hasArray || hasCollectionRef))
 					{
+						if (elementType is not null)
+						{
+							foreach (OpenApiSchema arraySchema in openApiSchema.OneOf.OfType<OpenApiSchema>().Where(x => x.Type == JsonSchemaType.Array && x.Items is not null))
+							{
+								arraySchema.Items = FixSchemaType(arraySchema.Items!, document, elementType);
+							}
+						}
+
 						return schema;
 					}
 				}
 
-				if (openApiSchema.Type != JsonSchemaType.Array && openApiSchema.Items is null)
+				bool schemaIsArray = openApiSchema.Type?.HasFlag(JsonSchemaType.Array) == true;
+
+				if (!schemaIsArray && openApiSchema.Items is null)
 				{
 					if (openApiSchema.Properties is not null && openApiSchema.Properties.Count > 0)
 					{
@@ -220,6 +262,11 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 						}
 					}
 
+					if (elementType is not null)
+					{
+						itemsSchema = FixSchemaType(itemsSchema, document, elementType);
+					}
+
 					OpenApiSchema arraySchema = new()
 					{
 						Type = JsonSchemaType.Array,
@@ -233,9 +280,14 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 
 					return arraySchema;
 				}
-				else if (openApiSchema.Type == JsonSchemaType.Array)
+				else if (schemaIsArray)
 				{
 					IOpenApiSchema? items = openApiSchema.Items;
+					if (items is not null && elementType is not null)
+					{
+						items = FixSchemaType(items, document, elementType);
+						openApiSchema.Items = items;
+					}
 
 					if (items is OpenApiSchema itemsSchema && itemsSchema.OneOf is not null && itemsSchema.OneOf.Count == 2)
 					{
@@ -265,6 +317,18 @@ sealed class TypeDocumentTransformer : IOpenApiDocumentTransformer
 							};
 						}
 					}
+				}
+			}
+			else if (openApiSchema.OneOf is not { Count: > 0 })
+			{
+				// Versioned OpenAPI can supply inline primitive schemas with parsing metadata
+				// (for example, a numeric pattern and format) but without the JSON schema type.
+				// Apply the known CLR type without discarding any existing constraints.
+				OpenApiSchemaHelper.SetPrimitiveTypeInfo(openApiSchema, actualType);
+
+				if (isNullable && openApiSchema.Type.HasValue)
+				{
+					return OpenApiSchemaHelper.WrapAsNullable(openApiSchema);
 				}
 			}
 		}

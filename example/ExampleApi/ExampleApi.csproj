@@ -4,8 +4,6 @@
 		<TargetFramework>net10.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<!-- Named documents are retained because the versioning integration transformers alter EnhancePropertiesAndValidation output. -->
-		<NoWarn>$(NoWarn);AV0029</NoWarn>
 	</PropertyGroup>
 
 	<ItemGroup>
