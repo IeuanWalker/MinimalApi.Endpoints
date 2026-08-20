@@ -4,6 +4,7 @@ using IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.PropertyEnhan
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Metadata;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
@@ -17,6 +18,89 @@ namespace IeuanWalker.MinimalApi.Endpoints;
 
 public static class OpenApiExtensions
 {
+	/// <summary>
+	/// Adds an empty <c>200 OK</c> response when the endpoint does not already declare a successful response.
+	/// </summary>
+	/// <param name="source">The route handler builder.</param>
+	/// <returns>The same <see cref="RouteHandlerBuilder"/> instance for chaining.</returns>
+	public static RouteHandlerBuilder WithDefaultSuccessResponse(this RouteHandlerBuilder source)
+	{
+		source.Add(endpointBuilder =>
+		{
+			bool hasSuccessResponse = endpointBuilder.Metadata
+				.OfType<IProducesResponseTypeMetadata>()
+				.Any(metadata => metadata.StatusCode is >= StatusCodes.Status200OK and < StatusCodes.Status300MultipleChoices);
+
+			if (!hasSuccessResponse)
+			{
+				endpointBuilder.Metadata.Add(new ProducesResponseTypeMetadata(StatusCodes.Status200OK, typeof(void)));
+			}
+		});
+
+		return source;
+	}
+
+	/// <summary>
+	/// Marks response content from successful responses as nullable in the generated OpenAPI operation.
+	/// </summary>
+	/// <remarks>
+	/// This is applied by the source generator when an endpoint declares a nullable response type. A composition is
+	/// required because OpenAPI 3.0 Reference Objects cannot have nullable sibling keywords.
+	/// </remarks>
+	/// <param name="source">The route handler builder.</param>
+	/// <returns>The same <see cref="RouteHandlerBuilder"/> instance for chaining.</returns>
+	public static RouteHandlerBuilder WithNullableResponse(this RouteHandlerBuilder source)
+	{
+		source.AddOpenApiOperationTransformer((operation, _, cancellationToken) =>
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			foreach ((string statusCode, IOpenApiResponse response) in operation.Responses ?? [])
+			{
+				if (!int.TryParse(statusCode, out int parsedStatusCode) ||
+					parsedStatusCode is < StatusCodes.Status200OK or >= StatusCodes.Status300MultipleChoices ||
+					response is not OpenApiResponse openApiResponse)
+				{
+					continue;
+				}
+
+				foreach (OpenApiMediaType mediaType in openApiResponse.Content?.Values ?? [])
+				{
+					if (mediaType.Schema is null || SchemaAllowsNull(mediaType.Schema))
+					{
+						continue;
+					}
+
+					mediaType.Schema = new OpenApiSchema
+					{
+						OneOf =
+						[
+							mediaType.Schema,
+							new OpenApiSchema { Type = JsonSchemaType.Null }
+						]
+					};
+				}
+			}
+
+			return Task.CompletedTask;
+		});
+
+		return source;
+	}
+
+	static bool SchemaAllowsNull(IOpenApiSchema schema)
+	{
+		if (schema is not OpenApiSchema openApiSchema)
+		{
+			return false;
+		}
+
+		return openApiSchema.Type?.HasFlag(JsonSchemaType.Null) == true ||
+			openApiSchema.Enum?.Any(value => value is null) == true ||
+			openApiSchema.OneOf?.Any(SchemaAllowsNull) == true ||
+			openApiSchema.AnyOf?.Any(SchemaAllowsNull) == true;
+	}
+
 	extension(OpenApiOptions source)
 	{
 		/// <summary>
@@ -49,6 +133,9 @@ public static class OpenApiExtensions
 
 			// Reorder so nullable is last
 			source.AddDocumentTransformer<NullableSchemaReorderTransformer>();
+
+			// Normalize inline value-or-null unions to version-appropriate nullable schemas
+			source.AddDocumentTransformer<NullableSchemaNormalizationTransformer>();
 
 			// Add cleanup transformer as the absolute final step to remove unused component schemas
 			// This removes schemas that are no longer referenced after aggressive inlining and unwrapping

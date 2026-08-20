@@ -74,6 +74,53 @@ public class ValidationDocumentTransformerTests
 		result.Description.ShouldContain("This field is mandatory");
 	}
 
+	[Fact]
+	public void CreateInlineSchemaWithAllValidation_WithRequiredRule_RemovesNullFromTypeAndEnum()
+	{
+		// Arrange
+		OpenApiDocument document = CreateTestDocument();
+		OpenApiSchema originalSchema = new()
+		{
+			Type = JsonSchemaType.String | JsonSchemaType.Null,
+			Enum = [JsonValue.Create("value")!, null!]
+		};
+		List<ValidationRule> rules = [new RequiredRule("Name")];
+
+		// Act
+		OpenApiSchema result = ValidationDocumentTransformer.CreateInlineSchemaWithAllValidation(
+			originalSchema,
+			rules,
+			typeAppendRulesToPropertyDescription: true,
+			appendRulesToPropertyDescription: true,
+			document);
+
+		// Assert
+		result.Type.ShouldBe(JsonSchemaType.String);
+		result.Enum.ShouldHaveSingleItem();
+		result.Enum.Any(value => value is null).ShouldBeFalse();
+	}
+
+	[Fact]
+	public void CreateInlineSchemaWithAllValidation_WithRequiredRule_UnwrapsNullableComposition()
+	{
+		// Arrange
+		OpenApiDocument document = CreateTestDocument();
+		OpenApiSchema originalSchema = CreateNullableWrapperSchema(CreateStringSchema());
+		List<ValidationRule> rules = [new RequiredRule("Name")];
+
+		// Act
+		OpenApiSchema result = ValidationDocumentTransformer.CreateInlineSchemaWithAllValidation(
+			originalSchema,
+			rules,
+			typeAppendRulesToPropertyDescription: true,
+			appendRulesToPropertyDescription: true,
+			document);
+
+		// Assert
+		result.Type.ShouldBe(JsonSchemaType.String);
+		result.OneOf.ShouldBeNull();
+	}
+
 	#endregion
 
 	#region CreateInlineSchemaWithAllValidation - StringLengthRule Tests
@@ -139,9 +186,35 @@ public class ValidationDocumentTransformerTests
 		// Assert
 		result.MinLength.ShouldBe(3);
 		result.MaxLength.ShouldBe(50);
+		result.MinItems.ShouldBeNull();
+		result.MaxItems.ShouldBeNull();
 		result.Description.ShouldNotBeNull();
 		result.Description.ShouldContain("at least 3 characters");
 		result.Description.ShouldContain("less than 50 characters");
+	}
+
+	[Fact]
+	public void CreateInlineSchemaWithAllValidation_WithStringLengthRuleOnNumber_DoesNotSetStringConstraints()
+	{
+		// Arrange
+		OpenApiDocument document = CreateTestDocument();
+		OpenApiSchema originalSchema = CreateNumberSchema();
+		List<ValidationRule> rules = [new StringLengthRule("Amount", minLength: 3, maxLength: 100)];
+
+		// Act
+		OpenApiSchema result = ValidationDocumentTransformer.CreateInlineSchemaWithAllValidation(
+			originalSchema,
+			rules,
+			typeAppendRulesToPropertyDescription: true,
+			appendRulesToPropertyDescription: true,
+			document);
+
+		// Assert
+		result.Type.ShouldBe(JsonSchemaType.Number);
+		result.MinLength.ShouldBeNull();
+		result.MaxLength.ShouldBeNull();
+		result.MinItems.ShouldBeNull();
+		result.MaxItems.ShouldBeNull();
 	}
 
 	#endregion
@@ -664,6 +737,55 @@ public class ValidationDocumentTransformerTests
 		// Assert
 		result.Type.ShouldBe(JsonSchemaType.Array);
 		result.Items.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CreateInlineSchemaWithAllValidation_WithArrayLengthRule_SetsItemConstraints()
+	{
+		// Arrange
+		OpenApiDocument document = CreateTestDocument();
+		OpenApiSchema originalSchema = CreateArraySchema(CreateStringSchema());
+		List<ValidationRule> rules = [new StringLengthRule("Items", minLength: 1, maxLength: 10)];
+
+		// Act
+		OpenApiSchema result = ValidationDocumentTransformer.CreateInlineSchemaWithAllValidation(
+			originalSchema,
+			rules,
+			typeAppendRulesToPropertyDescription: true,
+			appendRulesToPropertyDescription: true,
+			document);
+
+		// Assert
+		result.MinItems.ShouldBe(1);
+		result.MaxItems.ShouldBe(10);
+		result.MinLength.ShouldBeNull();
+		result.MaxLength.ShouldBeNull();
+	}
+
+	[Fact]
+	public void CreateInlineSchemaWithAllValidation_WithNullableArrayLengthRule_SetsItemConstraints()
+	{
+		// Arrange
+		OpenApiDocument document = CreateTestDocument();
+		OpenApiSchema originalSchema = CreateArraySchema(CreateStringSchema());
+		originalSchema.Type |= JsonSchemaType.Null;
+		List<ValidationRule> rules = [new StringLengthRule("Items", minLength: 1, maxLength: 10)];
+
+		// Act
+		OpenApiSchema result = ValidationDocumentTransformer.CreateInlineSchemaWithAllValidation(
+			originalSchema,
+			rules,
+			typeAppendRulesToPropertyDescription: true,
+			appendRulesToPropertyDescription: true,
+			document);
+
+		// Assert
+		result.Type.ShouldNotBeNull().HasFlag(JsonSchemaType.Array).ShouldBeTrue();
+		result.Type.ShouldNotBeNull().HasFlag(JsonSchemaType.Null).ShouldBeTrue();
+		result.MinItems.ShouldBe(1);
+		result.MaxItems.ShouldBe(10);
+		result.MinLength.ShouldBeNull();
+		result.MaxLength.ShouldBeNull();
 	}
 
 	#endregion

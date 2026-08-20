@@ -25,6 +25,40 @@ public class OpenApiSchemaHelperTests
 
 	#endregion
 
+	#region SetPrimitiveTypeInfo Tests
+
+	[Theory]
+	[InlineData(typeof(int), JsonSchemaType.Integer)]
+	[InlineData(typeof(decimal), JsonSchemaType.Number)]
+	public void SetPrimitiveTypeInfo_NumericType_RemovesPattern(Type primitiveType, JsonSchemaType expectedType)
+	{
+		// Arrange
+		OpenApiSchema schema = new() { Pattern = "numeric parsing pattern" };
+
+		// Act
+		OpenApiSchemaHelper.SetPrimitiveTypeInfo(schema, primitiveType);
+
+		// Assert
+		schema.Type.ShouldBe(expectedType);
+		schema.Pattern.ShouldBeNull();
+	}
+
+	[Fact]
+	public void SetPrimitiveTypeInfo_StringType_PreservesPattern()
+	{
+		// Arrange
+		OpenApiSchema schema = new() { Pattern = "^[a-z]+$" };
+
+		// Act
+		OpenApiSchemaHelper.SetPrimitiveTypeInfo(schema, typeof(string));
+
+		// Assert
+		schema.Type.ShouldBe(JsonSchemaType.String);
+		schema.Pattern.ShouldBe("^[a-z]+$");
+	}
+
+	#endregion
+
 	#region CreatePrimitiveSchemaFromRefId Tests
 
 	[Theory]
@@ -135,8 +169,7 @@ public class OpenApiSchemaHelperTests
 		nullableSchema.OneOf[1].ShouldNotBeNull();
 		OpenApiSchema? marker = nullableSchema.OneOf[1] as OpenApiSchema;
 		marker.ShouldNotBeNull();
-		marker.Extensions.ShouldNotBeNull();
-		marker.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		marker.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Theory]
@@ -269,13 +302,7 @@ public class OpenApiSchemaHelperTests
 		};
 		OpenApiSchema enumSchema = new()
 		{
-			Extensions = new Dictionary<string, IOpenApiExtension>
-			{
-				[SchemaConstants.EnumExtension] = new JsonNodeExtension(new JsonArray
-				{
-					JsonValue.Create("A")!
-				})
-			}
+			Enum = [JsonValue.Create("A")!]
 		};
 		doc.Components.Schemas!["MyEnum"] = enumSchema;
 
@@ -372,7 +399,8 @@ public class OpenApiSchemaHelperTests
 
 		// Assert
 		schema.Extensions.ShouldNotBeNull();
-		schema.Extensions.ContainsKey(SchemaConstants.EnumExtension).ShouldBeTrue();
+		schema.Enum.ShouldNotBeNull();
+		schema.Enum.Select(value => value!.GetValue<long>()).ShouldBe([0L, 1L]);
 		schema.Extensions.ContainsKey(SchemaConstants.EnumVarNamesExtension).ShouldBeTrue();
 		schema.Extensions.ContainsKey(SchemaConstants.EnumDescriptionsExtension).ShouldBeTrue();
 		schema.Description.ShouldStartWith("Enum:");
@@ -580,19 +608,14 @@ public class OpenApiSchemaHelperTests
 	#region Nullable Schema Tests
 
 	[Fact]
-	public void CreateNullableMarker_CreatesSchemaWithNullableExtension()
+	public void CreateNullableMarker_CreatesNullSchema()
 	{
 		// Act
 		OpenApiSchema marker = OpenApiSchemaHelper.CreateNullableMarker();
 
 		// Assert
 		marker.ShouldNotBeNull();
-		marker.Extensions.ShouldNotBeNull();
-		marker.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
-
-		JsonNodeExtension? extension = marker.Extensions[SchemaConstants.NullableExtension] as JsonNodeExtension;
-		extension.ShouldNotBeNull();
-		extension!.Node.ShouldNotBeNull();
+		marker.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Fact]
@@ -611,8 +634,7 @@ public class OpenApiSchemaHelperTests
 
 		OpenApiSchema? nullMarker = wrappedSchema.OneOf[1] as OpenApiSchema;
 		nullMarker.ShouldNotBeNull();
-		nullMarker!.Extensions.ShouldNotBeNull();
-		nullMarker.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		nullMarker.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	#endregion
@@ -832,6 +854,32 @@ public class OpenApiSchemaHelperTests
 
 		// Assert
 		result.ShouldBeSameAs(headerRef);
+	}
+
+	[Fact]
+	public void ResolveReference_PathItemFoundInComponents_ReturnsResolved()
+	{
+		OpenApiDocument document = new();
+		IOpenApiPathItem resolvedPathItem = new OpenApiPathItem { Description = "Reusable path" };
+		Dictionary<string, IOpenApiPathItem> components = new() { ["Reusable"] = resolvedPathItem };
+		IOpenApiPathItem pathItemReference = new OpenApiPathItemReference("Reusable", document, null);
+
+		IOpenApiPathItem result = OpenApiSchemaHelper.ResolveReference(pathItemReference, components);
+
+		result.ShouldBeSameAs(resolvedPathItem);
+	}
+
+	[Fact]
+	public void ResolveReference_CallbackFoundInComponents_ReturnsResolved()
+	{
+		OpenApiDocument document = new();
+		IOpenApiCallback resolvedCallback = new OpenApiCallback();
+		Dictionary<string, IOpenApiCallback> components = new() { ["Reusable"] = resolvedCallback };
+		IOpenApiCallback callbackReference = new OpenApiCallbackReference("Reusable", document, null);
+
+		IOpenApiCallback result = OpenApiSchemaHelper.ResolveReference(callbackReference, components);
+
+		result.ShouldBeSameAs(resolvedCallback);
 	}
 
 	#endregion

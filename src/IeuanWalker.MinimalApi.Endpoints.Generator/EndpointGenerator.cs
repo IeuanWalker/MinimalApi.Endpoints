@@ -166,16 +166,21 @@ public class EndpointGenerator : IIncrementalGenerator
 
 		string? requestTypeName = null;
 		string? responseTypeName = null;
+		bool responseIsNullable = false;
 		foreach (INamedTypeSymbol interfaceType in typeSymbol.AllInterfaces)
 		{
 			if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithRequestAndResponseSymbol) && interfaceType.TypeArguments.Length == 2)
 			{
 				requestTypeName = interfaceType.TypeArguments[0].ToDisplayString();
-				responseTypeName = interfaceType.TypeArguments[1].ToDisplayString();
+				ITypeSymbol responseType = interfaceType.TypeArguments[1];
+				responseTypeName = responseType.ToDisplayString();
+				responseIsNullable = IsNullableResponse(responseType);
 			}
 			else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutRequestSymbol) && interfaceType.TypeArguments.Length == 1)
 			{
-				responseTypeName = interfaceType.TypeArguments[0].ToDisplayString();
+				ITypeSymbol responseType = interfaceType.TypeArguments[0];
+				responseTypeName = responseType.ToDisplayString();
+				responseIsNullable = IsNullableResponse(responseType);
 			}
 			else if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, endpointWithoutResponseSymbol) && interfaceType.TypeArguments.Length == 1)
 			{
@@ -195,7 +200,14 @@ public class EndpointGenerator : IIncrementalGenerator
 			typeDeclaration.DontValidate(),
 			responseTypeName,
 			location,
-			diagnostics);
+			diagnostics,
+			responseIsNullable);
+	}
+
+	static bool IsNullableResponse(ITypeSymbol responseType)
+	{
+		return responseType.NullableAnnotation == NullableAnnotation.Annotated ||
+			responseType is INamedTypeSymbol namedType && namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
 	}
 
 	static void Execute(ImmutableArray<TypeInfo?> typeInfos, string assemblyName, SourceProductionContext context)

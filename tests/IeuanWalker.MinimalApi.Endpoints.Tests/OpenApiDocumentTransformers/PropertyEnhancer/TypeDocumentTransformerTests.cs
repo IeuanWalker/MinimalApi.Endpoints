@@ -94,9 +94,7 @@ public class TypeDocumentTransformerTests
 
 		OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
 		second.ShouldNotBeNull();
-		second.Type.HasValue.ShouldBeFalse();
-		second.Extensions.ShouldNotBeNull();
-		second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		second.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Fact]
@@ -160,12 +158,10 @@ public class TypeDocumentTransformerTests
 		firstItems.ShouldNotBeNull();
 		firstItems.Type.ShouldBe(JsonSchemaType.String);
 
-		// Second element should be the nullable marker (no Type, but has nullable extension)
+		// Second element should be the null schema
 		OpenApiSchema? second = valuesSchema.OneOf[1] as OpenApiSchema;
 		second.ShouldNotBeNull();
-		second.Type.HasValue.ShouldBeFalse();
-		second.Extensions.ShouldNotBeNull();
-		second.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		second.Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Fact]
@@ -1006,7 +1002,7 @@ public class TypeDocumentTransformerTests
 		TypeDocumentTransformer transformer = new();
 
 		// Property schema has OneOf: [ nullable marker, array ]
-		OpenApiSchema nullableMarker = new();
+		OpenApiSchema nullableMarker = OpenApiSchemaHelper.CreateNullableMarker();
 		OpenApiSchema arraySchema = new() { Type = JsonSchemaType.Array };
 
 		OpenApiSchema propertySchema = new()
@@ -1053,10 +1049,10 @@ public class TypeDocumentTransformerTests
 		OpenApiSchema vs = (OpenApiSchema)valuesSchema;
 		vs.OneOf.ShouldNotBeNull();
 		vs.OneOf.Count.ShouldBe(2);
-		// First element is the nullable marker (no Type)
+		// First element is the null schema
 		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
 		first.ShouldNotBeNull();
-		first.Type.HasValue.ShouldBeFalse();
+		first.Type.ShouldBe(JsonSchemaType.Null);
 		// Second element is the array schema
 		OpenApiSchema? second = vs.OneOf[1] as OpenApiSchema;
 		second.ShouldNotBeNull();
@@ -1131,9 +1127,7 @@ public class TypeDocumentTransformerTests
 		// First element should be the nullable marker
 		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
 		first.ShouldNotBeNull();
-		first.Type.HasValue.ShouldBeFalse();
-		first.Extensions.ShouldNotBeNull();
-		first.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		first.Type.ShouldBe(JsonSchemaType.Null);
 
 		// Second element should still be present
 		// The key verification is that the early-return code preserved the OneOf structure
@@ -1207,9 +1201,7 @@ public class TypeDocumentTransformerTests
 		// First element should be the nullable marker
 		OpenApiSchema? first = vs.OneOf[0] as OpenApiSchema;
 		first.ShouldNotBeNull();
-		first.Type.HasValue.ShouldBeFalse();
-		first.Extensions.ShouldNotBeNull();
-		first.Extensions.ContainsKey(SchemaConstants.NullableExtension).ShouldBeTrue();
+		first.Type.ShouldBe(JsonSchemaType.Null);
 
 		// Second element should be the array schema
 		OpenApiSchema? second = vs.OneOf[1] as OpenApiSchema;
@@ -1220,6 +1212,130 @@ public class TypeDocumentTransformerTests
 	public class TestArrayHolder
 	{
 		public string[] Values { get; set; } = null!;
+	}
+
+	[Fact]
+	public async Task TransformAsync_AppliesClrTypesAndRemovesStringPatternsFromNumericSchemas()
+	{
+		// Arrange
+		TypeDocumentTransformer transformer = new();
+		const string numericPattern = "^-?(?:0|[1-9]\\d*)$";
+		const string decimalPattern = "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$";
+		const string textPattern = "^[a-z]+$";
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					[typeof(TypeDocumentTransformerPrimitiveHolder).FullName!] = new OpenApiSchema
+					{
+						Properties = new Dictionary<string, IOpenApiSchema>
+						{
+							[nameof(TypeDocumentTransformerPrimitiveHolder.Count)] = new OpenApiSchema
+							{
+								Pattern = numericPattern,
+								Format = "int32"
+							},
+							[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalCount)] = new OpenApiSchema
+							{
+								Pattern = numericPattern,
+								Format = "int32"
+							},
+							[nameof(TypeDocumentTransformerPrimitiveHolder.Amount)] = new OpenApiSchema
+							{
+								Pattern = decimalPattern,
+								Format = "double"
+							},
+							[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalAmount)] = new OpenApiSchema
+							{
+								Pattern = decimalPattern,
+								Format = "double"
+							},
+							[nameof(TypeDocumentTransformerPrimitiveHolder.Values)] = new OpenApiSchema
+							{
+								Type = JsonSchemaType.Array,
+								Items = new OpenApiSchema
+								{
+									Pattern = numericPattern,
+									Format = "int32"
+								}
+							},
+							[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalValues)] = new OpenApiSchema
+							{
+								Type = JsonSchemaType.Array | JsonSchemaType.Null,
+								Items = new OpenApiSchema
+								{
+									Pattern = numericPattern,
+									Format = "int32"
+								}
+							},
+							[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalText)] = new OpenApiSchema
+							{
+								Type = JsonSchemaType.String,
+								Pattern = textPattern
+							}
+						}
+					}
+				}
+			}
+		};
+
+		// Act
+		await transformer.TransformAsync(document, CreateMockContext(), CancellationToken.None);
+
+		// Assert
+		OpenApiSchema component = document.Components.Schemas[typeof(TypeDocumentTransformerPrimitiveHolder).FullName!]
+			.ShouldBeOfType<OpenApiSchema>();
+		OpenApiSchema count = component.Properties![nameof(TypeDocumentTransformerPrimitiveHolder.Count)].ShouldBeOfType<OpenApiSchema>();
+		count.Type.ShouldBe(JsonSchemaType.Integer);
+		count.Format.ShouldBe("int32");
+		count.Pattern.ShouldBeNull();
+
+		OpenApiSchema optionalCount = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalCount)].ShouldBeOfType<OpenApiSchema>();
+		optionalCount.OneOf.ShouldNotBeNull();
+		optionalCount.OneOf.Count.ShouldBe(2);
+		OpenApiSchema valueSchema = optionalCount.OneOf[0].ShouldBeOfType<OpenApiSchema>();
+		valueSchema.Type.ShouldBe(JsonSchemaType.Integer);
+		valueSchema.Format.ShouldBe("int32");
+		valueSchema.Pattern.ShouldBeNull();
+		optionalCount.OneOf[1].ShouldBeOfType<OpenApiSchema>().Type.ShouldBe(JsonSchemaType.Null);
+
+		OpenApiSchema amount = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.Amount)].ShouldBeOfType<OpenApiSchema>();
+		amount.Type.ShouldBe(JsonSchemaType.Number);
+		amount.Format.ShouldBeNull();
+		amount.Pattern.ShouldBeNull();
+
+		OpenApiSchema optionalAmount = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalAmount)].ShouldBeOfType<OpenApiSchema>();
+		optionalAmount.OneOf.ShouldNotBeNull();
+		optionalAmount.OneOf.Count.ShouldBe(2);
+		OpenApiSchema optionalAmountValue = optionalAmount.OneOf[0].ShouldBeOfType<OpenApiSchema>();
+		optionalAmountValue.Type.ShouldBe(JsonSchemaType.Number);
+		optionalAmountValue.Format.ShouldBeNull();
+		optionalAmountValue.Pattern.ShouldBeNull();
+		optionalAmount.OneOf[1].ShouldBeOfType<OpenApiSchema>().Type.ShouldBe(JsonSchemaType.Null);
+
+		OpenApiSchema values = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.Values)].ShouldBeOfType<OpenApiSchema>();
+		values.Type.ShouldBe(JsonSchemaType.Array);
+		OpenApiSchema itemSchema = values.Items.ShouldBeOfType<OpenApiSchema>();
+		itemSchema.Type.ShouldBe(JsonSchemaType.Integer);
+		itemSchema.Format.ShouldBe("int32");
+		itemSchema.Pattern.ShouldBeNull();
+
+		OpenApiSchema optionalValues = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalValues)].ShouldBeOfType<OpenApiSchema>();
+		optionalValues.Type.ShouldNotBeNull().HasFlag(JsonSchemaType.Array).ShouldBeTrue();
+		optionalValues.Type.ShouldNotBeNull().HasFlag(JsonSchemaType.Null).ShouldBeTrue();
+		OpenApiSchema optionalValueItem = optionalValues.Items.ShouldBeOfType<OpenApiSchema>();
+		optionalValueItem.Type.ShouldBe(JsonSchemaType.Integer);
+		optionalValueItem.Format.ShouldBe("int32");
+		optionalValueItem.Pattern.ShouldBeNull();
+
+		OpenApiSchema optionalText = component.Properties[nameof(TypeDocumentTransformerPrimitiveHolder.OptionalText)].ShouldBeOfType<OpenApiSchema>();
+		optionalText.OneOf.ShouldNotBeNull();
+		OpenApiSchema textSchema = optionalText.OneOf[0].ShouldBeOfType<OpenApiSchema>();
+		textSchema.Type.ShouldBe(JsonSchemaType.String);
+		textSchema.Pattern.ShouldBe(textPattern);
+		optionalText.OneOf[1].ShouldBeOfType<OpenApiSchema>().Type.ShouldBe(JsonSchemaType.Null);
 	}
 
 	[Theory]
@@ -2600,4 +2716,15 @@ public class TypeDocumentTransformerTests
 	}
 
 	#endregion
+}
+
+public class TypeDocumentTransformerPrimitiveHolder
+{
+	public int Count { get; set; }
+	public int? OptionalCount { get; set; }
+	public decimal Amount { get; set; }
+	public decimal? OptionalAmount { get; set; }
+	public List<int> Values { get; set; } = [];
+	public List<int>? OptionalValues { get; set; }
+	public string? OptionalText { get; set; }
 }

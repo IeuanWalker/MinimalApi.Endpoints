@@ -6,8 +6,6 @@ namespace IeuanWalker.MinimalApi.Endpoints.OpenApiDocumentTransformers.PropertyE
 static class SchemaConstants
 {
 	// OpenAPI extension names
-	public const string NullableExtension = "nullable";
-	public const string EnumExtension = "enum";
 	public const string EnumVarNamesExtension = "x-enum-varnames";
 	public const string EnumDescriptionsExtension = "x-enum-descriptions";
 

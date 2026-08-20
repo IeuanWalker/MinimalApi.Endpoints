@@ -33,12 +33,13 @@ partial class ValidationDocumentTransformer
 					continue;
 				}
 
-				if (!TryGetValidatorInterface(type, out Type? validatorInterface))
+				if (!TryGetValidatorInterface(type, out Type? validatorInterface) ||
+					validatorInterface?.AssemblyQualifiedName is null)
 				{
 					continue;
 				}
 
-				object? validatorInstance = context.ApplicationServices.GetService(validatorInterface!);
+				object? validatorInstance = context.ApplicationServices.GetService(validatorInterface);
 				if (validatorInstance is IValidator validator)
 				{
 					validators.Add(validator);
@@ -403,7 +404,7 @@ partial class ValidationDocumentTransformer
 				}
 
 				// These are dynamic values that can't be determined at design time
-				message = message.Replace("{Digits} digits and {ActualScale} decimals were found.", string.Empty);
+				message = message.Replace("{Digits} digits and {ActualScale} decimals were found.", string.Empty).TrimEnd();
 			}
 		}
 #pragma warning disable CA1031

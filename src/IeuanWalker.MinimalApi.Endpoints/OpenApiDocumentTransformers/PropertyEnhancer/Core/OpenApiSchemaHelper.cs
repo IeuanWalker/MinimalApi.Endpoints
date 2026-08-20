@@ -174,7 +174,7 @@ static class OpenApiSchemaHelper
 	}
 
 	/// <summary>
-	/// Creates a nullable wrapper around a schema using oneOf pattern.
+	/// Creates a nullable wrapper around a schema using a oneOf pattern.
 	/// </summary>
 	public static OpenApiSchema WrapAsNullable(OpenApiSchema schema)
 	{
@@ -183,13 +183,7 @@ static class OpenApiSchemaHelper
 			OneOf =
 			[
 				schema,
-				new OpenApiSchema
-				{
-					Extensions = new Dictionary<string, IOpenApiExtension>
-					{
-						[SchemaConstants.NullableExtension] = new JsonNodeExtension(JsonValue.Create(true)!)
-					}
-				}
+				CreateNullableMarker()
 			]
 		};
 	}
@@ -201,10 +195,7 @@ static class OpenApiSchemaHelper
 	{
 		return new OpenApiSchema
 		{
-			Extensions = new Dictionary<string, IOpenApiExtension>
-			{
-				[SchemaConstants.NullableExtension] = new JsonNodeExtension(JsonValue.Create(true)!)
-			}
+			Type = JsonSchemaType.Null
 		};
 	}
 
@@ -241,12 +232,7 @@ static class OpenApiSchemaHelper
 
 		if (TryAsOpenApiSchema(referencedSchema, out OpenApiSchema? enumSchema))
 		{
-			if (enumSchema!.Extensions?.ContainsKey(SchemaConstants.EnumExtension) == true)
-			{
-				return true;
-			}
-
-			if (enumSchema.Enum is { Count: > 0 })
+			if (enumSchema!.Enum is { Count: > 0 })
 			{
 				return true;
 			}
@@ -357,7 +343,7 @@ static class OpenApiSchemaHelper
 		Array enumValues = Enum.GetValues(enumType);
 		string[] enumNames = Enum.GetNames(enumType);
 
-		JsonArray valueArray = [];
+		List<JsonNode> values = [];
 		JsonArray varNamesArray = [];
 		JsonObject? descObj = null;
 
@@ -368,12 +354,12 @@ static class OpenApiSchemaHelper
 
 			if (forStringSchema)
 			{
-				valueArray.Add(JsonValue.Create(enumName)!);
+				values.Add(JsonValue.Create(enumName)!);
 			}
 			else
 			{
 				long numericValue = Convert.ToInt64(enumValue);
-				valueArray.Add(JsonValue.Create(numericValue)!);
+				values.Add(JsonValue.Create(numericValue)!);
 			}
 			varNamesArray.Add(JsonValue.Create(enumName)!);
 
@@ -389,8 +375,8 @@ static class OpenApiSchemaHelper
 			}
 		}
 
+		schema.Enum = values;
 		schema.Extensions ??= new Dictionary<string, IOpenApiExtension>();
-		schema.Extensions[SchemaConstants.EnumExtension] = new JsonNodeExtension(valueArray);
 
 		// Only add varnames for non-string schemas (where values are integers)
 		if (!forStringSchema)
@@ -440,6 +426,8 @@ static class OpenApiSchemaHelper
 			OpenApiRequestBodyReference { Reference.Id: { Length: > 0 } id } => id,
 			OpenApiResponseReference { Reference.Id: { Length: > 0 } id } => id,
 			OpenApiHeaderReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiCallbackReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiPathItemReference { Reference.Id: { Length: > 0 } id } => id,
 			_ => null
 		};
 
@@ -466,7 +454,7 @@ static class OpenApiSchemaHelper
 			   genericDef == typeof(IReadOnlyCollection<>);
 	}
 
-	static void SetPrimitiveTypeInfo(OpenApiSchema schema, Type actualType)
+	internal static void SetPrimitiveTypeInfo(OpenApiSchema schema, Type actualType)
 	{
 		if (actualType == typeof(string))
 		{
@@ -490,6 +478,7 @@ static class OpenApiSchemaHelper
 		else if (actualType == typeof(decimal))
 		{
 			schema.Type = JsonSchemaType.Number;
+			schema.Format = null;
 		}
 		else if (actualType == typeof(double))
 		{
@@ -543,6 +532,16 @@ static class OpenApiSchemaHelper
 				Type = JsonSchemaType.String,
 				Format = SchemaConstants.FormatBinary
 			};
+		}
+
+		// ASP.NET can attach a lexical parsing pattern to inline primitive schemas before
+		// their CLR type is applied. JSON Schema's pattern keyword only constrains strings,
+		// so retaining it on an integer or number schema is ineffective and misleading.
+		if (schema.Type is JsonSchemaType schemaType &&
+			(schemaType.HasFlag(JsonSchemaType.Integer) || schemaType.HasFlag(JsonSchemaType.Number)) &&
+			!schemaType.HasFlag(JsonSchemaType.String))
+		{
+			schema.Pattern = null;
 		}
 	}
 

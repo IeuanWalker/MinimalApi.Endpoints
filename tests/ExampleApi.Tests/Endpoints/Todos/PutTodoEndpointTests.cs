@@ -36,7 +36,7 @@ public class PutTodoEndpointTests
 
 		await todoStore
 			.Received(1)
-			.UpdateAsync(5, Arg.Is<Todo>(t => t.Title == "Updated" && t.Description == "Updated Desc" && t.IsCompleted), Arg.Any<CancellationToken>());
+			.UpdateAsync(5, Arg.Is<Todo>(t => t!.Title == "Updated" && t.Description == "Updated Desc" && t.IsCompleted), Arg.Any<CancellationToken>());
 	}
 
 	[Fact]

@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
-using ExampleApi.Infrastructure;
+using IeuanWalker.MinimalApi.Endpoints;
+using Microsoft.AspNetCore.OpenApi;
+using Microsoft.OpenApi;
 
 namespace ExampleApi.Infrastructure;
 
@@ -13,7 +15,6 @@ public static class VersioningConfiguration
 		builder.Services
 			.AddApiVersioning(options =>
 			{
-				options.DefaultApiVersion = new ApiVersion(1, 0);
 				options.ReportApiVersions = true;
 				options.AssumeDefaultVersionWhenUnspecified = true;
 			})
@@ -21,6 +22,26 @@ public static class VersioningConfiguration
 			{
 				config.GroupNameFormat = "'v'VVV";
 				config.SubstituteApiVersionInUrl = true;
+			})
+			.AddOpenApi(options =>
+			{
+				options.Document.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+				options.Document.CreateSchemaReferenceId = jsonTypeInfo =>
+					OpenApiOptions.CreateDefaultSchemaReferenceId(jsonTypeInfo) is null
+						? null
+						: jsonTypeInfo.Type.FullName?.Replace('+', '.');
+				options.Document.AddDocumentTransformer((document, _, _) =>
+				{
+					document.Info = new OpenApiInfo
+					{
+						Title = "Test API",
+						Version = options.Description.ApiVersion.ToString(),
+						Description = "Example API demonstrating MinimalApi.Endpoints."
+					};
+
+					return Task.CompletedTask;
+				});
+				options.Document.EnhancePropertiesAndValidation();
 			});
 
 		return builder;

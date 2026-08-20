@@ -8,6 +8,7 @@
       openapi: 3.0.4,
       info: {
         title: Test API,
+        description: Example API demonstrating MinimalApi.Endpoints.,
         version: 1
       },
       servers: [
@@ -59,14 +60,14 @@
                 in: query,
                 required: true,
                 schema: {
-                  type: string,
-                  description: Enum: Low, Medium, High, Critical,
                   enum: [
                     Low,
                     Medium,
                     High,
                     Critical
                   ],
+                  type: string,
+                  description: Enum: Low, Medium, High, Critical,
                   x-enum-descriptions: {
                     Low: Low priority task,
                     Medium: Medium priority task,
@@ -79,14 +80,14 @@
                 name: NullableEnumAsString,
                 in: query,
                 schema: {
-                  type: string,
-                  description: Enum: Low, Medium, High, Critical,
                   enum: [
                     Low,
                     Medium,
                     High,
                     Critical
                   ],
+                  type: string,
+                  description: Enum: Low, Medium, High, Critical,
                   x-enum-descriptions: {
                     Low: Low priority task,
                     Medium: Medium priority task,
@@ -100,15 +101,15 @@
                 in: query,
                 required: true,
                 schema: {
-                  type: integer,
-                  description: Enum: Low, Medium, High, Critical,
-                  format: int32,
                   enum: [
                     0,
                     1,
                     2,
                     3
                   ],
+                  type: integer,
+                  description: Enum: Low, Medium, High, Critical,
+                  format: int32,
                   x-enum-varnames: [
                     Low,
                     Medium,
@@ -127,34 +128,29 @@
                 name: NullableEnumAsInt,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: integer,
-                      description: Enum: Low, Medium, High, Critical,
-                      format: int32,
-                      enum: [
-                        0,
-                        1,
-                        2,
-                        3
-                      ],
-                      x-enum-varnames: [
-                        Low,
-                        Medium,
-                        High,
-                        Critical
-                      ],
-                      x-enum-descriptions: {
-                        Low: Low priority task,
-                        Medium: Medium priority task,
-                        High: High priority task,
-                        Critical: Critical priority task requiring immediate attention
-                      }
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  enum: [
+                    0,
+                    1,
+                    2,
+                    3,
+                    null
+                  ],
+                  type: integer,
+                  description: Enum: Low, Medium, High, Critical,
+                  format: int32,
+                  nullable: true,
+                  x-enum-varnames: [
+                    Low,
+                    Medium,
+                    High,
+                    Critical
+                  ],
+                  x-enum-descriptions: {
+                    Low: Low priority task,
+                    Medium: Medium priority task,
+                    High: High priority task,
+                    Critical: Critical priority task requiring immediate attention
+                  }
                 }
               }
             ],
@@ -168,6 +164,9 @@
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           },
@@ -184,7 +183,8 @@
                     $ref: #/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               400: {
@@ -196,6 +196,9 @@
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -210,7 +213,11 @@
               {
                 name: api-version,
                 in: query,
+                description: The requested API version,
                 schema: {
+                  enum: [
+                    1.0
+                  ],
                   type: string
                 }
               }
@@ -383,7 +390,8 @@
                     $ref: #/components/schemas/ExampleApi.Endpoints.Todos.Post.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -525,7 +533,16 @@
                 content: {
                   application/json: {
                     schema: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.Todos.Patch.ResponseModel
+                      oneOf: [
+                        {
+                          $ref: #/components/schemas/ExampleApi.Endpoints.Todos.Patch.ResponseModel
+                        },
+                        {
+                          enum: [
+                            null
+                          ]
+                        }
+                      ]
                     }
                   }
                 }
@@ -619,15 +636,9 @@
                 name: NullableIntValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: integer,
-                      format: int32
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: integer,
+                  format: int32,
+                  nullable: true
                 }
               },
               {
@@ -643,15 +654,9 @@
                 name: NullableLongValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: integer,
-                      format: int64
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: integer,
+                  format: int64,
+                  nullable: true
                 }
               },
               {
@@ -666,14 +671,8 @@
                 name: NullableDecimalValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: number
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: number,
+                  nullable: true
                 }
               },
               {
@@ -689,15 +688,9 @@
                 name: NullableDoubleValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: number,
-                      format: double
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: number,
+                  format: double,
+                  nullable: true
                 }
               },
               {
@@ -713,15 +706,9 @@
                 name: NullableFloatValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: number,
-                      format: float
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: number,
+                  format: float,
+                  nullable: true
                 }
               },
               {
@@ -736,14 +723,8 @@
                 name: NullableBoolValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: boolean
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: boolean,
+                  nullable: true
                 }
               },
               {
@@ -759,15 +740,9 @@
                 name: NullableDateTimeValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: string,
-                      format: date-time
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: string,
+                  format: date-time,
+                  nullable: true
                 }
               },
               {
@@ -783,15 +758,9 @@
                 name: NullableDateOnlyValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: string,
-                      format: date
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: string,
+                  format: date,
+                  nullable: true
                 }
               },
               {
@@ -807,15 +776,9 @@
                 name: NullableTimeOnlyValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: string,
-                      format: time
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: string,
+                  format: time,
+                  nullable: true
                 }
               },
               {
@@ -831,15 +794,9 @@
                 name: NullableGuidValue,
                 in: query,
                 schema: {
-                  oneOf: [
-                    {
-                      type: string,
-                      format: uuid
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+                  type: string,
+                  format: uuid,
+                  nullable: true
                 }
               },
               {
@@ -944,7 +901,8 @@
                     $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -1033,20 +991,13 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  oneOf: [
-                    {
-                      maximum: 25,
-                      minimum: 10,
-                      type: number,
-                      description:
+                  maximum: 25,
+                  minimum: 10,
+                  type: number,
+                  description:
 Validation rules:
 - Is required
 - Must be >= 10 and <= 25
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
                 }
               },
               {
@@ -1284,7 +1235,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  minLength: 1,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: string
@@ -1299,7 +1250,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
+                  maxItems: 10,
                   type: array,
                   items: {
                     type: string
@@ -1314,8 +1265,8 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
-                  minLength: 1,
+                  maxItems: 10,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: string
@@ -1331,7 +1282,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  minLength: 1,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: integer,
@@ -1347,7 +1298,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
+                  maxItems: 10,
                   type: array,
                   items: {
                     type: integer,
@@ -1363,8 +1314,8 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
-                  minLength: 1,
+                  maxItems: 10,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: integer,
@@ -1470,6 +1421,9 @@ Validation rules:
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -1505,6 +1459,9 @@ Validation rules:
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -1763,14 +1720,12 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  oneOf: [
-                    {
-                      maximum: 100,
-                      exclusiveMaximum: true,
-                      minimum: 0,
-                      exclusiveMinimum: true,
-                      type: number,
-                      description:
+                  maximum: 100,
+                  exclusiveMaximum: true,
+                  minimum: 0,
+                  exclusiveMinimum: true,
+                  type: number,
+                  description:
 Validation rules:
 - Is required
 - Must not be equal to '10'.
@@ -1785,12 +1740,7 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals. 
-                    },
-                    {
-                      nullable: true
-                    }
-                  ]
+- Must not be more than 4 digits in total, with allowance for 2 decimals.
                 }
               },
               {
@@ -1816,12 +1766,12 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  type: string,
-                  description: Enum: Success, Failure,
                   enum: [
                     Success,
                     Failure
-                  ]
+                  ],
+                  type: string,
+                  description: Enum: Success, Failure
                 }
               },
               {
@@ -1829,13 +1779,13 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  type: integer,
-                  description: Enum: Success, Failure,
-                  format: int32,
                   enum: [
                     0,
                     1
                   ],
+                  type: integer,
+                  description: Enum: Success, Failure,
+                  format: int32,
                   x-enum-varnames: [
                     Success,
                     Failure
@@ -1861,6 +1811,9 @@ Validation rules:
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -1893,7 +1846,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -1916,7 +1870,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               400: {
@@ -1928,6 +1883,9 @@ Validation rules:
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -1964,6 +1922,9 @@ Validation rules:
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -1982,7 +1943,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationEdgeCases.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               400: {
@@ -1994,6 +1956,9 @@ Validation rules:
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -2012,7 +1977,8 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.RequestModel
                   }
                 }
-              }
+              },
+              required: true
             },
             responses: {
               200: {
@@ -2053,6 +2019,9 @@ Validation rules:
                     }
                   }
                 }
+              },
+              200: {
+                description: OK
               }
             }
           }
@@ -2061,14 +2030,14 @@ Validation rules:
       components: {
         schemas: {
           ExampleApi.Endpoints.Enum.GetFromQuery.PriorityEnum: {
-            type: integer,
-            description: Enum: Low, Medium, High, Critical,
             enum: [
               0,
               1,
               2,
               3
             ],
+            type: integer,
+            description: Enum: Low, Medium, High, Critical,
             x-enum-varnames: [
               Low,
               Medium,
@@ -2083,14 +2052,14 @@ Validation rules:
             }
           },
           ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum: {
-            type: integer,
-            description: Enum: Low, Medium, High, Critical,
             enum: [
               0,
               1,
               2,
               3
             ],
+            type: integer,
+            description: Enum: Low, Medium, High, Critical,
             x-enum-varnames: [
               Low,
               Medium,
@@ -2116,7 +2085,9 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum
                   },
                   {
-                    nullable: true
+                    enum: [
+                      null
+                    ]
                   }
                 ]
               },
@@ -2129,19 +2100,21 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.PriorityEnum
                   },
                   {
-                    nullable: true
+                    enum: [
+                      null
+                    ]
                   }
                 ]
               },
               enumAsString: {
-                type: string,
-                description: Enum: Low, Medium, High, Critical,
                 enum: [
                   Low,
                   Medium,
                   High,
                   Critical
                 ],
+                type: string,
+                description: Enum: Low, Medium, High, Critical,
                 x-enum-descriptions: {
                   Low: Low priority task,
                   Medium: Medium priority task,
@@ -2150,38 +2123,33 @@ Validation rules:
                 }
               },
               nullableEnumAsString: {
-                oneOf: [
-                  {
-                    type: string,
-                    description: Enum: Low, Medium, High, Critical,
-                    enum: [
-                      Low,
-                      Medium,
-                      High,
-                      Critical
-                    ],
-                    x-enum-descriptions: {
-                      Low: Low priority task,
-                      Medium: Medium priority task,
-                      High: High priority task,
-                      Critical: Critical priority task requiring immediate attention
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                enum: [
+                  Low,
+                  Medium,
+                  High,
+                  Critical,
+                  null
+                ],
+                type: string,
+                description: Enum: Low, Medium, High, Critical,
+                nullable: true,
+                x-enum-descriptions: {
+                  Low: Low priority task,
+                  Medium: Medium priority task,
+                  High: High priority task,
+                  Critical: Critical priority task requiring immediate attention
+                }
               },
               enumAsInt: {
-                type: integer,
-                description: Enum: Low, Medium, High, Critical,
-                format: int32,
                 enum: [
                   0,
                   1,
                   2,
                   3
                 ],
+                type: integer,
+                description: Enum: Low, Medium, High, Critical,
+                format: int32,
                 x-enum-varnames: [
                   Low,
                   Medium,
@@ -2196,34 +2164,29 @@ Validation rules:
                 }
               },
               nullableEnumAsInt: {
-                oneOf: [
-                  {
-                    type: integer,
-                    description: Enum: Low, Medium, High, Critical,
-                    format: int32,
-                    enum: [
-                      0,
-                      1,
-                      2,
-                      3
-                    ],
-                    x-enum-varnames: [
-                      Low,
-                      Medium,
-                      High,
-                      Critical
-                    ],
-                    x-enum-descriptions: {
-                      Low: Low priority task,
-                      Medium: Medium priority task,
-                      High: High priority task,
-                      Critical: Critical priority task requiring immediate attention
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                enum: [
+                  0,
+                  1,
+                  2,
+                  3,
+                  null
+                ],
+                type: integer,
+                description: Enum: Low, Medium, High, Critical,
+                format: int32,
+                nullable: true,
+                x-enum-varnames: [
+                  Low,
+                  Medium,
+                  High,
+                  Critical
+                ],
+                x-enum-descriptions: {
+                  Low: Low priority task,
+                  Medium: Medium priority task,
+                  High: High priority task,
+                  Critical: Critical priority task requiring immediate attention
+                }
               },
               nullableOnlyEnumTest: {
                 oneOf: [
@@ -2231,19 +2194,21 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.Enum.PostFromBody.TestEnum
                   },
                   {
-                    nullable: true
+                    enum: [
+                      null
+                    ]
                   }
                 ]
               }
             }
           },
           ExampleApi.Endpoints.Enum.PostFromBody.TestEnum: {
-            type: integer,
-            description: Enum: Test1, Test2,
             enum: [
               0,
               1
             ],
+            type: integer,
+            description: Enum: Test1, Test2,
             x-enum-varnames: [
               Test1,
               Test2
@@ -2407,15 +2372,9 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               }
             }
           },
@@ -2440,15 +2399,9 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               }
             }
           },
@@ -2456,34 +2409,20 @@ Validation rules:
             type: object,
             properties: {
               title: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                maxLength: 200,
+                minLength: 1,
+                type: string,
+                nullable: true
               },
               description: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                maxLength: 1000,
+                minLength: 0,
+                type: string,
+                nullable: true
               },
               isCompleted: {
-                oneOf: [
-                  {
-                    type: boolean
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: boolean,
+                nullable: true
               }
             }
           },
@@ -2508,15 +2447,9 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               }
             }
           },
@@ -2568,15 +2501,9 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               }
             }
           },
@@ -2628,15 +2555,9 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               }
             }
           },
@@ -2651,7 +2572,10 @@ Validation rules:
                 format: int32
               },
               receivedValues: {
-                type: string
+                type: object,
+                additionalProperties: {
+                  type: string
+                }
               }
             }
           },
@@ -2665,205 +2589,121 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int64
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int64,
+                nullable: true
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                oneOf: [
-                  {
-                    type: number
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                nullable: true
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: double,
+                nullable: true
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: float
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: float,
+                nullable: true
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                oneOf: [
-                  {
-                    type: boolean
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: boolean,
+                nullable: true
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date,
+                nullable: true
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: time,
+                nullable: true
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uuid
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uuid,
+                nullable: true
               },
               stringList: {
                 type: array,
@@ -2872,17 +2712,11 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intList: {
                 type: array,
@@ -2892,18 +2726,12 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               doubleList: {
                 type: array,
@@ -2913,18 +2741,12 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: number,
-                      format: double
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: number,
+                  format: double
+                },
+                nullable: true
               },
               intArray: {
                 type: array,
@@ -2934,18 +2756,12 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               readOnlyStringList: {
                 type: array,
@@ -2954,17 +2770,11 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intCollection: {
                 type: array,
@@ -2974,18 +2784,12 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               singleFile: {
                 type: string,
@@ -3006,43 +2810,25 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: binary
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: binary,
+                nullable: true
               },
               readOnlyList1Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               readOnlyList2Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               fileCollectionList: {
                 type: array,
@@ -3057,22 +2843,18 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
                   },
                   {
-                    nullable: true
+                    enum: [
+                      null
+                    ]
                   }
                 ]
               },
               nestedObjectList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
+                },
+                nullable: true
               },
               uriArray: {
                 type: array,
@@ -3082,33 +2864,21 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: uri
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: uri
+                },
+                nullable: true
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uri,
+                nullable: true
               }
             }
           },
@@ -3145,205 +2915,121 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int64
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int64,
+                nullable: true
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                oneOf: [
-                  {
-                    type: number
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                nullable: true
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: double,
+                nullable: true
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: float
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: float,
+                nullable: true
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                oneOf: [
-                  {
-                    type: boolean
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: boolean,
+                nullable: true
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date,
+                nullable: true
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: time,
+                nullable: true
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uuid
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uuid,
+                nullable: true
               },
               stringList: {
                 type: array,
@@ -3352,17 +3038,11 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intList: {
                 type: array,
@@ -3372,18 +3052,12 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               doubleList: {
                 type: array,
@@ -3393,18 +3067,12 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: number,
-                      format: double
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: number,
+                  format: double
+                },
+                nullable: true
               },
               intArray: {
                 type: array,
@@ -3414,18 +3082,12 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               readOnlyStringList: {
                 type: array,
@@ -3434,17 +3096,11 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intCollection: {
                 type: array,
@@ -3454,18 +3110,12 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               singleFile: {
                 type: string,
@@ -3486,43 +3136,25 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: binary
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: binary,
+                nullable: true
               },
               readOnlyList1Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               readOnlyList2Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               fileCollectionList: {
                 type: array,
@@ -3537,22 +3169,18 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
                   },
                   {
-                    nullable: true
+                    enum: [
+                      null
+                    ]
                   }
                 ]
               },
               nestedObjectList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
+                },
+                nullable: true
               },
               uriArray: {
                 type: array,
@@ -3562,33 +3190,21 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: uri
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: uri
+                },
+                nullable: true
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uri,
+                nullable: true
               }
             }
           },
@@ -3614,205 +3230,121 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int64
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int64,
+                nullable: true
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                oneOf: [
-                  {
-                    type: number
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                nullable: true
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: double,
+                nullable: true
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: float
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: float,
+                nullable: true
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                oneOf: [
-                  {
-                    type: boolean
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: boolean,
+                nullable: true
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date,
+                nullable: true
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: time,
+                nullable: true
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uuid
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uuid,
+                nullable: true
               },
               stringList: {
                 type: array,
@@ -3821,17 +3353,11 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intList: {
                 type: array,
@@ -3841,18 +3367,12 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               doubleList: {
                 type: array,
@@ -3862,18 +3382,12 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: number,
-                      format: double
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: number,
+                  format: double
+                },
+                nullable: true
               },
               intArray: {
                 type: array,
@@ -3883,18 +3397,12 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               readOnlyStringList: {
                 type: array,
@@ -3903,17 +3411,11 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intCollection: {
                 type: array,
@@ -3923,18 +3425,12 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               singleFile: {
                 type: string,
@@ -3955,43 +3451,25 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: binary
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: binary,
+                nullable: true
               },
               readOnlyList1Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               readOnlyList2Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               fileCollectionList: {
                 type: array,
@@ -4006,22 +3484,18 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
                   },
                   {
-                    nullable: true
+                    enum: [
+                      null
+                    ]
                   }
                 ]
               },
               nestedObjectList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
+                },
+                nullable: true
               },
               uriArray: {
                 type: array,
@@ -4031,33 +3505,21 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: uri
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: uri
+                },
+                nullable: true
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uri,
+                nullable: true
               }
             }
           },
@@ -4094,205 +3556,121 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int64
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int64,
+                nullable: true
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                oneOf: [
-                  {
-                    type: number
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                nullable: true
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: double,
+                nullable: true
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                oneOf: [
-                  {
-                    type: number,
-                    format: float
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: number,
+                format: float,
+                nullable: true
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                oneOf: [
-                  {
-                    type: boolean
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: boolean,
+                nullable: true
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date-time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date-time,
+                nullable: true
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: date
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: date,
+                nullable: true
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: time
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: time,
+                nullable: true
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uuid
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uuid,
+                nullable: true
               },
               stringList: {
                 type: array,
@@ -4301,17 +3679,11 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intList: {
                 type: array,
@@ -4321,18 +3693,12 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               doubleList: {
                 type: array,
@@ -4342,18 +3708,12 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: number,
-                      format: double
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: number,
+                  format: double
+                },
+                nullable: true
               },
               intArray: {
                 type: array,
@@ -4363,18 +3723,12 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               readOnlyStringList: {
                 type: array,
@@ -4383,17 +3737,11 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string
+                },
+                nullable: true
               },
               intCollection: {
                 type: array,
@@ -4403,18 +3751,12 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: integer,
-                      format: int32
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: integer,
+                  format: int32
+                },
+                nullable: true
               },
               singleFile: {
                 type: string,
@@ -4435,43 +3777,25 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: binary
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: binary,
+                nullable: true
               },
               readOnlyList1Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               readOnlyList2Nullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: binary
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: binary
+                },
+                nullable: true
               },
               fileCollectionList: {
                 type: array,
@@ -4486,22 +3810,18 @@ Validation rules:
                     $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
                   },
                   {
-                    nullable: true
+                    enum: [
+                      null
+                    ]
                   }
                 ]
               },
               nestedObjectList: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
+                },
+                nullable: true
               },
               uriArray: {
                 type: array,
@@ -4511,33 +3831,21 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      type: string,
-                      format: uri
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  type: string,
+                  format: uri
+                },
+                nullable: true
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uri,
+                nullable: true
               }
             }
           },
@@ -4558,12 +3866,12 @@ Validation rules:
             }
           },
           ExampleApi.Endpoints.Validation.GetFluentValidationFromQuery.StatusEnum: {
-            type: integer,
-            description: Enum: Success, Failure,
             enum: [
               0,
               1
             ],
+            type: integer,
+            description: Enum: Success, Failure,
             x-enum-varnames: [
               Success,
               Failure
@@ -4579,13 +3887,11 @@ Validation rules:
             type: object,
             properties: {
               allBuiltInStringValidators: {
-                oneOf: [
-                  {
-                    maxLength: 100,
-                    minLength: 3,
-                    pattern: ^[a-zA-Z0-9]+$,
-                    type: string,
-                    description:
+                maxLength: 100,
+                minLength: 3,
+                pattern: ^[a-zA-Z0-9]+$,
+                type: string,
+                description:
 Validation rules:
 - Is required
 - Must be at least 3 characters and less than 50 characters
@@ -4598,33 +3904,18 @@ Validation rules:
 - Must be a valid credit card number
 - AllBuiltInStringValidators is not valid.
 - Default error message,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: uri
               },
               allBuiltInNumberValidators: {
-                oneOf: [
-                  {
-                    maximum: 25,
-                    minimum: 10,
-                    maxLength: 100,
-                    minLength: 3,
-                    type: number,
-                    description:
+                maximum: 25,
+                minimum: 10,
+                type: number,
+                description:
 Validation rules:
 - Is required
 - Must be >= 10 and <= 25
 - Must be 3 characters or more
-- Must be 100 characters or fewer,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+- Must be 100 characters or fewer
               },
               requiredString: {
                 type: string,
@@ -4655,7 +3946,7 @@ Validation rules:
 - Must be 3 characters or more
               },
               listMin: {
-                minLength: 3,
+                minItems: 3,
                 type: array,
                 items: {
                   type: string
@@ -4672,7 +3963,7 @@ Validation rules:
 - Must be 100 characters or fewer
               },
               listMax: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
                   type: string
@@ -4725,15 +4016,9 @@ Validation rules:
                 format: uri
               },
               actualUri: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uri,
+                nullable: true
               },
               compare1: {
                 type: string,
@@ -4754,18 +4039,12 @@ Validation rules:
 - Must be a valid credit card number
               },
               fileExtension: {
-                oneOf: [
-                  {
-                    type: string,
-                    description:
+                type: string,
+                description:
 Validation rules:
 - Must be a file with extension: jpg,png,
-                    format: binary
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: binary,
+                nullable: true
               },
               intMin: {
                 maximum: 2147483647,
@@ -4822,45 +4101,31 @@ Validation rules:
                 format: double
               },
               listStringMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
-                  minLength: 1,
-                  type: string,
-                  description:
-Validation rules:
-- Must be 1 items or more
+                  type: string
                 },
                 description:
 Validation rules:
 - Must be 1 items or more
               },
               listStringMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
-                  maxLength: 10,
-                  type: string,
-                  description:
-Validation rules:
-- Must be 10 items or fewer
+                  type: string
                 },
                 description:
 Validation rules:
 - Must be 10 items or fewer
               },
               listStringRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
-                  maxLength: 10,
-                  minLength: 1,
-                  type: string,
-                  description:
-Validation rules:
-- Must be 1 items or more
-- Must be 10 items or fewer
+                  type: string
                 },
                 description:
 Validation rules:
@@ -4868,14 +4133,10 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
-                  minLength: 1,
                   type: integer,
-                  description:
-Validation rules:
-- Must be 1 items or more,
                   format: int32
                 },
                 description:
@@ -4883,14 +4144,10 @@ Validation rules:
 - Must be 1 items or more
               },
               listIntMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
-                  maxLength: 10,
                   type: integer,
-                  description:
-Validation rules:
-- Must be 10 items or fewer,
                   format: int32
                 },
                 description:
@@ -4898,17 +4155,11 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
-                  maxLength: 10,
-                  minLength: 1,
                   type: integer,
-                  description:
-Validation rules:
-- Must be 1 items or more
-- Must be 10 items or fewer,
                   format: int32
                 },
                 description:
@@ -4959,13 +4210,11 @@ Validation rules:
             type: object,
             properties: {
               allBuiltInStringValidators: {
-                oneOf: [
-                  {
-                    maxLength: 100,
-                    minLength: 3,
-                    pattern: ^[a-zA-Z0-9]+$,
-                    type: string,
-                    description:
+                maxLength: 100,
+                minLength: 3,
+                pattern: ^[a-zA-Z0-9]+$,
+                type: string,
+                description:
 Validation rules:
 - Is required
 - Must be at least 3 characters and less than 50 characters
@@ -4976,33 +4225,18 @@ Validation rules:
 - Must be a valid phone number
 - Must be a valid URL
 - Must be a valid credit card number,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: uri
               },
               allBuiltInNumberValidators: {
-                oneOf: [
-                  {
-                    maximum: 25,
-                    minimum: 10,
-                    maxLength: 100,
-                    minLength: 3,
-                    type: number,
-                    description:
+                maximum: 25,
+                minimum: 10,
+                type: number,
+                description:
 Validation rules:
 - Is required
 - Must be >= 10 and <= 25
 - Must be 3 characters or more
-- Must be 100 characters or fewer,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+- Must be 100 characters or fewer
               },
               requiredString: {
                 type: string,
@@ -5033,7 +4267,7 @@ Validation rules:
 - Must be 3 characters or more
               },
               listMin: {
-                minLength: 3,
+                minItems: 3,
                 type: array,
                 items: {
                   type: string
@@ -5050,7 +4284,7 @@ Validation rules:
 - Must be 100 characters or fewer
               },
               listMax: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
                   type: string
@@ -5103,15 +4337,9 @@ Validation rules:
                 format: uri
               },
               actualUri: {
-                oneOf: [
-                  {
-                    type: string,
-                    format: uri
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                format: uri,
+                nullable: true
               },
               compare1: {
                 type: string,
@@ -5132,18 +4360,12 @@ Validation rules:
 - Must be a valid credit card number
               },
               fileExtension: {
-                oneOf: [
-                  {
-                    type: string,
-                    description:
+                type: string,
+                description:
 Validation rules:
 - Must be a file with extension: jpg,png,
-                    format: binary
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: binary,
+                nullable: true
               },
               intMin: {
                 maximum: 2147483647,
@@ -5200,45 +4422,31 @@ Validation rules:
                 format: double
               },
               listStringMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
-                  minLength: 1,
-                  type: string,
-                  description:
-Validation rules:
-- Must be 1 items or more
+                  type: string
                 },
                 description:
 Validation rules:
 - Must be 1 items or more
               },
               listStringMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
-                  maxLength: 10,
-                  type: string,
-                  description:
-Validation rules:
-- Must be 10 items or fewer
+                  type: string
                 },
                 description:
 Validation rules:
 - Must be 10 items or fewer
               },
               listStringRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
-                  maxLength: 10,
-                  minLength: 1,
-                  type: string,
-                  description:
-Validation rules:
-- Must be 1 items or more
-- Must be 10 items or fewer
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5246,14 +4454,10 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
-                  minLength: 1,
                   type: integer,
-                  description:
-Validation rules:
-- Must be 1 items or more,
                   format: int32
                 },
                 description:
@@ -5261,14 +4465,10 @@ Validation rules:
 - Must be 1 items or more
               },
               listIntMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
-                  maxLength: 10,
                   type: integer,
-                  description:
-Validation rules:
-- Must be 10 items or fewer,
                   format: int32
                 },
                 description:
@@ -5276,17 +4476,11 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
-                  maxLength: 10,
-                  minLength: 1,
                   type: integer,
-                  description:
-Validation rules:
-- Must be 1 items or more
-- Must be 10 items or fewer,
                   format: int32
                 },
                 description:
@@ -5314,26 +4508,20 @@ Validation rules:
                 ],
                 description:
 Validation rules:
-- Required
+- Is required
               },
               listNestedObject: {
-                oneOf: [
-                  {
-                    maxLength: 10,
-                    minLength: 0,
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel
-                    },
-                    description:
+                maxItems: 10,
+                minItems: 0,
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel
+                },
+                description:
 Validation rules:
 - Must be 0 items or more
-- Must be 10 items or fewer
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+- Must be 10 items or fewer,
+                nullable: true
               },
               customValidationWithDefaultMessage: {
                 type: string,
@@ -5446,10 +4634,7 @@ Validation rules:
               listStringMinCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at least 1 item.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5458,10 +4643,7 @@ Validation rules:
               listStringMaxCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at most 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5470,10 +4652,7 @@ Validation rules:
               listStringRangeCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5483,9 +4662,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at least 1 item.,
                   format: int32
                 },
                 description:
@@ -5496,9 +4672,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at most 10 items.,
                   format: int32
                 },
                 description:
@@ -5509,9 +4682,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.,
                   format: int32
                 },
                 description:
@@ -5613,10 +4783,7 @@ Validation rules:
               listStringMinCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at least 1 item.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5625,10 +4792,7 @@ Validation rules:
               listStringMaxCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at most 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5637,10 +4801,7 @@ Validation rules:
               listStringRangeCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5650,9 +4811,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at least 1 item.,
                   format: int32
                 },
                 description:
@@ -5663,9 +4821,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at most 10 items.,
                   format: int32
                 },
                 description:
@@ -5676,9 +4831,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.,
                   format: int32
                 },
                 description:
@@ -5693,29 +4845,21 @@ Validation rules:
                 ],
                 description:
 Validation rules:
-- Required
+- Is required
               },
               listNestedObject: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel
+                },
+                nullable: true
               },
               allBuiltInStringValidators: {
-                oneOf: [
-                  {
-                    maxLength: 250,
-                    minLength: 2,
-                    pattern: ^[a-zA-Z0-9]+$,
-                    type: string,
-                    description:
+                maxLength: 250,
+                minLength: 2,
+                pattern: ^[a-zA-Z0-9]+$,
+                type: string,
+                description:
 Validation rules:
 - Is required
 - Must not be equal to 'TestNotEqual'.
@@ -5728,22 +4872,15 @@ Validation rules:
 - Must be a valid email address
 - Must be a valid credit card number
 - Must be empty.,
-                    format: email
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: email
               },
               allBuiltInNumberValidators: {
-                oneOf: [
-                  {
-                    maximum: 100,
-                    exclusiveMaximum: true,
-                    minimum: 0,
-                    exclusiveMinimum: true,
-                    type: number,
-                    description:
+                maximum: 100,
+                exclusiveMaximum: true,
+                minimum: 0,
+                exclusiveMinimum: true,
+                type: number,
+                description:
 Validation rules:
 - Is required
 - Must not be equal to '10'.
@@ -5758,13 +4895,7 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals. ,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+- Must not be more than 4 digits in total, with allowance for 2 decimals.
               },
               maxNumberTest: {
                 type: integer,
@@ -5775,21 +4906,21 @@ Validation rules:
                 format: int32
               },
               enumStringValidator: {
-                type: string,
-                description: Enum: Success, Failure,
                 enum: [
                   Success,
                   Failure
-                ]
+                ],
+                type: string,
+                description: Enum: Success, Failure
               },
               enumIntValidator: {
-                type: integer,
-                description: Enum: Success, Failure,
-                format: int32,
                 enum: [
                   0,
                   1
                 ],
+                type: integer,
+                description: Enum: Success, Failure,
+                format: int32,
                 x-enum-varnames: [
                   Success,
                   Failure
@@ -5801,12 +4932,12 @@ Validation rules:
             }
           },
           ExampleApi.Endpoints.Validation.PostFluentValidation.StatusEnum: {
-            type: integer,
-            description: Enum: Success, Failure,
             enum: [
               0,
               1
             ],
+            type: integer,
+            description: Enum: Success, Failure,
             x-enum-varnames: [
               Success,
               Failure
@@ -5829,47 +4960,29 @@ Validation rules:
 - Must be one of the following: en-GB, cy-GB
               },
               uprn: {
-                oneOf: [
-                  {
-                    type: integer,
-                    description:
+                type: integer,
+                description:
 Validation rules:
 - Must provide either uprn or easting/ northing
 - Must provide UPRN if required by chosen key,
-                    format: int64
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: int64,
+                nullable: true
               },
               easting: {
-                oneOf: [
-                  {
-                    type: number,
-                    description:
+                type: number,
+                description:
 Validation rules:
 - Must provide either uprn or easting/ northing,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: double,
+                nullable: true
               },
               northing: {
-                oneOf: [
-                  {
-                    type: number,
-                    description:
+                type: number,
+                description:
 Validation rules:
 - Must provide either uprn or easting/ northing,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: double,
+                nullable: true
               }
             }
           },
@@ -5958,10 +5071,7 @@ Validation rules:
               listStringMinCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at least 1 item.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5970,10 +5080,7 @@ Validation rules:
               listStringMaxCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at most 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5982,10 +5089,7 @@ Validation rules:
               listStringRangeCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -5995,9 +5099,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at least 1 item.,
                   format: int32
                 },
                 description:
@@ -6008,9 +5109,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at most 10 items.,
                   format: int32
                 },
                 description:
@@ -6021,9 +5119,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.,
                   format: int32
                 },
                 description:
@@ -6125,10 +5220,7 @@ Validation rules:
               listStringMinCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at least 1 item.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -6137,10 +5229,7 @@ Validation rules:
               listStringMaxCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at most 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -6149,10 +5238,7 @@ Validation rules:
               listStringRangeCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -6162,9 +5248,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at least 1 item.,
                   format: int32
                 },
                 description:
@@ -6175,9 +5258,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at most 10 items.,
                   format: int32
                 },
                 description:
@@ -6188,9 +5268,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.,
                   format: int32
                 },
                 description:
@@ -6205,29 +5282,21 @@ Validation rules:
                 ],
                 description:
 Validation rules:
-- Required
+- Is required
               },
               listNestedObject: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel
+                },
+                nullable: true
               },
               allBuiltInStringValidators: {
-                oneOf: [
-                  {
-                    maxLength: 250,
-                    minLength: 2,
-                    pattern: ^[a-zA-Z0-9]+$,
-                    type: string,
-                    description:
+                maxLength: 250,
+                minLength: 2,
+                pattern: ^[a-zA-Z0-9]+$,
+                type: string,
+                description:
 Validation rules:
 - Is required
 - Must not be equal to 'TestNotEqual'.
@@ -6240,22 +5309,15 @@ Validation rules:
 - Must be a valid email address
 - Must be a valid credit card number
 - Must be empty.,
-                    format: email
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                format: email
               },
               allBuiltInNumberValidators: {
-                oneOf: [
-                  {
-                    maximum: 100,
-                    exclusiveMaximum: true,
-                    minimum: 0,
-                    exclusiveMinimum: true,
-                    type: number,
-                    description:
+                maximum: 100,
+                exclusiveMaximum: true,
+                minimum: 0,
+                exclusiveMinimum: true,
+                type: number,
+                description:
 Validation rules:
 - Is required
 - Must not be equal to '10'.
@@ -6270,13 +5332,7 @@ Validation rules:
 - Must be greater than or equal to 'MinNumberTest'.
 - Must be empty.
 - Must be >= 1 and <= 10
-- Must not be more than 4 digits in total, with allowance for 2 decimals. ,
-                    format: double
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+- Must not be more than 4 digits in total, with allowance for 2 decimals.
               },
               maxNumberTest: {
                 type: integer,
@@ -6287,21 +5343,21 @@ Validation rules:
                 format: int32
               },
               enumStringValidator: {
-                type: string,
-                description: Enum: Success, Failure,
                 enum: [
                   Success,
                   Failure
-                ]
+                ],
+                type: string,
+                description: Enum: Success, Failure
               },
               enumIntValidator: {
-                type: integer,
-                description: Enum: Success, Failure,
-                format: int32,
                 enum: [
                   0,
                   1
                 ],
+                type: integer,
+                description: Enum: Success, Failure,
+                format: int32,
                 x-enum-varnames: [
                   Success,
                   Failure
@@ -6313,12 +5369,12 @@ Validation rules:
             }
           },
           ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.StatusEnum: {
-            type: integer,
-            description: Enum: Success, Failure,
             enum: [
               0,
               1
             ],
+            type: integer,
+            description: Enum: Success, Failure,
             x-enum-varnames: [
               Success,
               Failure
@@ -6513,10 +5569,7 @@ Validation rules:
               listStringMinCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at least 1 item.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -6525,10 +5578,7 @@ Validation rules:
               listStringMaxCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain at most 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -6537,10 +5587,7 @@ Validation rules:
               listStringRangeCount: {
                 type: array,
                 items: {
-                  type: string,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.
+                  type: string
                 },
                 description:
 Validation rules:
@@ -6550,9 +5597,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at least 1 item.,
                   format: int32
                 },
                 description:
@@ -6563,9 +5607,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain at most 10 items.,
                   format: int32
                 },
                 description:
@@ -6576,9 +5617,6 @@ Validation rules:
                 type: array,
                 items: {
                   type: integer,
-                  description:
-Validation rules:
-- Must contain between 1 and 10 items.,
                   format: int32
                 },
                 description:
@@ -6621,20 +5659,14 @@ Validation rules:
                 ],
                 description:
 Validation rules:
-- Required
+- Is required
               },
               listNestedObject: {
-                oneOf: [
-                  {
-                    type: array,
-                    items: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel
-                    }
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: array,
+                items: {
+                  $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel
+                },
+                nullable: true
               }
             }
           },
@@ -6676,14 +5708,8 @@ Validation rules:
                 format: int32
               },
               summary: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               }
             }
           },
@@ -6691,55 +5717,25 @@ Validation rules:
             type: object,
             properties: {
               type: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               title: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               status: {
-                oneOf: [
-                  {
-                    type: integer,
-                    format: int32
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: integer,
+                format: int32,
+                nullable: true
               },
               detail: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               instance: {
-                oneOf: [
-                  {
-                    type: string
-                  },
-                  {
-                    nullable: true
-                  }
-                ]
+                type: string,
+                nullable: true
               },
               errors: {
                 type: object,

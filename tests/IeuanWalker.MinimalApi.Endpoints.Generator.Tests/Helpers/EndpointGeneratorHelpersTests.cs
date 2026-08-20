@@ -60,7 +60,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("post_Users_1");
 
 			global::CreateUserEndpoint.Configure(post_Users_1);
-			
+
 			""";
 
 		// Act
@@ -128,7 +128,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_Users_3");
 
 			global::GetUserEndpoint.Configure(get_Users_3);
-			
+
 			""";
 
 		// Act
@@ -234,7 +234,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("post_Users_6");
 
 			global::CreateUserEndpoint.Configure(post_Users_6);
-			
+
 			""";
 
 		// Act
@@ -268,7 +268,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_Users_7");
 
 			global::GetUsersEndpoint.Configure(get_Users_7);
-			
+
 			""";
 
 		// Act
@@ -299,7 +299,7 @@ public class EndpointGeneratorHelpersTests
 				.WithTags("Users");
 
 			global::GetUsersEndpoint.Configure(get_Users_8);
-			
+
 			""";
 
 		// Act
@@ -332,7 +332,7 @@ public class EndpointGeneratorHelpersTests
 				.WithTags("Users");
 
 			global::GetUsersEndpoint.Configure(get_Users_9);
-			
+
 			""";
 
 		// Act
@@ -363,7 +363,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_Users_10");
 
 			global::GetUsersEndpoint.Configure(get_Users_10);
-			
+
 			""";
 
 		// Act
@@ -396,7 +396,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_Users_11");
 
 			global::GetUsersEndpoint.Configure(get_Users_11);
-			
+
 			""";
 
 		// Act
@@ -436,7 +436,8 @@ public class EndpointGeneratorHelpersTests
 				.ProducesValidationProblem();
 
 			global::CreateUserEndpoint.Configure(post_Users_12);
-			
+			global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithDefaultSuccessResponse(post_Users_12);
+
 			""";
 
 		// Act
@@ -473,7 +474,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("post_Users_13");
 
 			global::CreateUserEndpoint.Configure(post_Users_13);
-			
+
 			""";
 
 		// Act
@@ -482,6 +483,31 @@ public class EndpointGeneratorHelpersTests
 		// Assert
 		string result = builder.ToString();
 		result.ShouldBe(expected);
+	}
+
+	[Fact]
+	public void ToEndpoint_WithValidatorAndResponseType_DoesNotAddDefaultSuccessResponse()
+	{
+		// Arrange
+		using IndentedTextBuilder builder = new();
+		EndpointInfo endpoint = CreateEndpointInfo(
+			httpVerb: HttpVerb.Post,
+			routePattern: "/users",
+			typeName: "CreateUserEndpoint",
+			requestType: "CreateUserRequest",
+			responseType: "CreatedUserResponse");
+
+		List<ValidatorInfo> validators = [
+			CreateValidatorInfo("CreateUserRequestValidator", "CreateUserRequest")
+		];
+
+		// Act
+		builder.ToEndpoint(endpoint, 13, validators, null);
+
+		// Assert
+		string result = builder.ToString();
+		result.ShouldContain(".ProducesValidationProblem();");
+		result.ShouldNotContain("WithDefaultSuccessResponse");
 	}
 
 	[Fact]
@@ -509,7 +535,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_Users_14");
 
 			global::GetUsersEndpoint.Configure(get_Users_14);
-			
+
 			""";
 
 		// Act
@@ -545,7 +571,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("{httpVerb.ToString().ToLower()}_Test_15");
 
 			global::TestEndpoint.Configure({httpVerb.ToString().ToLower()}_Test_15);
-			
+
 			""";
 
 		// Act
@@ -579,7 +605,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_UsersPosts_16");
 
 			global::GetUserPostEndpoint.Configure(get_UsersPosts_16);
-			
+
 			""";
 
 		// Act
@@ -624,7 +650,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_Test_18");
 
 			global::TestEndpoint.Configure(get_Test_18);
-			
+
 			""";
 
 		// Act
@@ -657,7 +683,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("post_Users_19");
 
 			global::CreateUserEndpoint.Configure(post_Users_19);
-			
+
 			""";
 
 		// Act
@@ -690,7 +716,7 @@ public class EndpointGeneratorHelpersTests
 				.WithName("get_Users_20");
 
 			global::GetUsersEndpoint.Configure(get_Users_20);
-			
+
 			""";
 
 		// Act
@@ -732,7 +758,8 @@ public class EndpointGeneratorHelpersTests
 				.ProducesValidationProblem();
 
 			global::CreateUserEndpoint.Configure(post_Users_21);
-			
+			global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithDefaultSuccessResponse(post_Users_21);
+
 			""";
 
 		// Act
