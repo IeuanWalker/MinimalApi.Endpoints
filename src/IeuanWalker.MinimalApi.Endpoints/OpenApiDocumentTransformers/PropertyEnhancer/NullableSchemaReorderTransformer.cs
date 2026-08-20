@@ -14,14 +14,16 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 		cancellationToken.ThrowIfCancellationRequested();
 
 		HashSet<IOpenApiSchema> visitedSchemas = new(ReferenceEqualityComparer.Instance);
+		HashSet<object> visitedContainers = new(ReferenceEqualityComparer.Instance);
 
-		ProcessComponents(document, visitedSchemas, cancellationToken);
-		ProcessPaths(document, visitedSchemas, cancellationToken);
+		ProcessComponents(document, visitedSchemas, visitedContainers, cancellationToken);
+		ProcessPathItems(document.Paths?.Values, document, visitedSchemas, visitedContainers, cancellationToken);
+		ProcessPathItems(document.Webhooks?.Values, document, visitedSchemas, visitedContainers, cancellationToken);
 
 		return Task.CompletedTask;
 	}
 
-	static void ProcessComponents(OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
+	static void ProcessComponents(OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, HashSet<object> visitedContainers, CancellationToken cancellationToken)
 	{
 		if (document.Components is null)
 		{
@@ -67,42 +69,61 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 				ProcessHeader(header, document, visitedSchemas, cancellationToken);
 			}
 		}
+
+		ProcessPathItems(document.Components.PathItems?.Values, document, visitedSchemas, visitedContainers, cancellationToken);
+		foreach (IOpenApiCallback callback in document.Components.Callbacks?.Values ?? [])
+		{
+			ProcessCallback(callback, document, visitedSchemas, visitedContainers, cancellationToken);
+		}
 	}
 
-	static void ProcessPaths(OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
+	static void ProcessPathItems(IEnumerable<IOpenApiPathItem>? pathItems, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, HashSet<object> visitedContainers, CancellationToken cancellationToken)
 	{
-		if (document.Paths is null)
+		foreach (IOpenApiPathItem pathItem in pathItems ?? [])
+		{
+			ProcessPathItem(pathItem, document, visitedSchemas, visitedContainers, cancellationToken);
+		}
+	}
+
+	static void ProcessPathItem(IOpenApiPathItem pathItem, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, HashSet<object> visitedContainers, CancellationToken cancellationToken)
+	{
+		IOpenApiPathItem resolved = OpenApiSchemaHelper.ResolveReference(pathItem, document.Components?.PathItems);
+		if (!visitedContainers.Add(resolved))
 		{
 			return;
 		}
 
-		foreach (OpenApiPathItem pathItem in document.Paths.Values.OfType<OpenApiPathItem>())
+		cancellationToken.ThrowIfCancellationRequested();
+		ProcessParameterCollection(resolved.Parameters, document, visitedSchemas, cancellationToken);
+		foreach (OpenApiOperation operation in resolved.Operations?.Values.AsEnumerable() ?? [])
 		{
-			cancellationToken.ThrowIfCancellationRequested();
-
-			ProcessParameterCollection(pathItem.Parameters, document, visitedSchemas, cancellationToken);
-
-			if (pathItem.Operations is null)
-			{
-				continue;
-			}
-
-			foreach (OpenApiOperation operation in pathItem.Operations.Values)
-			{
-				ProcessParameterCollection(operation.Parameters, document, visitedSchemas, cancellationToken);
-				ProcessRequestBody(operation.RequestBody, document, visitedSchemas, cancellationToken);
-
-				if (operation.Responses is null)
-				{
-					continue;
-				}
-
-				foreach (IOpenApiResponse response in operation.Responses.Values)
-				{
-					ProcessResponse(response, document, visitedSchemas, cancellationToken);
-				}
-			}
+			ProcessOperation(operation, document, visitedSchemas, visitedContainers, cancellationToken);
 		}
+	}
+
+	static void ProcessOperation(OpenApiOperation operation, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, HashSet<object> visitedContainers, CancellationToken cancellationToken)
+	{
+		ProcessParameterCollection(operation.Parameters, document, visitedSchemas, cancellationToken);
+		ProcessRequestBody(operation.RequestBody, document, visitedSchemas, cancellationToken);
+		foreach (IOpenApiResponse response in operation.Responses?.Values.AsEnumerable() ?? [])
+		{
+			ProcessResponse(response, document, visitedSchemas, cancellationToken);
+		}
+		foreach (IOpenApiCallback callback in operation.Callbacks?.Values ?? [])
+		{
+			ProcessCallback(callback, document, visitedSchemas, visitedContainers, cancellationToken);
+		}
+	}
+
+	static void ProcessCallback(IOpenApiCallback callback, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, HashSet<object> visitedContainers, CancellationToken cancellationToken)
+	{
+		IOpenApiCallback resolved = OpenApiSchemaHelper.ResolveReference(callback, document.Components?.Callbacks);
+		if (!visitedContainers.Add(resolved))
+		{
+			return;
+		}
+
+		ProcessPathItems(resolved.PathItems?.Values, document, visitedSchemas, visitedContainers, cancellationToken);
 	}
 
 	static void ProcessParameterCollection(IEnumerable<IOpenApiParameter>? parameters, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
@@ -122,24 +143,32 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 	{
 		IOpenApiParameter resolved = OpenApiSchemaHelper.ResolveReference(parameter, document.Components?.Parameters);
 
-		if (resolved is not OpenApiParameter openApiParameter || openApiParameter.Schema is null)
+		if (resolved is not OpenApiParameter openApiParameter)
 		{
 			return;
 		}
 
-		ProcessSchema(openApiParameter.Schema, document, visitedSchemas, cancellationToken);
+		if (openApiParameter.Schema is not null)
+		{
+			ProcessSchema(openApiParameter.Schema, document, visitedSchemas, cancellationToken);
+		}
+		ProcessContent(openApiParameter.Content, document, visitedSchemas, cancellationToken);
 	}
 
 	static void ProcessHeader(IOpenApiHeader header, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
 	{
 		IOpenApiHeader resolved = OpenApiSchemaHelper.ResolveReference(header, document.Components?.Headers);
 
-		if (resolved is not OpenApiHeader openApiHeader || openApiHeader.Schema is null)
+		if (resolved is not OpenApiHeader openApiHeader)
 		{
 			return;
 		}
 
-		ProcessSchema(openApiHeader.Schema, document, visitedSchemas, cancellationToken);
+		if (openApiHeader.Schema is not null)
+		{
+			ProcessSchema(openApiHeader.Schema, document, visitedSchemas, cancellationToken);
+		}
+		ProcessContent(openApiHeader.Content, document, visitedSchemas, cancellationToken);
 	}
 
 	static void ProcessRequestBody(IOpenApiRequestBody? requestBody, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
@@ -243,42 +272,19 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 		ReorderNullableVariants(openApiSchema.OneOf);
 		ReorderNullableVariants(openApiSchema.AnyOf);
 
-		if (openApiSchema.Properties is not null)
-		{
-			foreach (IOpenApiSchema propertySchema in openApiSchema.Properties.Values)
-			{
-				ProcessSchema(propertySchema, document, visitedSchemas, cancellationToken);
-			}
-		}
+		ProcessSchemas(openApiSchema.Properties?.Values, document, visitedSchemas, cancellationToken);
+		ProcessSchemas(openApiSchema.Definitions?.Values, document, visitedSchemas, cancellationToken);
+		ProcessSchemas(openApiSchema.PatternProperties?.Values, document, visitedSchemas, cancellationToken);
+		ProcessSchemas(openApiSchema.DependentSchemas?.Values, document, visitedSchemas, cancellationToken);
 
 		if (openApiSchema.Items is not null)
 		{
 			ProcessSchema(openApiSchema.Items, document, visitedSchemas, cancellationToken);
 		}
 
-		if (openApiSchema.AllOf is not null)
-		{
-			foreach (IOpenApiSchema child in openApiSchema.AllOf)
-			{
-				ProcessSchema(child, document, visitedSchemas, cancellationToken);
-			}
-		}
-
-		if (openApiSchema.OneOf is not null)
-		{
-			foreach (IOpenApiSchema child in openApiSchema.OneOf)
-			{
-				ProcessSchema(child, document, visitedSchemas, cancellationToken);
-			}
-		}
-
-		if (openApiSchema.AnyOf is not null)
-		{
-			foreach (IOpenApiSchema child in openApiSchema.AnyOf)
-			{
-				ProcessSchema(child, document, visitedSchemas, cancellationToken);
-			}
-		}
+		ProcessSchemas(openApiSchema.AllOf, document, visitedSchemas, cancellationToken);
+		ProcessSchemas(openApiSchema.OneOf, document, visitedSchemas, cancellationToken);
+		ProcessSchemas(openApiSchema.AnyOf, document, visitedSchemas, cancellationToken);
 
 		if (openApiSchema.AdditionalProperties is not null)
 		{
@@ -288,6 +294,42 @@ sealed class NullableSchemaReorderTransformer : IOpenApiDocumentTransformer
 		if (openApiSchema.Not is not null)
 		{
 			ProcessSchema(openApiSchema.Not, document, visitedSchemas, cancellationToken);
+		}
+		if (openApiSchema.Contains is not null)
+		{
+			ProcessSchema(openApiSchema.Contains, document, visitedSchemas, cancellationToken);
+		}
+		if (openApiSchema.PropertyNames is not null)
+		{
+			ProcessSchema(openApiSchema.PropertyNames, document, visitedSchemas, cancellationToken);
+		}
+		if (openApiSchema.UnevaluatedPropertiesSchema is not null)
+		{
+			ProcessSchema(openApiSchema.UnevaluatedPropertiesSchema, document, visitedSchemas, cancellationToken);
+		}
+		if (openApiSchema.ContentSchema is not null)
+		{
+			ProcessSchema(openApiSchema.ContentSchema, document, visitedSchemas, cancellationToken);
+		}
+		if (openApiSchema.If is not null)
+		{
+			ProcessSchema(openApiSchema.If, document, visitedSchemas, cancellationToken);
+		}
+		if (openApiSchema.Then is not null)
+		{
+			ProcessSchema(openApiSchema.Then, document, visitedSchemas, cancellationToken);
+		}
+		if (openApiSchema.Else is not null)
+		{
+			ProcessSchema(openApiSchema.Else, document, visitedSchemas, cancellationToken);
+		}
+	}
+
+	static void ProcessSchemas(IEnumerable<IOpenApiSchema>? schemas, OpenApiDocument document, HashSet<IOpenApiSchema> visitedSchemas, CancellationToken cancellationToken)
+	{
+		foreach (IOpenApiSchema schema in schemas ?? [])
+		{
+			ProcessSchema(schema, document, visitedSchemas, cancellationToken);
 		}
 	}
 

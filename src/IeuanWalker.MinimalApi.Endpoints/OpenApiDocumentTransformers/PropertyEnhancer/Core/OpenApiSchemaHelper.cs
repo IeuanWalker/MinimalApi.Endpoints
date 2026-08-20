@@ -426,6 +426,8 @@ static class OpenApiSchemaHelper
 			OpenApiRequestBodyReference { Reference.Id: { Length: > 0 } id } => id,
 			OpenApiResponseReference { Reference.Id: { Length: > 0 } id } => id,
 			OpenApiHeaderReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiCallbackReference { Reference.Id: { Length: > 0 } id } => id,
+			OpenApiPathItemReference { Reference.Id: { Length: > 0 } id } => id,
 			_ => null
 		};
 

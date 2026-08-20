@@ -822,6 +822,32 @@ public class OpenApiSchemaHelperTests
 		result.ShouldBeSameAs(headerRef);
 	}
 
+	[Fact]
+	public void ResolveReference_PathItemFoundInComponents_ReturnsResolved()
+	{
+		OpenApiDocument document = new();
+		IOpenApiPathItem resolvedPathItem = new OpenApiPathItem { Description = "Reusable path" };
+		Dictionary<string, IOpenApiPathItem> components = new() { ["Reusable"] = resolvedPathItem };
+		IOpenApiPathItem pathItemReference = new OpenApiPathItemReference("Reusable", document, null);
+
+		IOpenApiPathItem result = OpenApiSchemaHelper.ResolveReference(pathItemReference, components);
+
+		result.ShouldBeSameAs(resolvedPathItem);
+	}
+
+	[Fact]
+	public void ResolveReference_CallbackFoundInComponents_ReturnsResolved()
+	{
+		OpenApiDocument document = new();
+		IOpenApiCallback resolvedCallback = new OpenApiCallback();
+		Dictionary<string, IOpenApiCallback> components = new() { ["Reusable"] = resolvedCallback };
+		IOpenApiCallback callbackReference = new OpenApiCallbackReference("Reusable", document, null);
+
+		IOpenApiCallback result = OpenApiSchemaHelper.ResolveReference(callbackReference, components);
+
+		result.ShouldBeSameAs(resolvedCallback);
+	}
+
 	#endregion
 }
 

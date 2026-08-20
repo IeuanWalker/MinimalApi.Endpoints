@@ -638,6 +638,179 @@ public class NullableSchemaReorderTransformerTests
 	}
 
 	[Fact]
+	public async Task TransformAsync_WhenParameterAndHeaderContentContainNullableReferences_ReordersOneOf()
+	{
+		// Arrange
+		OpenApiSchemaReference parameterReference = new("Referenced", null, null);
+		OpenApiSchema parameterNull = new() { Type = JsonSchemaType.Null };
+		OpenApiSchema parameterRoot = new() { OneOf = [parameterNull, parameterReference] };
+		OpenApiSchemaReference headerReference = new("Referenced", null, null);
+		OpenApiSchema headerNull = new() { Type = JsonSchemaType.Null };
+		OpenApiSchema headerRoot = new() { OneOf = [headerNull, headerReference] };
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema>
+				{
+					["Referenced"] = new OpenApiSchema { Type = JsonSchemaType.Object }
+				},
+				Parameters = new Dictionary<string, IOpenApiParameter>
+				{
+					["parameter"] = new OpenApiParameter
+					{
+						Content = new Dictionary<string, OpenApiMediaType>
+						{
+							["application/json"] = new() { Schema = parameterRoot }
+						}
+					}
+				},
+				Headers = new Dictionary<string, IOpenApiHeader>
+				{
+					["header"] = new OpenApiHeader
+					{
+						Content = new Dictionary<string, OpenApiMediaType>
+						{
+							["application/json"] = new() { Schema = headerRoot }
+						}
+					}
+				}
+			}
+		};
+
+		// Act
+		await new NullableSchemaReorderTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert
+		parameterRoot.OneOf![0].ShouldBe(parameterReference);
+		parameterRoot.OneOf[1].ShouldBe(parameterNull);
+		headerRoot.OneOf![0].ShouldBe(headerReference);
+		headerRoot.OneOf[1].ShouldBe(headerNull);
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenOpenApi31KeywordsContainNullableSchemas_ReordersOneOf()
+	{
+		// Arrange
+		(OpenApiSchema definition, OpenApiSchema definitionValue, OpenApiSchema definitionNull) = CreateNullFirstSchema();
+		(OpenApiSchema contains, OpenApiSchema containsValue, OpenApiSchema containsNull) = CreateNullFirstSchema();
+		(OpenApiSchema pattern, OpenApiSchema patternValue, OpenApiSchema patternNull) = CreateNullFirstSchema();
+		(OpenApiSchema unevaluated, OpenApiSchema unevaluatedValue, OpenApiSchema unevaluatedNull) = CreateNullFirstSchema();
+		(OpenApiSchema content, OpenApiSchema contentValue, OpenApiSchema contentNull) = CreateNullFirstSchema();
+		(OpenApiSchema propertyNames, OpenApiSchema propertyNamesValue, OpenApiSchema propertyNamesNull) = CreateNullFirstSchema();
+		(OpenApiSchema dependent, OpenApiSchema dependentValue, OpenApiSchema dependentNull) = CreateNullFirstSchema();
+		(OpenApiSchema ifSchema, OpenApiSchema ifValue, OpenApiSchema ifNull) = CreateNullFirstSchema();
+		(OpenApiSchema thenSchema, OpenApiSchema thenValue, OpenApiSchema thenNull) = CreateNullFirstSchema();
+		(OpenApiSchema elseSchema, OpenApiSchema elseValue, OpenApiSchema elseNull) = CreateNullFirstSchema();
+		OpenApiSchema root = new()
+		{
+			Definitions = new Dictionary<string, IOpenApiSchema> { ["definition"] = definition },
+			Contains = contains,
+			PatternProperties = new Dictionary<string, IOpenApiSchema> { ["^x-"] = pattern },
+			UnevaluatedPropertiesSchema = unevaluated,
+			ContentSchema = content,
+			PropertyNames = propertyNames,
+			DependentSchemas = new Dictionary<string, IOpenApiSchema> { ["name"] = dependent },
+			If = ifSchema,
+			Then = thenSchema,
+			Else = elseSchema
+		};
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				Schemas = new Dictionary<string, IOpenApiSchema> { ["root"] = root }
+			}
+		};
+
+		// Act
+		await new NullableSchemaReorderTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert
+		(OpenApiSchema schema, OpenApiSchema value, OpenApiSchema nullSchema)[] schemas =
+		[
+			(definition, definitionValue, definitionNull),
+			(contains, containsValue, containsNull),
+			(pattern, patternValue, patternNull),
+			(unevaluated, unevaluatedValue, unevaluatedNull),
+			(content, contentValue, contentNull),
+			(propertyNames, propertyNamesValue, propertyNamesNull),
+			(dependent, dependentValue, dependentNull),
+			(ifSchema, ifValue, ifNull),
+			(thenSchema, thenValue, thenNull),
+			(elseSchema, elseValue, elseNull)
+		];
+		foreach ((OpenApiSchema schema, OpenApiSchema value, OpenApiSchema nullSchema) in schemas)
+		{
+			schema.OneOf![0].ShouldBe(value);
+			schema.OneOf[1].ShouldBe(nullSchema);
+		}
+	}
+
+	[Fact]
+	public async Task TransformAsync_WhenReusablePathsCallbacksAndWebhooksContainNullableSchemas_ReordersOneOf()
+	{
+		// Arrange
+		(OpenApiSchema componentPath, OpenApiSchema componentPathValue, OpenApiSchema componentPathNull) = CreateNullFirstSchema();
+		(OpenApiSchema componentCallback, OpenApiSchema componentCallbackValue, OpenApiSchema componentCallbackNull) = CreateNullFirstSchema();
+		(OpenApiSchema operationCallback, OpenApiSchema operationCallbackValue, OpenApiSchema operationCallbackNull) = CreateNullFirstSchema();
+		(OpenApiSchema webhook, OpenApiSchema webhookValue, OpenApiSchema webhookNull) = CreateNullFirstSchema();
+		OpenApiCallback reusableCallback = new()
+		{
+			PathItems = new Dictionary<RuntimeExpression, IOpenApiPathItem>
+			{
+				[RuntimeExpression.Build("{$request.body#/callbackUrl}")] = CreateResponsePathItem(componentCallback)
+			}
+		};
+		OpenApiCallback inlineCallback = new()
+		{
+			PathItems = new Dictionary<RuntimeExpression, IOpenApiPathItem>
+			{
+				[RuntimeExpression.Build("{$request.body#/callbackUrl}")] = CreateResponsePathItem(operationCallback)
+			}
+		};
+		OpenApiDocument document = new()
+		{
+			Components = new OpenApiComponents
+			{
+				PathItems = new Dictionary<string, IOpenApiPathItem> { ["Reusable"] = CreateResponsePathItem(componentPath) },
+				Callbacks = new Dictionary<string, IOpenApiCallback> { ["Reusable"] = reusableCallback }
+			},
+			Paths = new OpenApiPaths
+			{
+				["/root"] = new OpenApiPathItem
+				{
+					Operations = new Dictionary<HttpMethod, OpenApiOperation>
+					{
+						[HttpMethod.Post] = new OpenApiOperation
+						{
+							Callbacks = new Dictionary<string, IOpenApiCallback> { ["inline"] = inlineCallback }
+						}
+					}
+				}
+			},
+			Webhooks = new Dictionary<string, IOpenApiPathItem> { ["event"] = CreateResponsePathItem(webhook) }
+		};
+
+		// Act
+		await new NullableSchemaReorderTransformer().TransformAsync(document, null!, CancellationToken.None);
+
+		// Assert
+		(OpenApiSchema schema, OpenApiSchema value, OpenApiSchema nullSchema)[] schemas =
+		[
+			(componentPath, componentPathValue, componentPathNull),
+			(componentCallback, componentCallbackValue, componentCallbackNull),
+			(operationCallback, operationCallbackValue, operationCallbackNull),
+			(webhook, webhookValue, webhookNull)
+		];
+		foreach ((OpenApiSchema schema, OpenApiSchema value, OpenApiSchema nullSchema) in schemas)
+		{
+			schema.OneOf![0].ShouldBe(value);
+			schema.OneOf[1].ShouldBe(nullSchema);
+		}
+	}
+
+	[Fact]
 	public async Task TransformAsync_WhenComponentRequestBodySchema_ReordersOneOf()
 	{
 		// Arrange
@@ -950,5 +1123,35 @@ public class NullableSchemaReorderTransformerTests
 		IList<IOpenApiSchema> encHeaderOneOf = ((OpenApiSchema)encodingHeader.Schema!).OneOf!;
 		encHeaderOneOf[0].ShouldBeOfType<OpenApiSchema>().ShouldNotBeNull();
 		encHeaderOneOf[0].ShouldBe(encHeaderOneOf[0]);
+	}
+
+	static (OpenApiSchema schema, OpenApiSchema value, OpenApiSchema nullSchema) CreateNullFirstSchema()
+	{
+		OpenApiSchema value = new() { Type = JsonSchemaType.String };
+		OpenApiSchema nullSchema = new() { Type = JsonSchemaType.Null };
+		return (new OpenApiSchema { OneOf = [nullSchema, value] }, value, nullSchema);
+	}
+
+	static OpenApiPathItem CreateResponsePathItem(IOpenApiSchema schema)
+	{
+		return new OpenApiPathItem
+		{
+			Operations = new Dictionary<HttpMethod, OpenApiOperation>
+			{
+				[HttpMethod.Get] = new OpenApiOperation
+				{
+					Responses = new OpenApiResponses
+					{
+						["200"] = new OpenApiResponse
+						{
+							Content = new Dictionary<string, OpenApiMediaType>
+							{
+								["application/json"] = new() { Schema = schema }
+							}
+						}
+					}
+				}
+			}
+		};
 	}
 }
