@@ -122,6 +122,42 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 		}
 	}
 
+	[Fact]
+	public async Task OpenApiJson_UsesOpenApi31FileSchemasAndContentTypes()
+	{
+		// Act
+		string json = await _client.GetStringAsync("/openapi/v1.json", TestContext.Current.CancellationToken);
+		using JsonDocument document = JsonDocument.Parse(json);
+		JsonElement root = document.RootElement;
+
+		JsonElement multipartContent = root
+			.GetProperty("paths")
+			.GetProperty("/api/v1/FileHandling/Multipart")
+			.GetProperty("post")
+			.GetProperty("requestBody")
+			.GetProperty("content");
+
+		JsonElement schemas = root.GetProperty("components").GetProperty("schemas");
+		JsonElement multipartProperties = schemas
+			.GetProperty("ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel")
+			.GetProperty("properties");
+
+		// Assert
+		multipartContent.TryGetProperty("application/x-www-form-urlencoded", out _).ShouldBeFalse();
+		AssertRawFileSchema(multipartProperties.GetProperty("singleFile"));
+		AssertRawFileSchema(multipartProperties.GetProperty("readOnlyList1").GetProperty("items"));
+
+		JsonElement formProperties = schemas
+			.GetProperty("ExampleApi.Endpoints.TypeExamples.PostFromForm.BaseTests")
+			.GetProperty("properties");
+		AssertNullableRawFileSchema(formProperties.GetProperty("singleFileNullable"));
+
+		JsonElement jsonBodyProperties = schemas
+			.GetProperty("ExampleApi.Endpoints.TypeExamples.PostFromBody.BaseTests")
+			.GetProperty("properties");
+		AssertRawFileSchema(jsonBodyProperties.GetProperty("singleFile"));
+	}
+
 	static void AssertDecimalSchema(JsonElement schema, bool nullable)
 	{
 		JsonElement type = schema.GetProperty("type");
@@ -139,5 +175,26 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 
 		schema.TryGetProperty("format", out _).ShouldBeFalse();
 		schema.TryGetProperty("nullable", out _).ShouldBeFalse();
+	}
+
+	static void AssertRawFileSchema(JsonElement schema)
+	{
+		schema.GetProperty("contentMediaType").GetString().ShouldBe("application/octet-stream");
+		schema.TryGetProperty("type", out _).ShouldBeFalse();
+		schema.TryGetProperty("format", out _).ShouldBeFalse();
+	}
+
+	static void AssertNullableRawFileSchema(JsonElement schema)
+	{
+		JsonElement alternatives = schema.GetProperty("oneOf");
+		alternatives.GetArrayLength().ShouldBe(2);
+
+		JsonElement rawFile = alternatives[0];
+		rawFile.GetProperty("contentMediaType").GetString().ShouldBe("application/octet-stream");
+		rawFile.GetProperty("not").GetProperty("type").GetString().ShouldBe("null");
+		alternatives[1].GetProperty("type").GetString().ShouldBe("null");
+
+		schema.TryGetProperty("type", out _).ShouldBeFalse();
+		schema.TryGetProperty("format", out _).ShouldBeFalse();
 	}
 }

@@ -256,8 +256,7 @@
                       request: {
                         type: array,
                         items: {
-                          type: string,
-                          format: binary
+                          contentMediaType: application/octet-stream
                         }
                       }
                     }
@@ -295,11 +294,6 @@
                   schema: {
                     $ref: #/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel
                   }
-                },
-                application/x-www-form-urlencoded: {
-                  schema: {
-                    $ref: #/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.RequestModel
-                  }
                 }
               },
               required: true
@@ -331,8 +325,7 @@
                     type: object,
                     properties: {
                       request: {
-                        type: string,
-                        format: binary
+                        contentMediaType: application/octet-stream
                       }
                     }
                   }
@@ -951,11 +944,6 @@
             requestBody: {
               content: {
                 multipart/form-data: {
-                  schema: {
-                    $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel
-                  }
-                },
-                application/x-www-form-urlencoded: {
                   schema: {
                     $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.RequestModel
                   }
@@ -2289,28 +2277,24 @@ Validation rules:
                 type: string
               },
               singleFile: {
-                type: string,
-                format: binary
+                contentMediaType: application/octet-stream
               },
               readOnlyList1: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               fileCollectionList: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               }
             }
@@ -2872,29 +2856,32 @@ Validation rules:
                 }
               },
               singleFile: {
-                type: string,
-                format: binary
+                contentMediaType: application/octet-stream
               },
               readOnlyList1: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               singleFileNullable: {
-                type: [
-                  null,
-                  string
-                ],
-                format: binary
+                oneOf: [
+                  {
+                    contentMediaType: application/octet-stream,
+                    not: {
+                      type: null
+                    }
+                  },
+                  {
+                    type: null
+                  }
+                ]
               },
               readOnlyList1Nullable: {
                 type: [
@@ -2902,8 +2889,7 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2Nullable: {
@@ -2912,15 +2898,13 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               fileCollectionList: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               nestedObjectValue: {
@@ -3250,29 +3234,32 @@ Validation rules:
                 }
               },
               singleFile: {
-                type: string,
-                format: binary
+                contentMediaType: application/octet-stream
               },
               readOnlyList1: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               singleFileNullable: {
-                type: [
-                  null,
-                  string
-                ],
-                format: binary
+                oneOf: [
+                  {
+                    contentMediaType: application/octet-stream,
+                    not: {
+                      type: null
+                    }
+                  },
+                  {
+                    type: null
+                  }
+                ]
               },
               readOnlyList1Nullable: {
                 type: [
@@ -3280,8 +3267,7 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2Nullable: {
@@ -3290,15 +3276,13 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               fileCollectionList: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               nestedObjectValue: {
@@ -3617,29 +3601,32 @@ Validation rules:
                 }
               },
               singleFile: {
-                type: string,
-                format: binary
+                contentMediaType: application/octet-stream
               },
               readOnlyList1: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               singleFileNullable: {
-                type: [
-                  null,
-                  string
-                ],
-                format: binary
+                oneOf: [
+                  {
+                    contentMediaType: application/octet-stream,
+                    not: {
+                      type: null
+                    }
+                  },
+                  {
+                    type: null
+                  }
+                ]
               },
               readOnlyList1Nullable: {
                 type: [
@@ -3647,8 +3634,7 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2Nullable: {
@@ -3657,15 +3643,13 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               fileCollectionList: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               nestedObjectValue: {
@@ -3995,29 +3979,32 @@ Validation rules:
                 }
               },
               singleFile: {
-                type: string,
-                format: binary
+                contentMediaType: application/octet-stream
               },
               readOnlyList1: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               singleFileNullable: {
-                type: [
-                  null,
-                  string
-                ],
-                format: binary
+                oneOf: [
+                  {
+                    contentMediaType: application/octet-stream,
+                    not: {
+                      type: null
+                    }
+                  },
+                  {
+                    type: null
+                  }
+                ]
               },
               readOnlyList1Nullable: {
                 type: [
@@ -4025,8 +4012,7 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               readOnlyList2Nullable: {
@@ -4035,15 +4021,13 @@ Validation rules:
                   array
                 ],
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               fileCollectionList: {
                 type: array,
                 items: {
-                  type: string,
-                  format: binary
+                  contentMediaType: application/octet-stream
                 }
               },
               nestedObjectValue: {
@@ -4289,14 +4273,20 @@ Validation rules:
 - Must be a valid credit card number
               },
               fileExtension: {
-                type: [
-                  null,
-                  string
+                oneOf: [
+                  {
+                    contentMediaType: application/octet-stream,
+                    not: {
+                      type: null
+                    }
+                  },
+                  {
+                    type: null
+                  }
                 ],
                 description:
 Validation rules:
-- Must be a file with extension: jpg,png,
-                format: binary
+- Must be a file with extension: jpg,png
               },
               intMin: {
                 maximum: 2147483647,
@@ -4614,14 +4604,20 @@ Validation rules:
 - Must be a valid credit card number
               },
               fileExtension: {
-                type: [
-                  null,
-                  string
+                oneOf: [
+                  {
+                    contentMediaType: application/octet-stream,
+                    not: {
+                      type: null
+                    }
+                  },
+                  {
+                    type: null
+                  }
                 ],
                 description:
 Validation rules:
-- Must be a file with extension: jpg,png,
-                format: binary
+- Must be a file with extension: jpg,png
               },
               intMin: {
                 maximum: 2147483647,

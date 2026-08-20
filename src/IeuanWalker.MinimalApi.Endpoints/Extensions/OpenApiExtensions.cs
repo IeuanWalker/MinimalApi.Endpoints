@@ -137,6 +137,11 @@ public static class OpenApiExtensions
 			// Normalize inline value-or-null unions to version-appropriate nullable schemas
 			source.AddDocumentTransformer<NullableSchemaNormalizationTransformer>();
 
+			// Normalize file schemas and form content types for OpenAPI 3.1
+			source.AddDocumentTransformer((document, context, ct) =>
+				new OpenApi31FileSchemaTransformer(source.OpenApiVersion == OpenApiSpecVersion.OpenApi3_1)
+					.TransformAsync(document, context, ct));
+
 			// Add cleanup transformer as the absolute final step to remove unused component schemas
 			// This removes schemas that are no longer referenced after aggressive inlining and unwrapping
 			source.AddDocumentTransformer<UnusedComponentsCleanupTransformer>();
