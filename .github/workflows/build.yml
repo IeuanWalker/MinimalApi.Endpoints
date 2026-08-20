@@ -16,7 +16,7 @@ env:
   NET_VERSION: 10.0.100
   NUGET_PATH: './**/IeuanWalker.MinimalApi.Endpoints.1.0.0.nupkg'
   MINIMUM_COVERAGE: 80
-  
+
 jobs:
   build:
 
@@ -24,7 +24,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-  
+
     - name: Setup .NET ${{ env.NET_VERSION }}
       uses: actions/setup-dotnet@v4
       with:
@@ -37,19 +37,19 @@ jobs:
       run: dotnet build --no-restore
 
     - name: Test with Coverage
-      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage --settings coverlet.runsettings
+      run: dotnet test --no-build --verbosity normal --results-directory ./coverage --coverlet --coverlet-output-format cobertura --coverlet-include "[IeuanWalker.MinimalApi.Endpoints*]*" --coverlet-include "[ExampleApi]*" --coverlet-exclude-by-attribute Obsolete --coverlet-skip-auto-props
 
     - name: Code Coverage Report
       uses: danielpalme/ReportGenerator-GitHub-Action@5.3.11
       with:
-        reports: 'coverage/**/coverage.cobertura.xml'
+        reports: 'coverage/**/coverage.cobertura*.xml'
         targetdir: 'coveragereport'
         reporttypes: 'MarkdownSummaryGithub;Cobertura'
         verbosity: 'Info'
         assemblyfilters: '-Microsoft.*;-System.*;'
         classfilters: '-Microsoft.*;-System.*'
         filefilters: '-**/obj/**;-**/bin/**;-**/*.g.cs;-**/*.generated.cs'
-        
+
     - name: Write to Job Summary
       run: cat coveragereport/SummaryGithub.md >> $GITHUB_STEP_SUMMARY
       shell: bash
@@ -60,17 +60,17 @@ jobs:
       with:
         recreate: true
         path: coveragereport/SummaryGithub.md
-        
+
     - name: Check Coverage Threshold
       shell: pwsh
       run: |
         [xml]$coverage = Get-Content coveragereport/Cobertura.xml
         $lineCoverage = [math]::Round([double]$coverage.coverage.'line-rate' * 100, 2)
         $branchCoverage = [math]::Round([double]$coverage.coverage.'branch-rate' * 100, 2)
-        
+
         Write-Host "Line Coverage: $lineCoverage%"
         Write-Host "Branch Coverage: $branchCoverage%"
-        
+
         if ($lineCoverage -lt ${{ env.MINIMUM_COVERAGE }}) {
           Write-Error "Line coverage ($lineCoverage%) is below minimum threshold (${{ env.MINIMUM_COVERAGE }}%)"
           exit 1

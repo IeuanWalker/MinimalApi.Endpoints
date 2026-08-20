@@ -25,7 +25,7 @@ public static class VersioningConfiguration
 			})
 			.AddOpenApi(options =>
 			{
-				options.Document.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+				options.Document.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
 				options.Document.CreateSchemaReferenceId = jsonTypeInfo =>
 					OpenApiOptions.CreateDefaultSchemaReferenceId(jsonTypeInfo) is null
 						? null

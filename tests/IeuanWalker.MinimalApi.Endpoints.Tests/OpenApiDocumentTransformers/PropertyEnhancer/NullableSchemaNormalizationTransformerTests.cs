@@ -170,6 +170,15 @@ public class NullableSchemaNormalizationTransformerTests
 		result.OneOf.ShouldNotBeNull();
 		result.OneOf.Count.ShouldBe(2);
 		result.OneOf[0].ShouldBeSameAs(reference);
+		OpenApiSchema nullSchema = result.OneOf[1].ShouldBeOfType<OpenApiSchema>();
+		nullSchema.Type.ShouldBeNull();
+		nullSchema.Enum.ShouldNotBeNull();
+		nullSchema.Enum.ShouldHaveSingleItem().ShouldBeNull();
+
+		string json = await nullSchema.SerializeAsJsonAsync(OpenApiSpecVersion.OpenApi3_0, TestContext.Current.CancellationToken);
+		json.ShouldContain("\"enum\"");
+		json.ShouldContain("null");
+		json.ShouldNotContain("\"nullable\"");
 	}
 
 	[Fact]
