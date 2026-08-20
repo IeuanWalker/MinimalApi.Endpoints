@@ -124,12 +124,20 @@ public partial class OpenApiTests : IClassFixture<ExampleApiWebApplicationFactor
 
 	static void AssertDecimalSchema(JsonElement schema, bool nullable)
 	{
-		schema.GetProperty("type").GetString().ShouldBe("number");
-		schema.TryGetProperty("format", out _).ShouldBeFalse();
-		schema.TryGetProperty("nullable", out JsonElement nullableProperty).ShouldBe(nullable);
+		JsonElement type = schema.GetProperty("type");
 		if (nullable)
 		{
-			nullableProperty.GetBoolean().ShouldBeTrue();
+			type.ValueKind.ShouldBe(JsonValueKind.Array);
+			type.GetArrayLength().ShouldBe(2);
+			type[0].GetString().ShouldBe("null");
+			type[1].GetString().ShouldBe("number");
 		}
+		else
+		{
+			type.GetString().ShouldBe("number");
+		}
+
+		schema.TryGetProperty("format", out _).ShouldBeFalse();
+		schema.TryGetProperty("nullable", out _).ShouldBeFalse();
 	}
 }

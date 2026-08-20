@@ -5,7 +5,7 @@
       Content-Type: application/json; charset=utf-8
     },
     Value: {
-      openapi: 3.0.4,
+      openapi: 3.1.1,
       info: {
         title: Test API,
         description: Example API demonstrating MinimalApi.Endpoints.,
@@ -135,10 +135,12 @@
                     3,
                     null
                   ],
-                  type: integer,
+                  type: [
+                    null,
+                    integer
+                  ],
                   description: Enum: Low, Medium, High, Critical,
                   format: int32,
-                  nullable: true,
                   x-enum-varnames: [
                     Low,
                     Medium,
@@ -636,9 +638,11 @@
                 name: NullableIntValue,
                 in: query,
                 schema: {
-                  type: integer,
-                  format: int32,
-                  nullable: true
+                  type: [
+                    null,
+                    integer
+                  ],
+                  format: int32
                 }
               },
               {
@@ -654,9 +658,11 @@
                 name: NullableLongValue,
                 in: query,
                 schema: {
-                  type: integer,
-                  format: int64,
-                  nullable: true
+                  type: [
+                    null,
+                    integer
+                  ],
+                  format: int64
                 }
               },
               {
@@ -671,8 +677,10 @@
                 name: NullableDecimalValue,
                 in: query,
                 schema: {
-                  type: number,
-                  nullable: true
+                  type: [
+                    null,
+                    number
+                  ]
                 }
               },
               {
@@ -688,9 +696,11 @@
                 name: NullableDoubleValue,
                 in: query,
                 schema: {
-                  type: number,
-                  format: double,
-                  nullable: true
+                  type: [
+                    null,
+                    number
+                  ],
+                  format: double
                 }
               },
               {
@@ -706,9 +716,11 @@
                 name: NullableFloatValue,
                 in: query,
                 schema: {
-                  type: number,
-                  format: float,
-                  nullable: true
+                  type: [
+                    null,
+                    number
+                  ],
+                  format: float
                 }
               },
               {
@@ -723,8 +735,10 @@
                 name: NullableBoolValue,
                 in: query,
                 schema: {
-                  type: boolean,
-                  nullable: true
+                  type: [
+                    null,
+                    boolean
+                  ]
                 }
               },
               {
@@ -740,9 +754,11 @@
                 name: NullableDateTimeValue,
                 in: query,
                 schema: {
-                  type: string,
-                  format: date-time,
-                  nullable: true
+                  type: [
+                    null,
+                    string
+                  ],
+                  format: date-time
                 }
               },
               {
@@ -758,9 +774,11 @@
                 name: NullableDateOnlyValue,
                 in: query,
                 schema: {
-                  type: string,
-                  format: date,
-                  nullable: true
+                  type: [
+                    null,
+                    string
+                  ],
+                  format: date
                 }
               },
               {
@@ -776,9 +794,11 @@
                 name: NullableTimeOnlyValue,
                 in: query,
                 schema: {
-                  type: string,
-                  format: time,
-                  nullable: true
+                  type: [
+                    null,
+                    string
+                  ],
+                  format: time
                 }
               },
               {
@@ -794,9 +814,11 @@
                 name: NullableGuidValue,
                 in: query,
                 schema: {
-                  type: string,
-                  format: uuid,
-                  nullable: true
+                  type: [
+                    null,
+                    string
+                  ],
+                  format: uuid
                 }
               },
               {
@@ -1720,10 +1742,8 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maximum: 100,
-                  exclusiveMaximum: true,
-                  minimum: 0,
-                  exclusiveMinimum: true,
+                  exclusiveMaximum: 100,
+                  exclusiveMinimum: 0,
                   type: number,
                   description:
 Validation rules:
@@ -2130,9 +2150,11 @@ Validation rules:
                   Critical,
                   null
                 ],
-                type: string,
+                type: [
+                  null,
+                  string
+                ],
                 description: Enum: Low, Medium, High, Critical,
-                nullable: true,
                 x-enum-descriptions: {
                   Low: Low priority task,
                   Medium: Medium priority task,
@@ -2171,10 +2193,12 @@ Validation rules:
                   3,
                   null
                 ],
-                type: integer,
+                type: [
+                  null,
+                  integer
+                ],
                 description: Enum: Low, Medium, High, Critical,
                 format: int32,
-                nullable: true,
                 x-enum-varnames: [
                   Low,
                   Medium,
@@ -2372,9 +2396,11 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               }
             }
           },
@@ -2399,9 +2425,11 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               }
             }
           },
@@ -2411,18 +2439,24 @@ Validation rules:
               title: {
                 maxLength: 200,
                 minLength: 1,
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               description: {
                 maxLength: 1000,
                 minLength: 0,
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               isCompleted: {
-                type: boolean,
-                nullable: true
+                type: [
+                  null,
+                  boolean
+                ]
               }
             }
           },
@@ -2447,9 +2481,11 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               }
             }
           },
@@ -2501,9 +2537,11 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               }
             }
           },
@@ -2555,9 +2593,11 @@ Validation rules:
                 format: date-time
               },
               updatedAt: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               }
             }
           },
@@ -2589,121 +2629,149 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                type: integer,
-                format: int64,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int64
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                type: number,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ]
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                type: number,
-                format: double,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: double
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                type: number,
-                format: float,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: float
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                type: boolean,
-                nullable: true
+                type: [
+                  null,
+                  boolean
+                ]
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                type: string,
-                format: date,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                type: string,
-                format: time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: time
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                type: string,
-                format: uuid,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uuid
               },
               stringList: {
                 type: array,
@@ -2712,11 +2780,13 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intList: {
                 type: array,
@@ -2726,12 +2796,14 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               doubleList: {
                 type: array,
@@ -2741,12 +2813,14 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: number,
                   format: double
-                },
-                nullable: true
+                }
               },
               intArray: {
                 type: array,
@@ -2756,12 +2830,14 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               readOnlyStringList: {
                 type: array,
@@ -2770,11 +2846,13 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intCollection: {
                 type: array,
@@ -2784,12 +2862,14 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               singleFile: {
                 type: string,
@@ -2810,25 +2890,31 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                type: string,
-                format: binary,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: binary
               },
               readOnlyList1Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               readOnlyList2Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               fileCollectionList: {
                 type: array,
@@ -2850,11 +2936,13 @@ Validation rules:
                 ]
               },
               nestedObjectList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
-                },
-                nullable: true
+                }
               },
               uriArray: {
                 type: array,
@@ -2864,21 +2952,25 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: uri
-                },
-                nullable: true
+                }
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                type: string,
-                format: uri,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uri
               }
             }
           },
@@ -2915,121 +3007,149 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                type: integer,
-                format: int64,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int64
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                type: number,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ]
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                type: number,
-                format: double,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: double
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                type: number,
-                format: float,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: float
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                type: boolean,
-                nullable: true
+                type: [
+                  null,
+                  boolean
+                ]
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                type: string,
-                format: date,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                type: string,
-                format: time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: time
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                type: string,
-                format: uuid,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uuid
               },
               stringList: {
                 type: array,
@@ -3038,11 +3158,13 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intList: {
                 type: array,
@@ -3052,12 +3174,14 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               doubleList: {
                 type: array,
@@ -3067,12 +3191,14 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: number,
                   format: double
-                },
-                nullable: true
+                }
               },
               intArray: {
                 type: array,
@@ -3082,12 +3208,14 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               readOnlyStringList: {
                 type: array,
@@ -3096,11 +3224,13 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intCollection: {
                 type: array,
@@ -3110,12 +3240,14 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               singleFile: {
                 type: string,
@@ -3136,25 +3268,31 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                type: string,
-                format: binary,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: binary
               },
               readOnlyList1Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               readOnlyList2Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               fileCollectionList: {
                 type: array,
@@ -3176,11 +3314,13 @@ Validation rules:
                 ]
               },
               nestedObjectList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromBody.NestedObject
-                },
-                nullable: true
+                }
               },
               uriArray: {
                 type: array,
@@ -3190,21 +3330,25 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: uri
-                },
-                nullable: true
+                }
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                type: string,
-                format: uri,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uri
               }
             }
           },
@@ -3230,121 +3374,149 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                type: integer,
-                format: int64,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int64
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                type: number,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ]
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                type: number,
-                format: double,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: double
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                type: number,
-                format: float,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: float
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                type: boolean,
-                nullable: true
+                type: [
+                  null,
+                  boolean
+                ]
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                type: string,
-                format: date,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                type: string,
-                format: time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: time
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                type: string,
-                format: uuid,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uuid
               },
               stringList: {
                 type: array,
@@ -3353,11 +3525,13 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intList: {
                 type: array,
@@ -3367,12 +3541,14 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               doubleList: {
                 type: array,
@@ -3382,12 +3558,14 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: number,
                   format: double
-                },
-                nullable: true
+                }
               },
               intArray: {
                 type: array,
@@ -3397,12 +3575,14 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               readOnlyStringList: {
                 type: array,
@@ -3411,11 +3591,13 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intCollection: {
                 type: array,
@@ -3425,12 +3607,14 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               singleFile: {
                 type: string,
@@ -3451,25 +3635,31 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                type: string,
-                format: binary,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: binary
               },
               readOnlyList1Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               readOnlyList2Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               fileCollectionList: {
                 type: array,
@@ -3491,11 +3681,13 @@ Validation rules:
                 ]
               },
               nestedObjectList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
-                },
-                nullable: true
+                }
               },
               uriArray: {
                 type: array,
@@ -3505,21 +3697,25 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: uri
-                },
-                nullable: true
+                }
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                type: string,
-                format: uri,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uri
               }
             }
           },
@@ -3556,121 +3752,149 @@ Validation rules:
                 type: string
               },
               nullableStringValue: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               intValue: {
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               longValue: {
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                type: integer,
-                format: int64,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int64
               },
               shortValue: {
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               byteValue: {
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               decimalValue: {
                 type: number
               },
               nullableDecimalValue: {
-                type: number,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ]
               },
               doubleValue: {
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                type: number,
-                format: double,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: double
               },
               floatValue: {
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                type: number,
-                format: float,
-                nullable: true
+                type: [
+                  null,
+                  number
+                ],
+                format: float
               },
               boolValue: {
                 type: boolean
               },
               nullableBoolValue: {
-                type: boolean,
-                nullable: true
+                type: [
+                  null,
+                  boolean
+                ]
               },
               dateTimeValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateTimeOffsetValue: {
                 type: string,
                 format: date-time
               },
               nullableDateTimeOffsetValue: {
-                type: string,
-                format: date-time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date-time
               },
               dateOnlyValue: {
                 type: string,
                 format: date
               },
               nullableDateOnlyValue: {
-                type: string,
-                format: date,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: date
               },
               timeOnlyValue: {
                 type: string,
                 format: time
               },
               nullableTimeOnlyValue: {
-                type: string,
-                format: time,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: time
               },
               guidValue: {
                 type: string,
                 format: uuid
               },
               nullableGuidValue: {
-                type: string,
-                format: uuid,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uuid
               },
               stringList: {
                 type: array,
@@ -3679,11 +3903,13 @@ Validation rules:
                 }
               },
               nullableStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intList: {
                 type: array,
@@ -3693,12 +3919,14 @@ Validation rules:
                 }
               },
               nullableIntList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               doubleList: {
                 type: array,
@@ -3708,12 +3936,14 @@ Validation rules:
                 }
               },
               nullableDoubleList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: number,
                   format: double
-                },
-                nullable: true
+                }
               },
               intArray: {
                 type: array,
@@ -3723,12 +3953,14 @@ Validation rules:
                 }
               },
               nullableIntArray: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               readOnlyStringList: {
                 type: array,
@@ -3737,11 +3969,13 @@ Validation rules:
                 }
               },
               nullableReadOnlyStringList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string
-                },
-                nullable: true
+                }
               },
               intCollection: {
                 type: array,
@@ -3751,12 +3985,14 @@ Validation rules:
                 }
               },
               nullableIntCollection: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: integer,
                   format: int32
-                },
-                nullable: true
+                }
               },
               singleFile: {
                 type: string,
@@ -3777,25 +4013,31 @@ Validation rules:
                 }
               },
               singleFileNullable: {
-                type: string,
-                format: binary,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: binary
               },
               readOnlyList1Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               readOnlyList2Nullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: binary
-                },
-                nullable: true
+                }
               },
               fileCollectionList: {
                 type: array,
@@ -3817,11 +4059,13 @@ Validation rules:
                 ]
               },
               nestedObjectList: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.TypeExamples.PostFromForm.NestedObject
-                },
-                nullable: true
+                }
               },
               uriArray: {
                 type: array,
@@ -3831,21 +4075,25 @@ Validation rules:
                 }
               },
               uriArrayNullable: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   type: string,
                   format: uri
-                },
-                nullable: true
+                }
               },
               uriValue: {
                 type: string,
                 format: uri
               },
               uriValueNullable: {
-                type: string,
-                format: uri,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uri
               }
             }
           },
@@ -4016,9 +4264,11 @@ Validation rules:
                 format: uri
               },
               actualUri: {
-                type: string,
-                format: uri,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uri
               },
               compare1: {
                 type: string,
@@ -4039,12 +4289,14 @@ Validation rules:
 - Must be a valid credit card number
               },
               fileExtension: {
-                type: string,
+                type: [
+                  null,
+                  string
+                ],
                 description:
 Validation rules:
 - Must be a file with extension: jpg,png,
-                format: binary,
-                nullable: true
+                format: binary
               },
               intMin: {
                 maximum: 2147483647,
@@ -4337,9 +4589,11 @@ Validation rules:
                 format: uri
               },
               actualUri: {
-                type: string,
-                format: uri,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ],
+                format: uri
               },
               compare1: {
                 type: string,
@@ -4360,12 +4614,14 @@ Validation rules:
 - Must be a valid credit card number
               },
               fileExtension: {
-                type: string,
+                type: [
+                  null,
+                  string
+                ],
                 description:
 Validation rules:
 - Must be a file with extension: jpg,png,
-                format: binary,
-                nullable: true
+                format: binary
               },
               intMin: {
                 maximum: 2147483647,
@@ -4513,15 +4769,17 @@ Validation rules:
               listNestedObject: {
                 maxItems: 10,
                 minItems: 0,
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel
                 },
                 description:
 Validation rules:
 - Must be 0 items or more
-- Must be 10 items or fewer,
-                nullable: true
+- Must be 10 items or fewer
               },
               customValidationWithDefaultMessage: {
                 type: string,
@@ -4848,11 +5106,13 @@ Validation rules:
 - Is required
               },
               listNestedObject: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidation.NestedObjectModel
-                },
-                nullable: true
+                }
               },
               allBuiltInStringValidators: {
                 maxLength: 250,
@@ -4875,10 +5135,8 @@ Validation rules:
                 format: email
               },
               allBuiltInNumberValidators: {
-                maximum: 100,
-                exclusiveMaximum: true,
-                minimum: 0,
-                exclusiveMinimum: true,
+                exclusiveMaximum: 100,
+                exclusiveMinimum: 0,
                 type: number,
                 description:
 Validation rules:
@@ -4960,29 +5218,35 @@ Validation rules:
 - Must be one of the following: en-GB, cy-GB
               },
               uprn: {
-                type: integer,
+                type: [
+                  null,
+                  integer
+                ],
                 description:
 Validation rules:
 - Must provide either uprn or easting/ northing
 - Must provide UPRN if required by chosen key,
-                format: int64,
-                nullable: true
+                format: int64
               },
               easting: {
-                type: number,
+                type: [
+                  null,
+                  number
+                ],
                 description:
 Validation rules:
 - Must provide either uprn or easting/ northing,
-                format: double,
-                nullable: true
+                format: double
               },
               northing: {
-                type: number,
+                type: [
+                  null,
+                  number
+                ],
                 description:
 Validation rules:
 - Must provide either uprn or easting/ northing,
-                format: double,
-                nullable: true
+                format: double
               }
             }
           },
@@ -5285,11 +5549,13 @@ Validation rules:
 - Is required
               },
               listNestedObject: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostFluentValidationFromFrom.NestedObjectModel
-                },
-                nullable: true
+                }
               },
               allBuiltInStringValidators: {
                 maxLength: 250,
@@ -5312,10 +5578,8 @@ Validation rules:
                 format: email
               },
               allBuiltInNumberValidators: {
-                maximum: 100,
-                exclusiveMaximum: true,
-                minimum: 0,
-                exclusiveMinimum: true,
+                exclusiveMaximum: 100,
+                exclusiveMinimum: 0,
                 type: number,
                 description:
 Validation rules:
@@ -5418,8 +5682,7 @@ Validation rules:
                 format: int32
               },
               intMax: {
-                maximum: 500,
-                exclusiveMaximum: true,
+                exclusiveMaximum: 500,
                 type: integer,
                 description:
 Validation rules:
@@ -5624,10 +5887,8 @@ Validation rules:
 - Must contain between 1 and 10 items.
               },
               allRules: {
-                maximum: 100,
-                exclusiveMaximum: true,
-                minimum: 10,
-                exclusiveMinimum: true,
+                exclusiveMaximum: 100,
+                exclusiveMinimum: 10,
                 maxLength: 100,
                 minLength: 10,
                 pattern: ^[a-zA-Z0-9]+$,
@@ -5662,11 +5923,13 @@ Validation rules:
 - Is required
               },
               listNestedObject: {
-                type: array,
+                type: [
+                  null,
+                  array
+                ],
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostWithValidation.NestedObjectModel
-                },
-                nullable: true
+                }
               }
             }
           },
@@ -5708,8 +5971,10 @@ Validation rules:
                 format: int32
               },
               summary: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               }
             }
           },
@@ -5717,25 +5982,35 @@ Validation rules:
             type: object,
             properties: {
               type: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               title: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               status: {
-                type: integer,
-                format: int32,
-                nullable: true
+                type: [
+                  null,
+                  integer
+                ],
+                format: int32
               },
               detail: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               instance: {
-                type: string,
-                nullable: true
+                type: [
+                  null,
+                  string
+                ]
               },
               errors: {
                 type: object,
