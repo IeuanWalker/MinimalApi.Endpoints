@@ -40,6 +40,67 @@ public static class OpenApiExtensions
 		return source;
 	}
 
+	/// <summary>
+	/// Marks response content from successful responses as nullable in the generated OpenAPI operation.
+	/// </summary>
+	/// <remarks>
+	/// This is applied by the source generator when an endpoint declares a nullable response type. A composition is
+	/// required because OpenAPI 3.0 Reference Objects cannot have nullable sibling keywords.
+	/// </remarks>
+	/// <param name="source">The route handler builder.</param>
+	/// <returns>The same <see cref="RouteHandlerBuilder"/> instance for chaining.</returns>
+	public static RouteHandlerBuilder WithNullableResponse(this RouteHandlerBuilder source)
+	{
+		source.AddOpenApiOperationTransformer((operation, _, cancellationToken) =>
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+
+			foreach ((string statusCode, IOpenApiResponse response) in operation.Responses ?? [])
+			{
+				if (!int.TryParse(statusCode, out int parsedStatusCode) ||
+					parsedStatusCode is < StatusCodes.Status200OK or >= StatusCodes.Status300MultipleChoices ||
+					response is not OpenApiResponse openApiResponse)
+				{
+					continue;
+				}
+
+				foreach (OpenApiMediaType mediaType in openApiResponse.Content?.Values ?? [])
+				{
+					if (mediaType.Schema is null || SchemaAllowsNull(mediaType.Schema))
+					{
+						continue;
+					}
+
+					mediaType.Schema = new OpenApiSchema
+					{
+						OneOf =
+						[
+							mediaType.Schema,
+							new OpenApiSchema { Type = JsonSchemaType.Null }
+						]
+					};
+				}
+			}
+
+			return Task.CompletedTask;
+		});
+
+		return source;
+	}
+
+	static bool SchemaAllowsNull(IOpenApiSchema schema)
+	{
+		if (schema is not OpenApiSchema openApiSchema)
+		{
+			return false;
+		}
+
+		return openApiSchema.Type?.HasFlag(JsonSchemaType.Null) == true ||
+			openApiSchema.Enum?.Any(value => value is null) == true ||
+			openApiSchema.OneOf?.Any(SchemaAllowsNull) == true ||
+			openApiSchema.AnyOf?.Any(SchemaAllowsNull) == true;
+	}
+
 	extension(OpenApiOptions source)
 	{
 		/// <summary>

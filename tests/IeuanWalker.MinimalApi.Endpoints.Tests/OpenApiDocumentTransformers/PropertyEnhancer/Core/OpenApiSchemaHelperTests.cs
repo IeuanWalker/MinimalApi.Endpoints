@@ -25,6 +25,40 @@ public class OpenApiSchemaHelperTests
 
 	#endregion
 
+	#region SetPrimitiveTypeInfo Tests
+
+	[Theory]
+	[InlineData(typeof(int), JsonSchemaType.Integer)]
+	[InlineData(typeof(decimal), JsonSchemaType.Number)]
+	public void SetPrimitiveTypeInfo_NumericType_RemovesPattern(Type primitiveType, JsonSchemaType expectedType)
+	{
+		// Arrange
+		OpenApiSchema schema = new() { Pattern = "numeric parsing pattern" };
+
+		// Act
+		OpenApiSchemaHelper.SetPrimitiveTypeInfo(schema, primitiveType);
+
+		// Assert
+		schema.Type.ShouldBe(expectedType);
+		schema.Pattern.ShouldBeNull();
+	}
+
+	[Fact]
+	public void SetPrimitiveTypeInfo_StringType_PreservesPattern()
+	{
+		// Arrange
+		OpenApiSchema schema = new() { Pattern = "^[a-z]+$" };
+
+		// Act
+		OpenApiSchemaHelper.SetPrimitiveTypeInfo(schema, typeof(string));
+
+		// Assert
+		schema.Type.ShouldBe(JsonSchemaType.String);
+		schema.Pattern.ShouldBe("^[a-z]+$");
+	}
+
+	#endregion
+
 	#region CreatePrimitiveSchemaFromRefId Tests
 
 	[Theory]

@@ -399,13 +399,27 @@ partial class ValidationDocumentTransformer
 				break;
 
 			case StringLengthRule stringLengthRule:
-				if (stringLengthRule.MinLength.HasValue)
+				if (schema.Type?.HasFlag(JsonSchemaType.Array) == true)
 				{
-					schema.MinLength = stringLengthRule.MinLength.Value;
+					if (stringLengthRule.MinLength.HasValue)
+					{
+						schema.MinItems = stringLengthRule.MinLength.Value;
+					}
+					if (stringLengthRule.MaxLength.HasValue)
+					{
+						schema.MaxItems = stringLengthRule.MaxLength.Value;
+					}
 				}
-				if (stringLengthRule.MaxLength.HasValue)
+				else
 				{
-					schema.MaxLength = stringLengthRule.MaxLength.Value;
+					if (stringLengthRule.MinLength.HasValue)
+					{
+						schema.MinLength = stringLengthRule.MinLength.Value;
+					}
+					if (stringLengthRule.MaxLength.HasValue)
+					{
+						schema.MaxLength = stringLengthRule.MaxLength.Value;
+					}
 				}
 				break;
 

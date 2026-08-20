@@ -532,6 +532,16 @@ static class OpenApiSchemaHelper
 				Format = SchemaConstants.FormatBinary
 			};
 		}
+
+		// ASP.NET can attach a lexical parsing pattern to inline primitive schemas before
+		// their CLR type is applied. JSON Schema's pattern keyword only constrains strings,
+		// so retaining it on an integer or number schema is ineffective and misleading.
+		if (schema.Type is JsonSchemaType schemaType &&
+			(schemaType.HasFlag(JsonSchemaType.Integer) || schemaType.HasFlag(JsonSchemaType.Number)) &&
+			!schemaType.HasFlag(JsonSchemaType.String))
+		{
+			schema.Pattern = null;
+		}
 	}
 
 	static OpenApiSchema? CreateInlineSchemaFromRefIdWithCollections(string refId, OpenApiDocument document)

@@ -531,7 +531,16 @@
                 content: {
                   application/json: {
                     schema: {
-                      $ref: #/components/schemas/ExampleApi.Endpoints.Todos.Patch.ResponseModel
+                      oneOf: [
+                        {
+                          $ref: #/components/schemas/ExampleApi.Endpoints.Todos.Patch.ResponseModel
+                        },
+                        {
+                          enum: [
+                            null
+                          ]
+                        }
+                      ]
                     }
                   }
                 }
@@ -1224,7 +1233,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  minLength: 1,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: string
@@ -1239,7 +1248,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
+                  maxItems: 10,
                   type: array,
                   items: {
                     type: string
@@ -1254,8 +1263,8 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
-                  minLength: 1,
+                  maxItems: 10,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: string
@@ -1271,7 +1280,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  minLength: 1,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: integer,
@@ -1287,7 +1296,7 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
+                  maxItems: 10,
                   type: array,
                   items: {
                     type: integer,
@@ -1303,8 +1312,8 @@ Validation rules:
                 in: query,
                 required: true,
                 schema: {
-                  maxLength: 10,
-                  minLength: 1,
+                  maxItems: 10,
+                  minItems: 1,
                   type: array,
                   items: {
                     type: integer,
@@ -2214,7 +2223,6 @@ Validation rules:
                 type: string
               },
               size: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               }
@@ -2234,7 +2242,6 @@ Validation rules:
                 type: string
               },
               size: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               }
@@ -2297,7 +2304,6 @@ Validation rules:
                 $ref: #/components/schemas/ExampleApi.Endpoints.FileHandling.PostMultipart.FileInfo
               },
               totalFileCount: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2335,7 +2341,6 @@ Validation rules:
                 type: string
               },
               size: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               }
@@ -2345,7 +2350,6 @@ Validation rules:
             type: object,
             properties: {
               id: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2373,7 +2377,6 @@ Validation rules:
             type: object,
             properties: {
               id: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2422,7 +2425,6 @@ Validation rules:
             type: object,
             properties: {
               id: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2477,7 +2479,6 @@ Validation rules:
             type: object,
             properties: {
               id: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2532,7 +2533,6 @@ Validation rules:
             type: object,
             properties: {
               id: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2563,7 +2563,6 @@ Validation rules:
                 type: string
               },
               providedParametersCount: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2589,78 +2588,64 @@ Validation rules:
                 nullable: true
               },
               intValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               longValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64,
                 nullable: true
               },
               shortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               byteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               decimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double
               },
               nullableDecimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               doubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               floatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float,
                 nullable: true
@@ -2733,7 +2718,6 @@ Validation rules:
               intList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -2741,7 +2725,6 @@ Validation rules:
               nullableIntList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -2750,7 +2733,6 @@ Validation rules:
               doubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 }
@@ -2758,7 +2740,6 @@ Validation rules:
               nullableDoubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 },
@@ -2767,7 +2748,6 @@ Validation rules:
               intArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -2775,7 +2755,6 @@ Validation rules:
               nullableIntArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -2797,7 +2776,6 @@ Validation rules:
               intCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -2805,7 +2783,6 @@ Validation rules:
               nullableIntCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -2909,7 +2886,6 @@ Validation rules:
                 type: string
               },
               value: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -2940,78 +2916,64 @@ Validation rules:
                 nullable: true
               },
               intValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               longValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64,
                 nullable: true
               },
               shortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               byteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               decimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double
               },
               nullableDecimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               doubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               floatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float,
                 nullable: true
@@ -3084,7 +3046,6 @@ Validation rules:
               intList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3092,7 +3053,6 @@ Validation rules:
               nullableIntList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3101,7 +3061,6 @@ Validation rules:
               doubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 }
@@ -3109,7 +3068,6 @@ Validation rules:
               nullableDoubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 },
@@ -3118,7 +3076,6 @@ Validation rules:
               intArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3126,7 +3083,6 @@ Validation rules:
               nullableIntArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3148,7 +3104,6 @@ Validation rules:
               intCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3156,7 +3111,6 @@ Validation rules:
               nullableIntCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3260,7 +3214,6 @@ Validation rules:
                 type: string
               },
               processedPropertiesCount: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               }
@@ -3280,78 +3233,64 @@ Validation rules:
                 nullable: true
               },
               intValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               longValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64,
                 nullable: true
               },
               shortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               byteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               decimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double
               },
               nullableDecimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               doubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               floatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float,
                 nullable: true
@@ -3424,7 +3363,6 @@ Validation rules:
               intList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3432,7 +3370,6 @@ Validation rules:
               nullableIntList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3441,7 +3378,6 @@ Validation rules:
               doubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 }
@@ -3449,7 +3385,6 @@ Validation rules:
               nullableDoubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 },
@@ -3458,7 +3393,6 @@ Validation rules:
               intArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3466,7 +3400,6 @@ Validation rules:
               nullableIntArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3488,7 +3421,6 @@ Validation rules:
               intCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3496,7 +3428,6 @@ Validation rules:
               nullableIntCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3600,7 +3531,6 @@ Validation rules:
                 type: string
               },
               value: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -3631,78 +3561,64 @@ Validation rules:
                 nullable: true
               },
               intValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableIntValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               longValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64
               },
               nullableLongValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int64,
                 nullable: true
               },
               shortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableShortValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               byteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               nullableByteValue: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true
               },
               decimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double
               },
               nullableDecimalValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               doubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double
               },
               nullableDoubleValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double,
                 nullable: true
               },
               floatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float
               },
               nullableFloatValue: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: float,
                 nullable: true
@@ -3775,7 +3691,6 @@ Validation rules:
               intList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3783,7 +3698,6 @@ Validation rules:
               nullableIntList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3792,7 +3706,6 @@ Validation rules:
               doubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 }
@@ -3800,7 +3713,6 @@ Validation rules:
               nullableDoubleList: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                   type: number,
                   format: double
                 },
@@ -3809,7 +3721,6 @@ Validation rules:
               intArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3817,7 +3728,6 @@ Validation rules:
               nullableIntArray: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3839,7 +3749,6 @@ Validation rules:
               intCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -3847,7 +3756,6 @@ Validation rules:
               nullableIntCollection: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -3951,12 +3859,10 @@ Validation rules:
                 type: string
               },
               processedPropertiesCount: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               uploadedFilesCount: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               }
@@ -4048,7 +3954,7 @@ Validation rules:
 - Must be 3 characters or more
               },
               listMin: {
-                minLength: 3,
+                minItems: 3,
                 type: array,
                 items: {
                   type: string
@@ -4065,7 +3971,7 @@ Validation rules:
 - Must be 100 characters or fewer
               },
               listMax: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
                   type: string
@@ -4203,7 +4109,7 @@ Validation rules:
                 format: double
               },
               listStringMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
                   type: string
@@ -4213,7 +4119,7 @@ Validation rules:
 - Must be 1 items or more
               },
               listStringMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
                   type: string
@@ -4223,8 +4129,8 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listStringRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
                   type: string
@@ -4235,10 +4141,9 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4247,10 +4152,9 @@ Validation rules:
 - Must be 1 items or more
               },
               listIntMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4259,11 +4163,10 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4377,7 +4280,7 @@ Validation rules:
 - Must be 3 characters or more
               },
               listMin: {
-                minLength: 3,
+                minItems: 3,
                 type: array,
                 items: {
                   type: string
@@ -4394,7 +4297,7 @@ Validation rules:
 - Must be 100 characters or fewer
               },
               listMax: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
                   type: string
@@ -4532,7 +4435,7 @@ Validation rules:
                 format: double
               },
               listStringMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
                   type: string
@@ -4542,7 +4445,7 @@ Validation rules:
 - Must be 1 items or more
               },
               listStringMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
                   type: string
@@ -4552,8 +4455,8 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listStringRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
                   type: string
@@ -4564,10 +4467,9 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntMinCount: {
-                minLength: 1,
+                minItems: 1,
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4576,10 +4478,9 @@ Validation rules:
 - Must be 1 items or more
               },
               listIntMaxCount: {
-                maxLength: 10,
+                maxItems: 10,
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4588,11 +4489,10 @@ Validation rules:
 - Must be 10 items or fewer
               },
               listIntRangeCount: {
-                maxLength: 10,
-                minLength: 1,
+                maxItems: 10,
+                minItems: 1,
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4624,8 +4524,8 @@ Validation rules:
 - Is required
               },
               listNestedObject: {
-                maxLength: 10,
-                minLength: 0,
+                maxItems: 10,
+                minItems: 0,
                 type: array,
                 items: {
                   $ref: #/components/schemas/ExampleApi.Endpoints.Validation.PostDataAnnotationsFromBody.NestedObjectModel
@@ -4774,7 +4674,6 @@ Validation rules:
               listIntMinCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4785,7 +4684,6 @@ Validation rules:
               listIntMaxCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4796,7 +4694,6 @@ Validation rules:
               listIntRangeCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4926,7 +4823,6 @@ Validation rules:
               listIntMinCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4937,7 +4833,6 @@ Validation rules:
               listIntMaxCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -4948,7 +4843,6 @@ Validation rules:
               listIntRangeCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5020,12 +4914,10 @@ Validation rules:
                 nullable: true
               },
               maxNumberTest: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               minNumberTest: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -5222,7 +5114,6 @@ Validation rules:
               listIntMinCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5233,7 +5124,6 @@ Validation rules:
               listIntMaxCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5244,7 +5134,6 @@ Validation rules:
               listIntRangeCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5374,7 +5263,6 @@ Validation rules:
               listIntMinCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5385,7 +5273,6 @@ Validation rules:
               listIntMaxCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5396,7 +5283,6 @@ Validation rules:
               listIntRangeCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5468,12 +5354,10 @@ Validation rules:
                 nullable: true
               },
               maxNumberTest: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               minNumberTest: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -5562,12 +5446,10 @@ Validation rules:
                 format: int32
               },
               intRange: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
               doubleMin: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double
               },
@@ -5580,7 +5462,6 @@ Validation rules:
                 format: double
               },
               doubleRange: {
-                pattern: ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$,
                 type: number,
                 format: double
               },
@@ -5605,7 +5486,6 @@ Validation rules:
               listIntMinCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -5613,7 +5493,6 @@ Validation rules:
               listIntMaxCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -5621,7 +5500,6 @@ Validation rules:
               listIntRangeCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 }
@@ -5737,7 +5615,6 @@ Validation rules:
               listIntMinCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5748,7 +5625,6 @@ Validation rules:
               listIntMaxCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5759,7 +5635,6 @@ Validation rules:
               listIntRangeCount: {
                 type: array,
                 items: {
-                  pattern: ^-?(?:0|[1-9]\d*)$,
                   type: integer,
                   format: int32
                 },
@@ -5848,7 +5723,6 @@ Validation rules:
                 format: date
               },
               temperatureC: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32
               },
@@ -5870,7 +5744,6 @@ Validation rules:
                 nullable: true
               },
               status: {
-                pattern: ^-?(?:0|[1-9]\d*)$,
                 type: integer,
                 format: int32,
                 nullable: true

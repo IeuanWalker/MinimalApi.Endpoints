@@ -37,6 +37,40 @@ public class SnapshotTests
 	}
 
 	[Fact]
+	public Task GeneratesEndpointExtensions_ForNullableResponse()
+	{
+		// Arrange
+		const string source =
+			/* language=C#-test */
+			//lang=csharp
+			"""
+			#nullable enable
+			using IeuanWalker.MinimalApi.Endpoints;
+
+			namespace TestNamespace;
+
+			public class FindUserEndpoint : IEndpoint<FindUserRequest, UserResponse?>
+			{
+				public static void Configure(RouteHandlerBuilder builder)
+				{
+					builder.Get("/api/users/{id}");
+				}
+
+				public Task<UserResponse?> Handle(FindUserRequest request, CancellationToken ct)
+				{
+					return Task.FromResult<UserResponse?>(null);
+				}
+			}
+
+			public record FindUserRequest(int Id);
+			public record UserResponse(int Id);
+			""";
+
+		// Act & Assert
+		return TestHelper.Verify(source);
+	}
+
+	[Fact]
 	public Task GeneratesEndpointExtensions_ForEndpointWithoutRequest()
 	{
 		// Arrange

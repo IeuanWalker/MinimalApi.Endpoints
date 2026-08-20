@@ -57,6 +57,10 @@ static class EndpointGeneratorHelpers
 
 		// Configure the endpoint
 		builder.AppendLine($"global::{endpoint.TypeName}.Configure({uniqueRootName});");
+		if (endpoint.ResponseIsNullable)
+		{
+			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithNullableResponse({uniqueRootName});");
+		}
 		if (addDefaultSuccessResponse)
 		{
 			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithDefaultSuccessResponse({uniqueRootName});");

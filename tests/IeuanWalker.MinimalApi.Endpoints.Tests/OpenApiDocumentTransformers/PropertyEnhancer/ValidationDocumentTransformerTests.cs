@@ -139,6 +139,8 @@ public class ValidationDocumentTransformerTests
 		// Assert
 		result.MinLength.ShouldBe(3);
 		result.MaxLength.ShouldBe(50);
+		result.MinItems.ShouldBeNull();
+		result.MaxItems.ShouldBeNull();
 		result.Description.ShouldNotBeNull();
 		result.Description.ShouldContain("at least 3 characters");
 		result.Description.ShouldContain("less than 50 characters");
@@ -664,6 +666,55 @@ public class ValidationDocumentTransformerTests
 		// Assert
 		result.Type.ShouldBe(JsonSchemaType.Array);
 		result.Items.ShouldNotBeNull();
+	}
+
+	[Fact]
+	public void CreateInlineSchemaWithAllValidation_WithArrayLengthRule_SetsItemConstraints()
+	{
+		// Arrange
+		OpenApiDocument document = CreateTestDocument();
+		OpenApiSchema originalSchema = CreateArraySchema(CreateStringSchema());
+		List<ValidationRule> rules = [new StringLengthRule("Items", minLength: 1, maxLength: 10)];
+
+		// Act
+		OpenApiSchema result = ValidationDocumentTransformer.CreateInlineSchemaWithAllValidation(
+			originalSchema,
+			rules,
+			typeAppendRulesToPropertyDescription: true,
+			appendRulesToPropertyDescription: true,
+			document);
+
+		// Assert
+		result.MinItems.ShouldBe(1);
+		result.MaxItems.ShouldBe(10);
+		result.MinLength.ShouldBeNull();
+		result.MaxLength.ShouldBeNull();
+	}
+
+	[Fact]
+	public void CreateInlineSchemaWithAllValidation_WithNullableArrayLengthRule_SetsItemConstraints()
+	{
+		// Arrange
+		OpenApiDocument document = CreateTestDocument();
+		OpenApiSchema originalSchema = CreateArraySchema(CreateStringSchema());
+		originalSchema.Type |= JsonSchemaType.Null;
+		List<ValidationRule> rules = [new StringLengthRule("Items", minLength: 1, maxLength: 10)];
+
+		// Act
+		OpenApiSchema result = ValidationDocumentTransformer.CreateInlineSchemaWithAllValidation(
+			originalSchema,
+			rules,
+			typeAppendRulesToPropertyDescription: true,
+			appendRulesToPropertyDescription: true,
+			document);
+
+		// Assert
+		result.Type.ShouldNotBeNull().HasFlag(JsonSchemaType.Array).ShouldBeTrue();
+		result.Type.ShouldNotBeNull().HasFlag(JsonSchemaType.Null).ShouldBeTrue();
+		result.MinItems.ShouldBe(1);
+		result.MaxItems.ShouldBe(10);
+		result.MinLength.ShouldBeNull();
+		result.MaxLength.ShouldBeNull();
 	}
 
 	#endregion

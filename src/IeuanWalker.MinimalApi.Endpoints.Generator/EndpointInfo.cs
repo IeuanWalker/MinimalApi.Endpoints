@@ -67,7 +67,8 @@ public sealed class EndpointInfo : TypeInfo
 		bool disableValidation,
 		string? responseType,
 		CachableLocation location,
-		List<DiagnosticInfo> diagnostics)
+		List<DiagnosticInfo> diagnostics,
+		bool responseIsNullable = false)
 		: base(typeName, location, diagnostics)
 	{
 		HttpVerb = httpVerb;
@@ -79,6 +80,7 @@ public sealed class EndpointInfo : TypeInfo
 		RequestBindingType = requestBindingType;
 		DisableValidation = disableValidation;
 		ResponseType = responseType;
+		ResponseIsNullable = responseIsNullable;
 	}
 
 	public HttpVerb HttpVerb { get; }
@@ -89,5 +91,6 @@ public sealed class EndpointInfo : TypeInfo
 	public string? RequestType { get; }
 	public (RequestBindingTypeEnum requestType, string? name)? RequestBindingType { get; }
 	public string? ResponseType { get; }
+	public bool ResponseIsNullable { get; }
 	public bool DisableValidation { get; }
 }
