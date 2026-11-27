@@ -10,16 +10,19 @@ public static class TestHelper
 {
 	public static Task Verify(string source, [CallerFilePath] string sourceFile = "")
 	{
-		// Parse the provided source code
-		SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(source);
+		GeneratorDriver driver = RunGenerator(CSharpSyntaxTree.ParseText(source));
+		return Verifier.Verify(driver, sourceFile: sourceFile);
+	}
 
+	internal static GeneratorDriver RunGenerator(params SyntaxTree[] syntaxTrees)
+	{
 		// Create references for all the assemblies we need
 		IEnumerable<PortableExecutableReference> references = GetReferences();
 
 		// Create a compilation with the source code
 		CSharpCompilation compilation = CSharpCompilation.Create(
 			assemblyName: "TestAssembly",
-			syntaxTrees: [syntaxTree],
+			syntaxTrees: syntaxTrees,
 			references: references,
 			options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
@@ -29,11 +32,7 @@ public static class TestHelper
 		// Use the Roslyn driver to run the generator
 		GeneratorDriver driver = CSharpGeneratorDriver.Create(generator);
 
-		// Run the generator
-		driver = driver.RunGenerators(compilation);
-
-		// Use Verify to snapshot test the results
-		return Verifier.Verify(driver, sourceFile: sourceFile);
+		return driver.RunGenerators(compilation);
 	}
 
 	static List<PortableExecutableReference> GetReferences()

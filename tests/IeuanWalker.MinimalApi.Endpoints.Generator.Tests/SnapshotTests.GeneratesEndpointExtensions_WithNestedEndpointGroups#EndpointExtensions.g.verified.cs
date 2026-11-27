@@ -21,8 +21,8 @@ public static class EndpointExtensions
 	public static IHostApplicationBuilder AddEndpointsFromTestAssembly(this IHostApplicationBuilder builder)
 	{
 		builder.Services.AddScoped<global::TestNamespace.GetUserEndpoint>();
-		builder.Services.AddScoped<global::TestNamespace.GetUserV1Endpoint>();
 		builder.Services.AddScoped<global::TestNamespace.GetAllUsersEndpoint>();
+		builder.Services.AddScoped<global::TestNamespace.GetUserV1Endpoint>();
 
 		return builder;
 	}
@@ -46,36 +46,36 @@ public static class EndpointExtensions
 
 		global::TestNamespace.GetUserEndpoint.Configure(get__0);
 
-		// ************************************
-		// GROUP: TestNamespace.V1EndpointGroup
-		// 1 endpoints
-		// ************************************
-		RouteGroupBuilder group_v1EndpointGroup_1 = TestNamespace.V1EndpointGroup.Configure(app);
-
-		// GET: /v1/user/{id}
-		RouteHandlerBuilder get_User_1 = group_v1EndpointGroup_1
-			.MapGet("/user/{id}", async (
-				global::TestNamespace.GetUserRequest request,
-				[FromServices] global::TestNamespace.GetUserV1Endpoint endpoint,
-				CancellationToken ct) => await endpoint.Handle(request, ct))
-			.WithName("get_User_1");
-
-		global::TestNamespace.GetUserV1Endpoint.Configure(get_User_1);
-
 		// ***************************************
 		// GROUP: TestNamespace.UsersEndpointGroup
 		// 1 endpoints
 		// ***************************************
-		RouteGroupBuilder group_usersEndpointGroup_2 = TestNamespace.UsersEndpointGroup.Configure(app);
+		RouteGroupBuilder group_usersEndpointGroup_1 = TestNamespace.UsersEndpointGroup.Configure(app);
 
 		// GET: /users/
-		RouteHandlerBuilder get_Users_2 = group_usersEndpointGroup_2
+		RouteHandlerBuilder get_Users_1 = group_usersEndpointGroup_1
 			.MapGet("/", async (
 				[FromServices] global::TestNamespace.GetAllUsersEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(ct))
-			.WithName("get_Users_2");
+			.WithName("get_Users_1");
 
-		global::TestNamespace.GetAllUsersEndpoint.Configure(get_Users_2);
+		global::TestNamespace.GetAllUsersEndpoint.Configure(get_Users_1);
+
+		// ************************************
+		// GROUP: TestNamespace.V1EndpointGroup
+		// 1 endpoints
+		// ************************************
+		RouteGroupBuilder group_v1EndpointGroup_2 = TestNamespace.V1EndpointGroup.Configure(app);
+
+		// GET: /v1/user/{id}
+		RouteHandlerBuilder get_User_2 = group_v1EndpointGroup_2
+			.MapGet("/user/{id}", async (
+				global::TestNamespace.GetUserRequest request,
+				[FromServices] global::TestNamespace.GetUserV1Endpoint endpoint,
+				CancellationToken ct) => await endpoint.Handle(request, ct))
+			.WithName("get_User_2");
+
+		global::TestNamespace.GetUserV1Endpoint.Configure(get_User_2);
 
 		return app;
 	}
