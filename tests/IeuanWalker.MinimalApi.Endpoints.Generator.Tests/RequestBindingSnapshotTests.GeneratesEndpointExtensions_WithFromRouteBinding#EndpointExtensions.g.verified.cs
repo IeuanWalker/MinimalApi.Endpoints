@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.GetUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("get_Users_0");
+			.WithName("get_Users_9aef4d0a429b1017");
 
 		global::TestNamespace.GetUserEndpoint.Configure(get_Users_0);
 

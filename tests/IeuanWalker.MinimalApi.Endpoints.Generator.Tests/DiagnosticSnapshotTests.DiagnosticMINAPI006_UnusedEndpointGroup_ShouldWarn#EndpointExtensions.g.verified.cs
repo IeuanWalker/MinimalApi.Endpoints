@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.SimpleEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Simple")
-			.WithName("get_Simple_0");
+			.WithName("get_Simple_50f65d8d0a064d4d");
 
 		global::TestNamespace.SimpleEndpoint.Configure(get_Simple_0);
 

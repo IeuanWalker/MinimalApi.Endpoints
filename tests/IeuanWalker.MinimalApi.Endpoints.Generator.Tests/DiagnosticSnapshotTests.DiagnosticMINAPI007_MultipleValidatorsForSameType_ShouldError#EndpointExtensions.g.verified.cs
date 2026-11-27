@@ -41,7 +41,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.ValidatorEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Val")
-			.WithName("post_Val_0")
+			.WithName("post_Val_696480cd7ca9479f")
 			.DisableValidation()
 			.AddEndpointFilter<FluentValidationFilter<global::TestNamespace.CreateRequest>>()
 			.ProducesValidationProblem();

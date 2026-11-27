@@ -34,7 +34,7 @@ public static class EndpointExtensions
 				global::TestNamespace.RootRequest request,
 				[FromServices] global::TestNamespace.RootEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
-			.WithName("get__0");
+			.WithName("get__d5231b4c7421c540");
 
 		global::TestNamespace.RootEndpoint.Configure(get__0);
 

@@ -36,7 +36,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.UpdateUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("put_Users_0");
+			.WithName("put_Users_22e72e5a22c54add");
 
 		global::TestNamespace.UpdateUserEndpoint.Configure(put_Users_0);
 
@@ -47,7 +47,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.PatchUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("patch_Users_1");
+			.WithName("patch_Users_78528eca55974a8f");
 
 		global::TestNamespace.PatchUserEndpoint.Configure(patch_Users_1);
 

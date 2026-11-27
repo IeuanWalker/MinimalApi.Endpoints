@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Text.RegularExpressions;
 
 namespace IeuanWalker.MinimalApi.Endpoints.Generator.Tests;
 
@@ -34,7 +35,19 @@ public class EndpointOrderingTests
 		forward.ShouldContain("GetItemV2.Configure");
 		forward.ShouldContain("GetMaterial.Configure");
 		reversed.ShouldBe(forward);
+
+		string[] originalNames = GetOperationNames(forward);
+		originalNames.Length.ShouldBe(3);
+		originalNames.Distinct(StringComparer.Ordinal).Count().ShouldBe(3);
+
+		SyntaxTree itemV0 = CreateEndpoint("GetItemV0", "ItemGroup");
+		string[] expandedNames = GetOperationNames(GenerateSource(groups, itemV0, itemV1, itemV2, material));
+		expandedNames.Length.ShouldBe(4);
+		expandedNames.Skip(1).ShouldBe(originalNames);
 	}
+
+	static string[] GetOperationNames(string source) => Regex.Matches(source, "\\.WithName\\(\"([^\"]+)\"\\)")
+		.Select(match => match.Groups[1].Value).ToArray();
 
 	static string GenerateSource(params SyntaxTree[] trees) => TestHelper.RunGenerator(trees)
 		.GetRunResult().GeneratedTrees.Single().GetText().ToString();

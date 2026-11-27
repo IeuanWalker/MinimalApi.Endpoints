@@ -37,7 +37,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.GetUsersEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("get_Users_0");
+			.WithName("get_Users_4467917e333636ee");
 
 		global::TestNamespace.GetUsersEndpoint.Configure(get_Users_0);
 
@@ -48,7 +48,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("post_Users_1");
+			.WithName("post_Users_5ad9da7b167973c0");
 
 		global::TestNamespace.CreateUserEndpoint.Configure(post_Users_1);
 
@@ -59,7 +59,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("delete_Users_2");
+			.WithName("delete_Users_bc960a1c9e6190ad");
 
 		global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_2);
 

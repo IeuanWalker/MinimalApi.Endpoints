@@ -24,7 +24,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::GetUsersEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
 				.WithTags("Users")
-				.WithName("get_Users_0");
+				.WithName("get_Users_e559a6a1e5a0b6f3");
 
 			global::GetUsersEndpoint.Configure(get_Users_0);
 
@@ -57,7 +57,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::CreateUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("post_Users_1");
+				.WithName("post_Users_2840f395858afadd");
 
 			global::CreateUserEndpoint.Configure(post_Users_1);
 
@@ -91,7 +91,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::CreateUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("post_Users_2");
+				.WithName("post_Users_2840f395858afadd");
 
 			global::CreateUserEndpoint.Configure(post_Users_2);
 
@@ -125,7 +125,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::GetUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("get_Users_3");
+				.WithName("get_Users_39442a95823d1e14");
 
 			global::GetUserEndpoint.Configure(get_Users_3);
 
@@ -159,7 +159,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::GetUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("get_Users_4");
+				.WithName("get_Users_39442a95823d1e14");
 
 			global::GetUserEndpoint.Configure(get_Users_4);
 
@@ -197,7 +197,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::TestEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Test")
-				.WithName("post_Test_5");
+				.WithName("post_Test_ab9cc7ebbb5bc243");
 
 			global::TestEndpoint.Configure(post_Test_5);
 
@@ -231,7 +231,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::CreateUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("post_Users_6");
+				.WithName("post_Users_2840f395858afadd");
 
 			global::CreateUserEndpoint.Configure(post_Users_6);
 
@@ -265,7 +265,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::GetUsersEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
 				.WithTags("Users")
-				.WithName("get_Users_7");
+				.WithName("get_Users_e559a6a1e5a0b6f3");
 
 			global::GetUsersEndpoint.Configure(get_Users_7);
 
@@ -360,7 +360,7 @@ public class EndpointGeneratorHelpersTests
 				.MapGet("/users", async (
 					[FromServices] global::GetUsersEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
-				.WithName("get_Users_10");
+				.WithName("get_Users_e559a6a1e5a0b6f3");
 
 			global::GetUsersEndpoint.Configure(get_Users_10);
 
@@ -393,7 +393,7 @@ public class EndpointGeneratorHelpersTests
 				.MapGet("/users", async (
 					[FromServices] global::GetUsersEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
-				.WithName("get_Users_11");
+				.WithName("get_Users_e559a6a1e5a0b6f3");
 
 			global::GetUsersEndpoint.Configure(get_Users_11);
 
@@ -430,7 +430,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::CreateUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("post_Users_12")
+				.WithName("post_Users_2840f395858afadd")
 				.DisableValidation()
 				.AddEndpointFilter<FluentValidationFilter<global::CreateUserRequest>>()
 				.ProducesValidationProblem();
@@ -471,7 +471,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::CreateUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("post_Users_13");
+				.WithName("post_Users_2840f395858afadd");
 
 			global::CreateUserEndpoint.Configure(post_Users_13);
 
@@ -532,7 +532,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::GetUsersEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
 				.WithTags("Users")
-				.WithName("get_Users_14");
+				.WithName("get_Users_e559a6a1e5a0b6f3");
 
 			global::GetUsersEndpoint.Configure(get_Users_14);
 
@@ -568,7 +568,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::TestEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
 				.WithTags("Test")
-				.WithName("{httpVerb.ToString().ToLower()}_Test_15");
+				.WithName("{httpVerb.ToString().ToLower()}_Test_ab9cc7ebbb5bc243");
 
 			global::TestEndpoint.Configure({httpVerb.ToString().ToLower()}_Test_15);
 
@@ -602,7 +602,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::GetUserPostEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
 				.WithTags("Users")
-				.WithName("get_UsersPosts_16");
+				.WithName("get_UsersPosts_553568546cd9e039");
 
 			global::GetUserPostEndpoint.Configure(get_UsersPosts_16);
 
@@ -647,7 +647,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::TestEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
 				.WithTags("Test")
-				.WithName("get_Test_18");
+				.WithName("get_Test_ab9cc7ebbb5bc243");
 
 			global::TestEndpoint.Configure(get_Test_18);
 
@@ -680,7 +680,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::CreateUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("post_Users_19");
+				.WithName("post_Users_2840f395858afadd");
 
 			global::CreateUserEndpoint.Configure(post_Users_19);
 
@@ -713,7 +713,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::GetUsersEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(ct))
 				.WithTags("Users")
-				.WithName("get_Users_20");
+				.WithName("get_Users_e559a6a1e5a0b6f3");
 
 			global::GetUsersEndpoint.Configure(get_Users_20);
 
@@ -752,7 +752,7 @@ public class EndpointGeneratorHelpersTests
 					[FromServices] global::CreateUserEndpoint endpoint,
 					CancellationToken ct) => await endpoint.Handle(request, ct))
 				.WithTags("Users")
-				.WithName("post_Users_21")
+				.WithName("post_Users_2840f395858afadd")
 				.DisableValidation()
 				.AddEndpointFilter<FluentValidationFilter<global::CreateUserRequest>>()
 				.ProducesValidationProblem();

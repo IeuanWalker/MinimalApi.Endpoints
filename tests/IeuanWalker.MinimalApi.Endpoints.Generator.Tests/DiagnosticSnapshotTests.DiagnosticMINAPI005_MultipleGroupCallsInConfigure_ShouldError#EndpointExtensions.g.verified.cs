@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.MultipleGroupCallsEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Multi")
-			.WithName("get_Multi_0");
+			.WithName("get_Multi_4c38f9b96e962ee9");
 
 		global::TestNamespace.MultipleGroupCallsEndpoint.Configure(get_Multi_0);
 

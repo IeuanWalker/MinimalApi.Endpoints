@@ -39,7 +39,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("post_Users_0")
+			.WithName("post_Users_5ad9da7b167973c0")
 			.DisableValidation()
 			.AddEndpointFilter<FluentValidationFilter<global::TestNamespace.CreateUserRequest>>()
 			.ProducesValidationProblem();
@@ -53,7 +53,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.UpdateUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("put_Users_1");
+			.WithName("put_Users_22e72e5a22c54add");
 
 		global::TestNamespace.UpdateUserEndpoint.Configure(put_Users_1);
 
