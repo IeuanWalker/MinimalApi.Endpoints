@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.DeleteUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("delete_Users_0");
+			.WithName("delete_Users_bc960a1c9e6190ad");
 
 		global::TestNamespace.DeleteUserEndpoint.Configure(delete_Users_0);
 

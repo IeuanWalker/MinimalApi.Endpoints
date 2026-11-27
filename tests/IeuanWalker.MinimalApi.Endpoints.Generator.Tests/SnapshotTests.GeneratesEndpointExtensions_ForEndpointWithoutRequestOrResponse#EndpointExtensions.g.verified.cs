@@ -34,7 +34,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.HealthCheckEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(ct))
 			.WithTags("Health")
-			.WithName("get_Health_0");
+			.WithName("get_Health_fc069b6e57de7abe");
 
 		global::TestNamespace.HealthCheckEndpoint.Configure(get_Health_0);
 

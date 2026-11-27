@@ -296,18 +296,18 @@ public class WithNameHelpersTests
 
 	#endregion
 
-	#region GenerateWithName Tests
+	#region Generated Name Tests
 
 	[Theory]
-	[InlineData(HttpVerb.Get, "/api/users", 1, "Get_Users_1")]
-	[InlineData(HttpVerb.Post, "/api/users", 1, "Post_Users_1")]
-	[InlineData(HttpVerb.Put, "/api/users/{id}", 1, "Put_Users_1")]
-	[InlineData(HttpVerb.Patch, "/api/users/{id}", 1, "Patch_Users_1")]
-	[InlineData(HttpVerb.Delete, "/api/users/{id}", 1, "Delete_Users_1")]
-	public void GenerateWithName_WithBasicRoutes_GeneratesCorrectName(HttpVerb verb, string pattern, int routeNumber, string expected)
+	[InlineData(HttpVerb.Get, "/api/users", "Get_Users")]
+	[InlineData(HttpVerb.Post, "/api/users", "Post_Users")]
+	[InlineData(HttpVerb.Put, "/api/users/{id}", "Put_Users")]
+	[InlineData(HttpVerb.Patch, "/api/users/{id}", "Patch_Users")]
+	[InlineData(HttpVerb.Delete, "/api/users/{id}", "Delete_Users")]
+	public void GenerateNamePrefix_WithBasicRoutes_GeneratesCorrectName(HttpVerb verb, string pattern, string expected)
 	{
 		// Act
-		string result = WithNameHelpers.GenerateWithName(verb, pattern, routeNumber);
+		string result = WithNameHelpers.GenerateNamePrefix(verb, pattern);
 
 		// Assert
 		result.ShouldBe(expected);
@@ -351,70 +351,62 @@ public class WithNameHelpersTests
 	[InlineData("/api/v1/api/users/v2", "Users")]
 	[InlineData("/application/users", "ApplicationUsers")]
 	[InlineData("/api/v1.5/users/v2.0/profiles", "UsersProfiles")]
-	public void GenerateWithName_WithRouteParameters_RemovesParameters(string pattern, string expectedMiddle)
+	public void GenerateNamePrefix_WithRouteParameters_RemovesParameters(string pattern, string expectedMiddle)
 	{
 		// Act
-		string result = WithNameHelpers.GenerateWithName(HttpVerb.Get, pattern, 1);
+		string result = WithNameHelpers.GenerateNamePrefix(HttpVerb.Get, pattern);
 
 		// Assert
-		result.ShouldBe($"Get_{expectedMiddle}_1");
+		result.ShouldBe($"Get_{expectedMiddle}");
 	}
 
 	[Fact]
-	public void GenerateWithName_WithEmptyPattern_GeneratesWithVerbAndRouteNumber()
+	public void GenerateNamePrefix_WithEmptyPattern_GeneratesWithVerb()
 	{
 		// Act
-		string result = WithNameHelpers.GenerateWithName(HttpVerb.Get, "", 1);
+		string result = WithNameHelpers.GenerateNamePrefix(HttpVerb.Get, "");
 
 		// Assert
-		result.ShouldBe("Get__1");
+		result.ShouldBe("Get_");
 	}
 
 	[Fact]
-	public void GenerateWithName_WithSlashOnlyPattern_GeneratesWithVerbAndRouteNumber()
+	public void GenerateNamePrefix_WithSlashOnlyPattern_GeneratesWithVerb()
 	{
 		// Act
-		string result = WithNameHelpers.GenerateWithName(HttpVerb.Post, "/", 5);
+		string result = WithNameHelpers.GenerateNamePrefix(HttpVerb.Post, "/");
 
 		// Assert
-		result.ShouldBe("Post__5");
+		result.ShouldBe("Post_");
 	}
 
 	[Fact]
-	public void GenerateWithName_WithOnlySpecialCharacters_GeneratesWithVerbAndRouteNumber()
+	public void GenerateNamePrefix_WithOnlySpecialCharacters_GeneratesWithVerb()
 	{
 		// Act
-		string result = WithNameHelpers.GenerateWithName(HttpVerb.Put, "/!@#$%^&*()", 3);
+		string result = WithNameHelpers.GenerateNamePrefix(HttpVerb.Put, "/!@#$%^&*()");
 
 		// Assert
-		result.ShouldBe("Put__3");
+		result.ShouldBe("Put_");
 	}
 
 	[Fact]
-	public void GenerateWithName_WithComplexRoute_GeneratesCorrectName()
+	public void GenerateNamePrefix_WithComplexRoute_GeneratesCorrectName()
 	{
 		// Arrange
 		const string complexRoute = "/api/v1/organizations/{orgId}/projects/{projectId}/issues/{issueId}/comments";
 
 		// Act
-		string result = WithNameHelpers.GenerateWithName(HttpVerb.Post, complexRoute, 1);
+		string result = WithNameHelpers.GenerateNamePrefix(HttpVerb.Post, complexRoute);
 
 		// Assert - "api" and "v1" are removed, leaving just the resource names
-		result.ShouldBe("Post_OrganizationsProjectsIssuesComments_1");
+		result.ShouldBe("Post_OrganizationsProjectsIssuesComments");
 	}
 
-	[Theory]
-	[InlineData(1)]
-	[InlineData(5)]
-	[InlineData(99)]
-	[InlineData(1000)]
-	public void GenerateWithName_WithDifferentRouteNumbers_IncludesNumber(int routeNumber)
+	[Fact]
+	public void GenerateWithName_AppendsFirstEightSha256BytesAsLowercaseHex()
 	{
-		// Act
-		string result = WithNameHelpers.GenerateWithName(HttpVerb.Get, "/users", routeNumber);
-
-		// Assert
-		result.ShouldBe($"Get_Users_{routeNumber}");
+		WithNameHelpers.GenerateWithName("get_Users", "abc").ShouldBe("get_Users_ba7816bf8f01cfea");
 	}
 
 	#endregion

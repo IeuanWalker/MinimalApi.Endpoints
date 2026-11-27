@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.GrouplessEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("get_Users_0");
+			.WithName("get_Users_5f07c4562441813f");
 
 		global::TestNamespace.GrouplessEndpoint.Configure(get_Users_0);
 

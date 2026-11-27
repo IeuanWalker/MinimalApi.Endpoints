@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.MultipleRequestTypesEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Items")
-			.WithName("post_Items_0");
+			.WithName("post_Items_95bc87021f1ced59");
 
 		global::TestNamespace.MultipleRequestTypesEndpoint.Configure(post_Items_0);
 

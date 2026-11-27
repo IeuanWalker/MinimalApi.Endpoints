@@ -38,7 +38,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.CreateUserEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Users")
-			.WithName("post_Users_0")
+			.WithName("post_Users_5ad9da7b167973c0")
 			.DisableValidation()
 			.AddEndpointFilter<FluentValidationFilter<global::TestNamespace.CreateUserRequest>>()
 			.ProducesValidationProblem();

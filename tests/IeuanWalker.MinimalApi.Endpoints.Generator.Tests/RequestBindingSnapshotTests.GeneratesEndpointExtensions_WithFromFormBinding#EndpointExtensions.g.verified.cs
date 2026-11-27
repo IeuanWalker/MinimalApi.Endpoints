@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.UploadFileEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Files")
-			.WithName("post_Files_0");
+			.WithName("post_Files_98d703020966b1b6");
 
 		global::TestNamespace.UploadFileEndpoint.Configure(post_Files_0);
 

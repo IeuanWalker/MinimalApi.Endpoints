@@ -40,7 +40,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.DisabledValidationEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Novalid")
-			.WithName("post_Novalid_0");
+			.WithName("post_Novalid_cbdd019053081a5e");
 
 		global::TestNamespace.DisabledValidationEndpoint.Configure(post_Novalid_0);
 

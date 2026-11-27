@@ -22,7 +22,7 @@
             tags: [
               Weatherforecast
             ],
-            operationId: get_Weatherforecast_0,
+            operationId: get_Weatherforecast_b4816c450c60c988,
             parameters: [
               {
                 name: api-version,
@@ -58,7 +58,7 @@
             tags: [
               FileHandling
             ],
-            operationId: post_FileHandlingListOfFiles_2,
+            operationId: post_FileHandlingListOfFiles_a249abf9211f14f0,
             requestBody: {
               content: {
                 multipart/form-data: {
@@ -99,7 +99,7 @@
             tags: [
               FileHandling
             ],
-            operationId: post_FileHandlingMultipart_3,
+            operationId: post_FileHandlingMultipart_2ea6cd68a28c58df,
             requestBody: {
               content: {
                 multipart/form-data: {
@@ -129,7 +129,7 @@
             tags: [
               FileHandling
             ],
-            operationId: post_FileHandlingSingleFile_4,
+            operationId: post_FileHandlingSingleFile_6a25765a1372ef1c,
             requestBody: {
               content: {
                 multipart/form-data: {
@@ -165,7 +165,7 @@
               Enum
             ],
             summary: FromQuery,
-            operationId: get_Enum_5,
+            operationId: get_Enum_323cf3b9c20f13a7,
             parameters: [
               {
                 name: PlainEnum,
@@ -319,7 +319,7 @@
               Enum
             ],
             summary: FromBody,
-            operationId: post_Enum_6,
+            operationId: post_Enum_e1bec299b8d44c19,
             requestBody: {
               content: {
                 application/json: {
@@ -354,7 +354,7 @@
             ],
             summary: Get all todos,
             description: Retrieves all todos from the store,
-            operationId: get_Todos_7,
+            operationId: get_Todos_6a57ec5355874897,
             responses: {
               200: {
                 description: OK,
@@ -377,7 +377,7 @@
             ],
             summary: Create a new todo,
             description: Creates a new todo item,
-            operationId: post_Todos_10,
+            operationId: post_Todos_738e673203fd8dd0,
             requestBody: {
               content: {
                 application/json: {
@@ -422,7 +422,7 @@
             ],
             summary: Export todos,
             description: Exports all todos as a downloadable HTML file. Returns 204 No Content if no todos exist.,
-            operationId: get_TodosExport_8,
+            operationId: get_TodosExport_c4a02459a5ebdc2a,
             responses: {
               204: {
                 description: No Content
@@ -447,7 +447,7 @@
             ],
             summary: Get todo by ID,
             description: Retrieves a specific todo by its ID,
-            operationId: get_Todos_9,
+            operationId: get_Todos_3370ac3ecf9d3a0a,
             parameters: [
               {
                 name: id,
@@ -481,7 +481,7 @@
             ],
             summary: Update a todo,
             description: Updates an existing todo item completely,
-            operationId: put_Todos_11,
+            operationId: put_Todos_6ec3938f7ef04a24,
             parameters: [
               {
                 name: id,
@@ -525,7 +525,7 @@
             ],
             summary: Partially update a todo,
             description: Updates specific fields of an existing todo item,
-            operationId: patch_Todos_12,
+            operationId: patch_Todos_ab0da3c8dbb109da,
             parameters: [
               {
                 name: id,
@@ -575,7 +575,7 @@
             ],
             summary: Delete a todo,
             description: Deletes an existing todo item,
-            operationId: delete_Todos_13,
+            operationId: delete_Todos_85d8d77abc102522,
             parameters: [
               {
                 name: id,
@@ -601,7 +601,7 @@
             ],
             summary: Type Examples From Query,
             description: Demonstrates all primitive types handled by TypeDocumentTransformer as query parameters: string, int, long, decimal, double, float, bool, DateTime, DateOnly, TimeOnly, Guid, and arrays,
-            operationId: get_TypeExamplesFromQuery_14,
+            operationId: get_TypeExamplesFromQuery_eba8f93273c87222,
             parameters: [
               {
                 name: StringValue,
@@ -908,7 +908,7 @@
             ],
             summary: Type Examples From Body,
             description: Demonstrates all primitive types handled by TypeDocumentTransformer: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, and nested objects,
-            operationId: post_TypeExamplesFromBody_15,
+            operationId: post_TypeExamplesFromBody_c154d01cddb92835,
             requestBody: {
               content: {
                 application/json: {
@@ -940,7 +940,7 @@
             ],
             summary: Type Examples From Form,
             description: Demonstrates all primitive types handled by TypeDocumentTransformer as form data: string, int, long, short, byte, decimal, double, float, bool, DateTime, DateTimeOffset, DateOnly, TimeOnly, Guid, arrays, nested objects, and file uploads (IFormFile, IFormFileCollection),
-            operationId: post_TypeExamplesFromForm_16,
+            operationId: post_TypeExamplesFromForm_8b8800e662ce4827,
             requestBody: {
               content: {
                 multipart/form-data: {
@@ -971,7 +971,7 @@
               Validation
             ],
             summary: DataAnnotationsFromQuery,
-            operationId: get_ValidationDataAnnotationsFromQuery_17,
+            operationId: get_ValidationDataAnnotationsFromQuery_23320459ddc788ee,
             parameters: [
               {
                 name: AllBuiltInStringValidators,
@@ -1406,7 +1406,7 @@ Validation rules:
               Validation
             ],
             summary: Test Endpoint A with Name property validation,
-            operationId: get_ValidationEndpointA_18,
+            operationId: get_ValidationEndpointA_f65cb13aaeb5cf5b,
             parameters: [
               {
                 name: Name,
@@ -1444,7 +1444,7 @@ Validation rules:
               Validation
             ],
             summary: Test Endpoint B with Name property validation,
-            operationId: get_ValidationEndpointB_19,
+            operationId: get_ValidationEndpointB_c92169db359dd589,
             parameters: [
               {
                 name: Name,
@@ -1482,7 +1482,7 @@ Validation rules:
               Validation
             ],
             summary: FluentValidationFromQuery,
-            operationId: get_ValidationFluentValidationFromQuery_20,
+            operationId: get_ValidationFluentValidationFromQuery_b55ea93c538bebec,
             parameters: [
               {
                 name: StringMin,
@@ -1832,7 +1832,7 @@ Validation rules:
               Validation
             ],
             summary: ValidationErrors,
-            operationId: get_ValidationValidationErrors_21,
+            operationId: get_ValidationValidationErrors_1e916801b9d5a555,
             responses: {
               200: {
                 description: OK
@@ -1846,7 +1846,7 @@ Validation rules:
               Validation
             ],
             summary: DataAnnotationsFromBody,
-            operationId: post_ValidationDataValidation_22,
+            operationId: post_ValidationDataValidation_5c754f1aff162349,
             requestBody: {
               content: {
                 application/json: {
@@ -1870,7 +1870,7 @@ Validation rules:
               Validation
             ],
             summary: FluentValidationFromBody,
-            operationId: post_ValidationFluentValidation_23,
+            operationId: post_ValidationFluentValidation_bb529748767fe5e3,
             requestBody: {
               content: {
                 application/json: {
@@ -1904,7 +1904,7 @@ Validation rules:
               Validation
             ],
             summary: FluentValidationFromForm,
-            operationId: post_ValidationFluentValidationFromForm_24,
+            operationId: post_ValidationFluentValidationFromForm_ea9c4d3d121138de,
             requestBody: {
               content: {
                 multipart/form-data: {
@@ -1943,7 +1943,7 @@ Validation rules:
               Validation
             ],
             summary: FluentValidationEdgeCases,
-            operationId: post_ValidationFluentValidationEdgeCases_25,
+            operationId: post_ValidationFluentValidationEdgeCases_b5708ad4b937b407,
             requestBody: {
               content: {
                 application/json: {
@@ -1977,7 +1977,7 @@ Validation rules:
               Validation
             ],
             summary: ManualWithValidation,
-            operationId: post_ValidationWithValidation_26,
+            operationId: post_ValidationWithValidation_87aa447dbf013fb8,
             requestBody: {
               content: {
                 application/json: {
@@ -2001,7 +2001,7 @@ Validation rules:
               Validation
             ],
             summary: WithValidationAlterAndRemove,
-            operationId: post_ValidationWithValidationAlterAndRemove_27,
+            operationId: post_ValidationWithValidationAlterAndRemove_2e5511a5aa2c6277,
             requestBody: {
               content: {
                 multipart/form-data: {

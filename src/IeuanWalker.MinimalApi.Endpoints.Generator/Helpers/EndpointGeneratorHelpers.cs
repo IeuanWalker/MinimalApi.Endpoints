@@ -6,11 +6,13 @@ static class EndpointGeneratorHelpers
 {
 	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber, List<ValidatorInfo> validators, (EndpointGroupInfo groupInfo, string groupName)? group)
 	{
-		string uniqueRootName = WithNameHelpers.GenerateWithName(endpoint.HttpVerb, $"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}", routeNumber).ToLowerFirstLetter();
+		string routePattern = $"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}";
+		string prefix = WithNameHelpers.GenerateNamePrefix(endpoint.HttpVerb, routePattern).ToLowerFirstLetter();
+		string variableName = $"{prefix}_{routeNumber}";
 
 		builder.AppendLine($"// {endpoint.HttpVerb.ToString().ToUpper()}: {group?.groupInfo?.Pattern ?? string.Empty}{endpoint.RoutePattern}");
 
-		builder.AppendLine($"RouteHandlerBuilder {uniqueRootName} = {group?.groupName ?? "app"}");
+		builder.AppendLine($"RouteHandlerBuilder {variableName} = {group?.groupName ?? "app"}");
 		builder.IncreaseIndent();
 		builder.AppendLine($".{endpoint.HttpVerb.ToMap()}(\"{endpoint.RoutePattern}\", async (");
 
@@ -33,7 +35,7 @@ static class EndpointGeneratorHelpers
 		if (endpoint.WithName is null && group?.groupInfo.WithName is null)
 		{
 			builder.AppendLine();
-			builder.Append($".WithName(\"{uniqueRootName}\")");
+			builder.Append($".WithName(\"{WithNameHelpers.GenerateWithName(prefix, endpoint.TypeName)}\")");
 		}
 
 		bool addDefaultSuccessResponse = false;
@@ -56,14 +58,14 @@ static class EndpointGeneratorHelpers
 		builder.AppendEmptyLine();
 
 		// Configure the endpoint
-		builder.AppendLine($"global::{endpoint.TypeName}.Configure({uniqueRootName});");
+		builder.AppendLine($"global::{endpoint.TypeName}.Configure({variableName});");
 		if (endpoint.ResponseIsNullable)
 		{
-			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithNullableResponse({uniqueRootName});");
+			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithNullableResponse({variableName});");
 		}
 		if (addDefaultSuccessResponse)
 		{
-			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithDefaultSuccessResponse({uniqueRootName});");
+			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithDefaultSuccessResponse({variableName});");
 		}
 	}
 

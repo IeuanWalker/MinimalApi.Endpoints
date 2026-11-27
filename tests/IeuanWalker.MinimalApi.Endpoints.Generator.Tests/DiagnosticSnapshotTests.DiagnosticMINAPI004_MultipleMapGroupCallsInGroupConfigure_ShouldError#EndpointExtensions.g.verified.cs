@@ -35,7 +35,7 @@ public static class EndpointExtensions
 				[FromServices] global::TestNamespace.DuplicateMapGroupEndpoint endpoint,
 				CancellationToken ct) => await endpoint.Handle(request, ct))
 			.WithTags("Dup")
-			.WithName("get_Dup_0");
+			.WithName("get_Dup_6dfb7ca72ea9250b");
 
 		global::TestNamespace.DuplicateMapGroupEndpoint.Configure(get_Dup_0);
 
