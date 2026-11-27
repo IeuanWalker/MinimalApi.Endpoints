@@ -6,11 +6,11 @@ static class EndpointGeneratorHelpers
 {
 	internal static void ToEndpoint(this IndentedTextBuilder builder, EndpointInfo endpoint, int routeNumber, List<ValidatorInfo> validators, (EndpointGroupInfo groupInfo, string groupName)? group)
 	{
-		string routePattern = $"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}";
+		string routePattern = CombineRoutePatterns(group?.groupInfo.Pattern, endpoint.RoutePattern);
 		string prefix = WithNameHelpers.GenerateNamePrefix(endpoint.HttpVerb, routePattern).ToLowerFirstLetter();
 		string variableName = $"{prefix}_{routeNumber}";
 
-		builder.AppendLine($"// {endpoint.HttpVerb.ToString().ToUpper()}: {group?.groupInfo?.Pattern ?? string.Empty}{endpoint.RoutePattern}");
+		builder.AppendLine($"// {endpoint.HttpVerb.ToString().ToUpper()}: {routePattern}");
 
 		builder.AppendLine($"RouteHandlerBuilder {variableName} = {group?.groupName ?? "app"}");
 		builder.IncreaseIndent();
@@ -29,7 +29,7 @@ static class EndpointGeneratorHelpers
 
 		if (endpoint.WithTags is null && group?.groupInfo.WithTags is null)
 		{
-			builder.GenerateAndAddTags($"{group?.groupInfo.Pattern ?? string.Empty}{endpoint.RoutePattern}");
+			builder.GenerateAndAddTags(routePattern);
 		}
 
 		if (endpoint.WithName is null && group?.groupInfo.WithName is null)
@@ -67,6 +67,21 @@ static class EndpointGeneratorHelpers
 		{
 			builder.AppendLine($"global::IeuanWalker.MinimalApi.Endpoints.OpenApiExtensions.WithDefaultSuccessResponse({variableName});");
 		}
+	}
+
+	static string CombineRoutePatterns(string? groupPattern, string endpointPattern)
+	{
+		if (string.IsNullOrEmpty(groupPattern))
+		{
+			return endpointPattern;
+		}
+
+		if (string.IsNullOrEmpty(endpointPattern))
+		{
+			return groupPattern!;
+		}
+
+		return $"{groupPattern!.TrimEnd('/')}/{endpointPattern.TrimStart('/')}";
 	}
 
 	static string GetBindingType(this EndpointInfo endpoint)
